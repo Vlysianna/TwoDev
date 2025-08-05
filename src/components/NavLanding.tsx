@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
 const NavLanding: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<string>('');
-  const location = useLocation();
-const currentPath = location.pathname;
-
+  
 
   const toggleMobileMenu = (): void => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -29,25 +27,25 @@ const currentPath = location.pathname;
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <img src="/TwodevTeks.png" alt="Wodev" className="w-auto h-8 " />
+              <img src="/twodev-teks.svg" alt="Wodev" className="w-auto h-8 " />
             </div>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <a
-                href="/"
+              <Link
+                to="/"
                 onClick={() => handleItemClick('home')}
                 className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  currentPath === 'home' ? 'text-blue-600' : ''
+                  activeItem === 'home' ? 'text-blue-600' : ''
                 }`}
               >
                 Home
-                {currentPath === 'home' && (
+                {activeItem === 'home' && (
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                 )}
-              </a>
+              </Link>
               
               {/* Profil Dropdown */}
               <div className="relative">
@@ -55,7 +53,7 @@ const currentPath = location.pathname;
                   onClick={() => toggleDropdown('profil')}
                                     
                   className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium flex items-center transition-colors duration-200 relative ${
-                    currentPath === 'profil' ? 'text-blue-600' : ''
+                    activeItem === 'profil' ? 'text-blue-600' : ''
                   }`}
                 >
                   Profil
@@ -65,33 +63,33 @@ const currentPath = location.pathname;
                       activeDropdown === 'profil' ? 'rotate-180' : ''
                     }`} 
                   />
-                  {currentPath === 'profil' && (
+                  {activeItem === 'profil' && (
                     <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                   )}
                 </button>
                 {activeDropdown === 'profil' && (
                   <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
-                    <a 
-                      href="/about" 
+                    <Link 
+                      to="/about" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                       onClick={() => handleItemClick('profil')}
                     >
                       Tentang LSP
-                    </a>
-                    <a 
-                      href="#" 
+                    </Link>
+                    <Link 
+                      to="/struktur-organisasi" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                       onClick={() => handleItemClick('profil')}
                     >
                       Struktur Organisai
-                    </a>
-                    <a 
-                      href="#" 
+                    </Link>
+                    <Link 
+                      to="/pengelola-sdm" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                       onClick={() => handleItemClick('profil')}
                     >
                       Pengelola SDM
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -104,7 +102,7 @@ const currentPath = location.pathname;
                     handleItemClick('layanan');
                   }}
                   className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium flex items-center transition-colors duration-200 relative ${
-                    currentPath === 'layanan' ? 'text-blue-600' : ''
+                    activeItem === 'layanan' ? 'text-blue-600' : ''
                   }`}
                 >
                   Layanan
@@ -114,82 +112,82 @@ const currentPath = location.pathname;
                       activeDropdown === 'layanan' ? 'rotate-180' : ''
                     }`} 
                   />
-                  {currentPath === 'layanan' && (
+                  {activeItem === 'layanan' && (
                     <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                   )}
                 </button>
                 {activeDropdown === 'layanan' && (
                   <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
-                    <a 
-                      href="#" 
+                    <Link 
+                      to="/skema" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                       onClick={() => handleItemClick('layanan')}
                     >
                       Skema
-                    </a>
-                    <a 
-                      href="#" 
+                    </Link>
+                    <Link 
+                      to="/tempat-uji" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                       onClick={() => handleItemClick('layanan')}
                     >
                       Tempat Uji
-                    </a>
-                    <a 
-                      href="#" 
+                    </Link>
+                    <Link 
+                      to="/asesor" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                       onClick={() => handleItemClick('layanan')}
                     >
                       Asesor
-                    </a>
-                    <a 
-                      href="#" 
+                    </Link>
+                    <Link 
+                      to="/prosedur-pendaftaran" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                       onClick={() => handleItemClick('layanan')}
                     >
                       Prosedur Pendaftaran
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
 
-              <a
-                href="#"
+              <Link
+                to="/berita"
                 onClick={() => handleItemClick('berita')}
                 className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  currentPath === 'berita' ? 'text-blue-600' : ''
+                  activeItem === 'berita' ? 'text-blue-600' : ''
                 }`}
               >
                 Berita
-                {currentPath === 'berita' && (
+                {activeItem === 'berita' && (
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                 )}
-              </a>
+              </Link>
               
-              <a
-                href="#"
+              <Link
+                to="/galeri"
                 onClick={() => handleItemClick('galeri')}
                 className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  currentPath === 'galeri' ? 'text-blue-600' : ''
+                  activeItem === 'galeri' ? 'text-blue-600' : ''
                 }`}
               >
                 Galeri
-                {currentPath === 'galeri' && (
+                {activeItem === 'galeri' && (
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                 )}
-              </a>
+              </Link>
               
-              <a
-                href="#"
+              <Link
+                to="/dokumen"
                 onClick={() => handleItemClick('dokumen')}
                 className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  currentPath === 'dokumen' ? 'text-blue-600' : ''
+                  activeItem === 'dokumen' ? 'text-blue-600' : ''
                 }`}
               >
                 Dokumen
-                {currentPath === 'dokumen' && (
+                {activeItem === 'dokumen' && (
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                 )}
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -215,15 +213,15 @@ const currentPath = location.pathname;
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 bg-white">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <a
-                href="#"
+              <Link
+                to="/"
                 onClick={() => handleItemClick('home')}
                 className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  currentPath === 'home' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                  activeItem === 'home' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                 }`}
               >
                 Home
-              </a>
+              </Link>
               
               {/* Mobile Profil Dropdown */}
               <div>
@@ -233,7 +231,7 @@ const currentPath = location.pathname;
                     handleItemClick('mobile-profil');
                   }}
                   className={`text-gray-700 hover:text-gray-900 w-full text-left px-3 py-2 text-base font-medium flex items-center justify-between ${
-                    currentPath === 'mobile-profil' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                    activeItem === 'mobile-profil' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                   }`}
                 >
                   Profil
@@ -246,39 +244,39 @@ const currentPath = location.pathname;
                 </button>
                 {activeDropdown === 'mobile-profil' && (
                   <div className="pl-6 space-y-1">
-                    <a 
-                      href="#" 
+                    <Link 
+                      to="/about" 
                       className={`block px-3 py-2 text-sm ${
-                        currentPath === 'mobile-profil-tentang' 
+                        activeItem === 'mobile-profil-tentang' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
                       onClick={() => handleItemClick('mobile-profil-tentang')}
                     >
-                      Tentang Kami
-                    </a>
-                    <a 
-                      href="#" 
+                      Tentang LSP
+                    </Link>
+                    <Link 
+                      to="/struktur-organisasi" 
                       className={`block px-3 py-2 text-sm ${
-                        currentPath === 'mobile-profil-tim' 
+                        activeItem === 'mobile-profil-struktur' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
-                      onClick={() => handleItemClick('mobile-profil-tim')}
+                      onClick={() => handleItemClick('mobile-profil-struktur')}
                     >
-                      Tim
-                    </a>
-                    <a 
-                      href="#" 
+                      Struktur Organisasi
+                    </Link>
+                    <Link 
+                      to="/pengelola-sdm" 
                       className={`block px-3 py-2 text-sm ${
-                        currentPath === 'mobile-profil-visi' 
+                        activeItem === 'mobile-profil-sdm' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
-                      onClick={() => handleItemClick('mobile-profil-visi')}
+                      onClick={() => handleItemClick('mobile-profil-sdm')}
                     >
-                      Visi & Misi
-                    </a>
+                      Pengelola SDM
+                    </Link>
                   </div>
                 )}
               </div>
@@ -291,7 +289,7 @@ const currentPath = location.pathname;
                     handleItemClick('mobile-layanan');
                   }}
                   className={`text-gray-700 hover:text-gray-900 w-full text-left px-3 py-2 text-base font-medium flex items-center justify-between ${
-                    currentPath === 'mobile-layanan' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                    activeItem === 'mobile-layanan' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                   }`}
                 >
                   Layanan
@@ -304,72 +302,83 @@ const currentPath = location.pathname;
                 </button>
                 {activeDropdown === 'mobile-layanan' && (
                   <div className="pl-6 space-y-1">
-                    <a 
-                      href="#" 
+                    <Link 
+                      to="/skema" 
                       className={`block px-3 py-2 text-sm ${
-                        currentPath === 'mobile-layanan-web' 
+                        activeItem === 'mobile-layanan-skema' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
-                      onClick={() => handleItemClick('mobile-layanan-web')}
+                      onClick={() => handleItemClick('mobile-layanan-skema')}
                     >
-                      Web Development
-                    </a>
-                    <a 
-                      href="#" 
+                      Skema
+                    </Link>
+                    <Link 
+                      to="/tempat-uji" 
                       className={`block px-3 py-2 text-sm ${
-                        currentPath === 'mobile-layanan-mobile' 
+                        activeItem === 'mobile-layanan-tempat' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
-                      onClick={() => handleItemClick('mobile-layanan-mobile')}
+                      onClick={() => handleItemClick('mobile-layanan-tempat')}
                     >
-                      Mobile App
-                    </a>
-                    <a 
-                      href="#" 
+                      Tempat Uji
+                    </Link>
+                    <Link 
+                      to="/asesor" 
                       className={`block px-3 py-2 text-sm ${
-                        currentPath === 'mobile-layanan-design' 
+                        activeItem === 'mobile-layanan-asesor' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
-                      onClick={() => handleItemClick('mobile-layanan-design')}
+                      onClick={() => handleItemClick('mobile-layanan-asesor')}
                     >
-                      UI/UX Design
-                    </a>
+                      Asesor
+                    </Link>
+                    <Link 
+                      to="/prosedur-pendaftaran" 
+                      className={`block px-3 py-2 text-sm ${
+                        activeItem === 'mobile-layanan-prosedur' 
+                          ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      onClick={() => handleItemClick('mobile-layanan-prosedur')}
+                    >
+                      Prosedur Pendaftaran
+                    </Link>
                   </div>
                 )}
               </div>
 
-              <a
-                href="#"
+              <Link
+                to="/berita"
                 onClick={() => handleItemClick('berita')}
                 className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  currentPath === 'berita' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                  activeItem === 'berita' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                 }`}
               >
                 Berita
-              </a>
+              </Link>
               
-              <a
-                href="#"
+              <Link
+                to="/galeri"
                 onClick={() => handleItemClick('galeri')}
                 className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  currentPath === 'galeri' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                  activeItem === 'galeri' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                 }`}
               >
                 Galeri
-              </a>
+              </Link>
               
-              <a
-                href="#"
+              <Link
+                to="/dokumen"
                 onClick={() => handleItemClick('dokumen')}
                 className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  currentPath === 'dokumen' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                  activeItem === 'dokumen' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                 }`}
               >
                 Dokumen
-              </a>
+              </Link>
 
               {/* Mobile Login Button */}
               <div className="pt-2">

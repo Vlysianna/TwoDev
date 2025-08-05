@@ -41,11 +41,11 @@ function TentangLSP() {
             </div>
           </div>
 
-          <div className="text-center flex items-center justify-center py-16">
-            <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8 text-start">
-              <h2 className="text-2xl font-semibold text-center mb-6">
-                Tentang LSP
-              </h2>
+          <h2 className="text-2xl font-semibold text-center  mt-16">
+            Tentang LSP SMK Negeri 24 Jakarta
+          </h2>
+          <div className="text-center flex items-center justify-center py-16 gap-8 px-10 ">
+            <div className=" w-full bg-white rounded-xl shadow-lg p-8 text-start">
               <p className="text-black-700 mb-4">
                 Lembaga Sertifikasi Profesi (LSP) SMKN 24 Jakarta adalah lembaga
                 resmi yang berlisensi dari Badan Nasional Sertifikasi Profesi
@@ -64,8 +64,8 @@ function TentangLSP() {
                 mengacu pada skema kompetensi yang sesuai dengan kebutuhan dunia
                 usaha dan dunia industri (DUDI). Selain itu, LSP ini juga
                 menjalin kerjasama dengan berbagai pihak untuk memastikan setiap
-                kompetensi yang diuji relevan dengan perkembangan teknologi dan
-                tuntutan pasar kerja.
+                kompetensi yang diujikan relevan dengan perkembangan teknologi
+                dan tuntutan pasar kerja.
               </p>
               <p className="text-black-700 mb-6">
                 Keberadaan LSP SMKN 24 Jakarta menjadi salah satu keunggulan
@@ -77,23 +77,48 @@ function TentangLSP() {
                 unggul, terpercaya, dan mampu menghasilkan SDM yang berdaya
                 saing di era globalisasi.
               </p>
-              <a href="#" className="text-blue-500 hover:underline font-medium">
-                Selengkapnya
-              </a>
             </div>
           </div>
 
-          <div className="py-16 px-4 bg-white">
-            <h2 className="text-2xl font-bold text-center mb-10">
-              Berita Terbaru LSP
-            </h2>
+          <h2 className="text-2xl font-semibold text-center mt-16">
+            Visi, Misi & Moto
+          </h2>
+          <div className="text-center flex items-center justify-center py-16 gap-8 px-10">
+            <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8 h-96">
+              <h1 className="text-center font-bold mb-4">Visi</h1>
+              <p className="text-black-700 mb-6 text-start">
+                Menjadi LSP yang unggul, terpercaya, dan berdaya saing dalam
+                mencetak sumber daya manusia yang kompeten, profesional, serta
+                mampu memenuhi kebutuhan dunia kerja.
+              </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-14 max-w-6xl mx-auto">
-              <img
-                src="/TwodevTeks.png"
-                alt="Wodev"
-                className="h-6 w-auto mb-4 ml-4" // mb-4 dan ml-4 untuk memberi jarak dari tepi
-              />
+              <h1 className="text-center font-bold mb-4">Moto</h1>
+              <p className="text-black-700 text-start">
+                1.Kompeten, Profesional, Siap Bersaing <br />
+                2.Mewujudkan SDM Unggul dengan Sertifikasi Kompetensi <br />
+                3.Standar Nasional, Kualitas Global <br />
+                4.Mencetak Tenaga Kerja Tersertifikasi dan Berdaya Saing <br />
+                5.Kompetensi Teruji, Masa Depan Pasti
+              </p>
+            </div>
+
+            <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8 h-96">
+              <h1 className="text-center font-bold mb-4">Misi</h1>
+              <p className="text-black-700 text-start">
+                1. Menyelenggarakan sertifikasi kompetensi secara profesional,
+                objektif, dan sesuai standar BNSP. <br />
+                2. Membina dan meningkatkan
+                kapasitas asesor kompetensi agar mampu memberikan penilaian yang
+                berkualitas. <br />
+                3. Memperkuat kerjasama dengan dunia usaha, dunia
+                industri, serta instansi terkait dalam mendukung terserapnya
+                tenaga kerja kompeten. <br />
+                4. Memberikan layanan sertifikasi yang
+                terjangkau, transparan, dan bermanfaat bagi peserta didik,
+                alumni, maupun masyarakat umum. <br />
+                5. Mendorong lulusan memiliki
+                sertifikat kompetensi sebagai bekal memasuki dunia kerja.
+              </p>
             </div>
           </div>
         </main>

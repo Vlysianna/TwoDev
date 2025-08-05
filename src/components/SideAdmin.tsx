@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileText,
@@ -17,38 +18,43 @@ interface MenuItem {
   name: string;
   icon: LucideIcon;
   section: string;
+  path: string;
 }
 
 interface MenuItemProps {
   item: MenuItem;
   isActive: boolean;
-  onClick: (itemName: string) => void;
+  onClick: () => void;
 }
 
 const Sidebar: React.FC = () => {
-  const [activeItem, setActiveItem] = useState<string>('Dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const location = useLocation();
 
   const menuItems: MenuItem[] = [
     {
       name: 'Dashboard',
       icon: LayoutDashboard,
-      section: 'main'
+      section: 'main',
+      path: '/dashboard'
     },
     {
       name: 'Kelola Asesmen',
       icon: FileText,
-      section: 'main'
+      section: 'main',
+      path: '/kelola-asesmen'
     },
     {
       name: 'Kelola Skema',
       icon: Users,
-      section: 'main'
+      section: 'main',
+      path: '/kelola-skema'
     },
     {
       name: 'Kelola Jurusan',
       icon: GraduationCap,
-      section: 'main'
+      section: 'main',
+      path: '/kelola-jurusan'
     }
   ];
 
@@ -56,22 +62,24 @@ const Sidebar: React.FC = () => {
     {
       name: 'Akun Asesi',
       icon: User,
-      section: 'management'
+      section: 'management',
+      path: '/akun-asesi'
     },
     {
       name: 'Akun Asesor',
       icon: UserCheck,
-      section: 'management'
+      section: 'management',
+      path: '/akun-asesor'
     },
     {
       name: 'Register',
       icon: UserPlus,
-      section: 'management'
+      section: 'management',
+      path: '/register'
     }
   ];
 
-  const handleItemClick = (itemName: string): void => {
-    setActiveItem(itemName);
+  const handleItemClick = (): void => {
     // Close mobile menu when item is clicked
     setIsMobileMenuOpen(false);
   };
@@ -80,34 +88,41 @@ const Sidebar: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleLogout = (): void => {
+    // Add logout logic here
+    console.log('Logout clicked');
+    setIsMobileMenuOpen(false);
+  };
+
   const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
     const IconComponent = item.icon;
     
     return (
-      <div
+      <Link
+        to={item.path}
         className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
           isActive 
             ? 'bg-orange-600 text-white' 
             : 'text-orange-100 hover:bg-orange-500 hover:text-white'
         }`}
-        onClick={() => onClick(item.name)}
+        onClick={onClick}
       >
         <IconComponent size={18} className="flex-shrink-0" />
         <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
-      </div>
+      </Link>
     );
   };
 
   const SidebarContent = () => (
     <>
       {/* Logo Section */}
-      <div className="p-6 border-b border-orange-400">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-white rounded flex items-center justify-center flex-shrink-0">
-            <span className="text-orange-500 font-bold text-lg">S</span>
+      <div className="p-2 border-b border-orange-400">
+        <Link to="/dashboard" className="flex items-center space-x-2 p-6">
+          <div className="w-8 h-20 flex items-center justify-center flex-shrink-0">
+            <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
           </div>
-          <span className="text-sm text-orange-100 whitespace-nowrap">SertifikasiI</span>
-        </div>
+        </Link>
+          <span className="p-2 text-sm text-orange-100 whitespace-nowrap">SertifikasiI</span>
       </div>
 
       {/* Main Menu Items */}
@@ -117,7 +132,7 @@ const Sidebar: React.FC = () => {
             <MenuItem
               key={item.name}
               item={item}
-              isActive={activeItem === item.name}
+              isActive={location.pathname === item.path}
               onClick={handleItemClick}
             />
           ))}
@@ -134,7 +149,7 @@ const Sidebar: React.FC = () => {
             <MenuItem
               key={item.name}
               item={item}
-              isActive={activeItem === item.name}
+              isActive={location.pathname === item.path}
               onClick={handleItemClick}
             />
           ))}
@@ -146,13 +161,13 @@ const Sidebar: React.FC = () => {
 
       {/* Logout */}
       <div className="p-2">
-        <div
-          className="flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 text-orange-100 hover:bg-orange-500 hover:text-white"
-          onClick={() => handleItemClick('Logout')}
+        <button
+          className="w-full flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 text-orange-100 hover:bg-orange-500 hover:text-white"
+          onClick={handleLogout}
         >
           <LogOut size={18} className="flex-shrink-0" />
           <span className="text-sm font-medium">Logout</span>
-        </div>
+        </button>
       </div>
     </>
   );
@@ -166,6 +181,14 @@ const Sidebar: React.FC = () => {
       >
         {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
+
+      {/* Overlay for mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Sidebar - Always visible on desktop, slide on mobile */}
       <div className={`

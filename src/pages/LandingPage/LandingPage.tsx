@@ -43,9 +43,9 @@ function LandingPage() {
     </div>
   </div>
 
-  <div className="text-center flex items-center justify-center py-16">
-    <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8 text-start">
-    <h2 className="text-2xl font-semibold text-center mb-6">Tentang LSP</h2>  
+    <h2 className="text-2xl font-semibold text-center mt-16">Tentang LSP</h2>  
+  <div className="text-center flex items-center justify-center py-16 gap-8 px-10 ">
+    <div className="w-full bg-white rounded-xl shadow-lg p-8 text-start">    
      <p className="text-black-700 mb-4">
           Lembaga Sertifikasi Profesi (LSP) SMKN 24 Jakarta adalah lembaga resmi yang berlisensi dari Badan Nasional Sertifikasi Profesi (BNSP) yang bertugas melaksanakan uji kompetensi bagi peserta didik, alumni, dan masyarakat umum. LSP ini dibentuk sebagai wujud komitmen SMKN 24 Jakarta dalam mencetak lulusan yang memiliki keterampilan, pengetahuan, dan sikap kerja sesuai standar nasional maupun internasional. Dengan adanya sertifikasi kompetensi, lulusan SMKN 24 Jakarta memiliki bukti pengakuan yang sah bahwa mereka siap bersaing di dunia kerja.
         </p>
@@ -81,7 +81,7 @@ function LandingPage() {
             {/* Logo saat hover */}
             <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-white to-transparent flex items-end justify-start opacity-0 group-hover:opacity-100 transition-opacity duration-300">
   <img 
-    src="/TwodevTeks.png" 
+    src="/twodev-teks.svg" 
     alt="Wodev" 
     className="h-6 w-auto mb-4 ml-4"  // mb-4 dan ml-4 untuk memberi jarak dari tepi
   />
