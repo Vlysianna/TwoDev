@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
 const NavLanding: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [activeItem, setActiveItem] = useState<string>('home');
+  const [activeItem, setActiveItem] = useState<string>('');
+  const location = useLocation();
+const currentPath = location.pathname;
+
 
   const toggleMobileMenu = (): void => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -19,16 +23,13 @@ const NavLanding: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-sm absolute inset-x-0 top-0 z-50">
+    <nav className="sticky bg-white border-b border-gray-200 shadow-sm absolute inset-x-0 top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <div className="w-8 h-8 bg-orange-600 rounded flex items-center justify-center mr-2">
-                <span className="text-white font-bold text-sm">W</span>
-              </div>
-              <span className="text-xl font-semibold text-gray-800">wodev</span>
+              <img src="/TwodevTeks.png" alt="Wodev" className="w-auto h-8 " />
             </div>
           </div>
 
@@ -36,14 +37,14 @@ const NavLanding: React.FC = () => {
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
               <a
-                href="#"
+                href="/"
                 onClick={() => handleItemClick('home')}
                 className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  activeItem === 'home' ? 'text-blue-600' : ''
+                  currentPath === 'home' ? 'text-blue-600' : ''
                 }`}
               >
                 Home
-                {activeItem === 'home' && (
+                {currentPath === 'home' && (
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                 )}
               </a>
@@ -54,7 +55,7 @@ const NavLanding: React.FC = () => {
                   onClick={() => toggleDropdown('profil')}
                                     
                   className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium flex items-center transition-colors duration-200 relative ${
-                    activeItem === 'profil' ? 'text-blue-600' : ''
+                    currentPath === 'profil' ? 'text-blue-600' : ''
                   }`}
                 >
                   Profil
@@ -64,14 +65,14 @@ const NavLanding: React.FC = () => {
                       activeDropdown === 'profil' ? 'rotate-180' : ''
                     }`} 
                   />
-                  {activeItem === 'profil' && (
+                  {currentPath === 'profil' && (
                     <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                   )}
                 </button>
                 {activeDropdown === 'profil' && (
                   <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
                     <a 
-                      href="#" 
+                      href="/about" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                       onClick={() => handleItemClick('profil')}
                     >
@@ -103,7 +104,7 @@ const NavLanding: React.FC = () => {
                     handleItemClick('layanan');
                   }}
                   className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium flex items-center transition-colors duration-200 relative ${
-                    activeItem === 'layanan' ? 'text-blue-600' : ''
+                    currentPath === 'layanan' ? 'text-blue-600' : ''
                   }`}
                 >
                   Layanan
@@ -113,7 +114,7 @@ const NavLanding: React.FC = () => {
                       activeDropdown === 'layanan' ? 'rotate-180' : ''
                     }`} 
                   />
-                  {activeItem === 'layanan' && (
+                  {currentPath === 'layanan' && (
                     <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                   )}
                 </button>
@@ -155,11 +156,11 @@ const NavLanding: React.FC = () => {
                 href="#"
                 onClick={() => handleItemClick('berita')}
                 className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  activeItem === 'berita' ? 'text-blue-600' : ''
+                  currentPath === 'berita' ? 'text-blue-600' : ''
                 }`}
               >
                 Berita
-                {activeItem === 'berita' && (
+                {currentPath === 'berita' && (
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                 )}
               </a>
@@ -168,11 +169,11 @@ const NavLanding: React.FC = () => {
                 href="#"
                 onClick={() => handleItemClick('galeri')}
                 className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  activeItem === 'galeri' ? 'text-blue-600' : ''
+                  currentPath === 'galeri' ? 'text-blue-600' : ''
                 }`}
               >
                 Galeri
-                {activeItem === 'galeri' && (
+                {currentPath === 'galeri' && (
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                 )}
               </a>
@@ -181,11 +182,11 @@ const NavLanding: React.FC = () => {
                 href="#"
                 onClick={() => handleItemClick('dokumen')}
                 className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  activeItem === 'dokumen' ? 'text-blue-600' : ''
+                  currentPath === 'dokumen' ? 'text-blue-600' : ''
                 }`}
               >
                 Dokumen
-                {activeItem === 'dokumen' && (
+                {currentPath === 'dokumen' && (
                   <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
                 )}
               </a>
@@ -218,7 +219,7 @@ const NavLanding: React.FC = () => {
                 href="#"
                 onClick={() => handleItemClick('home')}
                 className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  activeItem === 'home' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                  currentPath === 'home' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                 }`}
               >
                 Home
@@ -232,7 +233,7 @@ const NavLanding: React.FC = () => {
                     handleItemClick('mobile-profil');
                   }}
                   className={`text-gray-700 hover:text-gray-900 w-full text-left px-3 py-2 text-base font-medium flex items-center justify-between ${
-                    activeItem === 'mobile-profil' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                    currentPath === 'mobile-profil' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                   }`}
                 >
                   Profil
@@ -248,7 +249,7 @@ const NavLanding: React.FC = () => {
                     <a 
                       href="#" 
                       className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-profil-tentang' 
+                        currentPath === 'mobile-profil-tentang' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
@@ -259,7 +260,7 @@ const NavLanding: React.FC = () => {
                     <a 
                       href="#" 
                       className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-profil-tim' 
+                        currentPath === 'mobile-profil-tim' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
@@ -270,7 +271,7 @@ const NavLanding: React.FC = () => {
                     <a 
                       href="#" 
                       className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-profil-visi' 
+                        currentPath === 'mobile-profil-visi' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
@@ -290,7 +291,7 @@ const NavLanding: React.FC = () => {
                     handleItemClick('mobile-layanan');
                   }}
                   className={`text-gray-700 hover:text-gray-900 w-full text-left px-3 py-2 text-base font-medium flex items-center justify-between ${
-                    activeItem === 'mobile-layanan' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                    currentPath === 'mobile-layanan' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                   }`}
                 >
                   Layanan
@@ -306,7 +307,7 @@ const NavLanding: React.FC = () => {
                     <a 
                       href="#" 
                       className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-layanan-web' 
+                        currentPath === 'mobile-layanan-web' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
@@ -317,7 +318,7 @@ const NavLanding: React.FC = () => {
                     <a 
                       href="#" 
                       className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-layanan-mobile' 
+                        currentPath === 'mobile-layanan-mobile' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
@@ -328,7 +329,7 @@ const NavLanding: React.FC = () => {
                     <a 
                       href="#" 
                       className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-layanan-design' 
+                        currentPath === 'mobile-layanan-design' 
                           ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
@@ -344,7 +345,7 @@ const NavLanding: React.FC = () => {
                 href="#"
                 onClick={() => handleItemClick('berita')}
                 className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  activeItem === 'berita' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                  currentPath === 'berita' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                 }`}
               >
                 Berita
@@ -354,7 +355,7 @@ const NavLanding: React.FC = () => {
                 href="#"
                 onClick={() => handleItemClick('galeri')}
                 className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  activeItem === 'galeri' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                  currentPath === 'galeri' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                 }`}
               >
                 Galeri
@@ -364,7 +365,7 @@ const NavLanding: React.FC = () => {
                 href="#"
                 onClick={() => handleItemClick('dokumen')}
                 className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  activeItem === 'dokumen' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
+                  currentPath === 'dokumen' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
                 }`}
               >
                 Dokumen

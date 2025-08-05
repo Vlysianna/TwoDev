@@ -3,7 +3,8 @@ import { Phone, MapPin, Clock, Mail, MessageSquare } from 'lucide-react';
 
 const FootLanding = () => {
   return (
-    <footer className="bg-orange-500 text-white px-4 sm:px-6 py-6 w-full absolute bottom-0">
+    <footer className="bg-orange-500 text-white px-4 sm:px-6 py-6 w-full">
+
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Kontak Admin */}
@@ -49,7 +50,7 @@ const FootLanding = () => {
             </div>
             <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
               <div>SMK Negeri 24 Jakarta</div>
-              <div>Jalan Bentuk Dalam, Bentuk Agus</div>
+              <div>Jalan Bambu Hitam, Bambu Apus</div>
               <div>Cipayung, RT.7 / RW.3</div>
             </div>
           </div>
