@@ -13,18 +13,15 @@ function TentangLSP() {
             className="absolute inset-0 w-full h-full object-cover blur-sm brightness-75 z-0"
           />
 
-          <div className="relative z-10 flex items-center justify-between px-20 py-40 h-full">
+          <div className="relative z-10 flex items-center text-center justify-center px-20 py-40 h-full">
             <div className="text-white max-w-xl">
-              <p className="text-2xl mb-4">
+              <h1 className="text-6xl font-extrabold mb-4">
                 Lembaga Sertifikasi Profesi SMKN 24 Jakarta
-              </p>
-              <h1 className="text-6xl font-extrabold leading-tight">
-                Sertifikasikan <br />
-                Profesimu!
               </h1>
-            </div>
-
-            <div className="w-[500px] h-[300px] bg-gray-300 rounded-lg shadow-lg"></div>
+              <p className="text-2xl leading-tight">
+                Profil Singkat/ Visi/ Misi/ Moto
+              </p>
+            </div>            
           </div>
           
 
