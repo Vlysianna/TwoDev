@@ -4,6 +4,7 @@ import LandingPage from "../pages/LandingPage/LandingPage";
 import TentangLSP from "../pages/LandingPage/TentangLSP";
 import Sidebar from "../components/SideAdmin";
 import Test from "../pages/LandingPage/Test";
+import VerifikasiPage from "../pages/admin/verifikasi";
 
 export default function AppRouter() {
 	return (
@@ -13,6 +14,7 @@ export default function AppRouter() {
 				<Route path="/" element={<LandingPage />} />
 				<Route path="/about" element={<TentangLSP />} />
 				<Route path="/test" element={<Test />} />
+				<Route path="/verifikasi" element={<VerifikasiPage/>} />
 			</Routes>
 		</BrowserRouter>
 	);

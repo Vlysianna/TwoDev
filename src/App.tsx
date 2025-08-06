@@ -6,6 +6,7 @@ import Sidebar from './components/SideAdmin'
 import NavLanding from './components/NavLanding'
 import FootLanding from './components/FootLanding'
 import SideAsesor from './components/SideAsesor'
+import VerifikasiPage from './pages/admin/verifikasi'
 
 function App() {
   

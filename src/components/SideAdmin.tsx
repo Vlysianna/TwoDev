@@ -193,7 +193,7 @@ const Sidebar: React.FC = () => {
       {/* Sidebar - Always visible on desktop, slide on mobile */}
       <div className={`
         fixed lg:static inset-y-0 left-0 z-40
-        w-64 h-screen bg-orange-500 text-white flex flex-col
+        w-64 h-full bg-orange-500 text-white flex flex-col
         transform transition-transform duration-300 ease-in-out lg:transform-none
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
