@@ -26,20 +26,7 @@ function TentangLSP() {
 
             <div className="w-[500px] h-[300px] bg-gray-300 rounded-lg shadow-lg"></div>
           </div>
-
-          <div className="relative z-10 w-full bg-orange-500 text-white py-8 px-8 lg:px-20">
-            <div className="flex flex-col lg:flex-row items-center justify-between">
-              <div className="mb-4 lg:mb-0">
-                <h2 className="text-xl lg:text-2xl font-bold mb-2">
-                  Ayo Tingkatkan Kualitas Skill Anda Bersama Kami
-                </h2>
-                <p className="text-lg opacity-90">
-                  Sebelum mendaftarkan sertifikasi pastikan anda memiliki akun
-                  terlebih dahulu
-                </p>
-              </div>
-            </div>
-          </div>
+          
 
           <h2 className="text-2xl font-semibold text-center  mt-16">
             Tentang LSP SMK Negeri 24 Jakarta

@@ -3,6 +3,7 @@ import Home from "../pages/home/tes";
 import LandingPage from "../pages/LandingPage/LandingPage";
 import TentangLSP from "../pages/LandingPage/TentangLSP";
 import Sidebar from "../components/SideAdmin";
+import Test from "../pages/LandingPage/Test";
 
 export default function AppRouter() {
 	return (
@@ -11,7 +12,7 @@ export default function AppRouter() {
 				<Route path="/a" element={<Home />} />
 				<Route path="/" element={<LandingPage />} />
 				<Route path="/about" element={<TentangLSP />} />
-				<Route path="/sidebar" element={<Sidebar />} />
+				<Route path="/test" element={<Test />} />
 			</Routes>
 		</BrowserRouter>
 	);
