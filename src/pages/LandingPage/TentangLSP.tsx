@@ -6,31 +6,36 @@ function TentangLSP() {
     <>
       <div className="flex flex-col min-h-screen">
         <NavLanding />
-        <main className="min-h-screen">
+        
+          {/* Section Hero dengan background */}
+        <section className="relative min-h-screen">
           <img
             src="/bgsklh.png"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-sm brightness-75 z-0"
+            className="absolute inset-0 w-full h-full object-cover blur-sm brightness-75 z-0 "
           />
 
-          <div className="relative z-10 flex items-center text-center justify-center px-20 py-40 h-full">
-            <div className="text-white max-w-xl">
-              <h1 className="text-6xl font-extrabold mb-4">
+          <div className="relative z-10 flex items-center justify-center text-center px-4 sm:px-10 md:px-20 py-32 sm:py-40 h-full">
+            <div className="text-white max-w-2xl">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4">
                 Lembaga Sertifikasi Profesi SMKN 24 Jakarta
               </h1>
-              <p className="text-2xl leading-tight">
-                Profil Singkat/ Visi/ Misi/ Moto
+              <p className="text-lg sm:text-xl md:text-2xl leading-tight">
+                Profil Singkat / Visi / Misi / Moto
               </p>
-            </div>            
+            </div>
           </div>
-          
+        </section>
 
-          <h2 className="text-2xl font-semibold text-center  mt-16">
+ {/* Section Konten Utama */}
+        <main className="flex-grow bg-gray-50">
+          {/* Tentang LSP */}
+          <h2 className="text-xl sm:text-2xl font-semibold text-center mt-16 px-4">
             Tentang LSP SMK Negeri 24 Jakarta
           </h2>
-          <div className="text-center flex items-center justify-center py-16 gap-8 px-10 ">
-            <div className=" w-full bg-white rounded-xl shadow-lg p-8 text-start">
-              <p className="text-black-700 mb-4">
+          <div className="flex items-center justify-center py-10 px-4 sm:px-6 md:px-10">
+            <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-6 sm:p-8 text-start">
+              <p className="text-gray-700 mb-4">
                 Lembaga Sertifikasi Profesi (LSP) SMKN 24 Jakarta adalah lembaga
                 resmi yang berlisensi dari Badan Nasional Sertifikasi Profesi
                 (BNSP) yang bertugas melaksanakan uji kompetensi bagi peserta
@@ -41,7 +46,7 @@ function TentangLSP() {
                 kompetensi, lulusan SMKN 24 Jakarta memiliki bukti pengakuan
                 yang sah bahwa mereka siap bersaing di dunia kerja.
               </p>
-              <p className="text-black-700 mb-4">
+              <p className="text-gray-700 mb-4">
                 LSP SMKN 24 Jakarta didukung oleh fasilitas uji yang memadai
                 serta asesor kompetensi yang telah tersertifikasi BNSP. Proses
                 sertifikasi dilaksanakan secara objektif, transparan, dan
@@ -51,7 +56,7 @@ function TentangLSP() {
                 kompetensi yang diujikan relevan dengan perkembangan teknologi
                 dan tuntutan pasar kerja.
               </p>
-              <p className="text-black-700 mb-6">
+              <p className="text-gray-700 mb-6">
                 Keberadaan LSP SMKN 24 Jakarta menjadi salah satu keunggulan
                 sekolah dalam mempersiapkan tenaga kerja profesional dan
                 kompeten. Dengan sertifikat kompetensi yang diakui secara
@@ -63,45 +68,44 @@ function TentangLSP() {
               </p>
             </div>
           </div>
-
-          <h2 className="text-2xl font-semibold text-center mt-16">
+{/* Visi Misi Moto */}
+          <h2 className="text-xl sm:text-2xl font-semibold text-center mt-16 px-4">
             Visi, Misi & Moto
           </h2>
-          <div className="text-center flex items-center justify-center py-16 gap-8 px-10">
-            <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8 h-96">
+          <div className="flex flex-col lg:flex-row items-center justify-center py-10 px-4 sm:px-6 md:px-10 gap-6">
+           <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6 sm:p-8">
               <h1 className="text-center font-bold mb-4">Visi</h1>
-              <p className="text-black-700 mb-6 text-start">
+              <p className="text-gray-700 mb-6 text-start">
                 Menjadi LSP yang unggul, terpercaya, dan berdaya saing dalam
                 mencetak sumber daya manusia yang kompeten, profesional, serta
                 mampu memenuhi kebutuhan dunia kerja.
               </p>
 
               <h1 className="text-center font-bold mb-4">Moto</h1>
-              <p className="text-black-700 text-start">
-                1.Kompeten, Profesional, Siap Bersaing <br />
-                2.Mewujudkan SDM Unggul dengan Sertifikasi Kompetensi <br />
-                3.Standar Nasional, Kualitas Global <br />
-                4.Mencetak Tenaga Kerja Tersertifikasi dan Berdaya Saing <br />
-                5.Kompetensi Teruji, Masa Depan Pasti
+              <p className="text-gray-700 text-start">
+                1. Kompeten, Profesional, Siap Bersaing <br />
+                2. Mewujudkan SDM Unggul dengan Sertifikasi Kompetensi <br />
+                3. Standar Nasional, Kualitas Global <br />
+                4. Mencetak Tenaga Kerja Tersertifikasi dan Berdaya Saing <br />
+                5. Kompetensi Teruji, Masa Depan Pasti
               </p>
             </div>
 
-            <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8 h-96">
+            <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6 sm:p-8">
               <h1 className="text-center font-bold mb-4">Misi</h1>
-              <p className="text-black-700 text-start">
+              <p className="text-gray-700 text-start">
                 1. Menyelenggarakan sertifikasi kompetensi secara profesional,
                 objektif, dan sesuai standar BNSP. <br />
-                2. Membina dan meningkatkan
-                kapasitas asesor kompetensi agar mampu memberikan penilaian yang
-                berkualitas. <br />
-                3. Memperkuat kerjasama dengan dunia usaha, dunia
-                industri, serta instansi terkait dalam mendukung terserapnya
-                tenaga kerja kompeten. <br />
-                4. Memberikan layanan sertifikasi yang
-                terjangkau, transparan, dan bermanfaat bagi peserta didik,
-                alumni, maupun masyarakat umum. <br />
-                5. Mendorong lulusan memiliki
-                sertifikat kompetensi sebagai bekal memasuki dunia kerja.
+                2. Membina dan meningkatkan kapasitas asesor kompetensi agar
+                mampu memberikan penilaian yang berkualitas. <br />
+                3. Memperkuat kerjasama dengan dunia usaha, dunia industri,
+                serta instansi terkait dalam mendukung terserapnya tenaga kerja
+                kompeten. <br />
+                4. Memberikan layanan sertifikasi yang terjangkau, transparan,
+                dan bermanfaat bagi peserta didik, alumni, maupun masyarakat
+                umum. <br />
+                5. Mendorong lulusan memiliki sertifikat kompetensi sebagai
+                bekal memasuki dunia kerja.
               </p>
             </div>
           </div>
@@ -111,4 +115,5 @@ function TentangLSP() {
     </>
   );
 }
+
 export default TentangLSP;

@@ -1,405 +1,244 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
 const NavLanding: React.FC = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<string>('');
-  
 
-  const toggleMobileMenu = (): void => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === '/') setActiveItem('home');
+    else if (path.includes('/about') || path.includes('/struktur') || path.includes('/pengelola')) {
+      setActiveItem('profil');
+    } else if (
+      path.includes('/skema') ||
+      path.includes('/tempat-uji') ||
+      path.includes('/asesor') ||
+      path.includes('/prosedur-pendaftaran')
+    ) {
+      setActiveItem('layanan');
+    } else if (path.includes('/berita')) setActiveItem('berita');
+    else if (path.includes('/galeri')) setActiveItem('galeri');
+    else if (path.includes('/dokumen')) setActiveItem('dokumen');
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'auto';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMobileMenuOpen]);
+
+  const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+    setActiveDropdown(null);
   };
 
-  const toggleDropdown = (menu: string): void => {
+  const toggleDropdown = (menu: string) => {
     setActiveDropdown(activeDropdown === menu ? null : menu);
   };
 
-  const handleItemClick = (item: string): void => {
-    setActiveItem(item);
-  };
+  const menuItems = [
+    { name: 'Home', path: '/' },
+    { name: 'Berita', path: '/berita' },
+    { name: 'Galeri', path: '/galeri' },
+    { name: 'Dokumen', path: '/dokumen' },
+  ];
 
   return (
-    <nav className="sticky bg-white border-b border-gray-200 shadow-sm absolute inset-x-0 top-0 z-50">
+    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <img src="/twodev-teks.svg" alt="Wodev" className="w-auto h-8 " />
-            </div>
+            <img src="/twodev-teks.svg" alt="Wodev" className="h-8" />
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
+          <div className="hidden md:flex items-center space-x-8">
+            {menuItems.map((item) => (
               <Link
-                to="/"
-                onClick={() => handleItemClick('home')}
-                className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  activeItem === 'home' ? 'text-blue-600' : ''
+                key={item.name}
+                to={item.path}
+                className={`relative px-3 py-2 text-sm font-medium transition-colors ${
+                  activeItem === item.name.toLowerCase() ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
                 }`}
               >
-                Home
-                {activeItem === 'home' && (
-                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
+                {item.name}
+                {activeItem === item.name.toLowerCase() && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full" />
                 )}
               </Link>
-              
-              {/* Profil Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => toggleDropdown('profil')}
-                                    
-                  className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium flex items-center transition-colors duration-200 relative ${
-                    activeItem === 'profil' ? 'text-blue-600' : ''
-                  }`}
-                >
-                  Profil
-                  <ChevronDown 
-                    size={16} 
-                    className={`ml-1 transition-transform duration-200 ${
-                      activeDropdown === 'profil' ? 'rotate-180' : ''
-                    }`} 
-                  />
-                  {activeItem === 'profil' && (
-                    <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
-                  )}
-                </button>
-                {activeDropdown === 'profil' && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
-                    <Link 
-                      to="/about" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
-                      onClick={() => handleItemClick('profil')}
-                    >
-                      Tentang LSP
-                    </Link>
-                    <Link 
-                      to="/struktur-organisasi" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
-                      onClick={() => handleItemClick('profil')}
-                    >
-                      Struktur Organisai
-                    </Link>
-                    <Link 
-                      to="/pengelola-sdm" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
-                      onClick={() => handleItemClick('profil')}
-                    >
-                      Pengelola SDM
-                    </Link>
-                  </div>
-                )}
-              </div>
+            ))}
 
-              {/* Layanan Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => {
-                    toggleDropdown('layanan');
-                    handleItemClick('layanan');
-                  }}
-                  className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium flex items-center transition-colors duration-200 relative ${
-                    activeItem === 'layanan' ? 'text-blue-600' : ''
-                  }`}
-                >
-                  Layanan
-                  <ChevronDown 
-                    size={16} 
-                    className={`ml-1 transition-transform duration-200 ${
-                      activeDropdown === 'layanan' ? 'rotate-180' : ''
-                    }`} 
-                  />
-                  {activeItem === 'layanan' && (
-                    <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
-                  )}
-                </button>
-                {activeDropdown === 'layanan' && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
-                    <Link 
-                      to="/skema" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
-                      onClick={() => handleItemClick('layanan')}
-                    >
-                      Skema
-                    </Link>
-                    <Link 
-                      to="/tempat-uji" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
-                      onClick={() => handleItemClick('layanan')}
-                    >
-                      Tempat Uji
-                    </Link>
-                    <Link 
-                      to="/asesor" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
-                      onClick={() => handleItemClick('layanan')}
-                    >
-                      Asesor
-                    </Link>
-                    <Link 
-                      to="/prosedur-pendaftaran" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
-                      onClick={() => handleItemClick('layanan')}
-                    >
-                      Prosedur Pendaftaran
-                    </Link>
-                  </div>
+            {/* Profil Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown('profil')}
+                className={`relative px-3 py-2 text-sm font-medium flex items-center transition-colors ${
+                  activeItem === 'profil' ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
+                }`}
+              >
+                Profil
+                <ChevronDown
+                  size={16}
+                  className={`ml-1 transition-transform ${activeDropdown === 'profil' ? 'rotate-180' : ''}`}
+                />
+                {activeItem === 'profil' && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full" />
                 )}
-              </div>
+              </button>
+              {activeDropdown === 'profil' && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg border rounded-md z-50 py-2">
+                  <Link to="/about" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Tentang LSP
+                  </Link>
+                  <Link to="/struktur" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Struktur Organisasi
+                  </Link>
+                  <Link to="/pengelola-sdm" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Pengelola SDM
+                  </Link>
+                </div>
+              )}
+            </div>
 
-              <Link
-                to="/berita"
-                onClick={() => handleItemClick('berita')}
-                className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  activeItem === 'berita' ? 'text-blue-600' : ''
+            {/* Layanan Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown('layanan')}
+                className={`relative px-3 py-2 text-sm font-medium flex items-center transition-colors ${
+                  activeItem === 'layanan' ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
                 }`}
               >
-                Berita
-                {activeItem === 'berita' && (
-                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
+                Layanan
+                <ChevronDown
+                  size={16}
+                  className={`ml-1 transition-transform ${activeDropdown === 'layanan' ? 'rotate-180' : ''}`}
+                />
+                {activeItem === 'layanan' && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full" />
                 )}
-              </Link>
-              
-              <Link
-                to="/galeri"
-                onClick={() => handleItemClick('galeri')}
-                className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  activeItem === 'galeri' ? 'text-blue-600' : ''
-                }`}
-              >
-                Galeri
-                {activeItem === 'galeri' && (
-                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
-                )}
-              </Link>
-              
-              <Link
-                to="/dokumen"
-                onClick={() => handleItemClick('dokumen')}
-                className={`text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative ${
-                  activeItem === 'dokumen' ? 'text-blue-600' : ''
-                }`}
-              >
-                Dokumen
-                {activeItem === 'dokumen' && (
-                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-blue-600 rounded-full"></span>
-                )}
-              </Link>
+              </button>
+              {activeDropdown === 'layanan' && (
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white shadow-lg border rounded-md z-50 py-2">
+                  <Link to="/skema" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Skema
+                  </Link>
+                  <Link to="/tempat-uji" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Tempat Uji
+                  </Link>
+                  <Link to="/asesor" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Asesor
+                  </Link>
+                  <Link to="/prosedur-pendaftaran" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Prosedur Pendaftaran
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Login Button */}
           <div className="hidden md:block">
-            <button className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 shadow-sm">
+            <button className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-md text-sm font-medium">
               Login
             </button>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Toggle */}
           <div className="md:hidden">
-            <button
-              onClick={toggleMobileMenu}
-              className="text-gray-700 hover:text-gray-900 p-2"
-            >
+            <button onClick={toggleMobileMenu} className="text-gray-700 hover:text-gray-900">
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-white">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              <Link
-                to="/"
-                onClick={() => handleItemClick('home')}
-                className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  activeItem === 'home' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
-                }`}
-              >
-                Home
-              </Link>
-              
-              {/* Mobile Profil Dropdown */}
-              <div>
-                <button
-                  onClick={() => {
-                    toggleDropdown('mobile-profil');
-                    handleItemClick('mobile-profil');
-                  }}
-                  className={`text-gray-700 hover:text-gray-900 w-full text-left px-3 py-2 text-base font-medium flex items-center justify-between ${
-                    activeItem === 'mobile-profil' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
-                  }`}
-                >
-                  Profil
-                  <ChevronDown 
-                    size={16} 
-                    className={`transition-transform duration-200 ${
-                      activeDropdown === 'mobile-profil' ? 'rotate-180' : ''
-                    }`} 
-                  />
-                </button>
-                {activeDropdown === 'mobile-profil' && (
-                  <div className="pl-6 space-y-1">
-                    <Link 
-                      to="/about" 
-                      className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-profil-tentang' 
-                          ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleItemClick('mobile-profil-tentang')}
-                    >
-                      Tentang LSP
-                    </Link>
-                    <Link 
-                      to="/struktur-organisasi" 
-                      className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-profil-struktur' 
-                          ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleItemClick('mobile-profil-struktur')}
-                    >
-                      Struktur Organisasi
-                    </Link>
-                    <Link 
-                      to="/pengelola-sdm" 
-                      className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-profil-sdm' 
-                          ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleItemClick('mobile-profil-sdm')}
-                    >
-                      Pengelola SDM
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* Mobile Layanan Dropdown */}
-              <div>
-                <button
-                  onClick={() => {
-                    toggleDropdown('mobile-layanan');
-                    handleItemClick('mobile-layanan');
-                  }}
-                  className={`text-gray-700 hover:text-gray-900 w-full text-left px-3 py-2 text-base font-medium flex items-center justify-between ${
-                    activeItem === 'mobile-layanan' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
-                  }`}
-                >
-                  Layanan
-                  <ChevronDown 
-                    size={16} 
-                    className={`transition-transform duration-200 ${
-                      activeDropdown === 'mobile-layanan' ? 'rotate-180' : ''
-                    }`} 
-                  />
-                </button>
-                {activeDropdown === 'mobile-layanan' && (
-                  <div className="pl-6 space-y-1">
-                    <Link 
-                      to="/skema" 
-                      className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-layanan-skema' 
-                          ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleItemClick('mobile-layanan-skema')}
-                    >
-                      Skema
-                    </Link>
-                    <Link 
-                      to="/tempat-uji" 
-                      className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-layanan-tempat' 
-                          ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleItemClick('mobile-layanan-tempat')}
-                    >
-                      Tempat Uji
-                    </Link>
-                    <Link 
-                      to="/asesor" 
-                      className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-layanan-asesor' 
-                          ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleItemClick('mobile-layanan-asesor')}
-                    >
-                      Asesor
-                    </Link>
-                    <Link 
-                      to="/prosedur-pendaftaran" 
-                      className={`block px-3 py-2 text-sm ${
-                        activeItem === 'mobile-layanan-prosedur' 
-                          ? 'text-blue-600 border-l-4 border-blue-600 pl-2' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => handleItemClick('mobile-layanan-prosedur')}
-                    >
-                      Prosedur Pendaftaran
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              <Link
-                to="/berita"
-                onClick={() => handleItemClick('berita')}
-                className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  activeItem === 'berita' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
-                }`}
-              >
-                Berita
-              </Link>
-              
-              <Link
-                to="/galeri"
-                onClick={() => handleItemClick('galeri')}
-                className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  activeItem === 'galeri' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
-                }`}
-              >
-                Galeri
-              </Link>
-              
-              <Link
-                to="/dokumen"
-                onClick={() => handleItemClick('dokumen')}
-                className={`text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium ${
-                  activeItem === 'dokumen' ? 'text-blue-600 border-l-4 border-blue-600 pl-2' : ''
-                }`}
-              >
-                Dokumen
-              </Link>
-
-              {/* Mobile Login Button */}
-              <div className="pt-2">
-                <button className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                  Login
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Overlay untuk menutup dropdown ketika klik di luar */}
-      {(activeDropdown || isMobileMenuOpen) && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => {
-            setActiveDropdown(null);
-            setIsMobileMenuOpen(false);
-          }}
-        />
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-200 z-40 relative">
+          <div className="px-4 pt-4 pb-6 space-y-2">
+            <Link to="/" className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+              Home
+            </Link>
+
+            {/* Profil Mobile */}
+            <div>
+              <button
+                onClick={() => toggleDropdown('mobile-profil')}
+                className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
+              >
+                Profil
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${activeDropdown === 'mobile-profil' ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {activeDropdown === 'mobile-profil' && (
+                <div className="pl-4 space-y-1">
+                  <Link to="/about" className="block text-sm text-gray-600 hover:text-blue-600">
+                    Tentang LSP
+                  </Link>
+                  <Link to="/struktur" className="block text-sm text-gray-600 hover:text-blue-600">
+                    Struktur Organisasi
+                  </Link>
+                  <Link to="/pengelola-sdm" className="block text-sm text-gray-600 hover:text-blue-600">
+                    Pengelola SDM
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Layanan Mobile */}
+            <div>
+              <button
+                onClick={() => toggleDropdown('mobile-layanan')}
+                className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
+              >
+                Layanan
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${activeDropdown === 'mobile-layanan' ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {activeDropdown === 'mobile-layanan' && (
+                <div className="pl-4 space-y-1">
+                  <Link to="/skema" className="block text-sm text-gray-600 hover:text-blue-600">
+                    Skema
+                  </Link>
+                  <Link to="/tempat-uji" className="block text-sm text-gray-600 hover:text-blue-600">
+                    Tempat Uji
+                  </Link>
+                  <Link to="/asesor" className="block text-sm text-gray-600 hover:text-blue-600">
+                    Asesor
+                  </Link>
+                  <Link to="/prosedur-pendaftaran" className="block text-sm text-gray-600 hover:text-blue-600">
+                    Prosedur Pendaftaran
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <Link to="/berita" className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+              Berita
+            </Link>
+            <Link to="/galeri" className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+              Galeri
+            </Link>
+            <Link to="/dokumen" className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+              Dokumen
+            </Link>
+
+            <button className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm mt-4">
+              Login
+            </button>
+          </div>
+        </div>
       )}
     </nav>
   );

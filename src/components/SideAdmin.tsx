@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   FileText,
@@ -10,9 +10,9 @@ import {
   UserPlus,
   LogOut,
   Menu,
-  X
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+  X,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface MenuItem {
   name: string;
@@ -33,50 +33,50 @@ const Sidebar: React.FC = () => {
 
   const menuItems: MenuItem[] = [
     {
-      name: 'Dashboard',
+      name: "Dashboard",
       icon: LayoutDashboard,
-      section: 'main',
-      path: '/dashboard'
+      section: "main",
+      path: "/dashboard",
     },
     {
-      name: 'Kelola Asesmen',
+      name: "Kelola Asesmen",
       icon: FileText,
-      section: 'main',
-      path: '/kelola-asesmen'
+      section: "main",
+      path: "/kelola-asesmen",
     },
     {
-      name: 'Kelola Skema',
+      name: "Kelola Skema",
       icon: Users,
-      section: 'main',
-      path: '/kelola-skema'
+      section: "main",
+      path: "/kelola-skema",
     },
     {
-      name: 'Kelola Jurusan',
+      name: "Kelola Jurusan",
       icon: GraduationCap,
-      section: 'main',
-      path: '/kelola-jurusan'
-    }
+      section: "main",
+      path: "/kelola-jurusan",
+    },
   ];
 
   const managementItems: MenuItem[] = [
     {
-      name: 'Akun Asesi',
+      name: "Akun Asesi",
       icon: User,
-      section: 'management',
-      path: '/akun-asesi'
+      section: "management",
+      path: "/akun-asesi",
     },
     {
-      name: 'Akun Asesor',
+      name: "Akun Asesor",
       icon: UserCheck,
-      section: 'management',
-      path: '/akun-asesor'
+      section: "management",
+      path: "/akun-asesor",
     },
     {
-      name: 'Register',
+      name: "Register",
       icon: UserPlus,
-      section: 'management',
-      path: '/register'
-    }
+      section: "management",
+      path: "/register",
+    },
   ];
 
   const handleItemClick = (): void => {
@@ -90,25 +90,27 @@ const Sidebar: React.FC = () => {
 
   const handleLogout = (): void => {
     // Add logout logic here
-    console.log('Logout clicked');
+    console.log("Logout clicked");
     setIsMobileMenuOpen(false);
   };
 
   const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
     const IconComponent = item.icon;
-    
+
     return (
       <Link
         to={item.path}
         className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
-          isActive 
-            ? 'bg-orange-600 text-white' 
-            : 'text-orange-100 hover:bg-orange-500 hover:text-white'
+          isActive
+            ? "bg-orange-600 text-white"
+            : "text-orange-100 hover:bg-orange-500 hover:text-white"
         }`}
         onClick={onClick}
       >
         <IconComponent size={18} className="flex-shrink-0" />
-        <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
+        <span className="text-sm font-medium whitespace-nowrap">
+          {item.name}
+        </span>
       </Link>
     );
   };
@@ -122,7 +124,9 @@ const Sidebar: React.FC = () => {
             <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
           </div>
         </Link>
-          <span className="p-2 text-sm text-orange-100 whitespace-nowrap">SertifikasiI</span>
+        <span className="p-2 text-sm text-orange-100 whitespace-nowrap">
+          SertifikasiI
+        </span>
       </div>
 
       {/* Main Menu Items */}
@@ -184,19 +188,21 @@ const Sidebar: React.FC = () => {
 
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-30"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar - Always visible on desktop, slide on mobile */}
-      <div className={`
-        fixed lg:static inset-y-0 left-0 z-40
-        w-64 h-full bg-orange-500 text-white flex flex-col
-        transform transition-transform duration-300 ease-in-out lg:transform-none
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      <div
+        className={`
+  fixed inset-y-0 left-0 z-40
+  w-64 h-screen bg-orange-500 text-white flex flex-col
+  transform transition-transform duration-300 ease-in-out lg:transform-none
+  ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+`}
+      >
         <SidebarContent />
       </div>
 

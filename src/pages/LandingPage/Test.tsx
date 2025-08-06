@@ -18,7 +18,24 @@ function Test() {
 
         {/* Konten Utama */}
         <div className="p-6">
-          {/* Konten Utama ya buyunggggggggggggggggggggggggg */}
+          <div className="">
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci voluptates iste aliquam tenetur fugiat suscipit debitis porro quod quia! Dolor minus provident facilis, natus neque magni totam explicabo dicta ullam.</p>
+          </div>
+            <div className="mt-4">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci voluptates iste aliquam tenetur fugiat suscipit debitis porro quod quia! Dolor minus provident facilis, natus neque magni totam explicabo dicta ullam.</p>
+            </div>
+             <div className="mt-10">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci voluptates iste aliquam tenetur fugiat suscipit debitis porro quod quia! Dolor minus provident facilis, natus neque magni totam explicabo dicta ullam.</p>
+            </div>
+             <div className="mt-50">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci voluptates iste aliquam tenetur fugiat suscipit debitis porro quod quia! Dolor minus provident facilis, natus neque magni totam explicabo dicta ullam.</p>
+            </div>
+             <div className="mt-80">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci voluptates iste aliquam tenetur fugiat suscipit debitis porro quod quia! Dolor minus provident facilis, natus neque magni totam explicabo dicta ullam.</p>
+            </div>
+            <div className="mt-100">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci voluptates iste aliquam tenetur fugiat suscipit debitis porro quod quia! Dolor minus provident facilis, natus neque magni totam explicabo dicta ullam.</p>
+            </div>
         </div>
       </div>
     </div>
