@@ -66,7 +66,7 @@ export default function TambahSkema() {
   };
 
 
-  const handleUploadPG = async (e:React.ChangeEvent<HTMLInputElement> ) => {
+  const handleUploadPG = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -128,14 +128,14 @@ export default function TambahSkema() {
               <div>
                 <label className="block text-sm font-medium mb-1">Kode Unit</label>
                 <input
-                  {...register(unit.${unitIndex}.kode)}
+                  {...register(`unit.${unitIndex}.kode`)}
                   className="w-full border rounded px-3 py-2"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Judul Unit</label>
                 <input
-                  {...register(unit.${unitIndex}.judul)}
+                  {...register(`unit.${ unitIndex }.judul`)}
                   className="w-full border rounded px-3 py-2"
                 />
               </div>
@@ -148,7 +148,7 @@ export default function TambahSkema() {
                     Elemen {elemenIndex + 1}
                   </label>
                   <input
-                    {...register(unit.${unitIndex}.elemen.${elemenIndex}.text)}
+                    {...register(`unit.${ unitIndex }.elemen.${ elemenIndex }.text`)}
                     className="w-full border rounded px-3 py-2"
                   />
                 </div>
@@ -160,7 +160,7 @@ export default function TambahSkema() {
                     </label>
                     <input
                       {...register(
-                        unit.${unitIndex}.elemen.${elemenIndex}.item.${itemIndex}.text
+                        `unit.${ unitIndex }.elemen.${ elemenIndex }.item.${ itemIndex }.text`
                       )}
                       defaultValue={item.text}
                       className="w-full border rounded px-3 py-2"
@@ -197,7 +197,7 @@ export default function TambahSkema() {
             color: '#E77D35',
             border: '2px solid #E77D35',
           }}
-          // onClick={() => remove(fields.length - 1)}
+        // onClick={() => remove(fields.length - 1)}
         >
           Hapus Unit
         </button>
@@ -227,7 +227,7 @@ export default function TambahSkema() {
               .filter(line => line.trim() !== '') // Hapus baris kosong
               .map((line, index) => (
                 <div key={index} className="font-medium text-gray-800">
-                      {index + 1}. {line.trim()}
+                  {index + 1}. {line.trim()}
                 </div>
               ))}
           </div>
@@ -258,7 +258,7 @@ export default function TambahSkema() {
                   // Baris soal
                   return (
                     <div key={idx} className="font-medium text-gray-800">
-                      {${Math.floor(idx / 5) + 1}. ${line.trim()}}
+                      {`${Math.floor(idx / 5) + 1}. ${line.trim()}`}
                     </div>
                   );
                 } else {
@@ -269,9 +269,9 @@ export default function TambahSkema() {
                     <div key={idx} className="flex items-start gap-2 ml-4">
                       <input
                         type="radio"
-                        name={pg_${questionNumber}}
-                        className="mt-1"
-                        value={line.trim()}
+                        name={`pg_${questionNumber}`}
+                      className="mt-1"
+                      value={line.trim()}
                       />
                       <span>{line.trim()}</span>
                     </div>
@@ -357,33 +357,33 @@ export function parseHTMLToSchema(html: string): SkemaType {
       const ol = row.querySelector("ol");
       const items = ol
         ? Array.from(ol.querySelectorAll("li")).map((li, i) => ({
-            id: ${elementCounter}.${i + 1},
-            text: li.textContent?.trim() || "",
+          id: `${ elementCounter }.${ i + 1}`,
+    text: li.textContent?.trim() || "",
           }))
         : [];
 
-      elemenList.push({
-        id: ${elementCounter++},
-        text: elemenText,
-        item: items,
+  elemenList.push({
+    id: `${ elementCounter++}`,
+text: elemenText,
+  item: items,
       });
     }
   }
 
-  if (kodeUnit && judulUnit && elemenList.length > 0) {
-    unitList.push({
-      kode: kodeUnit,
-      judul: judulUnit,
-      elemen: elemenList,
-    });
-  }
+if (kodeUnit && judulUnit && elemenList.length > 0) {
+  unitList.push({
+    kode: kodeUnit,
+    judul: judulUnit,
+    elemen: elemenList,
+  });
+}
 
-  const skema: SkemaType = {
-    jurusan: "",
-    judul: "",
-    nomor: "",
-    unit: unitList,
-  };
+const skema: SkemaType = {
+  jurusan: "",
+  judul: "",
+  nomor: "",
+  unit: unitList,
+};
 
-  return skema;
+return skema;
 }
