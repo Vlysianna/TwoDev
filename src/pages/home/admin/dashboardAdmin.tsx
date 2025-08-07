@@ -51,7 +51,7 @@ export default function Dashboard() {
                   },
                 },
               },
-              cutout: "70%",
+              cutout: "80%",
             }}
           />
         </div>
