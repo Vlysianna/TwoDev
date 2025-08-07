@@ -11,6 +11,15 @@ import Sidebar from "../components/SideAdmin";
 import Test from "../pages/LandingPage/Test";
 import VerifikasiPage from "../pages/admin/verifikasi";
 import RegisterPage from "../pages/admin/register";
+import Skema from "@/pages/LandingPage/Skema";
+import StrukturLSP from "@/pages/LandingPage/StrukturLSP";
+import PengelolaSDM from "@/pages/LandingPage/PengelolaSDM";
+import Tempatuji from "@/pages/LandingPage/Tempatuji";
+import Asesor from "@/pages/LandingPage/Asesor";
+import Prosedur from "@/pages/LandingPage/Prosedur";
+import Berita from "@/pages/LandingPage/Berita";
+import Galeri from "@/pages/LandingPage/Galeri";
+import Dokumen from "@/pages/LandingPage/Dokumen";
 
 export default function AppRouter() {
 	return (
@@ -18,7 +27,7 @@ export default function AppRouter() {
 			<Routes>
 				<Route path="/a" element={<Home />} />
 				<Route path="/login" element={<LoginForm />} />
-				<Route path="/register" element={<RegisterForm />} />
+				<Route path="/registerAsesi" element={<RegisterForm />} />
 				<Route path="/apl-01" element={<AplZeroOne />} />
 				<Route path="/lspmedia" element={<LspMediaForm />} />
 				<Route path="/tambahskema" element={<TambahSkema />} />
