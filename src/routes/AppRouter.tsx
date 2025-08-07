@@ -13,6 +13,10 @@ import Berita from "../pages/LandingPage/Berita";
 import Galeri from "../pages/LandingPage/Galeri";
 import Dokumen from "../pages/LandingPage/Dokumen";
 import PengelolaSDM from "../pages/LandingPage/PengelolaSDM";
+import KelolaOkupasi from "@/pages/home/admin/okupasi/KelolaOkupasi";
+import { Table } from "lucide-react";
+import TambahOkupasi from "@/pages/home/admin/okupasi/TambahOkupasi";
+import EditOkupasi from "@/pages/home/admin/okupasi/EditOkupasi";
 
 export default function AppRouter() {
 	return (
@@ -31,6 +35,9 @@ export default function AppRouter() {
 				<Route path="/galeri" element={<Galeri />} />
 				<Route path="/dokumen" element={<Dokumen />} />
 				<Route path="/test" element={<Test />} />
+				<Route path="/okupasi" element={<KelolaOkupasi />} />
+				<Route path="/tambah-okupasi" element={<TambahOkupasi />} />
+				<Route path="/edit-okupasi/:id" element={<EditOkupasi />} />
 			</Routes>
 		</BrowserRouter>
 	);
