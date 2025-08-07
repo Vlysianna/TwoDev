@@ -48,13 +48,13 @@ export default function RegisterPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
-            <input type="email" className="w-full border rounded p-2" placeholder="Masukkan email anda" />
+            <input type="email" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan email anda" />
             <p className="text-xs text-red-500 mt-1 italic">*wajib diisi</p>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
             <div className="relative w-ful">
-                 <input type={showPassword ? "text" : "password"} className="w-full border rounded p-2 pr-10" placeholder= "Masukkan password anda" 
+                 <input type={showPassword ? "text" : "password"} className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400 pr-10" placeholder= "Masukkan password anda" 
             />
               <button
         type="button"
@@ -80,25 +80,25 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-1">Nama</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan nama anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan nama anda" />
             </div>
              <div>
               <label className="block text-sm font-medium mb-1">No. HP</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan nomor hp anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan nomor hp anda" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">No. KTP/NIK/Paspor</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan nomor identitas anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan nomor identitas anda" />
             </div>
             
             <div>
               <label className="block text-sm font-medium mb-1">Tempat Lahir</label>
-              <input type="text" className="w-full border rounded p-2" placeholder='Masukkan tempat lahir anda' />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder='Masukkan tempat lahir anda' />
             </div>
             <div>
-                <label className="block text-sm font-medium mb-1">Select Date</label>
-                <input type="date" name="date" className="w-full border rounded p-2" placeholder="Select Birth  Date"/>
+                <label className="block text-sm font-medium ">Select Date</label>
+                <input type="date" name="date" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400 font-normal text-gray-600 placeholder-gray-400" placeholder="Select Birth  Date"/>
                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">           
                 </div>
             </div>
@@ -118,35 +118,35 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium mb-1">Kewarganegaraan</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan negara anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan negara anda" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">No. Telp Kantor</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan no. telp kantor anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan no. telp kantor anda" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Kota</label>
-              <input type="tel" className="w-full border rounded p-2" placeholder="Masukkan kota anda" />
+              <input type="tel" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan kota anda" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">No. Telp Rumah</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan no. telp rumah anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan no. telp rumah anda" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Alamat</label>
-              <input type="tel" className="w-full border rounded p-2" placeholder="Masukkan alamat anda" />
+              <input type="tel" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan alamat anda" />
             </div>
              <div>
               <label className="block text-sm font-medium mb-1">Provinsi</label>
-              <select className="w-full border rounded p-2">
+              <select className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400">
                 <option value="">Masukkan provinsi anda</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">Kode Pos</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan kode pos anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan kode pos anda" />
             </div>
           </div>
         </section>
@@ -160,40 +160,40 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-1">Nama Instansi / Perusahaan</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan nama instansi atau perusahaan anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan nama instansi atau perusahaan anda" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">No. Telp Kantor</label>
-              <input type="tel" className="w-full border rounded p-2" placeholder="Masukkan no. telp kantor anda" />
+              <input type="tel" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan no. telp kantor anda" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">Bidang Pekerjaan</label>
-              <select className="w-full border rounded p-2">
+              <select className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400">
                 <option value="">Masukkan bidang anda</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Jabatan</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan jabatan anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan jabatan anda" />
             </div>
              <div>
               <label className="block text-sm font-medium mb-1">No. Telp Rumah</label>
-              <input type="tel" className="w-full border rounded p-2" placeholder="Masukkan no. telp rumah anda" />
+              <input type="tel" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan no. telp rumah anda" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">Alamat Kantor</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan alamat kantor anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan alamat kantor anda" />
             </div>
                <div>
               <label className="block text-sm font-medium mb-1">Emailr</label>
-              <input type="email" className="w-full border rounded p-2" placeholder="Masukkan Email kantor anda" />
+              <input type="email" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan Email kantor anda" />
             </div>
             
             <div>
               <label className="block text-sm font-medium mb-1">Kode Pos</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan kode pos kantor anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan kode pos kantor anda" />
             </div>
           </div>
         </section>
@@ -206,17 +206,17 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-1">Jenjang Pendidikan</label>
-              <select className="w-full border rounded p-2">
+              <select className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400">
                 <option value="">Jenjang pendidikan</option>
               </select>
             </div>
              <div>
               <label className="block text-sm font-medium mb-1">Instansi</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan instansi anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan instansi anda" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Tahun Lulus</label>
-              <input type="text" className="w-full border rounded p-2" placeholder="Masukkan tahun lulus anda" />
+              <input type="text" className="w-full border rounded p-2 font-normal text-gray-600 placeholder-gray-400" placeholder="Masukkan tahun lulus anda" />
             </div>
           </div>
         </section>
