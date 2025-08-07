@@ -1,15 +1,13 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import Home from "../pages/home/tes";
-import LandingPage from "../pages/LandingPage/LandingPage";
-import TentangLSP from "../pages/LandingPage/TentangLSP";
+import KelolaAkunAsesi from "@/pages/Admin/AkunAsesi";
 
 export default function AppRouter() {
 	return (
 		<BrowserRouter>
 			<Routes>
 				<Route path="/a" element={<Home />} />
-				<Route path="/" element={<LandingPage />} />
-				<Route path="/about" element={<TentangLSP />} />
+				<Route path="/" element={<KelolaAkunAsesi />} />
 			</Routes>
 		</BrowserRouter>
 	);
