@@ -14,7 +14,7 @@ export default function VerifikasiPage() {
     
     <div className="flex min-h-screen bg-gray-50">
 
-      <div className="inset-y-0 left-0 lg:w-64 md:w-0 bg-white shadow-md">
+      <div className="inset-y-0 left-0 lg:w-64 md:w-0 bg-white shadow-md ">
         <Sidebar />
       </div>
 

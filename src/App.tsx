@@ -7,6 +7,8 @@ import NavLanding from './components/NavLanding'
 import FootLanding from './components/FootLanding'
 import SideAsesor from './components/SideAsesor'
 import VerifikasiPage from './pages/admin/verifikasi'
+import RegisterPage from './pages/admin/register'
+
 
 function App() {
   
