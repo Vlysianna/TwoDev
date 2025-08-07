@@ -84,16 +84,16 @@ function Skema() {
                   <table className="w-full">
                     <thead>
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-black-500 tracking-wider border-b">
+                        <th className="px-6 py-3 text-left text-medium font-bold text-black-500 border-b">
                           #
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-black-500 tracking-wider border-b">
+                        <th className="px-6 py-3 text-left text-medium font-bold text-black-500 border-b">
                           Kode Skema
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-bold text-black-500 tracking-wider border-b">
+                        <th className="px-6 py-3 text-left text-medium font-bold text-black-500 border-b">
                           Nama Skema
                         </th>
-                        <th className="px-6 py-3 text-center text-xs font-bold text-black-500 tracking-wider border-b">
+                        <th className="px-6 py-3 text-center text-medium font-bold text-black-500 border-b">
                           Lihat Detail
                         </th>
                       </tr>
