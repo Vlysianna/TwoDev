@@ -10,8 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@radix-ui/react-progress": "^1.1.7",
-    "@tailwindcss/vite": "^4.1.11",
+    "@heroicons/react": "^2.2.0",
     "axios": "^1.11.0",
     "chart.js": "^4.5.0",
     "class-variance-authority": "^0.7.1",

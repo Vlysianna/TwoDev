@@ -2,6 +2,8 @@ import NavLanding from '../../components/NavLanding';
 import FootLanding from '../../components/FootLanding';
 import { useState } from 'react';
 
+
+
 function LandingPage() {
   const beritaImages = [
     { src: '/bgsklh.png', alt: 'Berita 1' },
