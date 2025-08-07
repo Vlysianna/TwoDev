@@ -50,26 +50,26 @@ export default function AplZeroOne() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white py-18">
       <div className="mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm mb-8">
           <NavbarAsesi title='Permohonan Sertifikasi Kompetensi FR.APL.01' />
         </div>
 
-        <div className="space-y-8 px-60 py-18">
+        <div className="space-y-8 px-4 sm:px-6 lg:px-8 xl:px-60 py-4 sm:py-8 ">
           {/* Data Pribadi Section */}
           <div>
-            <h2 className="text-3xl font-medium text-gray-900 mb-2">Data Pribadi</h2>
+            <h2 className="text-2xl sm:text-3xl font-medium text-gray-900 mb-2">Data Pribadi</h2>
             <p className="text-gray-600 text-sm mb-6">
               Isi biodata Anda dengan akurat untuk memastikan proses sertifikasi yang lancar.
-              Semua informasi akan <br /> digunakan semata-mata untuk keperluan administrasi dan
+              Semua informasi akan digunakan semata-mata untuk keperluan administrasi dan
               verifikasi Uji Sertifikasi Kompetensi (USK).
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Nama */}
-              <div className="md:col-span-4">
+              <div className="sm:col-span-2 lg:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nama
                 </label>
@@ -84,7 +84,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* No. KTP/NIK/Paspor */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-2 lg:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   No. KTP/NIK/Paspor
                 </label>
@@ -99,7 +99,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Tempat lahir */}
-              <div className="md:col-span-3">
+              <div className="sm:col-span-2 lg:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Tempat lahir
                 </label>
@@ -114,7 +114,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Select date */}
-              <div className="md:col-span-1">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Tanggal lahir
                 </label>
@@ -130,7 +130,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Jenis kelamin */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-2 lg:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Jenis kelamin
                 </label>
@@ -161,7 +161,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Kewarganegaraan */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Kewarganegaraan
                 </label>
@@ -180,7 +180,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Provinsi */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Provinsi
                 </label>
@@ -199,7 +199,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* No. Telp Kantor */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   No. Telp Kantor
                 </label>
@@ -214,7 +214,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Kota */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Kota
                 </label>
@@ -233,7 +233,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* No. HP */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   No. HP
                 </label>
@@ -248,7 +248,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* No. Telp Rumah */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   No. Telp Rumah
                 </label>
@@ -263,7 +263,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Alamat */}
-              <div className="md:col-span-4">
+              <div className="sm:col-span-2 lg:col-span-3">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Alamat
                 </label>
@@ -278,7 +278,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Kode pos */}
-              <div className="md:col-span-2">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Kode pos
                 </label>
@@ -304,9 +304,9 @@ export default function AplZeroOne() {
               Kompetensi (USK) dan tim penilai yang tepat.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Nama Institusi / Perusahaan */}
-              <div className='md:col-span-4'>
+              <div className='sm:col-span-2'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nama Institusi / Perusahaan
                 </label>
@@ -321,7 +321,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* No. Telp Rumah */}
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-1'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   No. Telp Rumah
                 </label>
@@ -336,7 +336,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Bidang pekerjaan */}
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-1'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bidang pekerjaan
                 </label>
@@ -356,7 +356,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Jabatan */}
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-1'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Jabatan
                 </label>
@@ -371,7 +371,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* No. Telp Kantor */}
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-1'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   No. Telp Kantor
                 </label>
@@ -386,7 +386,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Alamat Kantor */}
-              <div className='md:col-span-3'>
+              <div className='sm:col-span-2 lg:col-span-3'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Alamat Kantor
                 </label>
@@ -401,7 +401,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Kode pos */}
-              <div className='md:col-span-1'>
+              <div className='sm:col-span-1'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Kode pos
                 </label>
@@ -416,7 +416,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Email */}
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-2'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email
                 </label>
@@ -438,14 +438,13 @@ export default function AplZeroOne() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Kualifikasi Pendidikan</h2>
             <p className="text-gray-600 text-sm mb-6">
-              Latar belakang pendidikan Anda membantu kami memvalidasi kelayakan Anda untuk Uji Sertifikasi<br />
+              Latar belakang pendidikan Anda membantu kami memvalidasi kelayakan Anda untuk Uji Sertifikasi
               Kompetensi (USK) dan memastikan keselarasan dengan skema kompetensi yang dipilih
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Jenjang Pendidikan */}
-              <div className='md:col-span-6'>
+              <div className='sm:col-span-3'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Jenjang Pendidikan
                 </label>
@@ -462,8 +461,8 @@ export default function AplZeroOne() {
                 </select>
               </div>
 
-              {/* Jabatan */}
-              <div className='md:col-span-3'>
+              {/* Instansi */}
+              <div className='sm:col-span-2'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Instansi
                 </label>
@@ -477,8 +476,8 @@ export default function AplZeroOne() {
                 />
               </div>
 
-              {/* No. Telp Kantor */}
-              <div className='md:col-span-3'>
+              {/* Tahun Lulus */}
+              <div className='sm:col-span-1'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Tahun Lulus
                 </label>
@@ -495,11 +494,11 @@ export default function AplZeroOne() {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-8">
             <button
               type="button"
               onClick={handleSubmit}
-              className="bg-[#E77D35] hover:bg-blue-700 text-white font-normal py-2 px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Submit
             </button>

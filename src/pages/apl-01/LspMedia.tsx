@@ -58,6 +58,24 @@ export default function LspMediaForm() {
             name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
             format: 'PNG',
             size: '3MB'
+        },
+        {
+            id: 4,
+            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
+            format: 'PNG',
+            size: '3MB'
+        },
+        {
+            id: 4,
+            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
+            format: 'PNG',
+            size: '3MB'
+        },
+        {
+            id: 4,
+            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
+            format: 'PNG',
+            size: '3MB'
         }
     ]);
 
@@ -87,43 +105,49 @@ export default function LspMediaForm() {
         <div className="bg-white rounded-lg">
             <h3 className="text-gray-900 font-medium mb-4">{title}</h3>
 
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 mb-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 mb-4 hover:cursor-pointer transition-colors hover:bg-gray-100">
                 <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600 mb-2">Choose a file or drag & drop it here</p>
-                <p className="text-gray-500 text-sm mb-4">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md border border-gray-300 hover:bg-gray-200 transition-colors">
+                <p className="text-gray-800 text-xl mb-2">Choose a file or drag & drop it here</p>
+                <p className="text-gray-500 text-[12px] mb-4">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md border border-gray-300 hover:bg-gray-200 hover:cursor-pointer transition-colors">
                     Browse File
                 </button>
             </div>
 
-            {files.length > 0 && (
-                <div className="space-y-3 max-h-64 overflow-y-auto"> {/* Tambahkan max-height dan overflow-y-auto */}
-                    {files.map((file) => (
-                        <div key={file.id} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-                            <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                                    <Upload className="w-5 h-5 text-white" />
+            <div className="border border-gray-200 rounded-lg p-3 h-50 overflow-y-auto"> {/* Fixed height with scroll */}
+                {files.length > 0 ? (
+                    <div className="space-y-3">
+                        {files.map((file) => (
+                            <div key={file.id} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3 hover:cursor-pointer transition-colors">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                                        <Upload className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-900 font-medium text-sm">{file.name}</p>
+                                        <p className="text-gray-500 text-xs">File Format: {file.format} • File Size: {file.size}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-gray-900 font-medium text-sm">{file.name}</p>
-                                    <p className="text-gray-500 text-xs">File Format: {file.format} • File Size: {file.size}</p>
+                                <div className="flex items-center space-x-2">
+                                    <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors hover:cursor-pointer">
+                                        <Eye className="w-4 h-4 text-gray-600" />
+                                    </button>
+                                    <button
+                                        onClick={() => onFileRemove(file.id, type)}
+                                        className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors hover:cursor-pointer"
+                                    >
+                                        <X className="w-4 h-4 text-gray-600" />
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                    <Eye className="w-4 h-4 text-gray-600" />
-                                </button>
-                                <button
-                                    onClick={() => onFileRemove(file.id, type)}
-                                    className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
-                                >
-                                    <X className="w-4 h-4 text-gray-600" />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+                        ))}
+                    </div>
+                ) : (
+                    <div className="h-full flex items-center justify-center text-gray-500">
+                        No files uploaded yet
+                    </div>
+                )}
+            </div>
         </div>
     );
 
@@ -134,9 +158,9 @@ export default function LspMediaForm() {
                     <NavbarAsesi title='Bukti Administratif' />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-6 pb-7">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-6 pb-7 flex">
                     {/* Left Column */}
-                    <div className="space-y-6 md:col-span-3">
+                    <div className="space-y-6 md:col-span-3 flex flex-col">
                         {/* Tujuan Assessment */}
                         <div className="bg-white rounded-lg border border-gray-200 p-6">
                             <h3 className="text-gray-900 font-medium mb-4">Tujuan Assessment</h3>
@@ -189,10 +213,10 @@ export default function LspMediaForm() {
                     </div>
 
                     {/* Right Column */}
-                    <div className='md:col-span-2 h-210'>
-                        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-4 h-full">
+                    <div className='md:col-span-2 flex flex-col space-y-6'>
+                        <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col">
                             <h3 className="text-gray-900 font-medium mb-4">Kelengkapan Pemohon</h3>
-                            <div className="space-y-3">
+                            <div className="space-y-3 flex-grow">
                                 <FileUploadArea
                                     title=""
                                     files={supportingFiles}
@@ -200,8 +224,18 @@ export default function LspMediaForm() {
                                     type="supporting"
                                 />
                             </div>
-                            <div className="bg-white rounded-lg border border-gray-200 p-6 text-center h-auto">
-                                <button className="px-16 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors bottom-0">
+                        </div>
+                        <div className="bg-white rounded-lg border border-gray-200 px-6 py-2 flex flex-col h-full">
+                            <div className="text-center mt-4 mb-4 space-y-3">
+                                <textarea
+                                    name="catatan"
+                                    value=""
+                                    placeholder="Catatan"
+                                    rows={3}
+                                    className="w-full h-full px-3 py-3 border border-[#DADADA] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                                <hr className='text-gray-300'/>
+                                <button className="w-full py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors hover:cursor-pointer">
                                     Submit
                                 </button>
                             </div>

@@ -4,6 +4,7 @@ import LoginForm from "../pages/login/Login";
 import RegisterForm from "../pages/register/Register";
 import AplZeroOne from "../pages/apl-01/Apl-01";
 import LspMediaForm from "../pages/apl-01/LspMedia";
+import TambahSkema from "../pages/admin/TambahSkema";
 
 export default function AppRouter() {
 	return (
@@ -14,6 +15,7 @@ export default function AppRouter() {
 				<Route path="/register" element={<RegisterForm />} />
 				<Route path="/apl-01" element={<AplZeroOne />} />
 				<Route path="/lspmedia" element={<LspMediaForm />} />
+				<Route path="/tambahskema" element={<TambahSkema />} />
 			</Routes>
 		</BrowserRouter>
 	);
