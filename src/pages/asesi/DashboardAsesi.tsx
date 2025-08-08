@@ -151,7 +151,7 @@ export default function DashboardAsesi() {
                                             </div>
 
                                             {/* Tanggal */}
-                                            <div className="px-4 pt-3 pb-20">
+                                            <div className="px-4 pt-3 pb20">
                                                 <div className="flex flex-col items-center">
                                                     {/* Tanggal dan waktu */}
                                                     <div className="flex justify-between w-full text-sm text-gray-500 mb-2">
