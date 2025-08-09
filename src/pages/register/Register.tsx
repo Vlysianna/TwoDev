@@ -21,10 +21,8 @@ export default function RegisterForm() {
                 <div className="rounded-lg pr-8 pl-8 w-full max-w-md">
                     {/* Logo and Title */}
                     <div className="text-start mb-4">
-                        <div className="mb-10">
-                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg text-start">
-                                <img src="public/img/Group 24.svg" alt="" />
-                            </div>
+                        <div className="w-30 h-30 md:w-40 md:h-40 rounded-lg text-start">
+                            <img src="public/img/logo-lsp-oren.svg" alt="" className='w-full h-full' />
                         </div>
                         <h1 className="text-2xl font-semibold text-gray-900 mb-2">Buat Akun</h1>
                         <p className="text-gray-600 text-sm">
@@ -114,7 +112,7 @@ export default function RegisterForm() {
                         {/* Sign In Button */}
                         <button
                             onClick={handleSubmit}
-                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2.5 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200"
+                            className="w-full block text-center bg-[#E77D35] hover:cursor-pointer text-white py-2 md:py-2.5 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200"
                         >
                             Sign Up
                         </button>
@@ -122,19 +120,27 @@ export default function RegisterForm() {
                         {/* Register Link */}
                         <div className="text-center text-sm text-gray-600">
                             Have an account?{' '}
-                            <Link className="text-orange-500 hover:text-orange-600 font-small" to ='/login'>
+                            <Link className="text-orange-500 hover:text-orange-600 font-small" to='/login'>
                                 Sign In
                             </Link>
                         </div>
                     </div>
                 </div>
+                <div className="block sm:hidden fixed bottom-0 pb-10 flex items-center justify-center text-xs md:text-sm text-gray-600 w-full bg-white">
+                    <span>Developed by</span>
+                    <img
+                        src="public/img/logo-two-dev.svg"
+                        alt=""
+                        className="w-20 ml-2"
+                    />
+                </div>
             </div>
 
             {/* Left Side - Information Panel */}
-            <div className="hidden lg:flex lg:flex-1 bg-blue-50 justify-center relative overflow-hidden">
+            <div className="hidden lg:flex lg:flex-1 bg-[#F0F5FA4D] justify-center relative overflow-hidden">
                 {/* Background decorative elements */}
                 <div className="w-134.5 object-cover rounded-lg text-center">
-                    <img src="public/img/headline register.svg" alt="" />
+                    <img src="public/img/headline-register.png" alt="" />
                 </div>
             </div>
         </div>

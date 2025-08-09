@@ -1,6 +1,6 @@
 import SidebarAsesi from '@/components/SideAsesi';
 import Navbar from '../../components/NavAdmin';
-import { Eye, Filter, Search, LayoutDashboard, Clock, ChevronRight } from "lucide-react";
+import { Eye, ListFilter, Search, LayoutDashboard, Clock, ChevronRight } from "lucide-react";
 import NavbarAsesi from '@/components/NavbarAsesi';
 
 export default function AsessmentAktif() {
@@ -58,29 +58,31 @@ export default function AsessmentAktif() {
                             <div className="p-6">
                                 {/* Header dengan Search dan Filter */}
                                 <div className="mb-6">
-                                    <div className="flex items-center justify-between mb-4">
+                                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                                        {/* Bagian kiri: Selamat datang */}
                                         <div className="flex items-center space-x-2">
                                             <span className="text-gray-600">Selamat datang,</span>
                                             <span className="font-semibold text-gray-900">Asesi</span>
                                         </div>
-                                    </div>
 
-                                    <div className="flex items-center space-x-4">
-                                        {/* Search Bar */}
-                                        <div className="relative flex-1 max-w-md">
-                                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                            <input
-                                                type="text"
-                                                placeholder="Search..."
-                                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            />
+                                        {/* Bagian kanan: Search + Filter */}
+                                        <div className="flex items-center gap-4">
+                                            {/* Search Bar */}
+                                            <div className="relative w-full md:w-100">
+                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search..."
+                                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                            </div>
+
+                                            {/* Filter Button */}
+                                            <button className="flex-shrink-0 flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-sm hover:bg-gray-50">
+                                                <ListFilter className="w-4 h-4 text-gray-600" />
+                                                <span className="text-gray-600">Filter</span>
+                                            </button>
                                         </div>
-
-                                        {/* Filter Button */}
-                                        <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                                            <Filter className="w-4 h-4 text-gray-600" />
-                                            <span className="text-gray-600">Filter</span>
-                                        </button>
                                     </div>
                                 </div>
 
@@ -132,9 +134,9 @@ export default function AsessmentAktif() {
                                                     <div className="relative w-full h-4 flex items-center">
                                                         <div className="absolute left-0 right-0 h-[2px] bg-black" />
 
-                                                        <div className="w-4 h-4 bg-white border-2 border-black rounded-full z-10"></div>
+                                                        <div className="w-4 h-4 bg-white border-2 border-black rounded-full z-2"></div>
                                                         <div className="flex-1"></div>
-                                                        <div className="w-4 h-4 bg-white border-2 border-black rounded-full z-10"></div>
+                                                        <div className="w-4 h-4 bg-white border-2 border-black rounded-full z-2"></div>
                                                     </div>
                                                 </div>
                                             </div>

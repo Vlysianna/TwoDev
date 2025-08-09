@@ -1,7 +1,8 @@
 import SidebarAsesi from '@/components/SideAsesi';
 import Navbar from '../../components/NavAdmin';
-import { Eye, Filter, Search, LayoutDashboard, Clock, ChevronRight } from "lucide-react";
+import { Eye, ListFilter, Search, LayoutDashboard, Clock, ChevronRight } from "lucide-react";
 import NavbarAsesi from '@/components/NavbarAsesi';
+import { Link } from 'react-router-dom';
 
 export default function DashboardAsesi() {
     const okupasiData = [
@@ -23,7 +24,7 @@ export default function DashboardAsesi() {
             title: "Okupasi Front Office",
             subtitle: "Perhotelan ( PH )",
             status: "Sewaktu",
-            startDate: "24 Okt, 07:00pm",
+            startDate: "24 Okt, 09:00pm",
             endDate: "25 Okt, 18:00pm",
             avatar: "AA",
             avatarBg: "bg-gray-500",
@@ -103,34 +104,35 @@ export default function DashboardAsesi() {
                     {/* Konten Utama */}
                     <div className="p-6">
                         {/* Konten Utama ya buyunggggggggggggggggggggggggg */}
-                        {/* Konten utama */}
                         <main className=" ">
                             <div className="p-6">
                                 {/* Header dengan Search dan Filter */}
                                 <div className="mb-6">
-                                    <div className="flex items-center justify-between mb-4">
+                                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                                        {/* Bagian kiri: Selamat datang */}
                                         <div className="flex items-center space-x-2">
                                             <span className="text-gray-600">Selamat datang,</span>
                                             <span className="font-semibold text-gray-900">Asesi</span>
                                         </div>
-                                    </div>
 
-                                    <div className="flex items-center space-x-4">
-                                        {/* Search Bar */}
-                                        <div className="relative flex-1 max-w-md">
-                                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                            <input
-                                                type="text"
-                                                placeholder="Search..."
-                                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            />
+                                        {/* Bagian kanan: Search + Filter */}
+                                        <div className="flex items-center gap-4">
+                                            {/* Search Bar */}
+                                            <div className="relative w-full md:w-100">
+                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search..."
+                                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                            </div>
+
+                                            {/* Filter Button */}
+                                            <button className="flex-shrink-0 flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-sm hover:bg-gray-50">
+                                                <ListFilter className="w-4 h-4 text-gray-600" />
+                                                <span className="text-gray-600">Filter</span>
+                                            </button>
                                         </div>
-
-                                        {/* Filter Button */}
-                                        <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                                            <Filter className="w-4 h-4 text-gray-600" />
-                                            <span className="text-gray-600">Filter</span>
-                                        </button>
                                     </div>
                                 </div>
 
@@ -151,12 +153,12 @@ export default function DashboardAsesi() {
                                             </div>
 
                                             {/* Tanggal */}
-                                            <div className="px-4 pt-3 pb20">
+                                            <div className="px-4 pt-3 pb-20">
                                                 <div className="flex flex-col items-center">
                                                     {/* Tanggal dan waktu */}
                                                     <div className="flex justify-between w-full text-sm text-gray-500 mb-2">
-                                                        <span>24 Okt, 07:00pm</span>
-                                                        <span>25 Okt, 15:00pm</span>
+                                                        <span>{okupasi.startDate}</span>
+                                                        <span>{okupasi.endDate}</span>
                                                     </div>
 
                                                     {/* Garis dan bulatan */}
@@ -165,12 +167,12 @@ export default function DashboardAsesi() {
                                                         <div className="absolute left-0 right-0 h-[2px] bg-gray-300" />
 
                                                         {/* Titik kiri */}
-                                                        <div className="w-4 h-4 bg-white border-4 border-gray-400 rounded-full z-10"></div>
+                                                        <div className="w-4 h-4 bg-white border-4 border-gray-400 rounded-full z-2"></div>
 
                                                         <div className="flex-1"></div>
 
                                                         {/* Titik kanan */}
-                                                        <div className="w-4 h-4 bg-white border-4 border-gray-400 rounded-full z-10"></div>
+                                                        <div className="w-4 h-4 bg-white border-4 border-gray-400 rounded-full z-2"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -189,9 +191,9 @@ export default function DashboardAsesi() {
                                                     </div>
 
                                                     {/* Tombol Navigasi */}
-                                                    <button className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+                                                    <Link to="/apl-01" className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
                                                         <ChevronRight className="w-4 h-4 text-white" />
-                                                    </button>
+                                                    </Link>
                                                 </div>
                                             </div>
                                         </div>
