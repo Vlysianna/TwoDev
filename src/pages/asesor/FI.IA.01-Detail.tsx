@@ -181,6 +181,7 @@ export default function FIIADetail() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="p-4 text-left text-sm font-medium text-gray-700">No</th>
+                <th className="p-4 text-left text-sm font-medium text-gray-700"></th>
                 <th className="p-4 text-left text-sm font-medium text-gray-700">Kriteria Untuk Kerja</th>
                 <th className="p-4 text-left text-sm font-medium text-gray-700">Standar Industri atau Tempat Kerja</th>
                 <th className="p-4 text-center text-sm font-medium text-gray-700">Pencapaian</th>
@@ -195,6 +196,11 @@ export default function FIIADetail() {
                       {idx === 0 && (
                         <td rowSpan={item.criteria.length} className="px-4 py-3 text-sm text-gray-900 align-top">
                           {item.id}
+                        </td>
+                      )}
+                      {idx === 0 && (
+                        <td rowSpan={item.criteria.length} className="px-4 py-3 text-sm text-gray-900 align-top">
+                          {item.elemen}
                         </td>
                       )}
                       <td className="px-4 py-3 text-sm text-gray-900">
