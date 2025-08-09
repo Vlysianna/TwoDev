@@ -13,16 +13,16 @@ import Prosedur from "@/pages/LandingPage/Prosedur";
 import Berita from "@/pages/LandingPage/Berita";
 import Galeri from "@/pages/LandingPage/Galeri";
 import Dokumen from "@/pages/LandingPage/Dokumen";
-import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
-import KelolaMUK from "@/pages/admin/KelolaSkema";
-import EditAsesor from "@/pages/admin/EditAsesor";
-import KelolaAkunAsesor from "@/pages/admin/AkunAsesor";
-import VerifikasiPage from "@/pages/admin/verifikasi";
-import RegisterPage from "@/pages/admin/register";
-import EditAsesi from "@/pages/admin/EditAsessi";
-import KelolaOkupasi from "@/pages/admin/okupasi/KelolaOkupasi";
-import TambahOkupasi from "@/pages/admin/okupasi/TambahOkupasi";
-import EditOkupasi from "@/pages/admin/okupasi/EditOkupasi";
+import KelolaAkunAsesi from "@/pages/Admin/AkunAsesi";
+import KelolaMUK from "@/pages/Admin/KelolaSkema";
+import EditAsesor from "@/pages/Admin/EditAsesor";
+import KelolaAkunAsesor from "@/pages/Admin/AkunAsesor";
+import VerifikasiPage from "@/pages/Admin/verifikasi";
+import RegisterPage from "@/pages/Admin/register";
+import EditAsesi from "@/pages/Admin/EditAsessi";
+import KelolaOkupasi from "@/pages/Admin/okupasi/KelolaOkupasi";
+import TambahOkupasi from "@/pages/Admin/okupasi/TambahOkupasi";
+import EditOkupasi from "@/pages/Admin/okupasi/EditOkupasi";
 import AplZeroTwo from "@/pages/asesi/Apl-02";
 import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
@@ -36,8 +36,8 @@ import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
 
 
 import Test from "../pages/LandingPage/Test";
-import TambahSkema from "@/pages/admin/TambahSkema";
-import KelolaJurusan from "@/pages/admin/kelolaJur";
+import TambahSkema from "@/pages/Admin/TambahSkema";
+import KelolaJurusan from "@/pages/Admin/kelolaJur";
 
 export default function AppRouter() {
 	return (
