@@ -103,7 +103,7 @@ const Sidebar: React.FC = () => {
         className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
           isActive
             ? "bg-orange-600 text-white"
-            : "text-orange-100 hover:bg-orange-500 hover:text-white"
+            : "text-orange-100 hover:bg-[rgba(255,255,255,0.3)] hover:text-white"
         }`}
         onClick={onClick}
       >
@@ -125,12 +125,12 @@ const Sidebar: React.FC = () => {
           </div>
         </Link>
         <span className="p-2 text-sm text-orange-100 whitespace-nowrap">
-          SertifikasiI
+          Sertifikasi
         </span>
       </div>
 
       {/* Main Menu Items */}
-      <div className="flex-1 flex flex-col ">
+      <div className="flex-1">
         <div className="py-2">
           {menuItems.map((item) => (
             <MenuItem
@@ -195,12 +195,14 @@ const Sidebar: React.FC = () => {
       )}
 
       {/* Sidebar - Always visible on desktop, slide on mobile */}
-     <div className={`
+      <div
+        className={`
   fixed inset-y-0 left-0 z-40
-  w-64 h-screen bg-orange-500 text-white flex flex-col
+  w-64 h-screen bg-[#E77D35] text-white flex flex-col
   transform transition-transform duration-300 ease-in-out lg:transform-none
-  ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-`}>
+  ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+`}
+      >
         <SidebarContent />
       </div>
 
