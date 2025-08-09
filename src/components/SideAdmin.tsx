@@ -96,7 +96,6 @@ const Sidebar: React.FC = () => {
 
   const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
     const IconComponent = item.icon;
-
     return (
       <Link
         to={item.path}
