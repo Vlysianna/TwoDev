@@ -27,6 +27,7 @@ import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
 import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerahasiaan";
 import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
 import KelolaMUK from "@/pages/admin/KelolaSkema";
+import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
 
 export default function AppRouter() {
 	return (
@@ -60,6 +61,7 @@ export default function AppRouter() {
 				<Route path="/persetujuan-asesmen-kerahasiaan" element={<PersetujuanAsesmenKerahasiaan />} />
 				<Route path="/asesmen-pilihan-ganda" element={<AsessementPilihanGanda />} />
 				<Route path="/kelola-muk" element={<KelolaMUK />} />
+				<Route path="/kelola-akun-asesi" element={<KelolaAkunAsesi />} />
 			</Routes>
 		</BrowserRouter>
 	);
