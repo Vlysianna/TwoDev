@@ -19,7 +19,7 @@ const paths = {
     registerAsesi: "/register-asesi",
   },
   admin: {
-    root: "/admin",
+    root: "/",
     kelolaAkunAsesi: "/admin/kelola-akun-asesi",
     kelolaMUK: "/admin/kelola-muk",
     editAsesor: "/admin/edit-asesor",
@@ -31,7 +31,6 @@ const paths = {
     okupasi: {
       root: "/admin/okupasi",
       index: "/admin/okupasi",
-      tambah: "/admin/okupasi/tambah",
       edit: (id: string | number) => `/admin/okupasi/edit/${id}`,
       editPattern: "/admin/okupasi/edit/:id"
     },

@@ -2,6 +2,91 @@ import FootLanding from "../../components/FootLanding";
 import NavLanding from "../../components/NavLanding";
 
 function Berita() {
+  const berita = [
+  {
+    id: 1,
+    judul: "Lembaga Sertifikasi Profesi SMK Negeri 24 Jakarta",
+    penulis: "Denira Islam, Bamba, Aquis Cakrawang R.P",
+    tanggal: "7 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-utama.jpg",
+  },
+  {
+    id: 2,
+    judul: "Lembaga Sertifikasi Profesi",
+    penulis: "SMK Negeri 24 Jakarta",
+    tanggal: "5 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-kecil.jpg",
+  },
+  {
+    id: 3,
+    judul: "Lembaga Sertifikasi Profesi",
+    penulis: "SMK Negeri 24 Jakarta",
+    tanggal: "3 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-kecil.jpg",
+  },
+  // tambahkan berita lainnya
+  {
+    id: 3,
+    judul: "Lembaga Sertifikasi Profesi",
+    penulis: "SMK Negeri 24 Jakarta",
+    tanggal: "3 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-kecil.jpg",
+  },
+  {
+    id: 3,
+    judul: "Lembaga Sertifikasi Profesi",
+    penulis: "SMK Negeri 24 Jakarta",
+    tanggal: "3 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-kecil.jpg",
+  },
+  {
+    id: 3,
+    judul: "Lembaga Sertifikasi Profesi",
+    penulis: "SMK Negeri 24 Jakarta",
+    tanggal: "3 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-kecil.jpg",
+  },
+  {
+    id: 3,
+    judul: "Lembaga Sertifikasi Profesi",
+    penulis: "SMK Negeri 24 Jakarta",
+    tanggal: "3 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-kecil.jpg",
+  },
+  {
+    id: 3,
+    judul: "Lembaga Sertifikasi Profesi",
+    penulis: "SMK Negeri 24 Jakarta",
+    tanggal: "3 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-kecil.jpg",
+  },
+  {
+    id: 3,
+    judul: "Lembaga Sertifikasi Profesi",
+    penulis: "SMK Negeri 24 Jakarta",
+    tanggal: "3 Feb",
+    deskripsi:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
+    gambar: "/berita-kecil.jpg",
+  },
+];
+
   return (
     <>
       <div className="flex flex-col min-h-screen">
@@ -28,10 +113,53 @@ function Berita() {
         </section>
 
         
-        <main className="flex-grow bg-gray-50">
-          
-         
-        </main>
+<main className="flex-grow bg-gray-50 py-10">
+  <div className="container mx-auto px-4 md:px-8">
+    <h2 className="text-xl md:text-2xl font-bold mb-6">Berita Terbaru LSP</h2>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      {/* Kolom Kiri - Berita Utama */}
+      {berita.length > 0 && (
+        <div className="lg:col-span-2 bg-white rounded-lg shadow">
+          <img
+            src={berita[0].gambar}
+            alt={berita[0].judul}
+            className="w-full h-72 object-cover rounded-t-lg"
+          />
+          <div className="p-4">
+            <h3 className="text-lg font-bold mb-2">{berita[0].judul}</h3>
+            <p className="text-sm text-gray-500 mb-2">
+              {berita[0].penulis}, {berita[0].tanggal}
+            </p>
+            <p className="text-gray-700">{berita[0].deskripsi}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Kolom Kanan - Scrollable List */}
+      <div className="bg-white rounded-lg shadow p-2 max-h-[600px] overflow-y-auto">
+        {berita.slice(1).map((item) => (
+          <div key={item.id} className="flex gap-4 mb-3 border-b pb-3 last:border-none last:pb-0">
+            <img
+              src={item.gambar}
+              alt={item.judul}
+              className="w-24 h-24 object-cover rounded"
+            />
+            <div>
+              <h4 className="text-sm font-bold leading-tight">{item.judul}</h4>
+              <p className="text-xs text-gray-500 mb-1">
+                {item.penulis}, {item.tanggal}
+              </p>
+              <p className="text-xs text-gray-600">{item.deskripsi}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</main>
+
+
         <FootLanding />
       </div>
     </>

@@ -21,8 +21,6 @@ import VerifikasiPage from "@/pages/Admin/verifikasi";
 import RegisterPage from "@/pages/Admin/register";
 import EditAsesi from "@/pages/Admin/EditAsessi";
 import KelolaOkupasi from "@/pages/Admin/okupasi/KelolaOkupasi";
-import TambahOkupasi from "@/pages/Admin/okupasi/TambahOkupasi";
-import EditOkupasi from "@/pages/Admin/okupasi/EditOkupasi";
 import AplZeroTwo from "@/pages/asesi/Apl-02";
 import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
@@ -85,8 +83,6 @@ const router = createBrowserRouter([
             path: paths.admin.okupasi.root,
             children: [
               { index: true, element: <KelolaOkupasi /> },
-              { path: paths.admin.okupasi.tambah, element: <TambahOkupasi /> },
-              { path: paths.admin.okupasi.editPattern, element: <EditOkupasi /> },
             ],
           },
         ],

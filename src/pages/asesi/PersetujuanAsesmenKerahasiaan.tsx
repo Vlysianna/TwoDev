@@ -83,18 +83,21 @@ export default function PersetujuanAsesmenKerahasiaan() {
 
                         <div className="pt-6">
                             {/* Top grid 2 columns */}
-                            <div className="grid grid-cols-12 gap-8">
+                            {/* Top grid responsive */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
                                 {/* Left column */}
-                                <div className="col-span-7">
-                                    <h2 className="font-semibold text-gray-800 mb-3">Skema Sertifikasi (KKNI/Okupasi/Klaster)</h2>
-                                    <div className="text-sm mb-7 flex items-center gap-2">
+                                <div className="lg:col-span-7">
+                                    <h2 className="font-semibold text-gray-800 mb-3">
+                                        Skema Sertifikasi (KKNI/Okupasi/Klaster)
+                                    </h2>
+                                    <div className="text-sm mb-7 flex flex-wrap items-center gap-2">
                                         <span className="text-gray-700">Pemrogram Junior (Junior Coder)</span>
                                         <span className="bg-orange-100 text-[#E77D35] text-xs rounded px-2 py-1 select-none">
                                             SKM.RPL.PJ/LSPSMK24/2023
                                         </span>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                                         <select
                                             className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
                                             value={selectedAsesi}
@@ -118,20 +121,18 @@ export default function PersetujuanAsesmenKerahasiaan() {
                                     <label className="block mb-2 text-sm font-medium text-gray-700">
                                         Pelaksanaan asesmen disepakati pada:
                                     </label>
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <input
                                             type="date"
                                             className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
                                             value={tanggal}
                                             onChange={(e) => setTanggal(e.target.value)}
-                                            placeholder="Pilih tanggal"
                                         />
                                         <input
                                             type="time"
                                             className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
                                             value={waktu}
                                             onChange={(e) => setWaktu(e.target.value)}
-                                            placeholder="Waktu"
                                         />
                                         <select
                                             className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
@@ -146,16 +147,16 @@ export default function PersetujuanAsesmenKerahasiaan() {
                                 </div>
 
                                 {/* Right column */}
-                                <div className="col-span-5">
+                                <div className="lg:col-span-5">
                                     <h2 className="font-semibold text-gray-800 mb-3">Bukti yang akan dikumpulkan</h2>
-                                    <div className="grid grid-cols-2 gap-y-6 gap-x-6 text-sm mt-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm mt-4">
                                         {checkboxOptions.map(option => {
                                             const checked = checkedItems[option.key];
                                             return (
                                                 <label
                                                     key={option.key}
                                                     className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-                                                                ${checked ? "bg-orange-100 " : ""}`}
+                                    ${checked ? "bg-orange-100 " : ""}`}
                                                 >
                                                     <input
                                                         type="checkbox"
@@ -165,7 +166,7 @@ export default function PersetujuanAsesmenKerahasiaan() {
                                                     />
                                                     <span
                                                         className={`w-4 h-4 flex items-center justify-center rounded-xs border-2
-                                                                ${checked ? "bg-orange-500 border-orange-500" : "border-orange-400"}`}
+                                    ${checked ? "bg-orange-500 border-orange-500" : "border-orange-400"}`}
                                                     >
                                                         {checked && (
                                                             <svg

@@ -100,7 +100,7 @@ const center = 20;
 useEffect(() => {
   const rotationInterval = setInterval(() => {
     setAngle((prev) => prev + 360 / images.length);
-  }, 20000); // Durasi rotasi
+  }, 1000); // Durasi rotasi
 
   return () => clearInterval(rotationInterval);
 }, [images.length]); // Tambahkan images.length sebagai dependency
@@ -127,8 +127,8 @@ useEffect(() => {
               </h1>
             </div>
 
-            <div className="relative w-[300px] h-[300px] mx-auto mt-10">
-              <div className="w-[600px] h-[600px] relative mx-50 my-150 rounded-full ">
+            <div className="relative w-[300px] h-[300px] mx-auto mt-10 ">
+              <div className="w-[600px] h-[600px] relative mx-50 my-150  rounded-full ">
                 {images.map((img, i) => {
                   const theta =
                     ((360 / images.length) * i + angle) * (Math.PI / 180);
