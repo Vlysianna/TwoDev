@@ -103,7 +103,7 @@ const Sidebar: React.FC = () => {
         className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
           isActive
             ? "bg-orange-600 text-white"
-            : "text-orange-100 hover:bg-orange-500 hover:text-white"
+            : "text-orange-100 hover:bg-[rgba(255,255,255,0.3)] hover:text-white"
         }`}
         onClick={onClick}
       >
