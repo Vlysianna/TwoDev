@@ -4,10 +4,17 @@ import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
 
 export default function AsessementPilihanGanda() {
-    const [answers, setAnswers] = useState({
+    const [answers, setAnswers] = useState<Answers>({
         soal1: '',
         soal2: '',
-        soal3: ''
+        soal3: '',
+        soal4: '',
+        soal5: '',
+        soal6: '',
+        soal7: '',
+        soal8: '',
+        soal9: '',
+        soal10: ''
     });
 
     const questions = [
@@ -124,7 +131,12 @@ export default function AsessementPilihanGanda() {
     ];
 
 
-    const handleAnswerChange = (questionId, value) => {
+    type Answers = {
+        [key: string]: string;
+    };
+
+
+    const handleAnswerChange = (questionId: string, value: string) => {
         setAnswers(prev => ({
             ...prev,
             [questionId]: value
