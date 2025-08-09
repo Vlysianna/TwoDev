@@ -33,6 +33,8 @@ import Dashboard from "@/pages/admin/DashboardAdmin";
 import KelolaAkunAsesor from "@/pages/admin/AkunAsesor";
 import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaOkupasi from "@/pages/home/admin/okupasi/KelolaOkupasi";
+import KelolaJadwal from "@/pages/admin/KelolaJadwal";
+import TambahJadwal from "@/pages/admin/TambahJadwal";
 
 export default function AppRouter() {
 	return (
@@ -73,6 +75,8 @@ export default function AppRouter() {
 				<Route path="/kelola-akun-asesor" element={<KelolaAkunAsesor />} />
 				<Route path="/edit-asesi" element={<EditAsessi />} />
 				<Route path="/kelola-okupasi" element={<KelolaOkupasi />} />
+				<Route path="/kelola-jadwal" element={<KelolaJadwal />} />
+				<Route path="/tambah-jadwal" element={<TambahJadwal />} />
 			</Routes>
 		</BrowserRouter>
 	);

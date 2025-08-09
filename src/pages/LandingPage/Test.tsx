@@ -54,7 +54,6 @@ function Test() {
 
         {/* Konten Utama */}
         <div className="p-6">
-<<<<<<< HEAD
           <div className="">
             <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci voluptates iste aliquam tenetur fugiat suscipit debitis porro quod quia! Dolor minus provident facilis, natus neque magni totam explicabo dicta ullam.</p>
           </div>
@@ -188,9 +187,7 @@ function Test() {
                 </div>
             </div>
         </div>
-=======
           {/* Konten Utama ya buyunggggggggggggggggggggggggg */}
->>>>>>> 10aa187aaf24cf99e6a8898461e3cc46f4ecfa6a
         </div>
       </div>
     </div>
