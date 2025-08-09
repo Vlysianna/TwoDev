@@ -10,7 +10,11 @@ import {
   UserPlus,
   LogOut,
   Menu,
-  X
+  X,
+  File,
+  Calendar,
+  Album,
+  LogIn
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -40,19 +44,25 @@ const Sidebar: React.FC = () => {
     },
     {
       name: 'Kelola Asesmen',
-      icon: FileText,
+      icon: Users,
       section: 'main',
       path: '/kelola-asesmen'
     },
     {
-      name: 'Kelola Skema',
-      icon: Users,
+      name: 'Kelengkapan MUK',
+      icon: File,
       section: 'main',
       path: '/kelola-muk'
     },
     {
+      name: 'Kelola Okupasi',
+      icon: Calendar,
+      section: 'main',
+      path: '/kelola-okupasi'
+    },
+    {
       name: 'Kelola Jurusan',
-      icon: GraduationCap,
+      icon: Album,
       section: 'main',
       path: '/kelola-jurusan'
     }
@@ -73,7 +83,7 @@ const Sidebar: React.FC = () => {
     },
     {
       name: 'Register',
-      icon: UserPlus,
+      icon: LogIn,
       section: 'management',
       path: '/register'
     }

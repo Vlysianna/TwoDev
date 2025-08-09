@@ -45,7 +45,7 @@ const KelolaJurusan = () => {
           <div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
             <span>Dashboard</span>
             <span>/</span>
-            <span className="text-orange-600 font-medium">Kelola Jurusan</span>
+            <span className="text-gray-900 font-medium">Kelola Jurusan</span>
           </div>
 
           {/* Page Title */}
@@ -84,7 +84,7 @@ const KelolaJurusan = () => {
             <div className="mt-6">
               <button
                 onClick={handleAddJurusan}
-                className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                className="px-6 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors"
               >
                 Tambah Jurusan
               </button>
