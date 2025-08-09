@@ -37,6 +37,7 @@ import KelolaJadwal from "@/pages/admin/KelolaJadwal";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
 import TemplateAsesor from "@/pages/asesor/Template";
 import Template2 from "@/pages/asesor/Template2";
+import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 
 export default function AppRouter() {
 	return (
@@ -81,6 +82,7 @@ export default function AppRouter() {
 				<Route path="/tambah-jadwal" element={<TambahJadwal />} />
 				<Route path="/template-asesor" element={<TemplateAsesor />} />
 				<Route path="/template2-asesor" element={<Template2 />} />
+				<Route path="/FIIADetail" element={<FIIADetail />} />
 			</Routes>
 		</BrowserRouter>
 	);
