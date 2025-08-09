@@ -256,7 +256,7 @@ export default function DataSertifikasi() {
                                 <hr className="border-gray-300" />
                                 <div className="w-full">
                                     <Link
-                                        to="/asasmen-mandiri"
+                                        to="/asesmen-mandiri"
                                         className="w-full block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 rounded-md 
                            transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base"
                                     >
