@@ -1,8 +1,10 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import Home from "../pages/home/tes";
-import LandingPage from "../pages/LandingPage/LandingPage";
-import TentangLSP from "../pages/LandingPage/TentangLSP";
-import Sidebar from "../components/SideAdmin";
+import KelolaJurusan from "../pages/admin/kelolaJur";
+
+// import LandingPage from "../pages/LandingPage/LandingPage";
+
+
 import Test from "../pages/LandingPage/Test";
 
 export default function AppRouter() {
@@ -10,8 +12,8 @@ export default function AppRouter() {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/a" element={<Home />} />
-				<Route path="/" element={<LandingPage />} />
-				<Route path="/about" element={<TentangLSP />} />
+				{/* <Route path="/" element={<LandingPage />} /> */}
+				<Route path="/kelolaJur" element={<KelolaJurusan />} />
 				<Route path="/test" element={<Test />} />
 			</Routes>
 		</BrowserRouter>
