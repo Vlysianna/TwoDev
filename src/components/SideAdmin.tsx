@@ -96,15 +96,14 @@ const Sidebar: React.FC = () => {
 
   const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
     const IconComponent = item.icon;
-    
+
     return (
       <Link
         to={item.path}
-        className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
-          isActive 
-            ? 'bg-[#ffffff80] text-white' 
-            : 'text-orange-100 hover:bg-[#ffffff80] hover:text-white'
-        }`}
+        className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${isActive
+          ? 'bg-[#ffffff80] text-white'
+          : 'text-orange-100 hover:bg-[#ffffff80] hover:text-white'
+          }`}
         onClick={onClick}
       >
         <IconComponent size={18} className="flex-shrink-0" />
@@ -116,18 +115,21 @@ const Sidebar: React.FC = () => {
   const SidebarContent = () => (
     <>
       {/* Logo Section */}
-      <div className="p-2 border-b border-orange-400">
-        <Link to="/dashboard" className="flex items-center space-x-2 p-6">
-          <div className="w-8 h-20 flex items-center justify-center flex-shrink-0">
-            <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
-          </div>
+      <div className="flex flex-col items-start pl-4">
+        <Link to="/dashboard" className="py-10">
+          <img src="/img/logo-lsp.svg" alt="Logo" className="h-15 w-auto" />
         </Link>
-          <span className="p-2 text-sm text-orange-100 whitespace-nowrap">SertifikasiI</span>
       </div>
+
 
       {/* Main Menu Items */}
       <div className="flex-1">
-        <div className="py-2">
+        <div className="pb  -2">
+          <div className="px-4 py-3">
+            <span className="text-xs text-orange-200 font-medium uppercase tracking-wider">
+              Sertifikasi
+            </span>
+          </div>
           {menuItems.map((item) => (
             <MenuItem
               key={item.name}
@@ -184,7 +186,7 @@ const Sidebar: React.FC = () => {
 
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-30"
           onClick={() => setIsMobileMenuOpen(false)}
         />

@@ -35,21 +35,12 @@ const KelolaJurusan = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar - Fixed width dan fixed position */}
-      <div className="inset-y-0 left-0 lg:w-64 md:w-0 bg-white shadow-md">
-        <Sidebar />
-      </div>
+    <div className="min-h-screen bg-[#F7FAFC] flex">
+      <Sidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Navbar />
 
-      {/* Main Content Area */}
-      <div className="flex-1 lg:ml-0 md:ml-0">
-        {/* Navbar - Sticky di atas */}
-        <div className="sticky top-0 z-10 bg-white shadow-sm">
-          <Navbar />
-        </div>
-
-        {/* Konten Utama */}
-        <div className="p-6">
+        <main className="flex-1 overflow-auto p-6">
           {/* Breadcrumb */}
           <div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
             <span>Dashboard</span>
@@ -185,7 +176,7 @@ const KelolaJurusan = () => {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
