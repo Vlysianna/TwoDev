@@ -103,7 +103,7 @@ const Sidebar: React.FC = () => {
         className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
           isActive
             ? "bg-orange-600 text-white"
-            : "text-orange-100 hover:bg-[rgba(255,255,255,0.3)] hover:text-white"
+            : "text-orange-100 hover:bg-orange-500 hover:text-white"
         }`}
         onClick={onClick}
       >
@@ -121,7 +121,7 @@ const Sidebar: React.FC = () => {
       <div className="p-2 border-b border-orange-400">
         <Link to="/dashboard" className="flex items-center space-x-2 p-6">
           <div className="w-8 h-20 flex items-center justify-center flex-shrink-0">
-            <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
+            <img src="/twodev-white.svg" alt="Logo" className="h-15 w-auto" />
           </div>
         </Link>
         <span className="p-2 text-sm text-orange-100 whitespace-nowrap">
@@ -198,7 +198,7 @@ const Sidebar: React.FC = () => {
       <div
         className={`
   fixed inset-y-0 left-0 z-40
-  w-64 h-screen bg-[#E77D35] text-white flex flex-col
+  w-64 h-screen bg-orange-500 text-white flex flex-col
   transform transition-transform duration-300 ease-in-out lg:transform-none
   ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
 `}

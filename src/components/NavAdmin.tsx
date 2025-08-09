@@ -42,7 +42,7 @@ const Navbar = () => {
                 <img src="public/avatar.svg" alt="" className="w-10 h-10" />
               </div>
               <div className="text-sm">
-                <p className="font-medium text-gray-800">Asesi</p>
+                <p className="font-medium text-gray-800">Asesor</p>
                 <p className="text-sm text-gray-500">example@example.com</p>
               </div>
             </div>
