@@ -64,8 +64,8 @@ const SidebarAsesi: React.FC = () => {
                 to={item.path}
                 className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 relative
     ${isActive
-                        ? "bg-orange-500 text-white font-medium"
-                        : "text-orange-100 hover:bg-orange-400"}
+                        ? "bg-[#ffffff80] text-white font-medium"
+                        : ""}
   `}
                 onClick={onClick}
             >
@@ -147,7 +147,7 @@ const SidebarAsesi: React.FC = () => {
             {/* SidebarAsesi - Always visible on desktop, slide on mobile */}
             <div className={`
   fixed inset-y-0 left-0 z-40
-  w-64 h-screen bg-orange-500 text-white flex flex-col
+  w-64 h-screen bg-[#E77D35] text-white flex flex-col
   transform transition-transform duration-300 ease-in-out lg:transform-none
   ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
 `}>
