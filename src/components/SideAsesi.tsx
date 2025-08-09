@@ -37,7 +37,7 @@ const SidebarAsesi: React.FC = () => {
             name: "Asesment Aktif",
             icon: ListCheck,
             section: "main",
-            path: "/asessment-aktif-asesi",
+            path: "/asesmen-aktif-asesi",
         },
     ];
 

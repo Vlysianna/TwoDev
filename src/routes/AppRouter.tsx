@@ -1,11 +1,10 @@
 import { BrowserRouter, Route, Routes } from "react-router";
-import LoginForm from "../pages/login/Login";
-import RegisterForm from "../pages/register/Register";
-import AplZeroOne from "../pages/apl-01/Apl-01";
-import LspMediaForm from "../pages/apl-01/LspMedia";
-import LandingPage from "../pages/LandingPage/LandingPage";
-import TentangLSP from "../pages/LandingPage/TentangLSP";
-import Test from "../pages/LandingPage/Test";
+import LoginForm from "@/pages/login/Login";
+import RegisterForm from "@/pages/register/Register";
+import AplZeroOne from "@/pages/asesi/Apl-01";
+import LandingPage from "@/pages/LandingPage/LandingPage";
+import TentangLSP from "@/pages/LandingPage/TentangLSP";
+import Test from "@/pages/LandingPage/Test";
 import Skema from "@/pages/LandingPage/Skema";
 import StrukturLSP from "@/pages/LandingPage/StrukturLSP";
 import PengelolaSDM from "@/pages/LandingPage/PengelolaSDM";
@@ -22,10 +21,18 @@ import KelolaAkunAsesor from "@/pages/Admin/AkunAsesor";
 import VerifikasiPage from "@/pages/Admin/Verifikasi";
 import RegisterPage from "@/pages/Admin/Register";
 import EditAsesi from "@/pages/Admin/EditAsessi";
-import TambahSkema from "@/pages/Admin/TambahSkema";
 import KelolaOkupasi from "@/pages/home/admin/okupasi/KelolaOkupasi";
 import TambahOkupasi from "@/pages/home/admin/okupasi/TambahOkupasi";
 import EditOkupasi from "@/pages/home/admin/okupasi/EditOkupasi";
+import AplZeroTwo from "@/pages/asesi/Apl-02";
+import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
+import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
+import AsessmentAktif from "@/pages/asesi/AsesmentAktif";
+import AssassmentMandiri from "@/pages/asesi/AsassmentMandiri";
+import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
+import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerahasiaan";
+import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
+import TambahSkema from "@/pages/Admin/TambahSkema";
 
 export default function AppRouter() {
 	return (
@@ -38,9 +45,10 @@ export default function AppRouter() {
 				<Route path="/EditAsessi" element={<EditAsesi />} />
 				<Route path="/" element={<KelolaAkunAsesor />} />
 				<Route path="/login" element={<LoginForm />} />
-				<Route path="/registerAsesi" element={<RegisterForm />} />
+				<Route path="/register-asesi" element={<RegisterForm />} />
 				<Route path="/apl-01" element={<AplZeroOne />} />
-				<Route path="/lspmedia" element={<LspMediaForm />} />
+				<Route path="/apl-02" element={<AplZeroTwo />} />
+				<Route path="/data-sertifikasi" element={<DataSertifikasi />} />
 				<Route path="/tambahskema" element={<TambahSkema />} />
 				<Route path="/" element={<LandingPage />} />
 				<Route path="/about" element={<TentangLSP />} />
@@ -59,6 +67,23 @@ export default function AppRouter() {
 				<Route path="/okupasi" element={<KelolaOkupasi />} />
 				<Route path="/tambah-okupasi" element={<TambahOkupasi />} />
 				<Route path="/edit-okupasi/:id" element={<EditOkupasi />} />
+				<Route path="/verifikasi" element={<VerifikasiPage />} />
+				<Route path="/register" element={<RegisterPage />} />
+				<Route path="/dashboard-asesi" element={<DashboardAsesi />} />
+				<Route path="/asesmen-aktif-asesi" element={<AsessmentAktif />} />
+				<Route path="/asesmen-mandiri" element={<AssassmentMandiri />} />
+				<Route
+					path="/asesmen-mandiri-detail"
+					element={<AsassmentMandiriDetail />}
+				/>
+				<Route
+					path="/persetujuan-asesmen-kerahasiaan"
+					element={<PersetujuanAsesmenKerahasiaan />}
+				/>
+				<Route
+					path="/asesmen-pilihan-ganda"
+					element={<AsessementPilihanGanda />}
+				/>
 			</Routes>
 		</BrowserRouter>
 	);
