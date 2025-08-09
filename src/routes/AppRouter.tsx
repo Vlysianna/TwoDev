@@ -23,6 +23,9 @@ import VerifikasiPage from "@/pages/Admin/Verifikasi";
 import RegisterPage from "@/pages/Admin/Register";
 import EditAsesi from "@/pages/Admin/EditAsessi";
 import TambahSkema from "@/pages/Admin/TambahSkema";
+import KelolaOkupasi from "@/pages/home/admin/okupasi/KelolaOkupasi";
+import TambahOkupasi from "@/pages/home/admin/okupasi/TambahOkupasi";
+import EditOkupasi from "@/pages/home/admin/okupasi/EditOkupasi";
 
 export default function AppRouter() {
 	return (
@@ -53,7 +56,9 @@ export default function AppRouter() {
 				<Route path="/test" element={<Test />} />
 				<Route path="/verifikasi" element={<VerifikasiPage />} />
 				<Route path="/register" element={<RegisterPage />} />
-				
+				<Route path="/okupasi" element={<KelolaOkupasi />} />
+				<Route path="/tambah-okupasi" element={<TambahOkupasi />} />
+				<Route path="/edit-okupasi/:id" element={<EditOkupasi />} />
 			</Routes>
 		</BrowserRouter>
 	);
