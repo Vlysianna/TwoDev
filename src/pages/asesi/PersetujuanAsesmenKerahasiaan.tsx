@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FileCheck2, ChevronLeft, X } from 'lucide-react';
 import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 export default function PersetujuanAsesmenKerahasiaan() {
     const [selectedAsesi, setSelectedAsesi] = useState('');
@@ -59,7 +60,7 @@ export default function PersetujuanAsesmenKerahasiaan() {
                     <NavbarAsesi
                         title='Persetujuan Asesmen dan Kerahasiaan'
                         icon={
-                            <Link to="/data-sertifikasi" className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }

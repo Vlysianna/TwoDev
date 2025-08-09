@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Upload, X, Eye, ChevronLeft } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 interface File {
     id: number;
@@ -168,7 +169,7 @@ export default function DataSertifikasi() {
                     <NavbarAsesi
                         title='Bukti Administratif'
                         icon={
-                            <Link to="/apl-01" className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.apl01} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -256,7 +257,7 @@ export default function DataSertifikasi() {
                                 <hr className="border-gray-300" />
                                 <div className="w-full">
                                     <Link
-                                        to="/asasmen-mandiri"
+                                        to={paths.asesi.asesmenMandiri}
                                         className="w-full block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 rounded-md 
                            transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base"
                                     >

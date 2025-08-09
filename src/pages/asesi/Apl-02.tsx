@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 export default function AplZeroTwo() {
     const [formData, setFormData] = useState({
@@ -58,7 +59,7 @@ export default function AplZeroTwo() {
                     <NavbarAsesi
                         title="Asessment Sendiri"
                         icon={
-                            <Link to="/register" className="text-orange-500 hover:text-orange-600">
+                            <Link to={paths.auth.register} className="text-orange-500 hover:text-orange-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }

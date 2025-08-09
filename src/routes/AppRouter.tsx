@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { createBrowserRouter, Outlet } from "react-router";
 import LoginForm from "@/pages/login/Login";
 import RegisterForm from "@/pages/register/Register";
 import AplZeroOne from "@/pages/asesi/Apl-01";
@@ -31,75 +31,87 @@ import AssassmentMandiri from "@/pages/asesi/AsassmentMandiri";
 import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
 import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerahasiaan";
 import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
-
-// import LandingPage from "../pages/LandingPage/LandingPage";
-
-
-import Test from "../pages/LandingPage/Test";
+import Test from "@/pages/LandingPage/Test";
 import TambahSkema from "@/pages/Admin/TambahSkema";
 import KelolaJurusan from "@/pages/Admin/kelolaJur";
+import paths from "./paths";
 
-export default function AppRouter() {
-	return (
-		<BrowserRouter>
-			<Routes>
-				<Route path="/KelolaAkunAsesi" element={<KelolaAkunAsesi />} />
-				<Route path="/KelolaMUK" element={<KelolaMUK />} />
-				<Route path="/editasesor" element={<EditAsesor />} />
-				<Route path="/KelolaAkunAsesor" element={<KelolaAkunAsesor />} />
-				<Route path="/EditAsessi" element={<EditAsesi />} />
-				<Route path="/" element={<KelolaAkunAsesor />} />
-				<Route path="/login" element={<LoginForm />} />
-				<Route path="/register-asesi" element={<RegisterForm />} />
-				<Route path="/apl-01" element={<AplZeroOne />} />
-				<Route path="/apl-02" element={<AplZeroTwo />} />
-				<Route path="/data-sertifikasi" element={<DataSertifikasi />} />
-				<Route path="/tambahskema" element={<TambahSkema />} />
-				<Route path="/" element={<LandingPage />} />
-				<Route path="/about" element={<TentangLSP />} />
-				<Route path="/struktur" element={<StrukturLSP />} />
-				<Route path="/pengelola-sdm" element={<PengelolaSDM />} />
-				<Route path="/skema" element={<Skema />} />
-				<Route path="/tempat-uji" element={<Tempatuji />} />
-				<Route path="/asesor" element={<Asesor />} />
-				<Route path="/prosedur-pendaftaran" element={<Prosedur />} />
-				<Route path="/berita" element={<Berita />} />
-				<Route path="/galeri" element={<Galeri />} />
-				<Route path="/dokumen" element={<Dokumen />} />
-				<Route path="/test" element={<Test />} />
-				<Route path="/verifikasi" element={<VerifikasiPage />} />
-				<Route path="/register" element={<RegisterPage />} />
-				<Route path="/okupasi" element={<KelolaOkupasi />} />
-				<Route path="/tambah-okupasi" element={<TambahOkupasi />} />
-				<Route path="/edit-okupasi/:id" element={<EditOkupasi />} />
-				<Route path="/verifikasi" element={<VerifikasiPage />} />
-				<Route path="/register" element={<RegisterPage />} />
-				<Route path="/dashboard-asesi" element={<DashboardAsesi />} />
-				<Route path="/asesmen-aktif-asesi" element={<AsessmentAktif />} />
-				<Route path="/asesmen-mandiri" element={<AssassmentMandiri />} />
-				<Route
-					path="/asesmen-mandiri-detail"
-					element={<AsassmentMandiriDetail />}
-				/>
-				<Route
-					path="/persetujuan-asesmen-kerahasiaan"
-					element={<PersetujuanAsesmenKerahasiaan />}
-				/>
-				<Route
-					path="/asesmen-pilihan-ganda"
-					element={<AsessementPilihanGanda />}
-				/>
-				<Route path="/asesmen-mandiri-detail" element={<AsassmentMandiriDetail />} />
-				<Route path="/persetujuan-asesmen-kerahasiaan" element={<PersetujuanAsesmenKerahasiaan />} />
-				<Route path="/asesmen-pilihan-ganda" element={<AsessementPilihanGanda />} />
-				<Route path="/kelola-muk" element={<KelolaMUK />} />
-				<Route path="/kelola-akun-asesi" element={<KelolaAkunAsesi />} />
-				<Route path="/edit-asesor" element={<EditAsesor />} />
-				<Route path="/" element={<LandingPage />} />
-				<Route path="/kelolaJur" element={<KelolaJurusan />} />
-				<Route path="/test" element={<Test />} />
-				<Route path="/akun-asesor" element={<KelolaAkunAsesor />} />
-			</Routes>
-		</BrowserRouter>
-	);
-}
+const RootLayout = () => <Outlet />;
+
+const router = createBrowserRouter([
+  {
+    path: paths.root,
+    element: <RootLayout />,
+    children: [
+      // Landing & Public Pages
+      { index: true, element: <LandingPage /> },
+      { path: paths.about, element: <TentangLSP /> },
+      { path: paths.struktur, element: <StrukturLSP /> },
+      { path: paths.pengelolaSDM, element: <PengelolaSDM /> },
+      { path: paths.skema, element: <Skema /> },
+      { path: paths.tempatUji, element: <Tempatuji /> },
+      { path: paths.asesor, element: <Asesor /> },
+      { path: paths.prosedurPendaftaran, element: <Prosedur /> },
+      { path: paths.berita, element: <Berita /> },
+      { path: paths.galeri, element: <Galeri /> },
+      { path: paths.dokumen, element: <Dokumen /> },
+      { path: paths.test, element: <Test /> },
+
+      // Auth routes
+      {
+        path: paths.auth.root,
+        children: [
+          { path: paths.auth.login, element: <LoginForm /> },
+          { path: paths.auth.register, element: <RegisterPage /> },
+          { path: paths.auth.registerAsesi, element: <RegisterForm /> },
+        ],
+      },
+
+      // Admin routes
+      {
+        path: paths.admin.root,
+        children: [
+          { path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
+          { path: paths.admin.kelolaMUK, element: <KelolaMUK /> },
+          { path: paths.admin.editAsesor, element: <EditAsesor /> },
+          { path: paths.admin.kelolaAkunAsesor, element: <KelolaAkunAsesor /> },
+          { path: paths.admin.editAsesi, element: <EditAsesi /> },
+          { path: paths.admin.verifikasi, element: <VerifikasiPage /> },
+          { path: paths.admin.tambahSkema, element: <TambahSkema /> },
+          { path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
+
+          // Okupasi nested
+          {
+            path: paths.admin.okupasi.root,
+            children: [
+              { index: true, element: <KelolaOkupasi /> },
+              { path: paths.admin.okupasi.tambah, element: <TambahOkupasi /> },
+              { path: paths.admin.okupasi.editPattern, element: <EditOkupasi /> },
+            ],
+          },
+        ],
+      },
+
+      // Asesi routes
+      {
+        path: paths.asesi.root,
+        children: [
+          { path: paths.asesi.dashboard, element: <DashboardAsesi /> },
+          { path: paths.asesi.apl01, element: <AplZeroOne /> },
+          { path: paths.asesi.apl02, element: <AplZeroTwo /> },
+          { path: paths.asesi.dataSertifikasi, element: <DataSertifikasi /> },
+          { path: paths.asesi.asesmenAktif, element: <AsessmentAktif /> },
+          { path: paths.asesi.asesmenMandiri, element: <AssassmentMandiri /> },
+          { path: paths.asesi.asesmenMandiriDetail, element: <AsassmentMandiriDetail /> },
+          {
+            path: paths.asesi.persetujuanAsesmenKerahasiaan,
+            element: <PersetujuanAsesmenKerahasiaan />,
+          },
+          { path: paths.asesi.asesmenPilihanGanda, element: <AsessementPilihanGanda /> },
+        ],
+      },
+    ],
+  },
+]);
+
+export default router;

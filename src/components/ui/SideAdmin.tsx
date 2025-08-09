@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import paths from "@/routes/paths";
 
 interface MenuItem {
   name: string;
@@ -36,25 +37,25 @@ const Sidebar: React.FC = () => {
       name: "Dashboard",
       icon: LayoutDashboard,
       section: "main",
-      path: "/dashboard",
+      path: paths.admin.root,
     },
     {
       name: "Kelola Asesmen",
       icon: FileText,
       section: "main",
-      path: "/kelola-asesmen",
+      path: paths.admin.kelolaAkunAsesi,
     },
     {
       name: "Kelola Skema",
       icon: Users,
       section: "main",
-      path: "/kelola-skema",
+      path: paths.admin.kelolaMUK,
     },
     {
       name: "Kelola Jurusan",
       icon: GraduationCap,
       section: "main",
-      path: "/kelola-jurusan",
+      path: paths.admin.kelolaJurusan,
     },
   ];
 
@@ -63,19 +64,19 @@ const Sidebar: React.FC = () => {
       name: "Akun Asesi",
       icon: User,
       section: "management",
-      path: "/akun-asesi",
+      path: paths.admin.kelolaAkunAsesi,
     },
     {
       name: "Akun Asesor",
       icon: UserCheck,
       section: "management",
-      path: "/akun-asesor",
+      path: paths.admin.kelolaAkunAsesor,
     },
     {
       name: "Register",
       icon: UserPlus,
       section: "management",
-      path: "/register",
+      path: paths.auth.register,
     },
   ];
 
@@ -119,7 +120,7 @@ const Sidebar: React.FC = () => {
     <>
       {/* Logo Section */}
       <div className="p-2 border-b border-orange-400">
-        <Link to="/dashboard" className="flex items-center space-x-2 p-6">
+        <Link to={paths.admin.root} className="flex items-center space-x-2 p-6">
           <div className="w-8 h-20 flex items-center justify-center flex-shrink-0">
             <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
           </div>
@@ -213,3 +214,4 @@ const Sidebar: React.FC = () => {
 };
 
 export default Sidebar;
+

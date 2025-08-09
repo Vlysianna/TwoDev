@@ -8,6 +8,7 @@ import {
     ListCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import paths from "@/routes/paths";
 
 interface MenuItem {
     name: string;
@@ -28,16 +29,16 @@ const SidebarAsesi: React.FC = () => {
 
     const menuItems: MenuItem[] = [
         {
-            name: "List Asesment Aktif",
+            name: "List Asesmen Aktif",
             icon: ClipboardList,
             section: "main",
-            path: "/dashboard-asesi",
+            path: paths.asesi.dashboard,
         },
         {
-            name: "Asesment Aktif",
+            name: "Asesmen Aktif",
             icon: ListCheck,
             section: "main",
-            path: "/asesmen-aktif-asesi",
+            path: paths.asesi.asesmenAktif,
         },
     ];
 
@@ -84,13 +85,9 @@ const SidebarAsesi: React.FC = () => {
         <>
             {/* Logo Section */}
             <div className="p-2 border-b border-orange-400 flex justify-center">
-                <Link to="/dashboard" className="p-6">
+                <Link to={paths.asesi.root} className="p-6">
                     <div className="h-20 flex items-center justify-center">
-                        <img
-                            src="img/final logo twodev teks putih 1.svg"
-                            alt="Logo"
-                            className="h-full object-contain"
-                        />
+                        <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
                     </div>
                 </Link>
             </div>
@@ -161,3 +158,4 @@ const SidebarAsesi: React.FC = () => {
 };
 
 export default SidebarAsesi;
+

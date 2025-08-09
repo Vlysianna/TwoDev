@@ -1,18 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  GraduationCap,
-  User,
-  UserCheck,
-  UserPlus,
-  LogOut,
-  Menu,
-  X
-} from 'lucide-react';
+import { LayoutDashboard, FileText, Users, GraduationCap, User, UserCheck, UserPlus, LogOut, Menu, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import paths from '@/routes/paths';
 
 interface MenuItem {
   name: string;
@@ -35,48 +25,48 @@ const Sidebar: React.FC = () => {
     {
       name: 'Dashboard',
       icon: LayoutDashboard,
-      section: 'main',
-      path: '/dashboard'
+      section: 'admin',
+      path: paths.admin.root,
     },
     {
       name: 'Kelola Asesmen',
       icon: FileText,
-      section: 'main',
-      path: '/kelola-asesmen'
+      section: 'admin',
+      path: paths.admin.root,
     },
     {
       name: 'Kelola Skema',
       icon: Users,
-      section: 'main',
-      path: '/kelola-skema'
+      section: 'admin',
+      path: paths.admin.kelolaMUK,
     },
     {
       name: 'Kelola Jurusan',
       icon: GraduationCap,
-      section: 'main',
-      path: '/kelola-jurusan'
-    }
+      section: 'admin',
+      path: paths.admin.kelolaJurusan,
+    },
   ];
 
   const managementItems: MenuItem[] = [
     {
       name: 'Akun Asesi',
       icon: User,
-      section: 'management',
-      path: '/akun-asesi'
+      section: 'admin',
+      path: paths.admin.kelolaAkunAsesi,
     },
     {
       name: 'Akun Asesor',
       icon: UserCheck,
-      section: 'management',
-      path: '/akun-asesor'
+      section: 'admin',
+      path: paths.admin.kelolaAkunAsesor,
     },
     {
       name: 'Register',
       icon: UserPlus,
-      section: 'management',
-      path: '/register'
-    }
+      section: 'auth',
+      path: paths.auth.register,
+    },
   ];
 
   const handleItemClick = (): void => {
@@ -96,13 +86,13 @@ const Sidebar: React.FC = () => {
 
   const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
     const IconComponent = item.icon;
-    
+
     return (
       <Link
         to={item.path}
         className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
-          isActive 
-            ? 'bg-orange-600 text-white' 
+          isActive
+            ? 'bg-orange-600 text-white'
             : 'text-orange-100 hover:bg-orange-500 hover:text-white'
         }`}
         onClick={onClick}
@@ -117,12 +107,12 @@ const Sidebar: React.FC = () => {
     <>
       {/* Logo Section */}
       <div className="p-2 border-b border-orange-400">
-        <Link to="/dashboard" className="flex items-center space-x-2 p-6">
+        <Link to={paths.admin.root} className="flex items-center space-x-2 p-6">
           <div className="w-8 h-20 flex items-center justify-center flex-shrink-0">
             <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
           </div>
         </Link>
-          <span className="p-2 text-sm text-orange-100 whitespace-nowrap">SertifikasiI</span>
+          <span className="p-2 text-sm text-orange-100 whitespace-nowrap">Sertifikasi</span>
       </div>
 
       {/* Main Menu Items */}
@@ -184,19 +174,21 @@ const Sidebar: React.FC = () => {
 
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-30"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar - Always visible on desktop, slide on mobile */}
-      <div className={`
-        fixed inset-y-0 left-0 z-40
-        w-64 h-screen bg-orange-500 text-white flex flex-col
-        transform transition-transform duration-300 ease-in-out lg:transform-none
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-40
+          w-64 h-screen bg-orange-500 text-white flex flex-col
+          transform transition-transform duration-300 ease-in-out lg:transform-none
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
         <SidebarContent />
       </div>
 
@@ -207,3 +199,4 @@ const Sidebar: React.FC = () => {
 };
 
 export default Sidebar;
+

@@ -10,6 +10,7 @@ import {
 import { Link } from 'react-router-dom';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
+import paths from '@/routes/paths';
 
 interface UserData {
   id: number;
@@ -60,7 +61,7 @@ const KelolaMUK: React.FC = () => {
             
             {/* Buttons */}
             <div className="flex space-x-3">
-              <Link to="/tambah-muk">
+              <Link to={paths.admin.tambahSkema}>
                 <button
                   className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
                 >
@@ -68,7 +69,7 @@ const KelolaMUK: React.FC = () => {
                 </button>
               </Link>
 
-              <Link to="/kelola-jurusan">
+              <Link to={paths.admin.kelolaJurusan}>
                 <button
                   className="w-[151px] h-[41px] border border-[#E77D35] text-[#E77D35] text-sm font-medium rounded-md hover:bg-orange-50 transition-colors"
                 >

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Upload, X, Eye, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavbarAsesi from '@/components/NavbarAsesi';
+import paths from '@/routes/paths';
 
 export default function AssassmentMandiri() {
     const [selectedAssessor, setSelectedAssessor] = useState('');
@@ -67,7 +68,7 @@ export default function AssassmentMandiri() {
                     <NavbarAsesi
                         title='Banding Asesmen'
                         icon={
-                            <Link to="/data-sertifikasi" className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -130,7 +131,7 @@ export default function AssassmentMandiri() {
                                                     <div></div>
                                                 )}
 
-                                                <Link to="/asesmen-mandiri-detail" className="text-orange-500 hover:text-orange-600 text-sm flex items-center hover:underline hover:cursor-pointer">
+                                                <Link to={paths.asesi.asesmenMandiriDetail} className="text-orange-500 hover:text-orange-600 text-sm flex items-center hover:underline hover:cursor-pointer">
                                                     Lihat detail
                                                     <ChevronRight size={14} className="ml-1" />
                                                 </Link>

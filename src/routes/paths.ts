@@ -1,0 +1,53 @@
+const paths = {
+  root: "/",
+  landing: "/",
+  about: "/about",
+  struktur: "/struktur",
+  pengelolaSDM: "/pengelola-sdm",
+  skema: "/skema",
+  tempatUji: "/tempat-uji",
+  asesor: "/asesor",
+  prosedurPendaftaran: "/prosedur-pendaftaran",
+  berita: "/berita",
+  galeri: "/galeri",
+  dokumen: "/dokumen",
+  test: "/test",
+  auth: {
+    root: "/",
+    login: "/login",
+    register: "/register",
+    registerAsesi: "/register-asesi",
+  },
+  admin: {
+    root: "/admin",
+    kelolaAkunAsesi: "/admin/kelola-akun-asesi",
+    kelolaMUK: "/admin/kelola-muk",
+    editAsesor: "/admin/edit-asesor",
+    kelolaAkunAsesor: "/admin/kelola-akun-asesor",
+    editAsesi: "/admin/edit-asesi",
+    verifikasi: "/admin/verifikasi",
+    tambahSkema: "/admin/tambahskema",
+    kelolaJurusan: "/admin/kelola-jurusan",
+    okupasi: {
+      root: "/admin/okupasi",
+      index: "/admin/okupasi",
+      tambah: "/admin/okupasi/tambah",
+      edit: (id: string | number) => `/admin/okupasi/edit/${id}`,
+      editPattern: "/admin/okupasi/edit/:id"
+    },
+  },
+  asesi: {
+    root: "/asesi",
+    dashboard: "/asesi/dashboard",
+    apl01: "/asesi/apl-01",
+    apl02: "/asesi/apl-02",
+    dataSertifikasi: "/asesi/data-sertifikasi",
+    asesmenAktif: "/asesi/asesmen-aktif",
+    asesmenMandiri: "/asesi/asesmen-mandiri",
+    asesmenMandiriDetail: "/asesi/asesmen-mandiri-detail",
+    persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
+    asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda",
+  },
+};
+
+export default paths;

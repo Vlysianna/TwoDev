@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, FileText } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 export default function AplZeroOne() {
   const [formData, setFormData] = useState({
@@ -414,7 +415,7 @@ export default function AplZeroOne() {
           {/* Submit Button */}
           <div className="flex justify-end mt-8">
             <Link
-              to="/data-sertifikasi"
+              to={paths.asesi.dataSertifikasi}
               className="bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
             >
               Lanjut

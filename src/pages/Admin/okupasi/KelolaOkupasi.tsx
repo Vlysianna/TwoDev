@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Plus, Edit, Eye, Trash2, Filter, Bell } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import { Link, useNavigate } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 interface OkupasiData {
   id: number;
@@ -67,7 +68,7 @@ const KelolaOkupasi: React.FC = () => {
   const handleEdit = (id: number) => {
     console.log('Edit okupasi:', id);
     // Navigate to edit page with the ocupasi ID
-    navigate(`/edit-okupasi/${id}`);
+    navigate(paths.admin.okupasi.edit(id));
   };
 
   const handleView = (id: number) => {
@@ -163,7 +164,7 @@ const KelolaOkupasi: React.FC = () => {
             {/* Add Button */}
             <div className="px-6 py-4 border-b border-gray-200">
               <Link
-                to="/tambah-okupasi"
+                to={paths.admin.okupasi.tambah}
                 className="inline-flex bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg items-center space-x-2 transition-colors duration-200"
                 >
                 <Plus size={16} />

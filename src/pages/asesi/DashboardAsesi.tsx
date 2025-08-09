@@ -3,6 +3,7 @@ import Navbar from '../../components/NavAdmin';
 import { Eye, ListFilter, Search, LayoutDashboard, Clock, ChevronRight } from "lucide-react";
 import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 export default function DashboardAsesi() {
     const okupasiData = [
@@ -146,7 +147,7 @@ export default function DashboardAsesi() {
                                                 <div className="flex items-center justify-between">
                                                     <h3 className="font-semibold text-gray-900">{okupasi.title}</h3>
                                                     <Link
-                                                        to="/apl-01"
+                                                        to={paths.asesi.apl01}
                                                         className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
                                                     >
                                                         <ChevronRight className="w-4 h-4 text-white" />
@@ -200,7 +201,7 @@ export default function DashboardAsesi() {
                                                         </div>
                                                     </div>
 
-                                                    <Link to="/apl-01" className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+                                                    <Link to={paths.asesi.apl01} className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
                                                         <ChevronRight className="w-4 h-4 text-white" />
                                                     </Link>
                                                 </div>

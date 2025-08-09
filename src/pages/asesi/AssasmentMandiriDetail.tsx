@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Monitor, ChevronLeft, Search } from 'lucide-react';
 import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 export default function AssessmentMandiriDetail() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -90,7 +91,7 @@ export default function AssessmentMandiriDetail() {
                     <NavbarAsesi
                         title='Detail'
                         icon={
-                            <Link to="/asesmen-mandiri" className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.asesmenMandiri} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }

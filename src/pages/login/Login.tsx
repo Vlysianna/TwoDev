@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeClosed, Shield, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -79,17 +80,17 @@ export default function LoginForm() {
             </div>
 
             {/* Sign In Button */}
-            <Link
-              to="/dashboard-asesi"
+            <button
+              onSubmit={handleSubmit}
               className="w-full block text-center bg-[#E77D35] hover:cursor-pointer text-white py-2 md:py-2.5 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200"
             >
               Sign In
-            </Link>
+            </button>
 
             {/* Register Link */}
             <div className="text-center text-xs md:text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link className="text-orange-500 hover:text-orange-600 font-small" to="/register-asesi">
+              <Link className="text-orange-500 hover:text-orange-600 font-small" to={paths.auth.registerAsesi}>
                 Register
               </Link>
             </div>

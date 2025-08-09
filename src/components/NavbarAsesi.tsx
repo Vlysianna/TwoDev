@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 interface NavbarAsesiProps {
   title: string;
@@ -192,7 +193,7 @@ export default function NavbarAsesi({ title, icon }: NavbarAsesiProps) {
                 Batalkan
               </button>
               <Link
-                to="/login"
+                to={paths.auth.login}
                 className="flex-1 bg-[#E77D35] text-white py-2 rounded hover:bg-orange-600 cursor-pointer text-center"
               >
                 Keluar

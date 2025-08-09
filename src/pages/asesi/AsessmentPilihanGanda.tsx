@@ -2,6 +2,7 @@ import { ChevronLeft, Clock } from 'lucide-react';
 import { useState } from 'react';
 import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 export default function AsessementPilihanGanda() {
     const [answers, setAnswers] = useState<Answers>({
@@ -156,7 +157,7 @@ export default function AsessementPilihanGanda() {
                     <NavbarAsesi
                         title='Lembar Jawaban Pilihan Ganda'
                         icon={
-                            <Link to="/data-sertifikasi" className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
