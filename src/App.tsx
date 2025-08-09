@@ -8,17 +8,17 @@ import FootLanding from './components/FootLanding'
 import SideAsesor from './components/SideAsesor'
 
 function App() {
-  
+
 
   return (
     <>
-    <div className="relative min-h-screen">
-  {/* <NavLanding />   */}
-  <main>        
-    <SideAsesor />
-  </main>
-  {/* <FootLanding /> */}
-</div>
+      <div className="relative min-h-screen">
+        {/* <NavLanding />   */}
+        <main>
+          <SideAsesor />
+        </main>
+        {/* <FootLanding /> */}
+      </div>
     </>
   )
 }
