@@ -9,7 +9,7 @@ export default function AppRouter() {
 			<Routes>
 				<Route path="/" element={<KelolaAkunAsesi />} />
 				<Route path="/b" element={<KelolaMUK />} />
-				<Route path="/" element={<EditAsesor />} />
+				<Route path="/editasesor" element={<EditAsesor />} />
 			</Routes>
 		</BrowserRouter>
 	);
