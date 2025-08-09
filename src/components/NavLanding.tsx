@@ -64,9 +64,8 @@ const NavLanding: React.FC = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`relative px-3 py-2 text-sm font-medium transition-colors ${
-                  activeItem === item.name.toLowerCase() ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
-                }`}
+                className={`relative px-3 py-2 text-sm font-medium transition-colors ${activeItem === item.name.toLowerCase() ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
+                  }`}
               >
                 {item.name}
                 {activeItem === item.name.toLowerCase() && (
@@ -79,9 +78,8 @@ const NavLanding: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown('profil')}
-                className={`relative px-3 py-2 text-sm font-medium flex items-center transition-colors ${
-                  activeItem === 'profil' ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
-                }`}
+                className={`relative px-3 py-2 text-sm font-medium flex items-center transition-colors ${activeItem === 'profil' ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
+                  }`}
               >
                 Profil
                 <ChevronDown
@@ -111,9 +109,8 @@ const NavLanding: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown('layanan')}
-                className={`relative px-3 py-2 text-sm font-medium flex items-center transition-colors ${
-                  activeItem === 'layanan' ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
-                }`}
+                className={`relative px-3 py-2 text-sm font-medium flex items-center transition-colors ${activeItem === 'layanan' ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
+                  }`}
               >
                 Layanan
                 <ChevronDown
@@ -145,9 +142,9 @@ const NavLanding: React.FC = () => {
 
           {/* Login Button */}
           <div className="hidden md:block">
-            <button className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-md text-sm font-medium">
+            <Link className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-md text-sm font-medium" to="/login">
               Login
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Toggle */}

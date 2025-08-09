@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Routes } from "react-router";
-import Home from "../pages/home/tes";
 import LoginForm from "../pages/login/Login";
 import RegisterForm from "../pages/register/Register";
 import AplZeroOne from "../pages/asesi/Apl-01";
@@ -28,13 +27,12 @@ import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerah
 import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
 import KelolaMUK from "@/pages/admin/KelolaSkema";
 import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
-import EditAsesor from "@/pages/home/Admin/EditAsesor";
+import EditAsesor from "@/pages/admin/EditAsesor";
 
 export default function AppRouter() {
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route path="/a" element={<Home />} />
 				<Route path="/login" element={<LoginForm />} />
 				<Route path="/register-asesi" element={<RegisterForm />} />
 				<Route path="/apl-01" element={<AplZeroOne />} />
@@ -63,7 +61,7 @@ export default function AppRouter() {
 				<Route path="/asesmen-pilihan-ganda" element={<AsessementPilihanGanda />} />
 				<Route path="/kelola-muk" element={<KelolaMUK />} />
 				<Route path="/kelola-akun-asesi" element={<KelolaAkunAsesi />} />
-				<Route path="/" element={<EditAsesor />} />
+				<Route path="/edit-asesor" element={<EditAsesor />} />
 			</Routes>
 		</BrowserRouter>
 	);
