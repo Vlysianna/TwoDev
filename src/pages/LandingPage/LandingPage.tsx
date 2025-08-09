@@ -3,6 +3,8 @@ import FootLanding from "../../components/FootLanding";
 import { useState, useEffect } from "react";
 import { Link} from 'react-router-dom';
 
+
+
 function LandingPage() {
   const images = ["/bgsklh.png", "/bgsklh.png", "/bgsklh.png", "/bgsklh.png"];
 
