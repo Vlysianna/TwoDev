@@ -5,6 +5,23 @@ import EditAsesor from "@/pages/home/Admin/EditAsesor";
 import Home from "../pages/home/tes";
 import KelolaAkunAsesor from "@/pages/home/Admin/AkunAsesor";
 import EditAsessi from "@/pages/home/Admin/EditAsessi";
+import LoginForm from "../pages/login/Login";
+import RegisterForm from "../pages/register/Register";
+import AplZeroOne from "../pages/apl-01/Apl-01";
+import LspMediaForm from "../pages/apl-01/LspMedia";
+import LandingPage from "../pages/LandingPage/LandingPage";
+import TentangLSP from "../pages/LandingPage/TentangLSP";
+import Test from "../pages/LandingPage/Test";
+import StrukturLSP from "../pages/LandingPage/StrukturLSP";
+import Skema from "../pages/LandingPage/Skema";
+import Tempatuji from "../pages/LandingPage/Tempatuji";
+import Asesor from "../pages/LandingPage/Asesor";
+import Prosedur from "../pages/LandingPage/Prosedur";
+import Berita from "../pages/LandingPage/Berita";
+import Galeri from "../pages/LandingPage/Galeri";
+import Dokumen from "../pages/LandingPage/Dokumen";
+import PengelolaSDM from "../pages/LandingPage/PengelolaSDM";
+import TambahSkema from "@/pages/Admin/TambahSkema";
 
 export default function AppRouter() {
 	return (
@@ -18,6 +35,23 @@ export default function AppRouter() {
 				<Route path="/a" element={<Home />} />
 				<Route path="/" element={<KelolaAkunAsesor />} />
 				<Route path="/b" element={<EditAsessi />} />
+				<Route path="/login" element={<LoginForm />} />
+				<Route path="/register" element={<RegisterForm />} />
+				<Route path="/apl-01" element={<AplZeroOne />} />
+				<Route path="/lspmedia" element={<LspMediaForm />} />
+				<Route path="/tambahskema" element={<TambahSkema />} />
+				<Route path="/" element={<LandingPage />} />
+				<Route path="/about" element={<TentangLSP />} />
+				<Route path="/struktur" element={<StrukturLSP />} />
+				<Route path="/pengelola-sdm" element={<PengelolaSDM />} />
+				<Route path="/skema" element={<Skema />} />
+				<Route path="/tempat-uji" element={<Tempatuji />} />
+				<Route path="/asesor" element={<Asesor />} />
+				<Route path="/prosedur-pendaftaran" element={<Prosedur />} />
+				<Route path="/berita" element={<Berita />} />
+				<Route path="/galeri" element={<Galeri />} />
+				<Route path="/dokumen" element={<Dokumen />} />
+				<Route path="/test" element={<Test />} />
 			</Routes>
 		</BrowserRouter>
 	);

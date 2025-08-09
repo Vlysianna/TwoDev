@@ -121,11 +121,11 @@ const Sidebar: React.FC = () => {
       <div className="p-2 border-b border-orange-400">
         <Link to="/dashboard" className="flex items-center space-x-2 p-6">
           <div className="w-8 h-20 flex items-center justify-center flex-shrink-0">
-            <img src="/twodev-white.svg" alt="Logo" className="h-15 w-auto" />
+            <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
           </div>
         </Link>
         <span className="p-2 text-sm text-orange-100 whitespace-nowrap">
-          Sertifikasi
+          SertifikasiI
         </span>
       </div>
 

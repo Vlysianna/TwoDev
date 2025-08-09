@@ -39,10 +39,10 @@ const Navbar = () => {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 border border-gray-200 rounded-4xl px-2.5 py-2 hover:bg-gray-100 cursor-pointer transition">
               <div className="rounded-full flex items-center justify-center">
-                <img src="public/avatar.svg" alt="" className="w-10 h-10" />
+                <img src="public/img/male avatar.svg" alt="" className="w-10 h-10" />
               </div>
               <div className="text-sm">
-                <p className="font-medium text-gray-800">Asesor</p>
+                <p className="font-medium text-gray-800">Asesi</p>
                 <p className="text-sm text-gray-500">example@example.com</p>
               </div>
             </div>
