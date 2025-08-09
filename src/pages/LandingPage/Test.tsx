@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Navbar from "../../components/NavAdmin"
 import Sidebar from "../../components/SideAdmin"
 
@@ -7,6 +8,36 @@ function Test() {
     { src: '/bgsklh.png', alt: 'Berita 2' },
     { src: '/bgsklh.png', alt: 'Berita 3' },
   ];
+   // Definisikan tipe props untuk komponen Counter
+  interface CounterProps {
+    target: number;
+    duration?: number;
+  }
+
+  const Counter = ({ target, duration = 2000 }: CounterProps) => {
+  const [count, setCount] = useState<number>(0);
+
+  useEffect(() => {
+    let startTime = Date.now();
+    let requestId: number;
+
+    const updateCounter = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      setCount(Math.floor(progress * target));
+
+      if (progress < 1) {
+        requestId = requestAnimationFrame(updateCounter);
+      }
+    };
+
+    requestId = requestAnimationFrame(updateCounter);
+
+    return () => cancelAnimationFrame(requestId);
+  }, [target, duration]);
+
+  return <span>{count}</span>;
+};
  return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar - Fixed width dan fixed position */}
@@ -42,6 +73,34 @@ function Test() {
                 <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci voluptates iste aliquam tenetur fugiat suscipit debitis porro quod quia! Dolor minus provident facilis, natus neque magni totam explicabo dicta ullam.</p>
             </div>
 
+  <div className="bg-orange-500 text-white py-8 px-6 md:px-20">
+          <div className="flex flex-col md:flex-row justify-between items-center px-6">
+            <div className="text-center md:text-center mb-4 md:mb-0">
+              <h2 className="text-xl md:text-2xl font-bold mb-2">
+                <Counter target={1999} />
+              </h2>
+              <p className="text-base md:text-lg opacity-90">Jumlah Asesi</p>
+            </div>
+            <div className="text-center md:text-center mb-4 md:mb-0">
+              <h2 className="text-xl md:text-2xl font-bold mb-2">
+                <Counter target={19} /> 
+              </h2>
+              <p className="text-base md:text-lg opacity-90">Jumlah Asesi</p>
+            </div>
+            <div className="text-center md:text-center mb-4 md:mb-0">
+              <h2 className="text-xl md:text-2xl font-bold mb-2">
+                <Counter target={1999} /> 
+              </h2>
+              <p className="text-base md:text-lg opacity-90">Jumlah Asesi</p>
+            </div>
+            <div className="text-center md:text-center mb-4 md:mb-0">
+              <h2 className="text-xl md:text-2xl font-bold mb-2">
+                <Counter target={1999} /> 
+              </h2>
+              <p className="text-base md:text-lg opacity-90">Jumlah Asesi</p>
+            </div>
+          </div>
+        </div>
                     {/* Berita Terbaru */}
         <div className="py-16 px-4 bg-white">
           <h2 className="text-2xl font-bold text-center mb-10">Berita Terbaru LSP</h2>
