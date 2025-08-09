@@ -35,6 +35,8 @@ import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaOkupasi from "@/pages/home/admin/okupasi/KelolaOkupasi";
 import TemplateAsesor from "@/pages/asesor/Template";
 import Template2 from "@/pages/asesor/Template2";
+import KelolaJadwal from "@/pages/admin/KelolaJadwal";
+import TambahJadwal from "@/pages/admin/TambahJadwal";
 
 export default function AppRouter() {
 	return (
@@ -77,6 +79,8 @@ export default function AppRouter() {
 				<Route path="/kelola-okupasi" element={<KelolaOkupasi />} />
 				<Route path="/template-asesor" element={<TemplateAsesor />} />
 				<Route path="/template2-asesor" element={<Template2 />} />
+				<Route path="/kelola-jadwal" element={<KelolaJadwal />} />
+				<Route path="/tambah-jadwal" element={<TambahJadwal />} />
 			</Routes>
 		</BrowserRouter>
 	);
