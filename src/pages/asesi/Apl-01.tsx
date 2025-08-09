@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, FileText } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
+import { Link } from 'react-router-dom';
 
 export default function AplZeroOne() {
   const [formData, setFormData] = useState({
@@ -43,11 +44,6 @@ export default function AplZeroOne() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form Data:', formData);
-    alert('Form berhasil disubmit! Check console untuk melihat data.');
-  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -379,7 +375,7 @@ export default function AplZeroOne() {
                   className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               {/* No. Telp Kantor */}
               <div className='sm:col-span-1'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -417,16 +413,15 @@ export default function AplZeroOne() {
 
           {/* Submit Button */}
           <div className="flex justify-end mt-8">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            <Link
+              to="/data-sertifikasi"
+              className="bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
             >
               Lanjut
-            </button>
+            </Link>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
