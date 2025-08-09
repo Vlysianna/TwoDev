@@ -7,6 +7,7 @@ import {
   Eye,
   Trash2
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 
@@ -57,12 +58,13 @@ const KelolaAkunAsesi: React.FC = () => {
             <h1 className="text-2xl font-semibold text-gray-900 mb-4">Kelola Akun Asesi</h1>
             
             {/* Create Account Button */}
-            <button
-              onClick={handleCreateAccount}
-              className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
-            >
-              Buat Akun
-            </button>
+            <Link to="/target-route">
+              <button
+                className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
+              >
+                Buat Akun
+              </button>
+            </Link>
           </div>
 
           {/* Main Content Card - This is the box container like in Figma */}
@@ -74,16 +76,15 @@ const KelolaAkunAsesi: React.FC = () => {
                 <div className="flex space-x-3">
                   <button
                     onClick={handleFilter}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    <Filter size={16} />
                     Filter
+                    <Filter size={16} className="text-[#E77D35]" />
                   </button>
                   <button
                     onClick={handleExport}
-                    className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
+                    className="w-[152px] h-[41px] bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
                   >
-                    <Download size={16} />
                     Export ke Excel
                   </button>
                 </div>
@@ -97,7 +98,7 @@ const KelolaAkunAsesi: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-orange-500 text-white">
+                    <tr className="bg-[#E77D35] text-white">
                       <th className="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">
                         Username
                       </th>
