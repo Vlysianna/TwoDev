@@ -49,7 +49,7 @@ const KelolaAkunAsesi: React.FC = () => {
             <nav className="flex text-sm text-gray-500">
               <span>Dashboard</span>
               <span className="mx-2">/</span>
-              <span className="text-gray-900">Akun Asesi</span>
+              <span className="text-[#000000]">Akun Asesi</span>
             </nav>
           </div>
 
@@ -72,7 +72,7 @@ const KelolaAkunAsesi: React.FC = () => {
             {/* Card Header with full border line */}
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Akun Asesi</h2>
+                <h2 className="text-[26px] font-semibold text-[#000000]">Akun Asesi</h2>
                 <div className="flex space-x-3">
                   <button
                     onClick={handleFilter}
