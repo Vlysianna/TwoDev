@@ -28,13 +28,7 @@ import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
 import KelolaMUK from "@/pages/admin/KelolaSkema";
 import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
 import EditAsesor from "@/pages/admin/EditAsesor";
-import Home from "../pages/home/tes";
 import KelolaJurusan from "../pages/admin/kelolaJur";
-
-// import LandingPage from "../pages/LandingPage/LandingPage";
-
-
-import Test from "../pages/LandingPage/Test";
 
 export default function AppRouter() {
 	return (
@@ -69,9 +63,7 @@ export default function AppRouter() {
 				<Route path="/kelola-muk" element={<KelolaMUK />} />
 				<Route path="/kelola-akun-asesi" element={<KelolaAkunAsesi />} />
 				<Route path="/edit-asesor" element={<EditAsesor />} />
-				<Route path="/a" element={<Home />} />
-				{/* <Route path="/" element={<LandingPage />} /> */}
-				<Route path="/kelolaJur" element={<KelolaJurusan />} />
+				<Route path="/kelola-jurusan" element={<KelolaJurusan />} />
 				<Route path="/test" element={<Test />} />
 			</Routes>
 		</BrowserRouter>

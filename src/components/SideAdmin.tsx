@@ -48,7 +48,7 @@ const Sidebar: React.FC = () => {
       name: 'Kelola Skema',
       icon: Users,
       section: 'main',
-      path: '/kelola-skema'
+      path: '/kelola-muk'
     },
     {
       name: 'Kelola Jurusan',
@@ -63,13 +63,13 @@ const Sidebar: React.FC = () => {
       name: 'Akun Asesi',
       icon: User,
       section: 'management',
-      path: '/akun-asesi'
+      path: '/kelola-akun-asesi'
     },
     {
       name: 'Akun Asesor',
       icon: UserCheck,
       section: 'management',
-      path: '/akun-asesor'
+      path: '/kelola-akun-asesor'
     },
     {
       name: 'Register',
@@ -102,8 +102,8 @@ const Sidebar: React.FC = () => {
         to={item.path}
         className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
           isActive 
-            ? 'bg-orange-600 text-white' 
-            : 'text-orange-100 hover:bg-orange-500 hover:text-white'
+            ? 'bg-[#ffffff80] text-white' 
+            : 'text-orange-100 hover:bg-[#ffffff80] hover:text-white'
         }`}
         onClick={onClick}
       >
@@ -193,7 +193,7 @@ const Sidebar: React.FC = () => {
       {/* Sidebar - Always visible on desktop, slide on mobile */}
       <div className={`
         fixed inset-y-0 left-0 z-40
-        w-64 h-screen bg-orange-500 text-white flex flex-col
+        w-64 h-screen bg-[#E77D35] text-white flex flex-col
         transform transition-transform duration-300 ease-in-out lg:transform-none
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
