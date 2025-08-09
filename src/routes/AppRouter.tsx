@@ -4,7 +4,6 @@ import RegisterForm from "@/pages/register/Register";
 import AplZeroOne from "@/pages/asesi/Apl-01";
 import LandingPage from "@/pages/LandingPage/LandingPage";
 import TentangLSP from "@/pages/LandingPage/TentangLSP";
-import Test from "@/pages/LandingPage/Test";
 import Skema from "@/pages/LandingPage/Skema";
 import StrukturLSP from "@/pages/LandingPage/StrukturLSP";
 import PengelolaSDM from "@/pages/LandingPage/PengelolaSDM";
@@ -32,7 +31,13 @@ import AssassmentMandiri from "@/pages/asesi/AsassmentMandiri";
 import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
 import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerahasiaan";
 import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
+
+// import LandingPage from "../pages/LandingPage/LandingPage";
+
+
+import Test from "../pages/LandingPage/Test";
 import TambahSkema from "@/pages/Admin/TambahSkema";
+import KelolaJurusan from "@/pages/Admin/kelolaJur";
 
 export default function AppRouter() {
 	return (
@@ -84,6 +89,15 @@ export default function AppRouter() {
 					path="/asesmen-pilihan-ganda"
 					element={<AsessementPilihanGanda />}
 				/>
+				<Route path="/asesmen-mandiri-detail" element={<AsassmentMandiriDetail />} />
+				<Route path="/persetujuan-asesmen-kerahasiaan" element={<PersetujuanAsesmenKerahasiaan />} />
+				<Route path="/asesmen-pilihan-ganda" element={<AsessementPilihanGanda />} />
+				<Route path="/kelola-muk" element={<KelolaMUK />} />
+				<Route path="/kelola-akun-asesi" element={<KelolaAkunAsesi />} />
+				<Route path="/edit-asesor" element={<EditAsesor />} />
+				<Route path="/" element={<LandingPage />} />
+				<Route path="/kelolaJur" element={<KelolaJurusan />} />
+				<Route path="/test" element={<Test />} />
 			</Routes>
 		</BrowserRouter>
 	);

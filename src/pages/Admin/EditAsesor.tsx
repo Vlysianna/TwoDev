@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { ChevronDown, Calendar } from 'lucide-react';
+import { ChevronDown, Calendar, Eye, EyeOff, EyeClosed } from 'lucide-react';
 import Sidebar from '@/components/ui/SideAdmin';
 import Navbar from '@/components/ui/NavAdmin';
 
 interface FormData {
+  email: string;
+  password: string;
   nama: string;
   noKTPNIKPasport: string;
   tempatLahir: string;
@@ -24,14 +26,15 @@ interface FormData {
   noTeleponBidang: string;
   alamatKantor: string;
   kodePosKantor: string;
-  email: string;
+  emailPekerjaan: string;
   jenjangPendidikan: string;
-  instansi: string;
-  tahunLulus: string;
 }
 
 const EditAsesor: React.FC = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<FormData>({
+    email: '',
+    password: '',
     nama: '',
     noKTPNIKPasport: '',
     tempatLahir: '',
@@ -52,10 +55,8 @@ const EditAsesor: React.FC = () => {
     noTeleponBidang: '',
     alamatKantor: '',
     kodePosKantor: '',
-    email: '',
+    emailPekerjaan: '',
     jenjangPendidikan: '',
-    instansi: '',
-    tahunLulus: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -98,6 +99,51 @@ const EditAsesor: React.FC = () => {
               {/* Akun Asesor Section */}
               <div>
                 <h2 className="text-[26px] font-medium text-gray-900 mb-2">Akun Asesor</h2>
+                <br />
+                <hr className='text-gray-300' />
+                <br />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="Masukkan email anda"
+                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">*wajib diisi</p>
+                  </div>
+
+                  {/* Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="Masukkan password anda"
+                        className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? <Eye size={16} /> : <EyeClosed size={16} />}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">*wajib diisi</p>
+                  </div>
+                </div>
               </div>
 
               <hr className='text-gray-300' />
@@ -328,6 +374,24 @@ const EditAsesor: React.FC = () => {
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
+
+                  {/* Kualifikasi Pendidikan */}
+                  <div className="md:col-span-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kualifikasi Pendidikan
+                    </label>
+                    <select
+                      name="jenjangPendidikan"
+                      value={formData.jenjangPendidikan}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Kualifikasi pendidikan</option>
+                      <option value="SMP">SMP</option>
+                      <option value="SMASederajat">SMA/Sederajat</option>
+                      <option value="S1">S1</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -353,39 +417,19 @@ const EditAsesor: React.FC = () => {
                     />
                   </div>
 
-                  {/* No. Telp Rumah */}
+                  {/* Email */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      No. Telp Rumah
+                      Email
                     </label>
                     <input
-                      type="tel"
-                      name="noTeleponInstansi"
-                      value={formData.noTeleponInstansi}
+                      type="email"
+                      name="emailPekerjaan"
+                      value={formData.emailPekerjaan}
                       onChange={handleInputChange}
-                      placeholder="Masukkan no. telp rumah anda"
+                      placeholder="Masukkan email anda"
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
-                  </div>
-
-                  {/* Bidang pekerjaan */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Bidang pekerjaan
-                    </label>
-                    <select
-                      name="bidangPekerjaan"
-                      value={formData.bidangPekerjaan}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Masukkan bidang anda</option>
-                      <option value="Teknologi Informasi">Teknologi Informasi</option>
-                      <option value="Keuangan">Keuangan</option>
-                      <option value="Pendidikan">Pendidikan</option>
-                      <option value="Kesehatan">Kesehatan</option>
-                      <option value="Manufaktur">Manufaktur</option>
-                    </select>
                   </div>
 
                   {/* Jabatan */}
@@ -399,6 +443,21 @@ const EditAsesor: React.FC = () => {
                       value={formData.jabatan}
                       onChange={handleInputChange}
                       placeholder="Masukkan jabatan anda"
+                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  {/* Kode pos */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kode pos
+                    </label>
+                    <input
+                      type="text"
+                      name="kodePosKantor"
+                      value={formData.kodePosKantor}
+                      onChange={handleInputChange}
+                      placeholder="Masukkan kode pos anda"
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -419,7 +478,7 @@ const EditAsesor: React.FC = () => {
                   </div>
 
                   {/* Alamat Kantor */}
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Alamat Kantor
                     </label>
@@ -429,93 +488,6 @@ const EditAsesor: React.FC = () => {
                       onChange={handleInputChange}
                       placeholder="Masukkan alamat kantor anda"
                       rows={3}
-                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  {/* Kode pos */}
-                  <div className="md:col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kode pos
-                    </label>
-                    <input
-                      type="text"
-                      name="kodePosKantor"
-                      value={formData.kodePosKantor}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan kode pos anda"
-                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan email anda"
-                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <hr className='text-gray-300' />
-
-              {/* Kualifikasi Pendidikan Section */}
-              <div>
-                <h2 className="text-[26px] font-medium text-gray-900 mb-2">Kualifikasi Pendidikan</h2>
-              <br></br>
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-                  {/* Jenjang Pendidikan */}
-                  <div className="md:col-span-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Jenjang Pendidikan
-                    </label>
-                    <select
-                      name="jenjangPendidikan"
-                      value={formData.jenjangPendidikan}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Jenjang Pendidikan</option>
-                      <option value="SMP">SMP</option>
-                      <option value="SMASederajat">SMA/Sederajat</option>
-                      <option value="S1">S1</option>
-                    </select>
-                  </div>
-
-                  {/* Instansi */}
-                  <div className="md:col-span-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Instansi
-                    </label>
-                    <input
-                      type="text"
-                      name="instansi"
-                      value={formData.instansi}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan instansi anda"
-                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  {/* Tahun Lulus */}
-                  <div className="md:col-span-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tahun Lulus
-                    </label>
-                    <input
-                      type="text"
-                      name="tahunLulus"
-                      value={formData.tahunLulus}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan tahun lulus anda"
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
