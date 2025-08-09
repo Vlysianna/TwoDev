@@ -98,6 +98,7 @@ export default function AppRouter() {
 				<Route path="/" element={<LandingPage />} />
 				<Route path="/kelolaJur" element={<KelolaJurusan />} />
 				<Route path="/test" element={<Test />} />
+				<Route path="/akun-asesor" element={<KelolaAkunAsesor />} />
 			</Routes>
 		</BrowserRouter>
 	);
