@@ -89,7 +89,7 @@ const EditAsesor: React.FC = () => {
 
           {/* Page Title */}
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-gray-900">Edit Akun Asesor</h1>
+            <h1 className="text-[26px] font-semibold text-gray-900">Edit Akun Asesor</h1>
           </div>
 
           <div className="space-y-8">
@@ -97,14 +97,14 @@ const EditAsesor: React.FC = () => {
             <div className="bg-white rounded-lg p-6 space-y-8">
               {/* Akun Asesor Section */}
               <div>
-                <h2 className="text-3xl font-medium text-gray-900 mb-2">Akun Asesor</h2>
+                <h2 className="text-[26px] font-medium text-gray-900 mb-2">Akun Asesor</h2>
               </div>
 
               <hr className='text-gray-300' />
 
               {/* Data Pribadi Section */}
               <div>
-                <h2 className="text-3xl font-medium text-gray-900 mb-2">Data Pribadi</h2>
+                <h2 className="text-[26px] font-medium text-gray-900 mb-2">Data Pribadi</h2>
               <br></br>
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
                   {/* Nama */}
@@ -335,7 +335,7 @@ const EditAsesor: React.FC = () => {
 
               {/* Data Pekerjaan Section */}
               <div>
-                <h2 className="text-3xl font-medium text-gray-900 mb-2">Data Pekerjaan</h2>
+                <h2 className="text-[26px] font-medium text-gray-900 mb-2">Data Pekerjaan</h2>
               <br></br>
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
                   {/* Nama instansi / Perusahaan */}
@@ -469,7 +469,7 @@ const EditAsesor: React.FC = () => {
 
               {/* Kualifikasi Pendidikan Section */}
               <div>
-                <h2 className="text-3xl font-medium text-gray-900 mb-2">Kualifikasi Pendidikan</h2>
+                <h2 className="text-[26px] font-medium text-gray-900 mb-2">Kualifikasi Pendidikan</h2>
               <br></br>
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
                   {/* Jenjang Pendidikan */}
@@ -527,7 +527,7 @@ const EditAsesor: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className="bg-[#E77D35] hover:bg-orange-500 text-white font-normal py-2 px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="bg-[#E77D35] hover:bg-orange-500 text-white font-normal w-[168px] h-[41px] rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   Submit
                 </button>
