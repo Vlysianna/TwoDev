@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Calendar, User, Mail, MapPin, Phone, Building, Hash, FileText } from 'lucide-react';
+import { ChevronLeft, FileText } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
+import { Link } from 'react-router-dom';
 
 export default function AplZeroOne() {
   const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ export default function AplZeroOne() {
     email: '',
 
     // Data Kualfikasi Pendidikan
-    jenjangPendidikan: '',
+    kualifikasiPendidikan: '',
     instansi: '',
     tahunLulus: ''
   });
@@ -43,21 +44,16 @@ export default function AplZeroOne() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form Data:', formData);
-    alert('Form berhasil disubmit! Check console untuk melihat data.');
-  };
 
   return (
-    <div className="min-h-screen bg-white py-18">
+    <div className="min-h-screen bg-white">
       <div className="mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm mb-8">
-          <NavbarAsesi title='Permohonan Sertifikasi Kompetensi FR.APL.01' />
+          <NavbarAsesi title='Permohonan Sertifikasi Kompetensi' icon={<FileText size={20} />} />
         </div>
 
-        <div className="space-y-8 px-4 sm:px-6 lg:px-8 xl:px-60 py-4 sm:py-8 ">
+        <div className="space-y-8 px-4 sm:px-6 lg:px-8 xl:px-40 py-4 sm:py-8 ">
           {/* Data Pribadi Section */}
           <div>
             <h2 className="text-2xl sm:text-3xl font-medium text-gray-900 mb-2">Data Pribadi</h2>
@@ -263,7 +259,7 @@ export default function AplZeroOne() {
               </div>
 
               {/* Alamat */}
-              <div className="sm:col-span-2 lg:col-span-3">
+              <div className="sm:col-span-2 lg:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Alamat
                 </label>
@@ -290,6 +286,22 @@ export default function AplZeroOne() {
                   placeholder="Masukkan kode pos anda"
                   className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+              </div>
+              <div className='sm:col-span-3'>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kualifikasi Pendidikan
+                </label>
+                <select
+                  name="kualifikasiPendidikan"
+                  value={formData.kualifikasiPendidikan}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Kualifikasi Pendidikan</option>
+                  <option value="SMP">SMP</option>
+                  <option value="SMASederajat">SMA/Sederajat</option>
+                  <option value="S1">S1</option>
+                </select>
               </div>
             </div>
           </div>
@@ -320,39 +332,18 @@ export default function AplZeroOne() {
                 />
               </div>
 
-              {/* No. Telp Rumah */}
               <div className='sm:col-span-1'>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  No. Telp Rumah
+                  Email
                 </label>
                 <input
-                  type="tel"
-                  name="noTelpRumahPekerjaan"
-                  value={formData.noTelpRumahPekerjaan}
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="Masukkan no. telp rumah anda"
+                  placeholder="Masukkan email anda"
                   className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
-              </div>
-
-              {/* Bidang pekerjaan */}
-              <div className='sm:col-span-1'>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bidang pekerjaan
-                </label>
-                <select
-                  name="bidangPekerjaan"
-                  value={formData.bidangPekerjaan}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Masukkan bidang anda</option>
-                  <option value="Teknologi Informasi">Teknologi Informasi</option>
-                  <option value="Keuangan">Keuangan</option>
-                  <option value="Pendidikan">Pendidikan</option>
-                  <option value="Kesehatan">Kesehatan</option>
-                  <option value="Manufaktur">Manufaktur</option>
-                </select>
               </div>
 
               {/* Jabatan */}
@@ -366,6 +357,21 @@ export default function AplZeroOne() {
                   value={formData.jabatan}
                   onChange={handleInputChange}
                   placeholder="Masukkan jabatan anda"
+                  className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* Kode pos */}
+              <div className='sm:col-span-1'>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kode pos
+                </label>
+                <input
+                  type="text"
+                  name="kodePosKantor"
+                  value={formData.kodePosKantor}
+                  onChange={handleInputChange}
+                  placeholder="Masukkan kode pos anda"
                   className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -400,111 +406,22 @@ export default function AplZeroOne() {
                 />
               </div>
 
-              {/* Kode pos */}
-              <div className='sm:col-span-1'>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Kode pos
-                </label>
-                <input
-                  type="text"
-                  name="kodePosKantor"
-                  value={formData.kodePosKantor}
-                  onChange={handleInputChange}
-                  placeholder="Masukkan kode pos anda"
-                  className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              {/* Email */}
-              <div className='sm:col-span-2'>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Masukkan email anda"
-                  className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
             </div>
           </div>
 
           <hr className='text-gray-300' />
 
-          {/* Kualifikasi Pendidikan */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Kualifikasi Pendidikan</h2>
-            <p className="text-gray-600 text-sm mb-6">
-              Latar belakang pendidikan Anda membantu kami memvalidasi kelayakan Anda untuk Uji Sertifikasi
-              Kompetensi (USK) dan memastikan keselarasan dengan skema kompetensi yang dipilih
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {/* Jenjang Pendidikan */}
-              <div className='sm:col-span-3'>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Jenjang Pendidikan
-                </label>
-                <select
-                  name="jenjangPendidikan"
-                  value={formData.jenjangPendidikan}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Jenjang Pendidikan</option>
-                  <option value="SMP">SMP</option>
-                  <option value="SMASederajat">SMA/Sederajat</option>
-                  <option value="S1">S1</option>
-                </select>
-              </div>
-
-              {/* Instansi */}
-              <div className='sm:col-span-2'>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Instansi
-                </label>
-                <input
-                  type="text"
-                  name="instansi"
-                  value={formData.instansi}
-                  onChange={handleInputChange}
-                  placeholder="Masukkan instansi anda"
-                  className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              {/* Tahun Lulus */}
-              <div className='sm:col-span-1'>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tahun Lulus
-                </label>
-                <input
-                  type="text"
-                  name="tahunLulus"
-                  value={formData.tahunLulus}
-                  onChange={handleInputChange}
-                  placeholder="Masukkan tahun lulus anda"
-                  className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Submit Button */}
           <div className="flex justify-end mt-8">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            <Link
+              to="/data-sertifikasi"
+              className="bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
             >
-              Submit
-            </button>
+              Lanjut
+            </Link>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

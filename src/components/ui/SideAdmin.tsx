@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   FileText,
@@ -11,12 +11,8 @@ import {
   LogOut,
   Menu,
   X,
-  File,
-  Calendar,
-  Album,
-  LogIn
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface MenuItem {
   name: string;
@@ -37,56 +33,50 @@ const Sidebar: React.FC = () => {
 
   const menuItems: MenuItem[] = [
     {
-      name: 'Dashboard',
+      name: "Dashboard",
       icon: LayoutDashboard,
-      section: 'main',
-      path: '/dashboard'
+      section: "main",
+      path: "/dashboard",
     },
     {
-      name: 'Kelola Asesmen',
+      name: "Kelola Asesmen",
+      icon: FileText,
+      section: "main",
+      path: "/kelola-asesmen",
+    },
+    {
+      name: "Kelola Skema",
       icon: Users,
-      section: 'main',
-      path: '/kelola-asesmen'
+      section: "main",
+      path: "/kelola-skema",
     },
     {
-      name: 'Kelengkapan MUK',
-      icon: File,
-      section: 'main',
-      path: '/kelola-muk'
+      name: "Kelola Jurusan",
+      icon: GraduationCap,
+      section: "main",
+      path: "/kelola-jurusan",
     },
-    {
-      name: 'Kelola Okupasi',
-      icon: Calendar,
-      section: 'main',
-      path: '/kelola-okupasi'
-    },
-    {
-      name: 'Kelola Jurusan',
-      icon: Album,
-      section: 'main',
-      path: '/kelola-jurusan'
-    }
   ];
 
   const managementItems: MenuItem[] = [
     {
-      name: 'Akun Asesi',
+      name: "Akun Asesi",
       icon: User,
-      section: 'management',
-      path: '/kelola-akun-asesi'
+      section: "management",
+      path: "/akun-asesi",
     },
     {
-      name: 'Akun Asesor',
+      name: "Akun Asesor",
       icon: UserCheck,
-      section: 'management',
-      path: '/kelola-akun-asesor'
+      section: "management",
+      path: "/akun-asesor",
     },
     {
-      name: 'Register',
-      icon: LogIn,
-      section: 'management',
-      path: '/register'
-    }
+      name: "Register",
+      icon: UserPlus,
+      section: "management",
+      path: "/register",
+    },
   ];
 
   const handleItemClick = (): void => {
@@ -100,7 +90,7 @@ const Sidebar: React.FC = () => {
 
   const handleLogout = (): void => {
     // Add logout logic here
-    console.log('Logout clicked');
+    console.log("Logout clicked");
     setIsMobileMenuOpen(false);
   };
 
@@ -110,14 +100,17 @@ const Sidebar: React.FC = () => {
     return (
       <Link
         to={item.path}
-        className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${isActive
-          ? 'bg-[#ffffff80] text-white'
-          : 'text-orange-100 hover:bg-[#ffffff80] hover:text-white'
-          }`}
+        className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
+          isActive
+            ? "bg-orange-600 text-white"
+            : "text-orange-100 hover:bg-[rgba(255,255,255,0.3)] hover:text-white"
+        }`}
         onClick={onClick}
       >
         <IconComponent size={18} className="flex-shrink-0" />
-        <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
+        <span className="text-sm font-medium whitespace-nowrap">
+          {item.name}
+        </span>
       </Link>
     );
   };
@@ -125,21 +118,20 @@ const Sidebar: React.FC = () => {
   const SidebarContent = () => (
     <>
       {/* Logo Section */}
-      <div className="flex flex-col items-start pl-4">
-        <Link to="/dashboard" className="py-10">
-          <img src="/img/logo-lsp.svg" alt="Logo" className="h-15 w-auto" />
+      <div className="p-2 border-b border-orange-400">
+        <Link to="/dashboard" className="flex items-center space-x-2 p-6">
+          <div className="w-8 h-20 flex items-center justify-center flex-shrink-0">
+            <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
+          </div>
         </Link>
+        <span className="p-2 text-sm text-orange-100 whitespace-nowrap">
+          Sertifikasi
+        </span>
       </div>
-
 
       {/* Main Menu Items */}
       <div className="flex-1">
-        <div className="pb  -2">
-          <div className="px-4 py-3">
-            <span className="text-xs text-orange-200 font-medium uppercase tracking-wider">
-              Sertifikasi
-            </span>
-          </div>
+        <div className="py-2">
           {menuItems.map((item) => (
             <MenuItem
               key={item.name}
@@ -203,12 +195,14 @@ const Sidebar: React.FC = () => {
       )}
 
       {/* Sidebar - Always visible on desktop, slide on mobile */}
-      <div className={`
-        fixed inset-y-0 left-0 z-40
-        w-64 h-screen bg-[#E77D35] text-white flex flex-col
-        transform transition-transform duration-300 ease-in-out lg:transform-none
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      <div
+        className={`
+  fixed inset-y-0 left-0 z-40
+  w-64 h-screen bg-[#E77D35] text-white flex flex-col
+  transform transition-transform duration-300 ease-in-out lg:transform-none
+  ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+`}
+      >
         <SidebarContent />
       </div>
 

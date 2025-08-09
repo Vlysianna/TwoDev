@@ -18,14 +18,12 @@ export default function LoginForm() {
       <div className="flex-1 flex items-center justify-center p-4 md:p-8">
         <div className="rounded-lg p-6 md:p-8 w-full max-w-md">
           {/* Logo and Title */}
-          <div className="text-start mb-6 md:mb-8">
-            <div className="mb-6 md:mb-10">
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg text-start">
-                <img src="public/img/Group 24.svg" alt="Logo" className="w-full h-full" />
-              </div>
+          <div className="text-start">
+            <div className="w-30 h-30 md:w-40 md:h-40 rounded-lg text-start">
+              <img src="public/img/logo-lsp-oren.svg" alt="Logo" className="w-full h-full" />
             </div>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Masuk</h1>
-            <p className="text-gray-600 text-xs md:text-sm">
+            <p className="mb-5 text-gray-600 text-xs md:text-sm">
               Selamat datang kembali! Silakan masukkan detail Anda.
             </p>
           </div>
@@ -81,22 +79,29 @@ export default function LoginForm() {
             </div>
 
             {/* Sign In Button */}
-            <button
-              onClick={handleSubmit}
-              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 md:py-2.5 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200"
-              type="button"
+            <Link
+              to="/dashboard-asesi"
+              className="w-full block text-center bg-[#E77D35] hover:cursor-pointer text-white py-2 md:py-2.5 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200"
             >
-              Sign in
-            </button>
+              Sign In
+            </Link>
 
             {/* Register Link */}
             <div className="text-center text-xs md:text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link className="text-orange-500 hover:text-orange-600 font-small" to="/register">
+              <Link className="text-orange-500 hover:text-orange-600 font-small" to="/register-asesi">
                 Register
               </Link>
             </div>
           </div>
+        </div>
+        <div className="fixed bottom-0 pb-10 flex items-center justify-center text-xs md:text-sm text-gray-600">
+          <span>Developed by</span>
+          <img
+            src="public/img/logo-two-dev.svg"
+            alt=""
+            className="w-20 ml-2"
+          />
         </div>
       </div>
 

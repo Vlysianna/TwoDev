@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Upload, X, Eye } from 'lucide-react';
+import { Upload, X, Eye, ChevronLeft } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
+import { Link } from 'react-router-dom';
 
 interface File {
     id: number;
@@ -16,7 +17,7 @@ interface FileUploadAreaProps {
     type: string;
 }
 
-export default function LspMediaForm() {
+export default function DataSertifikasi() {
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedAssessment, setSelectedAssessment] = useState('');
     const [selectedAssessor, setSelectedAssessor] = useState('');
@@ -118,28 +119,37 @@ export default function LspMediaForm() {
                 {files.length > 0 ? (
                     <div className="space-y-3">
                         {files.map((file) => (
-                            <div key={file.id} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3 hover:cursor-pointer transition-colors">
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                            <div
+                                key={file.id}
+                                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gray-50 border border-gray-200 rounded-lg p-3 hover:cursor-pointer transition-colors"
+                            >
+                                {/* Kiri - Icon + Detail */}
+                                <div className="flex items-center space-x-3 min-w-0">
+                                    <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <Upload className="w-5 h-5 text-white" />
                                     </div>
-                                    <div>
-                                        <p className="text-gray-900 font-medium text-sm">{file.name}</p>
-                                        <p className="text-gray-500 text-xs">File Format: {file.format} • File Size: {file.size}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-gray-900 font-medium text-sm truncate">{file.name}</p>
+                                        <p className="text-gray-500 text-xs truncate">
+                                            File Format: {file.format} • File Size: {file.size}
+                                        </p>
                                     </div>
                                 </div>
+
+                                {/* Kanan - Tombol */}
                                 <div className="flex items-center space-x-2">
-                                    <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors hover:cursor-pointer">
+                                    <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
                                         <Eye className="w-4 h-4 text-gray-600" />
                                     </button>
                                     <button
                                         onClick={() => onFileRemove(file.id, type)}
-                                        className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors hover:cursor-pointer"
+                                        className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
                                     >
                                         <X className="w-4 h-4 text-gray-600" />
                                     </button>
                                 </div>
                             </div>
+
                         ))}
                     </div>
                 ) : (
@@ -152,10 +162,17 @@ export default function LspMediaForm() {
     );
 
     return (
-        <div className="max-h-screen bg-gray-50 py-18">
+        <div className="max-h-screen bg-gray-50">
             <div className="mx-auto">
                 <div className="bg-white rounded-lg shadow-sm mb-8">
-                    <NavbarAsesi title='Bukti Administratif' />
+                    <NavbarAsesi
+                        title='Bukti Administratif'
+                        icon={
+                            <Link to="/apl-01" className="text-gray-500 hover:text-gray-600">
+                                <ChevronLeft size={20} />
+                            </Link>
+                        }
+                    />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-6 pb-7 flex">
@@ -225,19 +242,27 @@ export default function LspMediaForm() {
                                 />
                             </div>
                         </div>
-                        <div className="bg-white rounded-lg border border-gray-200 px-6 py-2 flex flex-col h-full">
+                        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:px-6 sm:py-4 flex flex-col h-full w-full mx-auto">
                             <div className="text-center mt-4 mb-4 space-y-3">
                                 <textarea
                                     name="catatan"
                                     value=""
                                     placeholder="Catatan"
                                     rows={3}
-                                    className="w-full h-full px-3 py-3 border border-[#DADADA] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-3 py-3 border border-[#DADADA] rounded-md 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                       text-sm sm:text-base resize-none"
                                 />
-                                <hr className='text-gray-300'/>
-                                <button className="w-full py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors hover:cursor-pointer">
-                                    Submit
-                                </button>
+                                <hr className="border-gray-300" />
+                                <div className="w-full">
+                                    <Link
+                                        to="/asesmen-mandiri"
+                                        className="w-full block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 rounded-md 
+                           transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base"
+                                    >
+                                        Lanjut
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
