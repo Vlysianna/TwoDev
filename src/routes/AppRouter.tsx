@@ -79,7 +79,7 @@ export default function AppRouter() {
 				<Route path="/kelola-okupasi" element={<KelolaOkupasi />} />
 				<Route path="/template-asesor" element={<TemplateAsesor />} />
 				<Route path="/template2-asesor" element={<Template2 />} />
-				<Route path="/kelola-jadwal" element={<KelolaJadwal />} />
+				<Route path="/kelola-asesmen" element={<KelolaJadwal />} />
 				<Route path="/tambah-jadwal" element={<TambahJadwal />} />
 			</Routes>
 		</BrowserRouter>
