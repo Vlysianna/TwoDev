@@ -13,21 +13,22 @@ import Navbar from '@/components/NavAdmin';
 
 interface UserData {
   id: number;
-  username: string;
-  password: string;
-  role: string;
+  okupasi: string;
+  skema: string;
+  tanggalMulai: string;
+  tanggalSelesai: string;
 }
 
-const KelolaAkunAsesi: React.FC = () => {
+const KelolaMUK: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const userData: UserData[] = [
-    { id: 1, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 2, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 3, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 4, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 5, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 6, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
+    { id: 1, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
+    { id: 2, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
+    { id: 3, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
+    { id: 4, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
+    { id: 5, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
+    { id: 6, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
   ];
 
   const handleEdit = (id: number) => console.log('Edit user:', id);
@@ -49,22 +50,32 @@ const KelolaAkunAsesi: React.FC = () => {
             <nav className="flex text-sm text-gray-500">
               <span>Dashboard</span>
               <span className="mx-2">/</span>
-              <span className="text-[#000000]">Akun Asesi</span>
+              <span className="text-[#000000]">Kelengkapan MUK</span>
             </nav>
           </div>
 
           {/* Page Title */}
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-4">Kelola Akun Asesi</h1>
+            <h1 className="text-[26px] font-semibold text-gray-900 mb-4">Kelengkapan MUK</h1>
             
-            {/* Create Account Button */}
-            <Link to="/target-route">
-              <button
-                className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
-              >
-                Buat Akun
-              </button>
-            </Link>
+            {/* Buttons */}
+            <div className="flex space-x-3">
+              <Link to="/tambah-muk">
+                <button
+                  className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
+                >
+                  Tambah MUK
+                </button>
+              </Link>
+
+              <Link to="/kelola-jurusan">
+                <button
+                  className="w-[151px] h-[41px] border border-[#E77D35] text-[#E77D35] text-sm font-medium rounded-md hover:bg-orange-50 transition-colors"
+                >
+                  Kelola Jurusan
+                </button>
+              </Link>
+            </div>
           </div>
 
           {/* Main Content Card - This is the box container like in Figma */}
@@ -72,7 +83,7 @@ const KelolaAkunAsesi: React.FC = () => {
             {/* Card Header with full border line */}
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[26px] font-semibold text-[#000000]">Akun Asesi</h2>
+                <h2 className="text-[26px] font-semibold text-[#000000]">Kelengkapan MUK</h2>
                 <div className="flex space-x-3">
                   <button
                     onClick={handleFilter}
@@ -99,17 +110,20 @@ const KelolaAkunAsesi: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-[#E77D35] text-white">
-                      <th className="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">
-                        Username
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Nama Okupasi
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">
-                        Password
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Skema
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">
-                        Role
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Tanggal Mulai
                       </th>
-                      <th className="px-6 py-4 text-center text-sm font-medium uppercase tracking-wider">
-                        Actions
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Tanggal Selesai
+                      </th>
+                      <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
+                        Aksi
                       </th>
                     </tr>
                   </thead>
@@ -120,13 +134,16 @@ const KelolaAkunAsesi: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.username}
+                          {user.okupasi}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.password}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.skema}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.role}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.tanggalMulai}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.tanggalSelesai}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
@@ -166,4 +183,4 @@ const KelolaAkunAsesi: React.FC = () => {
   );
 };
 
-export default KelolaAkunAsesi;
+export default KelolaMUK;
