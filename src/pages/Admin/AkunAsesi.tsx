@@ -99,16 +99,16 @@ const KelolaAkunAsesi: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-[#E77D35] text-white">
-                      <th className="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
                         Username
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
                         Password
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
                         Role
                       </th>
-                      <th className="px-6 py-4 text-center text-sm font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
                         Actions
                       </th>
                     </tr>
