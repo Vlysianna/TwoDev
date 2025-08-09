@@ -57,7 +57,7 @@ const KelolaMUK: React.FC = () => {
           {/* Page Title */}
           <div className="mb-6">
             <h1 className="text-[26px] font-semibold text-gray-900 mb-4">Kelengkapan MUK</h1>
-            
+
             {/* Buttons */}
             <div className="flex space-x-3">
               <Link to="/tambah-muk">
@@ -82,19 +82,21 @@ const KelolaMUK: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             {/* Card Header with full border line */}
             <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[26px] font-semibold text-[#000000]">Kelengkapan MUK</h2>
-                <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+                <h2 className="text-[20px] sm:text-[26px] font-semibold text-[#000000]">
+                  Kelengkapan MUK
+                </h2>
+                <div className="flex flex-wrap gap-3 sm:space-x-3">
                   <button
                     onClick={handleFilter}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto"
                   >
                     Filter
                     <Filter size={16} className="text-[#E77D35]" />
                   </button>
                   <button
                     onClick={handleExport}
-                    className="w-[152px] h-[41px] bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
+                    className="bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors w-full sm:w-[152px] h-[41px]"
                   >
                     Export ke Excel
                   </button>
@@ -129,8 +131,8 @@ const KelolaMUK: React.FC = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {userData.map((user, index) => (
-                      <tr 
-                        key={user.id} 
+                      <tr
+                        key={user.id}
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
