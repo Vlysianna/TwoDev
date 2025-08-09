@@ -65,7 +65,7 @@ export default function AssassmentMandiri() {
             <div className="mx-auto">
                 <div className="bg-white rounded-lg shadow-sm mb-8">
                     <NavbarAsesi
-                        title='Asasment Mandiri'
+                        title='Banding Asesmen'
                         icon={
                             <Link to="/data-sertifikasi" className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
@@ -130,7 +130,7 @@ export default function AssassmentMandiri() {
                                                     <div></div>
                                                 )}
 
-                                                <Link to="/asasmen-mandiri-detail" className="text-orange-500 hover:text-orange-600 text-sm flex items-center hover:underline hover:cursor-pointer">
+                                                <Link to="/asesmen-mandiri-detail" className="text-orange-500 hover:text-orange-600 text-sm flex items-center hover:underline hover:cursor-pointer">
                                                     Lihat detail
                                                     <ChevronRight size={14} className="ml-1" />
                                                 </Link>

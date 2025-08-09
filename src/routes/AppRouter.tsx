@@ -54,8 +54,8 @@ export default function AppRouter() {
 				<Route path="/register" element={<RegisterPage/>} />
 				<Route path="/dashboard-asesi" element={<DashboardAsesi/>} />
 				<Route path="/asesmen-aktif-asesi" element={<AsessmentAktif/>} />
-				<Route path="/asasmen-mandiri" element={<AssassmentMandiri />} />
-				<Route path="/asasmen-mandiri-detail" element={<AsassmentMandiriDetail />} />
+				<Route path="/asesmen-mandiri" element={<AssassmentMandiri />} />
+				<Route path="/asesmen-mandiri-detail" element={<AsassmentMandiriDetail />} />
 				<Route path="/persetujuan-asesmen-kerahasiaan" element={<PersetujuanAsesmenKerahasiaan />} />
 				<Route path="/asesmen-pilihan-ganda" element={<AsessementPilihanGanda />} />
 			</Routes>

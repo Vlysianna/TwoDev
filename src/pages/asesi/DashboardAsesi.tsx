@@ -142,10 +142,20 @@ export default function DashboardAsesi() {
                                         <div key={okupasi.id} className={`bg-white rounded-lg shadow-sm border-b-4 ${okupasi.borderColor} hover:shadow-md transition-shadow`}>
                                             {/* Header Kartu */}
                                             <div className="p-4 border-b border-gray-100">
-                                                <h3 className="font-semibold text-gray-900 mb-1">{okupasi.title}</h3>
+                                                {/* Title + tombol di kanan */}
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="font-semibold text-gray-900">{okupasi.title}</h3>
+                                                    <Link
+                                                        to="/apl-01"
+                                                        className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+                                                    >
+                                                        <ChevronRight className="w-4 h-4 text-white" />
+                                                    </Link>
+                                                </div>
+
                                                 <p className="text-sm text-gray-600 mb-2">{okupasi.subtitle}</p>
 
-                                                {/* Status dengan Clock Icon */}
+                                                {/* Status */}
                                                 <div className="flex items-center space-x-1 text-xs text-gray-500">
                                                     <Clock className="w-3 h-3" />
                                                     <span>{okupasi.status}</span>
@@ -153,7 +163,7 @@ export default function DashboardAsesi() {
                                             </div>
 
                                             {/* Tanggal */}
-                                            <div className="px-4 pt-3 pb-20">
+                                            <div className="px-4 pt-3 pb-10">
                                                 <div className="flex flex-col items-center">
                                                     {/* Tanggal dan waktu */}
                                                     <div className="flex justify-between w-full text-sm text-gray-500 mb-2">
@@ -178,8 +188,8 @@ export default function DashboardAsesi() {
                                             </div>
 
                                             {/* Footer dengan Avatar dan Tombol */}
-                                            <div className="p-4">
-                                                <div className="flex items-center justify-between">
+                                            {/* <div className="p-4">
+                                                <div className="flex items-center justify-end">
                                                     <div className="flex items-center space-x-3">
                                                         <div className={`w-8 h-8 ${okupasi.avatarBg} rounded-full flex items-center justify-center text-white text-sm font-medium`}>
                                                             {okupasi.avatar}
@@ -190,12 +200,11 @@ export default function DashboardAsesi() {
                                                         </div>
                                                     </div>
 
-                                                    {/* Tombol Navigasi */}
                                                     <Link to="/apl-01" className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
                                                         <ChevronRight className="w-4 h-4 text-white" />
                                                     </Link>
                                                 </div>
-                                            </div>
+                                            </div> */}
                                         </div>
                                     ))}
                                 </div>
