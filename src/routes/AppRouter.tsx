@@ -30,7 +30,7 @@ import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
 import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerahasiaan";
 import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
 import Test from "@/pages/LandingPage/Test";
-import TambahSkema from "@/pages/admin/TambahSkema";
+import TambahSkema from "@/pages/admin/TambahMUK";
 import KelolaJurusan from "@/pages/admin/kelolaJur";
 import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
