@@ -13,14 +13,14 @@ import Prosedur from "@/pages/LandingPage/Prosedur";
 import Berita from "@/pages/LandingPage/Berita";
 import Galeri from "@/pages/LandingPage/Galeri";
 import Dokumen from "@/pages/LandingPage/Dokumen";
-import KelolaAkunAsesi from "@/pages/Admin/AkunAsesi";
-import KelolaMUK from "@/pages/Admin/KelolaSkema";
-import EditAsesor from "@/pages/Admin/EditAsesor";
-import KelolaAkunAsesor from "@/pages/Admin/AkunAsesor";
-import VerifikasiPage from "@/pages/Admin/verifikasi";
-import RegisterPage from "@/pages/Admin/register";
-import EditAsesi from "@/pages/Admin/EditAsessi";
-import KelolaOkupasi from "@/pages/Admin/okupasi/KelolaOkupasi";
+import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
+import KelolaMUK from "@/pages/admin/KelolaSkema";
+import EditAsesor from "@/pages/admin/EditAsesor";
+import KelolaAkunAsesor from "@/pages/admin/AkunAsesor";
+import VerifikasiPage from "@/pages/admin/verifikasi";
+import RegisterPage from "@/pages/admin/register";
+import EditAsesi from "@/pages/admin/EditAsessi";
+import KelolaOkupasi from "@/pages/admin/okupasi/KelolaOkupasi";
 import AplZeroTwo from "@/pages/asesi/Apl-02";
 import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
@@ -30,8 +30,14 @@ import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
 import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerahasiaan";
 import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
 import Test from "@/pages/LandingPage/Test";
-import TambahSkema from "@/pages/Admin/TambahSkema";
-import KelolaJurusan from "@/pages/Admin/kelolaJur";
+import TambahSkema from "@/pages/admin/TambahSkema";
+import KelolaJurusan from "@/pages/admin/kelolaJur";
+import EditAsessi from "@/pages/admin/EditAsessi";
+import KelolaJadwal from "@/pages/admin/KelolaJadwal";
+import TambahJadwal from "@/pages/admin/TambahJadwal";
+import TemplateAsesor from "@/pages/asesor/Template";
+import Template2 from "@/pages/asesor/Template2";
+import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 import paths from "./paths";
 
 const RootLayout = () => <Outlet />;
@@ -48,7 +54,7 @@ const router = createBrowserRouter([
       { path: paths.pengelolaSDM, element: <PengelolaSDM /> },
       { path: paths.skema, element: <Skema /> },
       { path: paths.tempatUji, element: <Tempatuji /> },
-      { path: paths.asesor, element: <Asesor /> },
+      { path: paths.asesor.root, element: <Asesor /> },
       { path: paths.prosedurPendaftaran, element: <Prosedur /> },
       { path: paths.berita, element: <Berita /> },
       { path: paths.galeri, element: <Galeri /> },
@@ -72,18 +78,19 @@ const router = createBrowserRouter([
           { path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
           { path: paths.admin.kelolaMUK, element: <KelolaMUK /> },
           { path: paths.admin.editAsesor, element: <EditAsesor /> },
+          { path: paths.admin.editAsessi, element: <EditAsessi /> },
           { path: paths.admin.kelolaAkunAsesor, element: <KelolaAkunAsesor /> },
           { path: paths.admin.editAsesi, element: <EditAsesi /> },
           { path: paths.admin.verifikasi, element: <VerifikasiPage /> },
           { path: paths.admin.tambahSkema, element: <TambahSkema /> },
           { path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
+          { path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
+          { path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
 
           // Okupasi nested
           {
             path: paths.admin.okupasi.root,
-            children: [
-              { index: true, element: <KelolaOkupasi /> },
-            ],
+            children: [{ index: true, element: <KelolaOkupasi /> }],
           },
         ],
       },
@@ -104,6 +111,16 @@ const router = createBrowserRouter([
             element: <PersetujuanAsesmenKerahasiaan />,
           },
           { path: paths.asesi.asesmenPilihanGanda, element: <AsessementPilihanGanda /> },
+        ],
+      },
+
+      // Asesor routes
+      {
+        path: paths.asesor.root,
+        children: [
+          { path: paths.asesor.template, element: <TemplateAsesor /> },
+          { path: paths.asesor.template2, element: <Template2 /> },
+          { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
         ],
       },
     ],

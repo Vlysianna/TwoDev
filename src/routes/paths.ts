@@ -6,7 +6,6 @@ const paths = {
   pengelolaSDM: "/pengelola-sdm",
   skema: "/skema",
   tempatUji: "/tempat-uji",
-  asesor: "/asesor",
   prosedurPendaftaran: "/prosedur-pendaftaran",
   berita: "/berita",
   galeri: "/galeri",
@@ -34,6 +33,15 @@ const paths = {
       edit: (id: string | number) => `/admin/okupasi/edit/${id}`,
       editPattern: "/admin/okupasi/edit/:id"
     },
+    editAsessi: "/admin/edit-asesi",
+    kelolaJadwal: "/admin/kelola-jadwal",
+    tambahJadwal: "/admin/tambah-jadwal",
+  },
+  asesor: {
+    root: "/asesor",
+    template: "/asesor/template",
+    template2: "/asesor/template2",
+    fiiadetail: "/asesor/fi.ia.01-detail",
   },
   asesi: {
     root: "/asesi",
