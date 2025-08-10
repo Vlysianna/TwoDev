@@ -44,6 +44,8 @@ const paths = {
     template: "/asesor/template",
     template2: "/asesor/template2",
     fiiadetail: "/asesor/fi.ia.01-detail",
+    apl01: "/asesor/apl-01",
+    dataSertifikasi: "/asesor/data-sertifikasi",
   },
   asesi: {
     root: "/",

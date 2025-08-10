@@ -34,11 +34,13 @@ import TambahSkema from "@/pages/admin/TambahSkema";
 import KelolaJurusan from "@/pages/admin/kelolaJur";
 import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
+import AplZeroOneAsesor from "@/pages/asesor/Apl-01-Assesor";
+import DataSertifikasiAsesor from "@/pages/asesor/DataSertifikasiAsesor";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
+import paths from "./paths";
 import TemplateAsesor from "@/pages/asesor/Template";
 import Template2 from "@/pages/asesor/Template2";
 import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
-import paths from "./paths";
 
 const RootLayout = () => <Outlet />;
 
@@ -121,6 +123,8 @@ const router = createBrowserRouter([
           { path: paths.asesor.template, element: <TemplateAsesor /> },
           { path: paths.asesor.template2, element: <Template2 /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
+          { path: paths.asesor.apl01, element: <AplZeroOneAsesor /> },
+          { path: paths.asesor.dataSertifikasi, element: <DataSertifikasiAsesor /> },
         ],
       },
     ],
