@@ -6,11 +6,11 @@ function Berita() {
   {
     id: 1,
     judul: "Lembaga Sertifikasi Profesi SMK Negeri 24 Jakarta",
-    penulis: "Denira Islam, Bamba, Aquis Cakrawang R.P",
-    tanggal: "7 Feb",
+    penulis: "Jl.Bambu Hitam. Bambu Apus. Cipayung Rt.7 / Rw.3",
+    tanggal: "23-08-24",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/berita-utama.jpg",
+    gambar: "/bgsklh.png",
   },
   {
     id: 2,
@@ -19,7 +19,7 @@ function Berita() {
     tanggal: "5 Feb",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/berita-kecil.jpg",
+    gambar: "/bgsklh.png",
   },
   {
     id: 3,
@@ -94,11 +94,12 @@ function Berita() {
 
         {/* Section Hero dengan background */}
         <section className="relative min-h-screen">
-          <img
+           <img
             src="/bgsklh.png"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-sm brightness-75 z-0 "
+            className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />
+                <div className="absolute inset-0 bg-[#3171cd] opacity-55 mix-blend-multiply "></div>
 
           <div className="relative z-10 flex items-center justify-center text-center px-4 sm:px-10 md:px-20 py-32 sm:py-40 h-full">
             <div className="text-white max-w-2xl">
@@ -120,16 +121,22 @@ function Berita() {
 
       {/* Kolom Kiri - Berita Utama */}
       {berita.length > 0 && (
-        <div className="lg:col-span-2 bg-white rounded-lg shadow">
+        <div className="lg:col-span-2 rounded-lg w-2xl">
           <img
             src={berita[0].gambar}
             alt={berita[0].judul}
-            className="w-full h-72 object-cover rounded-t-lg"
+            className="w-full h-95 object-cover rounded-t-lg"
           />
+          <div className="bg-[#E77D35] text-white text-center p-5 text-lg text-start">
+    Lembaga Sertifikasi Profesi SMK Negeri 24 Jakarta
+  </div>
           <div className="p-4">
             <h3 className="text-lg font-bold mb-2">{berita[0].judul}</h3>
-            <p className="text-sm text-gray-500 mb-2">
-              {berita[0].penulis}, {berita[0].tanggal}
+            <p className="text-end text-sm text-gray-500 px-35">
+{berita[0].tanggal}
+            </p>
+            <p className="text-sm text-gray-500 mb-2 ">
+              {berita[0].penulis}
             </p>
             <p className="text-gray-700">{berita[0].deskripsi}</p>
           </div>
@@ -137,7 +144,7 @@ function Berita() {
       )}
 
       {/* Kolom Kanan - Scrollable List */}
-      <div className="bg-white rounded-lg shadow p-2 max-h-[600px] overflow-y-auto">
+      <div className=" rounded-lg  p-2 max-h-[600px] overflow-y-auto">
         {berita.slice(1).map((item) => (
           <div key={item.id} className="flex gap-4 mb-3 border-b pb-3 last:border-none last:pb-0">
             <img

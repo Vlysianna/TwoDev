@@ -97,10 +97,7 @@ const NavLanding: React.FC = () => {
                   </Link>
                   <Link to="/struktur" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Struktur Organisasi
-                  </Link>
-                  <Link to="/pengelola-sdm" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Pengelola SDM
-                  </Link>
+                  </Link>                 
                 </div>
               )}
             </div>
@@ -142,7 +139,7 @@ const NavLanding: React.FC = () => {
 
           {/* Login Button */}
           <div className="hidden md:block">
-            <Link className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-md text-sm font-medium" to="/login">
+            <Link className="bg-[#E77D35] hover:bg-orange-700 text-white px-5 py-2 rounded-md text-sm font-medium" to="/login">
               Login
             </Link>
           </div>
@@ -231,7 +228,7 @@ const NavLanding: React.FC = () => {
               Dokumen
             </Link>
 
-            <button className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm mt-4">
+            <button className="w-full bg-[#E77D35] hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm mt-4">
               Login
             </button>
           </div>

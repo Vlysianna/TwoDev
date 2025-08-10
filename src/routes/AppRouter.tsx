@@ -10,7 +10,6 @@ import VerifikasiPage from "../pages/admin/verifikasi";
 import RegisterPage from "../pages/admin/register";
 import Skema from "@/pages/LandingPage/Skema";
 import StrukturLSP from "@/pages/LandingPage/StrukturLSP";
-import PengelolaSDM from "@/pages/LandingPage/PengelolaSDM";
 import Tempatuji from "@/pages/LandingPage/Tempatuji";
 import Asesor from "@/pages/LandingPage/Asesor";
 import Prosedur from "@/pages/LandingPage/Prosedur";
@@ -48,8 +47,7 @@ export default function AppRouter() {
 				<Route path="/tambahskema" element={<TambahSkema />} />
 				<Route path="/" element={<LandingPage />} />
 				<Route path="/about" element={<TentangLSP />} />
-				<Route path="/struktur" element={<StrukturLSP />} />		
-				<Route path="/pengelola-sdm" element={<PengelolaSDM />} />		
+				<Route path="/struktur" element={<StrukturLSP />} />					
 				<Route path="/skema" element={<Skema />} />
 				<Route path="/tempat-uji" element={<Tempatuji />} />
 				<Route path="/asesor" element={<Asesor />} />
