@@ -45,7 +45,17 @@ export default function UnitField({
         width: "100%",
       }}
     >
-      <h2 className="text-md font-semibold" style={{ marginBottom: "0.5em" }}>Unit Kompetensi {unitIndex + 1}</h2>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-md font-semibold mb-2">Unit Kompetensi {unitIndex + 1}</h2>
+        <button
+          type="button"
+          onClick={() => removeUnit(unitIndex)}
+          className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+        >
+          Hapus Unit
+        </button>
+      </div>
+                        
 
       <div style={{ display: "flex", gap: "1em", marginBottom: "1em" }}>
         <div style={{ flex: 1 }}>
@@ -73,6 +83,9 @@ export default function UnitField({
       {elementFields.map((_elementField, elementIndex) => (
         <div
           key={_elementField.id}
+          style={{
+            marginBottom: "1em",
+          }}
         >
           <ElementField
             key={_elementField.id}
@@ -82,24 +95,17 @@ export default function UnitField({
             elementIndex={elementIndex}
             removeElement={removeElement}
           />
-          <div style={{ display: "flex", gap: "0.5em" }}>
-            <button
-              type="button"
-              onClick={() => appendElement({ id: "", text: "", item: [] })}
-              className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
-              >
-              Tambah Elemen
-            </button>
-            <button
-              type="button"
-              onClick={() => removeElement(elementIndex)}
-              className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
-              >
-              Hapus Elemen
-            </button>
-          </div>
         </div>
       ))}
+      <div style={{ display: "flex", gap: "0.5em" }}>
+        <button
+          type="button"
+          onClick={() => appendElement({ id: "", text: "", item: [] })}
+          className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
+          >
+          Tambah Elemen
+        </button>
+      </div>
     </div>
   );
 }
