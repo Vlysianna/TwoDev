@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Upload, X, Eye, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, X, Eye, ChevronLeft, AlertCircle, CheckCircle } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/helper/axios';
 
 interface File {
     id: number;

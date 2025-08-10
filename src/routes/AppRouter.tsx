@@ -13,34 +13,38 @@ import Prosedur from "@/pages/LandingPage/Prosedur";
 import Berita from "@/pages/LandingPage/Berita";
 import Galeri from "@/pages/LandingPage/Galeri";
 import Dokumen from "@/pages/LandingPage/Dokumen";
-import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
-import KelolaMUK from "@/pages/admin/KelolaSkema";
-import EditAsesor from "@/pages/admin/EditAsesor";
-import KelolaAkunAsesor from "@/pages/admin/AkunAsesor";
-import VerifikasiPage from "@/pages/admin/verifikasi";
-import RegisterPage from "@/pages/admin/register";
-import EditAsesi from "@/pages/admin/EditAsessi";
-import KelolaOkupasi from "@/pages/admin/okupasi/KelolaOkupasi";
+import KelolaAkunAsesi from "@/pages/Admin/AkunAsesi";
+import KelolaMUK from "@/pages/Admin/KelolaSkema";
+import EditAsesor from "@/pages/Admin/EditAsesor";
+import KelolaAkunAsesor from "@/pages/Admin/AkunAsesor";
+import VerifikasiPage from "@/pages/Admin/verifikasi";
+import RegisterPage from "@/pages/Admin/register";
+import EditAsesi from "@/pages/Admin/EditAsessi";
+import KelolaOkupasi from "@/pages/Admin/okupasi/KelolaOkupasi";
 import AplZeroTwo from "@/pages/asesi/Apl-02";
 import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
+import DashboardAdmin from "@/pages/Admin/DashboardAdmin";
 import AsessmentAktif from "@/pages/asesi/AsesmentAktif";
 import AssassmentMandiri from "@/pages/asesi/AsassmentMandiri";
 import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
 import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerahasiaan";
 import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
 import Test from "@/pages/LandingPage/Test";
-import TambahSkema from "@/pages/admin/TambahSkema";
-import KelolaJurusan from "@/pages/admin/kelolaJur";
-import EditAsessi from "@/pages/admin/EditAsessi";
-import KelolaJadwal from "@/pages/admin/KelolaJadwal";
+import TambahSkema from "@/pages/Admin/TambahSkema";
+import KelolaJurusan from "@/pages/Admin/kelolaJur";
+import EditAsessi from "@/pages/Admin/EditAsessi";
+import KelolaJadwal from "@/pages/Admin/KelolaJadwal";
 import AplZeroOneAsesor from "@/pages/asesor/Apl-01-Assesor";
 import DataSertifikasiAsesor from "@/pages/asesor/DataSertifikasiAsesor";
-import TambahJadwal from "@/pages/admin/TambahJadwal";
+import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
+import TambahJadwal from "@/pages/Admin/TambahJadwal";
 import paths from "./paths";
 import TemplateAsesor from "@/pages/asesor/Template";
 import Template2 from "@/pages/asesor/Template2";
 import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import DashboardHome from "@/components/DashboardHome";
 
 const RootLayout = () => <Outlet />;
 
@@ -63,9 +67,13 @@ const router = createBrowserRouter([
       { path: paths.dashboard.dokumen, element: <Dokumen /> },
       { path: paths.dashboard.test, element: <Test /> },
 
-      // Auth routes
+      // Dashboard route for authenticated users
+      { path: "/dashboard", element: <ProtectedRoute><DashboardHome /></ProtectedRoute> },
+
+      // Auth routes (public)
       {
         path: paths.auth.root,
+        element: <ProtectedRoute requireAuth={false}><Outlet /></ProtectedRoute>,
         children: [
           { path: paths.auth.login, element: <LoginForm /> },
           { path: paths.auth.register, element: <RegisterPage /> },
@@ -73,10 +81,12 @@ const router = createBrowserRouter([
         ],
       },
 
-      // Admin routes
+      // Admin routes (protected - role 1)
       {
         path: paths.admin.root,
+        element: <ProtectedRoute allowedRoles={[1]}><Outlet /></ProtectedRoute>,
         children: [
+          { index: true, element: <DashboardAdmin /> },
           { path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
           { path: paths.admin.kelolaMUK, element: <KelolaMUK /> },
           { path: paths.admin.editAsesor, element: <EditAsesor /> },
@@ -97,10 +107,12 @@ const router = createBrowserRouter([
         ],
       },
 
-      // Asesi routes
+      // Asesi routes (protected - role 3)
       {
         path: paths.asesi.root,
+        element: <ProtectedRoute allowedRoles={[3]}><Outlet /></ProtectedRoute>,
         children: [
+          { index: true, element: <DashboardAsesi /> },
           { path: paths.asesi.dashboard, element: <DashboardAsesi /> },
           { path: paths.asesi.apl01, element: <AplZeroOne /> },
           { path: paths.asesi.apl02, element: <AplZeroTwo /> },
@@ -116,10 +128,12 @@ const router = createBrowserRouter([
         ],
       },
 
-      // Asesor routes
+      // Asesor routes (protected - role 2)
       {
         path: paths.asesor.root,
+        element: <ProtectedRoute allowedRoles={[2]}><Outlet /></ProtectedRoute>,
         children: [
+          { index: true, element: <DashboardAsesor /> },
           { path: paths.asesor.template, element: <TemplateAsesor /> },
           { path: paths.asesor.template2, element: <Template2 /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },

@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import UserMenu from './UserMenu';
 import paths from '@/routes/paths';
 
 const NavLanding: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<string>('');
+  const { isAuthenticated, user } = useAuth();
 
   const location = useLocation();
 
   useEffect(() => {
     const path = location.pathname;
-    if (path === paths.dashboard.landing) {
+    if (path === paths.root) {
       setActiveItem('home');
     } else if (
       path.includes(paths.dashboard.about) || 
@@ -23,7 +26,7 @@ const NavLanding: React.FC = () => {
     } else if (
       path.includes(paths.dashboard.skema) || 
       path.includes(paths.dashboard.tempatUji) || 
-      path.includes(paths.asesor) || 
+      path.includes(paths.dashboard.asesor) || 
       path.includes(paths.dashboard.prosedurPendaftaran)
     ) {
       setActiveItem('layanan');
@@ -48,12 +51,25 @@ const NavLanding: React.FC = () => {
     setActiveDropdown(null);
   };
 
+  const getDashboardPath = (roleId: number) => {
+    switch (roleId) {
+      case 1:
+        return paths.admin.root;
+      case 2:
+        return paths.asesor.root;
+      case 3:
+        return paths.asesi.root;
+      default:
+        return paths.root;
+    }
+  };
+
   const toggleDropdown = (menu: string) => {
     setActiveDropdown(activeDropdown === menu ? null : menu);
   };
 
   const menuItems = [
-    { name: 'Home', path: paths.dashboard.landing },
+    { name: 'Home', path: paths.root },
     { name: 'Berita', path: paths.dashboard.berita },
     { name: 'Galeri', path: paths.dashboard.galeri },
     { name: 'Dokumen', path: paths.dashboard.dokumen },
@@ -139,7 +155,7 @@ const NavLanding: React.FC = () => {
                   <Link to={paths.dashboard.tempatUji} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Tempat Uji
                   </Link>
-                  <Link to={paths.asesor} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link to={paths.dashboard.asesor} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Asesor
                   </Link>
                   <Link to={paths.dashboard.prosedurPendaftaran} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -150,11 +166,23 @@ const NavLanding: React.FC = () => {
             </div>
           </div>
 
-          {/* Login Button */}
+          {/* Authentication Section */}
           <div className="hidden md:block">
-            <Link className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-md text-sm font-medium" to={paths.auth.login}>
-              Login
-            </Link>
+            {isAuthenticated && user ? (
+              <div className="flex items-center space-x-4">
+                <Link 
+                  to={getDashboardPath(user.role_id)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
+                <UserMenu />
+              </div>
+            ) : (
+              <Link className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-md text-sm font-medium" to={paths.auth.login}>
+                Login
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -170,7 +198,7 @@ const NavLanding: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200 z-40 relative">
           <div className="px-4 pt-4 pb-6 space-y-2">
-            <Link to={paths.dashboard.landing} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+            <Link to={paths.root} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
               Home
             </Link>
 
@@ -221,7 +249,7 @@ const NavLanding: React.FC = () => {
                   <Link to={paths.dashboard.tempatUji} className="block text-sm text-gray-600 hover:text-blue-600">
                     Tempat Uji
                   </Link>
-                  <Link to={paths.asesor} className="block text-sm text-gray-600 hover:text-blue-600">
+                  <Link to={paths.dashboard.asesor} className="block text-sm text-gray-600 hover:text-blue-600">
                     Asesor
                   </Link>
                   <Link to={paths.dashboard.prosedurPendaftaran} className="block text-sm text-gray-600 hover:text-blue-600">
@@ -241,9 +269,29 @@ const NavLanding: React.FC = () => {
               Dokumen
             </Link>
 
-            <button className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm mt-4">
-              Login
-            </button>
+            {/* Mobile Authentication Section */}
+            {isAuthenticated && user ? (
+              <div className="space-y-2 mt-4">
+                <Link 
+                  to={getDashboardPath(user.role_id)}
+                  className="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm text-center"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <div className="px-2">
+                  <UserMenu />
+                </div>
+              </div>
+            ) : (
+              <Link 
+                to={paths.auth.login}
+                className="block w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm mt-4 text-center"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       )}

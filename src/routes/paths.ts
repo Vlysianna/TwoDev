@@ -14,13 +14,13 @@ const paths = {
     test: "/test",
   },
   auth: {
-    root: "/",
-    login: "/login",
-    register: "/register",
-    registerAsesi: "/register-asesi",
+    root: "/auth",
+    login: "/auth/login",
+    register: "/auth/register",
+    registerAsesi: "/auth/register-asesi",
   },
   admin: {
-    root: "/",
+    root: "/admin",
     kelolaAkunAsesi: "/admin/kelola-akun-asesi",
     kelolaMUK: "/admin/kelola-muk",
     editAsesor: "/admin/edit-asesor",
@@ -48,7 +48,7 @@ const paths = {
     dataSertifikasi: "/asesor/data-sertifikasi",
   },
   asesi: {
-    root: "/",
+    root: "/asesi",
     dashboard: "/asesi/dashboard",
     apl01: "/asesi/apl-01",
     apl02: "/asesi/apl-02",

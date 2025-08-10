@@ -1,8 +1,10 @@
-import { ChevronLeft, Clock } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronLeft, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/helper/axios';
 
 export default function AsessementPilihanGanda() {
     const [answers, setAnswers] = useState<Answers>({

@@ -246,7 +246,7 @@ export default function PersetujuanAsesmenKerahasiaan() {
 
                                         <div className="flex justify-center items-center p-10">
                                             <img
-                                                src="public/img/cthbarkod.svg" // ganti dengan path QR code kamu
+                                                src="/img/cthbarkod.svg" // ganti dengan path QR code kamu
                                                 alt="QR Code"
                                                 className="w-[200px] h-[200px]"
                                             />

@@ -2,6 +2,7 @@ import NavLanding from "../../components/NavLanding";
 import FootLanding from "../../components/FootLanding";
 import { useState, useEffect } from "react";
 import { Link} from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import paths from "@/routes/paths";
 
 
@@ -9,7 +10,34 @@ import paths from "@/routes/paths";
 
 
 function LandingPage() {
+  const { isAuthenticated, user } = useAuth();
   const images = ["/bgsklh.png", "/bgsklh.png", "/bgsklh.png", "/bgsklh.png"];
+
+  const getDashboardPath = (roleId: number) => {
+    switch (roleId) {
+      case 1:
+        return paths.admin.root;
+      case 2:
+        return paths.asesor.root;
+      case 3:
+        return paths.asesi.root;
+      default:
+        return paths.root;
+    }
+  };
+
+  const getRoleName = (roleId: number) => {
+    switch (roleId) {
+      case 1:
+        return 'Admin';
+      case 2:
+        return 'Asesor';
+      case 3:
+        return 'Asesi';
+      default:
+        return 'User';
+    }
+  };
 
 const SkemaImages = [
   {
@@ -119,12 +147,34 @@ useEffect(() => {
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-20 h-full">
             <div className="text-white max-w-xl text-center md:text-left">
-              <p className="text-xl md:text-2xl mb-4">
-                Lembaga Sertifikasi Profesi SMKN 24 Jakarta
-              </p>
-              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
-                Sertifikasikan <br /> Profesimu!
-              </h1>
+              {isAuthenticated && user ? (
+                <>
+                  <p className="text-lg md:text-xl mb-2 text-yellow-300">
+                    Selamat datang, {user.email.split('@')[0]}!
+                  </p>
+                  <p className="text-md md:text-lg mb-4 text-gray-200">
+                    Anda login sebagai {getRoleName(user.role_id)}
+                  </p>
+                  <h1 className="text-3xl md:text-5xl font-extrabold leading-tight mb-6">
+                    Kelola Sertifikasi <br /> Profesi Anda!
+                  </h1>
+                  <Link
+                    to={getDashboardPath(user.role_id)}
+                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors"
+                  >
+                    Masuk ke Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="text-xl md:text-2xl mb-4">
+                    Lembaga Sertifikasi Profesi SMKN 24 Jakarta
+                  </p>
+                  <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
+                    Sertifikasikan <br /> Profesimu!
+                  </h1>
+                </>
+              )}
             </div>
 
             <div className="relative w-[300px] h-[300px] mx-auto mt-10 ">
