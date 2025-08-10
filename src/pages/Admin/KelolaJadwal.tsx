@@ -14,6 +14,7 @@ import {
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import { Link } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 interface UserData {
   id: number;
@@ -64,7 +65,7 @@ const KelolaJadwal: React.FC = () => {
 
             {/* Buttons */}
             <div className="flex space-x-3">
-              <Link to="/tambah-jadwal">
+              <Link to={paths.admin.tambahJadwal}>
                 <button
                   className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
                 >

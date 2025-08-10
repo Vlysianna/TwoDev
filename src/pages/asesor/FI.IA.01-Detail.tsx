@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Monitor, ChevronLeft, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavbarAsesor from '@/components/NavAsesor';
+import paths from '@/routes/paths';
 
 interface Criteria {
   id: string;
@@ -120,7 +121,7 @@ export default function FIIADetail() {
         <NavbarAsesor
           title="Detail"
           icon={
-            <Link to="/asesmen-mandiri" className="text-gray-500 hover:text-gray-600">
+            <Link to={paths.asesi.asesmenMandiri} className="text-gray-500 hover:text-gray-600">
               <ChevronLeft size={20} />
             </Link>
           }

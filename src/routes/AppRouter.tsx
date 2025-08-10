@@ -49,17 +49,17 @@ const router = createBrowserRouter([
     children: [
       // Landing & Public Pages
       { index: true, element: <LandingPage /> },
-      { path: paths.about, element: <TentangLSP /> },
-      { path: paths.struktur, element: <StrukturLSP /> },
-      { path: paths.pengelolaSDM, element: <PengelolaSDM /> },
-      { path: paths.skema, element: <Skema /> },
-      { path: paths.tempatUji, element: <Tempatuji /> },
-      { path: paths.asesor.root, element: <Asesor /> },
-      { path: paths.prosedurPendaftaran, element: <Prosedur /> },
-      { path: paths.berita, element: <Berita /> },
-      { path: paths.galeri, element: <Galeri /> },
-      { path: paths.dokumen, element: <Dokumen /> },
-      { path: paths.test, element: <Test /> },
+      { path: paths.dashboard.about, element: <TentangLSP /> },
+      { path: paths.dashboard.struktur, element: <StrukturLSP /> },
+      { path: paths.dashboard.pengelolaSDM, element: <PengelolaSDM /> },
+      { path: paths.dashboard.skema, element: <Skema /> },
+      { path: paths.dashboard.tempatUji, element: <Tempatuji /> },
+      { path: paths.dashboard.asesor, element: <Asesor /> },
+      { path: paths.dashboard.prosedurPendaftaran, element: <Prosedur /> },
+      { path: paths.dashboard.berita, element: <Berita /> },
+      { path: paths.dashboard.galeri, element: <Galeri /> },
+      { path: paths.dashboard.dokumen, element: <Dokumen /> },
+      { path: paths.dashboard.test, element: <Test /> },
 
       // Auth routes
       {

@@ -8,6 +8,7 @@ import {
     ListCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import paths from "@/routes/paths";
 
 interface MenuItem {
     name: string;
@@ -84,7 +85,7 @@ const SidebarAsesor: React.FC = () => {
         <>
             {/* Logo Section */}
             <div className="p-2 border-b border-orange-400 flex justify-center">
-                <Link to="/dashboard" className="p-6">
+                <Link to={paths.asesor.root} className="p-6">
                     <div className="h-20 flex items-center justify-center">
                         <img
                             src="img/final logo twodev teks putih 1.svg"

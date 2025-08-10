@@ -12,26 +12,26 @@ const NavLanding: React.FC = () => {
 
   useEffect(() => {
     const path = location.pathname;
-    if (path === paths.landing) {
+    if (path === paths.dashboard.landing) {
       setActiveItem('home');
     } else if (
-      path.includes(paths.about) || 
-      path.includes(paths.struktur) || 
-      path.includes(paths.pengelolaSDM)
+      path.includes(paths.dashboard.about) || 
+      path.includes(paths.dashboard.struktur) || 
+      path.includes(paths.dashboard.pengelolaSDM)
     ) {
       setActiveItem('profil');
     } else if (
-      path.includes(paths.skema) || 
-      path.includes(paths.tempatUji) || 
+      path.includes(paths.dashboard.skema) || 
+      path.includes(paths.dashboard.tempatUji) || 
       path.includes(paths.asesor) || 
-      path.includes(paths.prosedurPendaftaran)
+      path.includes(paths.dashboard.prosedurPendaftaran)
     ) {
       setActiveItem('layanan');
-    } else if (path.includes(paths.berita)) {
+    } else if (path.includes(paths.dashboard.berita)) {
       setActiveItem('berita');
-    } else if (path.includes(paths.galeri)) {
+    } else if (path.includes(paths.dashboard.galeri)) {
       setActiveItem('galeri');
-    } else if (path.includes(paths.dokumen)) {
+    } else if (path.includes(paths.dashboard.dokumen)) {
       setActiveItem('dokumen');
     }
   }, [location.pathname]);
@@ -53,10 +53,10 @@ const NavLanding: React.FC = () => {
   };
 
   const menuItems = [
-    { name: 'Home', path: paths.landing },
-    { name: 'Berita', path: paths.berita },
-    { name: 'Galeri', path: paths.galeri },
-    { name: 'Dokumen', path: paths.dokumen },
+    { name: 'Home', path: paths.dashboard.landing },
+    { name: 'Berita', path: paths.dashboard.berita },
+    { name: 'Galeri', path: paths.dashboard.galeri },
+    { name: 'Dokumen', path: paths.dashboard.dokumen },
   ];
 
   return (
@@ -102,13 +102,13 @@ const NavLanding: React.FC = () => {
               </button>
               {activeDropdown === 'profil' && (
                 <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg border rounded-md z-50 py-2">
-                  <Link to={paths.about} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link to={paths.dashboard.about} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Tentang LSP
                   </Link>
-                  <Link to={paths.struktur} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link to={paths.dashboard.struktur} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Struktur Organisasi
                   </Link>
-                  <Link to={paths.pengelolaSDM} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link to={paths.dashboard.pengelolaSDM} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Pengelola SDM
                   </Link>
                 </div>
@@ -133,16 +133,16 @@ const NavLanding: React.FC = () => {
               </button>
               {activeDropdown === 'layanan' && (
                 <div className="absolute top-full left-0 mt-2 w-56 bg-white shadow-lg border rounded-md z-50 py-2">
-                  <Link to={paths.skema} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link to={paths.dashboard.skema} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Skema
                   </Link>
-                  <Link to={paths.tempatUji} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link to={paths.dashboard.tempatUji} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Tempat Uji
                   </Link>
                   <Link to={paths.asesor} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Asesor
                   </Link>
-                  <Link to={paths.prosedurPendaftaran} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link to={paths.dashboard.prosedurPendaftaran} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Prosedur Pendaftaran
                   </Link>
                 </div>
@@ -170,7 +170,7 @@ const NavLanding: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200 z-40 relative">
           <div className="px-4 pt-4 pb-6 space-y-2">
-            <Link to={paths.landing} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+            <Link to={paths.dashboard.landing} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
               Home
             </Link>
 
@@ -188,13 +188,13 @@ const NavLanding: React.FC = () => {
               </button>
               {activeDropdown === 'mobile-profil' && (
                 <div className="pl-4 space-y-1">
-                  <Link to={paths.about} className="block text-sm text-gray-600 hover:text-blue-600">
+                  <Link to={paths.dashboard.about} className="block text-sm text-gray-600 hover:text-blue-600">
                     Tentang LSP
                   </Link>
-                  <Link to={paths.struktur} className="block text-sm text-gray-600 hover:text-blue-600">
+                  <Link to={paths.dashboard.struktur} className="block text-sm text-gray-600 hover:text-blue-600">
                     Struktur Organisasi
                   </Link>
-                  <Link to={paths.pengelolaSDM} className="block text-sm text-gray-600 hover:text-blue-600">
+                  <Link to={paths.dashboard.pengelolaSDM} className="block text-sm text-gray-600 hover:text-blue-600">
                     Pengelola SDM
                   </Link>
                 </div>
@@ -215,29 +215,29 @@ const NavLanding: React.FC = () => {
               </button>
               {activeDropdown === 'mobile-layanan' && (
                 <div className="pl-4 space-y-1">
-                  <Link to={paths.skema} className="block text-sm text-gray-600 hover:text-blue-600">
+                  <Link to={paths.dashboard.skema} className="block text-sm text-gray-600 hover:text-blue-600">
                     Skema
                   </Link>
-                  <Link to={paths.tempatUji} className="block text-sm text-gray-600 hover:text-blue-600">
+                  <Link to={paths.dashboard.tempatUji} className="block text-sm text-gray-600 hover:text-blue-600">
                     Tempat Uji
                   </Link>
                   <Link to={paths.asesor} className="block text-sm text-gray-600 hover:text-blue-600">
                     Asesor
                   </Link>
-                  <Link to={paths.prosedurPendaftaran} className="block text-sm text-gray-600 hover:text-blue-600">
+                  <Link to={paths.dashboard.prosedurPendaftaran} className="block text-sm text-gray-600 hover:text-blue-600">
                     Prosedur Pendaftaran
                   </Link>
                 </div>
               )}
             </div>
 
-            <Link to={paths.berita} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+            <Link to={paths.dashboard.berita} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
               Berita
             </Link>
-            <Link to={paths.galeri} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+            <Link to={paths.dashboard.galeri} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
               Galeri
             </Link>
-            <Link to={paths.dokumen} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+            <Link to={paths.dashboard.dokumen} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
               Dokumen
             </Link>
 

@@ -246,7 +246,7 @@ useEffect(() => {
       
       <div className="mb-10">
         <Link 
-          to={paths.skema} 
+          to={paths.dashboard.skema} 
           className="text-orange-500 border-2 border-orange-500 py-2 px-6 rounded-full hover:bg-orange-500 hover:text-white transition"
         >
           Lihat Semua Skema
@@ -278,7 +278,7 @@ useEffect(() => {
           {item.p}
         </p>
         <a
-          href={paths.skema}
+          href={paths.dashboard.skema}
           className="text-blue-600 font-semibold text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:text-blue-800"
         >
           Detail →
