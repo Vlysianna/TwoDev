@@ -42,6 +42,7 @@ import TemplateAsesor from "@/pages/asesor/Template";
 import Template2 from "@/pages/asesor/Template2";
 import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 import FIIA01Page from "@/pages/asesor/FI.IA.01/FI-IA-01";
+import Hasil from "@/pages/asesor/Hasil";
 
 const RootLayout = () => <Outlet />;
 
@@ -127,6 +128,7 @@ const router = createBrowserRouter([
           { path: paths.asesor.apl01, element: <AplZeroOneAsesor /> },
           { path: paths.asesor.dataSertifikasi, element: <DataSertifikasiAsesor /> },
           { path: paths.asesor.fiiapage, element: <FIIA01Page /> },
+          { path: paths.asesor.hasil, element: <Hasil /> },
         ],
       },
     ],
