@@ -40,10 +40,10 @@ import paths from "./paths";
 import TemplateAsesor from "@/pages/asesor/Template";
 import Template2 from "@/pages/asesor/Template2";
 import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
-import FIIA01Page from "@/pages/asesor/FI.IA.01/FI-IA-01";
-import Hasil from "@/pages/asesor/Hasil";
+import FIIA01Page from "@/pages/asesor/FI-IA-01";
+import HasilAsesmen from "@/pages/asesor/Hasil";
 import Dashboard from "@/pages/asesor/dashboard";
-import AssessmentRecord from "../pages/assesi/AssessmentRecord";
+import AssessmentRecord from "@/pages/assesi/AssessmentRecord";
 
 const RootLayout = () => <Outlet />;
 
@@ -125,11 +125,11 @@ const router = createBrowserRouter([
         children: [
           { path: paths.asesor.template, element: <TemplateAsesor /> },
           { path: paths.asesor.template2, element: <Template2 /> },
+          { path: paths.asesor.fiia, element: <FIIA01Page /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
           { path: paths.asesor.apl01, element: <AplZeroOneAsesor /> },
           { path: paths.asesor.dataSertifikasi, element: <DataSertifikasiAsesor /> },
-          { path: paths.asesor.fiiapage, element: <FIIA01Page /> },
-          { path: paths.asesor.hasil, element: <Hasil /> },
+          { path: paths.asesor.hasilAsesmen, element: <HasilAsesmen /> },
           { path: paths.asesor.dashboard, element: <Dashboard /> },
         ],
       },

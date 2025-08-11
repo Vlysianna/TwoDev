@@ -3,7 +3,7 @@ import { ChevronLeft, FileText } from 'lucide-react';
 import NavbarAsesor from '../../components/NavAsesor';
 
 // Main Component
-export default function Template2() {
+export default function HasilAsesmen() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
 
   const handleAnswerSelect = (questionId: number, answer: string) => {
