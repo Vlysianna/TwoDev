@@ -1,16 +1,55 @@
-import React, { useState } from 'react';
-import { FileCheck2, ChevronLeft, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileCheck2, ChevronLeft, X, AlertCircle, CheckCircle } from 'lucide-react';
 import NavbarAsesi from '@/components/NavbarAsesi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/helper/axios';
 
 export default function PersetujuanAsesmenKerahasiaan() {
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [selectedAsesi, setSelectedAsesi] = useState('');
     const [selectedAsesor, setSelectedAsesor] = useState('');
     const [selectedTUK, setSelectedTUK] = useState('');
     const [tanggal, setTanggal] = useState('');
     const [waktu, setWaktu] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [assessors, setAssessors] = useState<any[]>([]);
+    const [tukOptions, setTukOptions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetchAssessors();
+        fetchTUKOptions();
+    }, []);
+
+    const fetchAssessors = async () => {
+        try {
+            const response = await api.get('/assessor');
+            if (response.data.success) {
+                setAssessors(response.data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch assessors:', error);
+        }
+    };
+
+    const fetchTUKOptions = async () => {
+        try {
+            // Assuming you have a TUK endpoint
+            const tukMockData = [
+                { id: 1, name: 'TUK LSP Media' },
+                { id: 2, name: 'TUK Tempat Kerja' },
+                { id: 3, name: 'TUK Mandiri' }
+            ];
+            setTukOptions(tukMockData);
+        } catch (error) {
+            console.error('Failed to fetch TUK options:', error);
+        }
+    };
 
     type CheckedItemKey =
         | 'verifikasiPortofolio'

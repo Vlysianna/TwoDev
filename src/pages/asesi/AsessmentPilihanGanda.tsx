@@ -7,20 +7,61 @@ import { useAuth } from '@/contexts/AuthContext';
 import api from '@/helper/axios';
 
 export default function AsessementPilihanGanda() {
-    const [answers, setAnswers] = useState<Answers>({
-        soal1: '',
-        soal2: '',
-        soal3: '',
-        soal4: '',
-        soal5: '',
-        soal6: '',
-        soal7: '',
-        soal8: '',
-        soal9: '',
-        soal10: ''
-    });
+    const { user } = useAuth();
+    const [assessmentId, setAssessmentId] = useState<number | null>(null);
+    const [questions, setQuestions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [answers, setAnswers] = useState<Record<string, string>>({});
 
-    const questions = [
+    useEffect(() => {
+        // Try to get assessment ID from URL params or use default
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('assessmentId');
+        const assessmentIdToUse = id ? parseInt(id) : 1; // Default to 1 if no ID provided
+        
+        setAssessmentId(assessmentIdToUse);
+        fetchQuestions(assessmentIdToUse);
+    }, []);
+
+    const fetchQuestions = async (id: number) => {
+        try {
+            setLoading(true);
+            const response = await api.get(`/questions/assessment/${id}`);
+            
+            if (response.data.success) {
+                setQuestions(response.data.data);
+                // Initialize answers state
+                const initialAnswers: Record<string, string> = {};
+                response.data.data.forEach((q: any, index: number) => {
+                    initialAnswers[`soal${index + 1}`] = '';
+                });
+                setAnswers(initialAnswers);
+            } else {
+                // Fallback to sample questions if no API data
+                setQuestions(sampleQuestions);
+                const initialAnswers: Record<string, string> = {};
+                sampleQuestions.forEach((q: any, index: number) => {
+                    initialAnswers[`soal${index + 1}`] = '';
+                });
+                setAnswers(initialAnswers);
+            }
+        } catch (error: any) {
+            console.log('Using sample questions due to API error:', error);
+            setQuestions(sampleQuestions);
+            const initialAnswers: Record<string, string> = {};
+            sampleQuestions.forEach((q: any, index: number) => {
+                initialAnswers[`soal${index + 1}`] = '';
+            });
+            setAnswers(initialAnswers);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const sampleQuestions = [
         {
             id: 'soal1',
             number: 1,
@@ -146,6 +187,36 @@ export default function AsessementPilihanGanda() {
         }));
     };
 
+    const handleSubmit = async () => {
+        try {
+            setSubmitting(true);
+            setError(null);
+
+            // Convert answers to API format
+            const submissionData = {
+                assessee_id: user?.id, // You might need to get assessee ID from user
+                answers: Object.entries(answers).map(([key, value], index) => ({
+                    question_id: questions[index]?.id || index + 1,
+                    answer: value
+                })).filter(item => item.answer) // Only submit answered questions
+            };
+
+            const response = await api.post('/questions/submit-answers', submissionData);
+
+            if (response.data.success) {
+                setSuccess('Jawaban berhasil disimpan!');
+                setTimeout(() => {
+                    // Navigate to next step or results page
+                    window.history.back();
+                }, 2000);
+            }
+        } catch (error: any) {
+            setError('Gagal menyimpan jawaban. Silakan coba lagi.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     // Hitung progress
     const totalQuestions = questions.length;
     const answeredCount = Object.values(answers).filter(ans => ans !== '').length;
@@ -168,6 +239,30 @@ export default function AsessementPilihanGanda() {
 
                 {/* Content */}
                 <div className="px-4 sm:px-6 pb-7">
+                    {/* Loading State */}
+                    {loading && (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                        </div>
+                    )}
+
+                    {/* Error State */}
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+                            <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+                            <span className="text-red-800">{error}</span>
+                        </div>
+                    )}
+
+                    {/* Success State */}
+                    {success && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
+                            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                            <span className="text-green-800">{success}</span>
+                        </div>
+                    )}
+
+                    {!loading && (
                     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                         {/* Header Info */}
                         <div className="mb-8">
@@ -263,12 +358,17 @@ export default function AsessementPilihanGanda() {
                         {/* Submit Button */}
                         <div className="mt-8 pt-6 border-t border-gray-100">
                             <div className="flex justify-end">
-                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
-                                    Simpan Jawaban
+                                <button 
+                                    onClick={handleSubmit}
+                                    disabled={submitting}
+                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors"
+                                >
+                                    {submitting ? 'Menyimpan...' : 'Simpan Jawaban'}
                                 </button>
                             </div>
                         </div>
                     </div>
+                    )}
                 </div>
             </div>
         </div>

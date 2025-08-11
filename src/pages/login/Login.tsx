@@ -33,18 +33,17 @@ export default function LoginForm() {
     
     if (!email || !password) {
       setError('Email dan password harus diisi');
-      setSuccessMessage(''); // Clear success message
+      setSuccessMessage('');
       return;
     }
 
     try {
       setIsLoading(true);
       setError('');
-      setSuccessMessage(''); // Clear success message
+      setSuccessMessage('');
       
       await login(email, password);
       
-      // Redirect to intended page or dashboard based on role
       navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Login gagal');

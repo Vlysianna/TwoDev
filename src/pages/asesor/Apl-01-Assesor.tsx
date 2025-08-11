@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { FileText } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import NavbarAsesor from '@/components/NavAsesor';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/helper/axios';
 
 export default function AplZeroOneAsesor() {
   const [formData, setFormData] = useState({

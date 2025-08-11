@@ -45,6 +45,7 @@ import Template2 from "@/pages/asesor/Template2";
 import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
+import AdminApl02 from "@/pages/Admin/Apl-02";
 
 const RootLayout = () => <Outlet />;
 
@@ -98,6 +99,7 @@ const router = createBrowserRouter([
           { path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
           { path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
           { path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
+          { path: paths.admin.apl02, element: <AdminApl02 /> },
 
           // Okupasi nested
           {

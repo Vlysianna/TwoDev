@@ -1,85 +1,41 @@
 import React, { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import Navbar from "../../components/NavAdmin"
 import Sidebar from "../../components/SideAdmin"
-import mammoth from "mammoth";
+import axiosInstance from '@/helper/axios';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
-export type Item = {
-  id: string;
-  text: string;
-};
-
-export type Element = {
-  id: string;
-  text: string;
-  item: Item[];
-};
-
-export type Unit = {
-  kode: string;
-  judul: string;
-  elemen: Element[];
-};
-
-export type SkemaType = {
-  jurusan: string;
-  nomor: string;
-  judul: string;
-  unit: Unit[];
-};
+interface SchemeData {
+  code: string;
+  name: string;
+}
 
 export default function TambahSkema() {
-  const { register, handleSubmit, control, setValue } = useForm<SkemaType>({
-    defaultValues: {
-      jurusan: "",
-      judul: "",
-      nomor: "",
-      unit: [],
-    },
-  });
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<SchemeData>();
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { fields, append } = useFieldArray({
-    control,
-    name: "unit",
-  });
+  const onSubmit = async (data: SchemeData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
 
-  const [essayText, setEssayText] = useState("");
-  const [pgText, setPgText] = useState("");
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const html = await extractDocxText(file);
-    const parsed = parseHTMLToSchema(html);
-    setValue("jurusan", parsed.jurusan);
-    setValue("judul", parsed.judul);
-    setValue("nomor", parsed.nomor);
-    setValue("unit", parsed.unit);
-  };
-
-  const handleUploadEssay = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    setEssayText(result.value);
-  };
-
-
-  const handleUploadPG = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    setPgText(result.value);
-  };
-
-
-  const onSubmit = (data: SkemaType) => {
-    console.log("Submitted:", data);
+      const response = await axiosInstance.post('/scheme', data);
+      
+      if (response.data.success) {
+        setSuccess('Skema berhasil ditambahkan!');
+        reset();
+      } else {
+        setError(response.data.message || 'Gagal menambahkan skema');
+      }
+    } catch (error: any) {
+      console.error('Error creating scheme:', error);
+      setError(error.response?.data?.message || 'Gagal menambahkan skema');
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="flex min-h-screen bg-gray-50">
