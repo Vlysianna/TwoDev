@@ -4,13 +4,15 @@ import { Image as ImageIcon } from "lucide-react"; // ikon placeholder
 
 function Galeri() {
   // Data gambar bisa diganti di sini
-  const galeriData = [
-    "/img1.jpg",
-    "/img2.jpg",
-    "/img3.jpg",
-    "/img4.jpg",
-    "/img5.jpg",
-    "/img6.jpg",
+  const galeriImages = [
+    { src: '/bgsklh.png', alt: 'Berita 1' },
+    { src: '/bgsklh.png', alt: 'Berita 2' },
+    { src: '/bgsklh.png', alt: 'Berita 3' },
+    { src: '/bgsklh.png', alt: 'Berita 4' },
+    { src: '/bgsklh.png', alt: 'Berita 1' },
+    { src: '/bgsklh.png', alt: 'Berita 2' },
+    { src: '/bgsklh.png', alt: 'Berita 3' },
+    { src: '/bgsklh.png', alt: 'Berita 4' },
   ];
 
   return (
@@ -20,11 +22,12 @@ function Galeri() {
 
         {/* Section Hero */}
         <section className="relative min-h-screen">
-          <img
+           <img
             src="/bgsklh.png"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-sm brightness-75 z-0"
+            className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />
+                <div className="absolute inset-0 bg-[#3171cd] opacity-55 mix-blend-multiply "></div>
           <div className="relative z-10 flex items-center justify-center text-center px-4 sm:px-10 md:px-20 py-32 sm:py-40 h-full">
             <div className="text-white max-w-2xl">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4">
@@ -39,25 +42,33 @@ function Galeri() {
 
         {/* Album Kegiatan */}
         <main className="flex-grow bg-gray-50 py-10">
-          <h2 className="text-center text-lg font-bold mb-15">Album Kegiatan</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-35 max-w-5xl mx-auto px-4">
-            {galeriData.map((src, index) => (
+          <div className="py-16 px-4 bg-white">          
+          <h2 className="text-start text-lg px-20">Galeri</h2>
+          <h2 className="text-start text-4xl px-20 font-bold  mb-15">Foto LSP SMKN 24</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 max-w-6xl mx-auto">
+            {galeriImages.map((item, index) => (
               <div
                 key={index}
-                className="aspect-4/3 bg-gray-300 flex items-center justify-center rounded-lg overflow-hidden"
+                className="relative overflow-hidden rounded-xl shadow-md group"
               >
-                {src ? (
+                <div className="aspect-[3/4] w-full">
                   <img
-                    src={src}
-                    alt={`Foto ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    src={item.src}
+                    alt={item.alt}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                ) : (
-                  <ImageIcon className="w-12 h-12 text-gray-500" />
-                )}
+                </div>
+                <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-white to-transparent flex items-end justify-start opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <img
+                    src="/twodev-teks.svg"
+                    alt="Wodev"
+                    className="h-6 w-auto mb-4 ml-4"
+                  />
+                </div>
               </div>
             ))}
           </div>
+        </div>
         </main>
 
         <FootLanding />

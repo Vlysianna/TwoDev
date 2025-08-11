@@ -62,37 +62,7 @@ const SkemaImages = [
   },
 ];
 
-  // Definisikan tipe props untuk komponen Counter
-//   interface CounterProps {
-//     target: number;
-//     duration?: number;
-//   }
-
-//   const Counter = ({ target, duration = 2000 }: CounterProps) => {
-//   const [count, setCount] = useState<number>(0);
-
-//   useEffect(() => {
-//     let startTime = Date.now();
-//     let requestId: number;
-
-//     const updateCounter = () => {
-//       const elapsed = Date.now() - startTime;
-//       const progress = Math.min(elapsed / duration, 1);
-//       setCount(Math.floor(progress * target));
-
-//       if (progress < 1) {
-//         requestId = requestAnimationFrame(updateCounter);
-//       }
-//     };
-
-//     requestId = requestAnimationFrame(updateCounter);
-
-//     return () => cancelAnimationFrame(requestId);
-//   }, [target, duration]);
-
-//   return <span>{count}</span>;
-// };
-
+  
 const [angle, setAngle] = useState(0);
 const radius = 550;
 const center = 20;
@@ -100,7 +70,7 @@ const center = 20;
 useEffect(() => {
   const rotationInterval = setInterval(() => {
     setAngle((prev) => prev + 360 / images.length);
-  }, 1000); // Durasi rotasi
+  }, 2000); // Durasi rotasi
 
   return () => clearInterval(rotationInterval);
 }, [images.length]); // Tambahkan images.length sebagai dependency
@@ -113,9 +83,10 @@ useEffect(() => {
         <div className="relative h-[90vh] w-full overflow-hidden">
           <img
             src="/bgsklh.png"
-            alt="Background"
-            className="absolute inset-0 w-full h-full object-cover blur-sm brightness-75 z-0"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />
+                <div className="absolute inset-0 bg-[#3171cd] opacity-55 mix-blend-multiply "></div>
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-20 h-full">
             <div className="text-white max-w-xl text-center md:text-left">
@@ -152,7 +123,7 @@ useEffect(() => {
         </div>
 
         {/* CTA */}
-        <div className="bg-orange-500 text-white py-8 px-6 md:px-20">
+        <div className="bg-[#E77D35] text-white py-8 px-6 md:px-20">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-center md:text-left mb-4 md:mb-0">
               <h2 className="text-xl md:text-2xl font-bold mb-2">
@@ -211,35 +182,7 @@ useEffect(() => {
           </div>
         </div>
 
-                <div className="bg-orange-500 text-white py-8 px-6 md:px-20">
-          <div className="flex flex-col md:flex-row justify-between items-center px-6">
-            <div className="text-center md:text-center mb-4 md:mb-0">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">
-                {/* <Counter target={1999} /> */} 199
-              </h2>
-              <p className="text-base md:text-lg opacity-90">Jumlah Asesi</p>
-            </div>
-            <div className="text-center md:text-center mb-4 md:mb-0">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">
-                {/* <Counter target={19} /> */} 19
-              </h2>
-              <p className="text-base md:text-lg opacity-90">Jumlah Asesi</p>
-            </div>
-            <div className="text-center md:text-center mb-4 md:mb-0">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">
-                {/* <Counter target={1999} /> */} 1999
-              </h2>
-              <p className="text-base md:text-lg opacity-90">Jumlah Asesi</p>
-            </div>
-            <div className="text-center md:text-center mb-4 md:mb-0">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">
-                {/* <Counter target={1999} /> */} 9
-              </h2>
-              <p className="text-base md:text-lg opacity-90">Jumlah Asesi</p>
-            </div>
-          </div>
-        </div>
-
+               
   <div className="py-16 px-6 bg-white">
       <p className="text-2xl font-bold text-start">Skema Sertifikasi</p>
       <h2 className="text-2xl font-bold text-start mb-10">Daftar Skema Sertifikasi</h2>
@@ -247,7 +190,7 @@ useEffect(() => {
       <div className="mb-10">
         <Link 
           to={paths.dashboard.skema} 
-          className="text-orange-500 border-2 border-orange-500 py-2 px-6 rounded-full hover:bg-orange-500 hover:text-white transition"
+          className="border-2 border-[#E77D35] py-2 px-6 rounded-full hover:bg-orange-500 hover:text-white transition"
         >
           Lihat Semua Skema
         </Link>

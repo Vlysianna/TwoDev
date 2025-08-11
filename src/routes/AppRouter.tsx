@@ -6,7 +6,6 @@ import LandingPage from "@/pages/LandingPage/LandingPage";
 import TentangLSP from "@/pages/LandingPage/TentangLSP";
 import Skema from "@/pages/LandingPage/Skema";
 import StrukturLSP from "@/pages/LandingPage/StrukturLSP";
-import PengelolaSDM from "@/pages/LandingPage/PengelolaSDM";
 import Tempatuji from "@/pages/LandingPage/Tempatuji";
 import Asesor from "@/pages/LandingPage/Asesor";
 import Prosedur from "@/pages/LandingPage/Prosedur";
@@ -57,7 +56,6 @@ const router = createBrowserRouter([
       { index: true, element: <LandingPage /> },
       { path: paths.dashboard.about, element: <TentangLSP /> },
       { path: paths.dashboard.struktur, element: <StrukturLSP /> },
-      { path: paths.dashboard.pengelolaSDM, element: <PengelolaSDM /> },
       { path: paths.dashboard.skema, element: <Skema /> },
       { path: paths.dashboard.tempatUji, element: <Tempatuji /> },
       { path: paths.dashboard.asesor, element: <Asesor /> },

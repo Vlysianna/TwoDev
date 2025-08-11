@@ -3,7 +3,6 @@ const paths = {
 	dashboard: {
 		about: "/about",
 		struktur: "/struktur",
-		pengelolaSDM: "/pengelola-sdm",
 		skema: "/skema",
 		tempatUji: "/tempat-uji",
 		prosedurPendaftaran: "/prosedur-pendaftaran",
