@@ -41,6 +41,7 @@ const paths = {
 	},
 	asesor: {
 		root: "/asesor",
+		dashboard: "/asesor/dashboard",
 		template: "/asesor/template",
 		template2: "/asesor/template2",
 		fiiadetail: "/asesor/fi.ia.01-detail",
