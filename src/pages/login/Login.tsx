@@ -1,16 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeClosed, Shield, CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import paths from '@/routes/paths';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const from = location.state?.from?.pathname || '/';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle success message and pre-fill email from registration
+  useEffect(() => {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+    }
+    if (location.state?.email) {
+      setEmail(location.state.email);
+    }
+  }, [location.state]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', { email, password });
+    
+    if (!email || !password) {
+      setError('Email dan password harus diisi');
+      setSuccessMessage('');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError('');
+      setSuccessMessage('');
+      
+      await login(email, password);
+      
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      setError(err.message || 'Login gagal');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -21,7 +60,7 @@ export default function LoginForm() {
           {/* Logo and Title */}
           <div className="text-start">
             <div className="w-30 h-30 md:w-40 md:h-40 rounded-lg text-start">
-              <img src="public/img/logo-lsp-oren.svg" alt="Logo" className="w-full h-full" />
+              <img src="/img/logo-lsp-oren.svg" alt="Logo" className="w-full h-full" />
             </div>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Masuk</h1>
             <p className="mb-5 text-gray-600 text-xs md:text-sm">
@@ -72,19 +111,43 @@ export default function LoginForm() {
               </div>
             </div>
 
+            {/* Success Message */}
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                {successMessage}
+              </div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
             {/* Forgot Password */}
             <div className="text-right">
-              <button className="text-xs md:text-sm text-black-500 hover:text-gray-700 hover:cursor-pointer font-small">
+              <button type="button" className="text-xs md:text-sm text-black-500 hover:text-gray-700 hover:cursor-pointer font-small">
                 Lupa password?
               </button>
             </div>
 
             {/* Sign In Button */}
             <button
-              onSubmit={handleSubmit}
-              className="w-full block text-center bg-[#E77D35] hover:cursor-pointer text-white py-2 md:py-2.5 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200"
+              type="submit"
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center bg-[#E77D35] hover:cursor-pointer text-white py-2 md:py-2.5 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </button>
 
             {/* Register Link */}
@@ -99,7 +162,7 @@ export default function LoginForm() {
         <div className="fixed bottom-0 pb-10 flex items-center justify-center text-xs md:text-sm text-gray-600">
           <span>Developed by</span>
           <img
-            src="public/img/logo-two-dev.svg"
+            src="/img/logo-two-dev.svg"
             alt=""
             className="w-20 ml-2"
           />
@@ -119,7 +182,7 @@ export default function LoginForm() {
           <div className="text-center flex justify-center items-center">
             {/* Certificate Icon */}
             <div className="w-138 object-cover rounded-lg text-center">
-              <img src="public/img/hadline login.svg" alt="" />
+              <img src="/img/hadline login.svg" alt="" />
             </div>
           </div>
         </div>

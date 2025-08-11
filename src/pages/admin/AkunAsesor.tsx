@@ -1,40 +1,143 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Search,
   Filter,
   Download,
   Edit3,
   Eye,
-  Trash2
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
+import AssessorModal from '@/components/AssessorModal';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import api from '@/helper/axios';
 
-interface UserData {
+interface Role {
   id: number;
-  username: string;
-  password: string;
-  role: string;
+  name: string;
+}
+
+interface Assessor {
+  id: number;
+  full_name: string;
+  phone_no: string;
+  scheme_id: number;
+  address: string;
+  birth_date: string;
+}
+
+interface User {
+  id: number;
+  email: string;
+  role: Role;
+  assessor?: Assessor;
 }
 
 const KelolaAkunAsesor: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedAssessor, setSelectedAssessor] = useState<User | null>(null);
+  
+  // Delete modal states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [assessorToDelete, setAssessorToDelete] = useState<User | null>(null);
 
-  const userData: UserData[] = [
-    { id: 1, username: 'Salmah Nadya', password: 'asessor123', role: 'Asessor' },
-    { id: 2, username: 'Salmah Nadya', password: 'asessor123', role: 'Asessor' },
-    { id: 3, username: 'Salmah Nadya', password: 'asessor123', role: 'Asessor' },
-    { id: 4, username: 'Salmah Nadya', password: 'asessor123', role: 'Asessor' },
-    { id: 5, username: 'Salmah Nadya', password: 'asessor123', role: 'Asessor' },
-    { id: 6, username: 'Salmah Nadya', password: 'asessor123', role: 'Asessor' },
-  ];
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-  const handleEdit = (id: number) => console.log('Edit user:', id);
-  const handleView = (id: number) => console.log('View user:', id);
-  const handleDelete = (id: number) => console.log('Delete user:', id);
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get('/user');
+      
+      if (response.data.success) {
+        // Filter for assessor users (role_id === 2)
+        const assessorUsers = response.data.data.filter((user: User) => user.role.id === 2);
+        setUsers(assessorUsers);
+      } else {
+        setError('Gagal memuat data pengguna');
+      }
+    } catch (error: any) {
+      console.error('Error fetching users:', error);
+      setError(error.response?.data?.message || 'Gagal memuat data pengguna');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = () => {
+    setModalMode('create');
+    setSelectedAssessor(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (user: User) => {
+    setModalMode('edit');
+    setSelectedAssessor(user);
+    setIsModalOpen(true);
+  };
+
+  const handleView = (id: number) => {
+    // TODO: Implement view functionality
+    console.log('View user:', id);
+  };
+
+  const handleDeleteClick = (user: User) => {
+    setAssessorToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!assessorToDelete) return;
+
+    try {
+      setDeleteLoading(true);
+      await api.delete(`/user/${assessorToDelete.id}`);
+      await fetchUsers(); // Refresh the list
+      setIsDeleteModalOpen(false);
+      setAssessorToDelete(null);
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      setError(error.response?.data?.message || 'Gagal menghapus pengguna');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleModalSuccess = () => {
+    fetchUsers(); // Refresh the list
+  };
+
   const handleFilter = () => console.log('Filter clicked');
   const handleExport = () => console.log('Export to Excel clicked');
-  const handleCreateAccount = () => console.log('Create account clicked');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F7FAFC] flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar />
+          <main className="flex-1 overflow-auto p-6">
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E77D35] mx-auto mb-4"></div>
+                <p className="text-gray-600">Memuat data asesor...</p>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F7FAFC] flex">
@@ -43,6 +146,14 @@ const KelolaAkunAsesor: React.FC = () => {
         <Navbar />
 
         <main className="flex-1 overflow-auto p-6">
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+              <span className="text-red-800">{error}</span>
+            </div>
+          )}
+
           {/* Breadcrumb */}
           <div className="mb-6">
             <nav className="flex text-sm text-gray-500">
@@ -58,7 +169,7 @@ const KelolaAkunAsesor: React.FC = () => {
             
             {/* Create Account Button */}
             <button
-              onClick={handleCreateAccount}
+              onClick={handleCreate}
               className="px-14 py-2 bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
             >
               Buat Akun
@@ -99,13 +210,13 @@ const KelolaAkunAsesor: React.FC = () => {
                   <thead>
                     <tr className="bg-[#E77D35] text-white">
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Username
+                        Nama Lengkap
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Password
+                        Email
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Role
+                        Phone
                       </th>
                       <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
                         Actions
@@ -113,24 +224,24 @@ const KelolaAkunAsesor: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {userData.map((user, index) => (
+                    {users.map((user, index) => (
                       <tr 
                         key={user.id} 
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.username}
+                          {user.assessor?.full_name || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.password}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.role}
+                          {user.assessor?.phone_no || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
                             <button
-                              onClick={() => handleEdit(user.id)}
+                              onClick={() => handleEdit(user)}
                               className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
                               title="Edit"
                             >
@@ -144,7 +255,7 @@ const KelolaAkunAsesor: React.FC = () => {
                               <Eye size={16} />
                             </button>
                             <button
-                              onClick={() => handleDelete(user.id)}
+                              onClick={() => handleDeleteClick(user)}
                               className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
                               title="Delete"
                             >
@@ -161,6 +272,25 @@ const KelolaAkunAsesor: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Assessor Modal */}
+      <AssessorModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        assessor={selectedAssessor}
+        mode={modalMode}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        loading={deleteLoading}
+        title="Hapus Akun Assessor"
+        message={`Apakah Anda yakin ingin menghapus akun assessor "${assessorToDelete?.assessor?.full_name || assessorToDelete?.email}"? Tindakan ini tidak dapat dibatalkan.`}
+      />
     </div>
   );
 };

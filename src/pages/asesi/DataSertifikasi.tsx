@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Upload, X, Eye, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, X, Eye, ChevronLeft, AlertCircle, CheckCircle } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/helper/axios';
 
 interface File {
     id: number;
@@ -19,9 +21,16 @@ interface FileUploadAreaProps {
 }
 
 export default function DataSertifikasi() {
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedAssessment, setSelectedAssessment] = useState('');
     const [selectedAssessor, setSelectedAssessor] = useState('');
+    const [assessors, setAssessors] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+    
     const [administrativeFiles, setAdministrativeFiles] = useState<File[]>([
         {
             id: 1,
@@ -33,7 +42,7 @@ export default function DataSertifikasi() {
             id: 2,
             name: 'Kartu Tanda Penduduk ( KTP ) / Kartu Keluarga ( KK )',
             format: 'PNG',
-            size: '5MB'
+            size: '5MB' 
         }
     ]);
     const [supportingFiles, setSupportingFiles] = useState<File[]>([
@@ -60,26 +69,23 @@ export default function DataSertifikasi() {
             name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
             format: 'PNG',
             size: '3MB'
-        },
-        {
-            id: 4,
-            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
-            format: 'PNG',
-            size: '3MB'
-        },
-        {
-            id: 4,
-            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
-            format: 'PNG',
-            size: '3MB'
-        },
-        {
-            id: 4,
-            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
-            format: 'PNG',
-            size: '3MB'
         }
     ]);
+
+    useEffect(() => {
+        fetchAssessors();
+    }, []);
+
+    const fetchAssessors = async () => {
+        try {
+            const response = await api.get('/assessor');
+            if (response.data.success) {
+                setAssessors(response.data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch assessors:', error);
+        }
+    };
 
     const steps = [
         { number: 1, title: 'LSP Media', active: currentStep === 1, completed: currentStep > 1 },
@@ -100,6 +106,47 @@ export default function DataSertifikasi() {
             setAdministrativeFiles(files => files.filter(file => file.id !== fileId));
         } else {
             setSupportingFiles(files => files.filter(file => file.id !== fileId));
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!selectedAssessment || !selectedAssessor) {
+            setError('Harap pilih tujuan assessment dan asesor');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Here you would normally upload files and save assessment data
+            // For now, we'll just simulate the process
+            const assessmentData = {
+                user_id: user?.id,
+                assessor_id: parseInt(selectedAssessor),
+                purpose: selectedAssessment,
+                // File URLs would be added here after upload
+                files: {
+                    administrative: administrativeFiles.map(f => f.name),
+                    supporting: supportingFiles.map(f => f.name)
+                }
+            };
+
+            console.log('Assessment data to submit:', assessmentData);
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            setSuccess('Data berhasil disimpan! Melanjutkan ke tahap berikutnya...');
+            
+            setTimeout(() => {
+                navigate(paths.asesi.asesmenMandiri);
+            }, 2000);
+
+        } catch (error: any) {
+            setError('Gagal menyimpan data. Silakan coba lagi.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -177,6 +224,21 @@ export default function DataSertifikasi() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-6 pb-7 flex">
+                    {/* Notifications */}
+                    {error && (
+                        <div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+                            <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+                            <span className="text-red-800">{error}</span>
+                        </div>
+                    )}
+                    
+                    {success && (
+                        <div className="lg:col-span-5 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
+                            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                            <span className="text-green-800">{success}</span>
+                        </div>
+                    )}
+
                     {/* Left Column */}
                     <div className="space-y-6 md:col-span-3 flex flex-col">
                         {/* Tujuan Assessment */}
@@ -205,9 +267,11 @@ export default function DataSertifikasi() {
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none"
                                 >
                                     <option value="">Pilih nama asesor</option>
-                                    <option value="asesor1">Asesor 1</option>
-                                    <option value="asesor2">Asesor 2</option>
-                                    <option value="asesor3">Asesor 3</option>
+                                    {assessors.map((assessor) => (
+                                        <option key={assessor.id} value={assessor.id}>
+                                            {assessor.full_name}
+                                        </option>
+                                    ))}
                                 </select>
                                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,13 +320,14 @@ export default function DataSertifikasi() {
                                 />
                                 <hr className="border-gray-300" />
                                 <div className="w-full">
-                                    <Link
-                                        to={paths.asesi.asesmenMandiri}
-                                        className="w-full block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 rounded-md 
+                                    <button
+                                        onClick={handleSubmit}
+                                        disabled={loading}
+                                        className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 rounded-md 
                            transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base"
                                     >
-                                        Lanjut
-                                    </Link>
+                                        {loading ? 'Menyimpan...' : 'Lanjut'}
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -1,41 +1,145 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Search,
   Filter,
-  Download,
   Edit3,
   Eye,
-  Trash2
+  Trash2,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
+import AssesseeModal from '@/components/AssesseeModal';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import api from '@/helper/axios';
 
 interface UserData {
   id: number;
-  username: string;
-  password: string;
-  role: string;
+  email: string;
+  role: {
+    id: number;
+    name: string;
+  };
+  assessee?: {
+    id: number;
+    full_name: string;
+    phone_no: string;
+    identity_number: string;
+    birth_date: string;
+    birth_location: string;
+    gender: string;
+    nationality: string;
+    house_phone_no?: string;
+    office_phone_no?: string;
+    address: string;
+    postal_code?: string;
+    educational_qualifications: string;
+  };
 }
 
 const KelolaAkunAsesi: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedAssessee, setSelectedAssessee] = useState<UserData | null>(null);
+  
+  // Delete modal states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [assesseeToDelete, setAssesseeToDelete] = useState<UserData | null>(null);
 
-  const userData: UserData[] = [
-    { id: 1, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 2, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 3, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 4, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 5, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-    { id: 6, username: 'Torda Ibrani', password: 'password123', role: 'Password' },
-  ];
+  useEffect(() => {
+    fetchAssessees();
+  }, []);
 
-  const handleEdit = (id: number) => console.log('Edit user:', id);
-  const handleView = (id: number) => console.log('View user:', id);
-  const handleDelete = (id: number) => console.log('Delete user:', id);
+  const fetchAssessees = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch all users and filter for assessees (role_id = 3)
+      const response = await api.get('/user');
+      if (response.data && response.data.success) {
+        // Filter for assessee users only
+        const assesseeUsers = response.data.data.filter((user: UserData) => user.role && user.role.id === 3);
+        setUsers(assesseeUsers);
+      } else {
+        setError('Gagal memuat data asesi');
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch assessees:', error);
+      setError('Gagal memuat data asesi');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = () => {
+    setModalMode('create');
+    setSelectedAssessee(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = async (user: UserData) => {
+    setModalMode('edit');
+    setSelectedAssessee(user);
+    setIsModalOpen(true);
+  };
+
+  const handleView = async (id: number) => {
+    console.log('View user:', id);
+    // TODO: Navigate to view page or open view modal
+  };
+
+  const handleDeleteClick = (user: UserData) => {
+    setAssesseeToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!assesseeToDelete) return;
+
+    try {
+      setDeleteLoading(true);
+      await api.delete(`/user/${assesseeToDelete.id}`);
+      await fetchAssessees(); // Refresh the list
+      setIsDeleteModalOpen(false);
+      setAssesseeToDelete(null);
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      setError(error.response?.data?.message || 'Gagal menghapus pengguna');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleModalSuccess = () => {
+    fetchAssessees(); // Refresh the list
+  };
+
   const handleFilter = () => console.log('Filter clicked');
   const handleExport = () => console.log('Export to Excel clicked');
-  const handleCreateAccount = () => console.log('Create account clicked');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F7FAFC] flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar />
+          <main className="flex-1 overflow-auto p-6 flex items-center justify-center">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-[#E77D35]" />
+              <p className="text-gray-600">Memuat data asesi...</p>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F7FAFC] flex">
@@ -44,6 +148,14 @@ const KelolaAkunAsesi: React.FC = () => {
         <Navbar />
 
         <main className="flex-1 overflow-auto p-6">
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+              <span className="text-red-800">{error}</span>
+            </div>
+          )}
+
           {/* Breadcrumb */}
           <div className="mb-6">
             <nav className="flex text-sm text-gray-500">
@@ -58,13 +170,12 @@ const KelolaAkunAsesi: React.FC = () => {
             <h1 className="text-2xl font-semibold text-gray-900 mb-4">Kelola Akun Asesi</h1>
             
             {/* Create Account Button */}
-            <Link to="/target-route">
-              <button
-                className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
-              >
-                Buat Akun
-              </button>
-            </Link>
+            <button
+              onClick={handleCreate}
+              className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
+            >
+              Buat Akun
+            </button>
           </div>
 
           {/* Main Content Card - This is the box container like in Figma */}
@@ -100,10 +211,13 @@ const KelolaAkunAsesi: React.FC = () => {
                   <thead>
                     <tr className="bg-[#E77D35] text-white">
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Username
+                        Nama Lengkap
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Password
+                        Email
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Phone
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
                         Role
@@ -114,24 +228,27 @@ const KelolaAkunAsesi: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {userData.map((user, index) => (
+                    {users.map((user, index) => (
                       <tr 
                         key={user.id} 
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.username}
+                          {user.assessee?.full_name || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.password}
+                          {user.assessee?.phone_no || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.role}
+                          {user.role.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
                             <button
-                              onClick={() => handleEdit(user.id)}
+                              onClick={() => handleEdit(user)}
                               className="p-2 text-orange-500 hover:bg-orange-50 rounded-md transition-colors"
                               title="Edit"
                             >
@@ -145,7 +262,7 @@ const KelolaAkunAsesi: React.FC = () => {
                               <Eye size={16} />
                             </button>
                             <button
-                              onClick={() => handleDelete(user.id)}
+                              onClick={() => handleDeleteClick(user)}
                               className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                               title="Delete"
                             >
@@ -162,6 +279,25 @@ const KelolaAkunAsesi: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Assessee Modal */}
+      <AssesseeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        assessee={selectedAssessee}
+        mode={modalMode}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        loading={deleteLoading}
+        title="Hapus Akun Asesi"
+        message={`Apakah Anda yakin ingin menghapus akun asesi "${assesseeToDelete?.assessee?.full_name || assesseeToDelete?.email}"? Tindakan ini tidak dapat dibatalkan.`}
+      />
     </div>
   );
 };

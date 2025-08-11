@@ -68,7 +68,7 @@ export default function NavbarAsesor({ title, icon }: NavbarAsesorProps) {
               className="flex items-center space-x-2 border border-gray-200 rounded-full px-3 py-2 hover:bg-gray-100 transition cursor-pointer"
             >
               <img
-                src="/public/img/avatar-asesor.svg"
+                src="/img/avatar-asesor.svg"
                 alt="User avatar"
                 className="w-10 h-10 rounded-full"
               />
@@ -83,7 +83,7 @@ export default function NavbarAsesor({ title, icon }: NavbarAsesorProps) {
                 <div className="p-4 border-b border-gray-200 hover:cursor-pointer">
                   <div className="flex items-center space-x-2">
                     <img
-                      src="/public/img/avatar-asesor.svg"
+                      src="/img/avatar-asesor.svg"
                       alt="User avatar"
                       className="w-8 h-8 rounded-full"
                     />
@@ -150,7 +150,7 @@ export default function NavbarAsesor({ title, icon }: NavbarAsesorProps) {
               }}
               className="w-9 h-9 rounded-full overflow-hidden border border-gray-200"
             >
-              <img src="/public/img/male avatar.svg" alt="Avatar" className="w-full h-full object-cover" />
+              <img src="/img/male avatar.svg" alt="Avatar" className="w-full h-full object-cover" />
             </button>
 
             {isProfileOpen && (
@@ -177,7 +177,7 @@ export default function NavbarAsesor({ title, icon }: NavbarAsesorProps) {
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-[999]">
           <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full text-center">
             <div className="mb-4 flex justify-center">
-              <img src="public/img/gambarprialogout.svg" alt="Pria Sigma" />
+              <img src="/img/gambarprialogout.svg" alt="Pria Sigma" />
             </div>
 
             <h2 className="font-bold text-lg mb-2">Yakin ingin keluar?</h2>
