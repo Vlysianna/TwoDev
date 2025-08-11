@@ -61,6 +61,7 @@ const paths = {
 		asesmenMandiriDetail: "/asesi/asesmen-mandiri-detail",
 		persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
 		asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda",
+		assessmentRecord: "/asesi/assessment-record",
 	},
 };
 
