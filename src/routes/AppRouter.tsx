@@ -50,6 +50,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
 import AssessmentReport from "@/pages/assesi/AssesmentReport";
+import Hasil from "@/pages/asesor/Hasil";
 
 const RootLayout = () => <Outlet />;
 
@@ -151,6 +152,7 @@ const router = createBrowserRouter([
           { path: paths.asesor.dataSertifikasi, element: <DataSertifikasiAsesor /> },
           { path: paths.asesor.hasilAsesmen, element: <HasilAsesmen /> },
           { path: paths.asesor.dashboard, element: <Dashboard /> },
+          { path: paths.asesor.hasil, element: <Hasil /> },
         ],
       },
     ],
