@@ -43,6 +43,7 @@ const paths = {
     root: "/asesor",
     template: "/asesor/template",
     template2: "/asesor/template2",
+    dashboardAsesor: "/asesor/dashboard-asesor",
     fiia: "/asesor/fi.ia.01",
     fiiadetail: "/asesor/fi.ia.01-detail",
     apl01: "/asesor/apl-01",

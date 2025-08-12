@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import SidebarAsesor from '@/components/SideAsesor';
 import NavbarAsesor from '@/components/NavAsesor';
 
-export default function TemplateAsesor() {
+export default function DashboardAsesor() {
     const okupasiData = [
         {
             id: 1,
