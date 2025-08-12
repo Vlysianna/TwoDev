@@ -1,5 +1,7 @@
 import { useState } from "react";
 import NavbarAsesi from "@/components/ui/NavbarAsesi";
+import NavbarAsesor from "@/components/NavAsesor";
+import { FileText } from "lucide-react";
 
 export default function AssessmentRecord() {
   const [selectedOptions, setSelectedOptions] = useState<
@@ -58,7 +60,9 @@ export default function AssessmentRecord() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavbarAsesi title="" />
+      <NavbarAsesor title="Rekaman Asesmen Kompetensi - FR.AK.02" 
+      icon={<FileText size={20} />}
+      />
 
       <div className="pt-20 px-6 pb-6">
         <div className="max-w-7xl mx-auto">

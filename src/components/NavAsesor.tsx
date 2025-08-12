@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
+import UserMenu from './UserMenu';
 
 interface NavbarAsesorProps {
   title: string;
@@ -59,52 +60,7 @@ export default function NavbarAsesor({ title, icon }: NavbarAsesorProps) {
           </div>
 
           {/* Profile */}
-          <div className="relative" ref={profileRef}>
-            <button
-              onClick={() => {
-                setIsProfileOpen(!isProfileOpen);
-                setIsNotificationOpen(false);
-              }}
-              className="flex items-center space-x-2 border border-gray-200 rounded-full px-3 py-2 hover:bg-gray-100 transition cursor-pointer"
-            >
-              <img
-                src="/img/avatar-asesor.svg"
-                alt="User avatar"
-                className="w-10 h-10 rounded-full"
-              />
-              <div className="hidden md:block text-start text-sm">
-                <p className="font-medium text-gray-800">Asesor</p>
-                <p className="text-xs text-gray-500">example@example.com</p>
-              </div>
-            </button>
-
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                <div className="p-4 border-b border-gray-200 hover:cursor-pointer">
-                  <div className="flex items-center space-x-2">
-                    <img
-                      src="/img/avatar-asesor.svg"
-                      alt="User avatar"
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div className="text-start">
-                      <p className="font-medium text-gray-800">Asesi</p>
-                      <p className="text-xs text-gray-500">example@example.com</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-2">
-                  <button
-                    onClick={() => setShowModal(true)}
-                    className="w-full flex items-center justify-center text-red-500 hover:bg-gray-100 p-2 rounded transition cursor-pointer"
-                  >
-                    <LogOut size={18} className="mr-2" />
-                    Logout
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <UserMenu />
         </div>
       </div>
 

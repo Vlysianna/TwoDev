@@ -48,6 +48,7 @@ const routes = {
     dashboardAsesor: "/asesor/dashboard-asesor",
     fiia: "/asesor/fi.ia.01",
     fiiadetail: "/asesor/fi.ia.01-detail",
+    frak02: "/asesor/fr.ak.02",
     apl01: "/asesor/apl-01",
     dataSertifikasi: "/asesor/data-sertifikasi",
     hasil: "/asesor/hasil",

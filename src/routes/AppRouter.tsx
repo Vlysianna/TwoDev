@@ -36,7 +36,7 @@ import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
 import AplZeroOneAsesor from "@/pages/asesor/Apl-01-Assesor";
 import DataSertifikasiAsesor from "@/pages/asesor/DataSertifikasiAsesor";
-import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
+import DashboardAsesor from "@/pages/asesor/dashboard";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
 import TemplateAsesor from "@/pages/asesor/Template";
@@ -45,7 +45,7 @@ import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 import FIIA01Page from "@/pages/asesor/FI-IA-01";
 import HasilAsesmen from "@/pages/asesor/Hasil";
 import Dashboard from "@/pages/asesor/dashboard";
-import AssessmentRecord from "@/pages/assesi/AssessmentRecord";
+import AssessmentRecord from "@/pages/asesor/AssessmentRecord";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
@@ -144,10 +144,11 @@ const router = createBrowserRouter([
           { path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
           { path: paths.asesor.fiia, element: <FIIA01Page /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
+          { path: paths.asesor.frak02, element: <AssessmentRecord /> },
           { path: paths.asesor.apl01, element: <AplZeroOneAsesor /> },
           { path: paths.asesor.dataSertifikasi, element: <DataSertifikasiAsesor /> },
           { path: paths.asesor.hasilAsesmen, element: <HasilAsesmen /> },
-          { path: paths.asesor.dashboard, element: <Dashboard /> },
+          // { path: paths.asesor.dashboard, element: <Dashboard /> },
         ],
       },
     ],
