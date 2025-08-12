@@ -1,5 +1,7 @@
-import { useState } from "react";
-import NavbarAsesi from "@/components/ui/NavbarAsesi";
+import { ChevronDown, Clipboard, NotepadText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import NavbarAssesor from "../../components/ui/NavbarAssesor";
+
 
 export default function AssessmentRecord() {
   const [selectedOptions, setSelectedOptions] = useState<
@@ -58,7 +60,10 @@ export default function AssessmentRecord() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavbarAsesi title="" />
+      <NavbarAssesor 
+        title="Rekaman Asesmen Kompetensi - FR.AK.02"
+        icon={<NotepadText className="w-6 h-6" />}
+      />
 
       <div className="pt-20 px-6 pb-6">
         <div className="max-w-7xl mx-auto">

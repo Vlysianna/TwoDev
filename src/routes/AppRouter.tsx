@@ -8,7 +8,8 @@ import KelolaJurusan from "../pages/admin/kelolaJur";
 
 import Test from "../pages/LandingPage/Test";
 
-import AssessmentRecord from "../pages/assesi/AssessmentRecord";
+import AssessmentRecord from "../pages/assesi/AssesmentRecord";
+import AssessmentReport from "@/pages/assesi/AssesmentReport";
 
 export default function AppRouter() {
 	return (
@@ -19,6 +20,7 @@ export default function AppRouter() {
 				<Route path="/kelolaJur" element={<KelolaJurusan />} />
 				<Route path="/test" element={<Test />} />
 				<Route path="/assesi/assessment-record" element={<AssessmentRecord />} />
+				<Route path="/assesi/assesment-report" element={<AssessmentReport />} />
 			</Routes>
 		</BrowserRouter>
 	);
