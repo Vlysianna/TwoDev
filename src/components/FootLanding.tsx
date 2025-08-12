@@ -3,7 +3,7 @@ import { Phone, MapPin, Clock, Mail, MessageSquare } from 'lucide-react';
 
 const FootLanding = () => {
   return (
-    <footer className="bg-orange-500 text-white px-4 sm:px-6 py-6 w-full">
+    <footer className="bg-[#E77D35] text-white px-4 sm:px-6 py-6 w-full">
 
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">

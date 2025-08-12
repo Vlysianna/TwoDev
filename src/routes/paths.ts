@@ -1,4 +1,4 @@
-const paths = {
+const routes = {
   root: "/",
   dashboard: {
     about: "/about",
@@ -14,13 +14,13 @@ const paths = {
     test: "/test",
   },
   auth: {
-    root: "/",
-    login: "/login",
-    register: "/register",
-    registerAsesi: "/register-asesi",
+    root: "/auth",
+    login: "/auth/login",
+    register: "/auth/register",
+    registerAsesi: "/auth/register-asesi",
   },
   admin: {
-    root: "/",
+    root: "/admin",
     kelolaAkunAsesi: "/admin/kelola-akun-asesi",
     kelolaMUK: "/admin/kelola-muk",
     editAsesor: "/admin/edit-asesor",
@@ -33,14 +33,16 @@ const paths = {
       root: "/admin/okupasi",
       index: "/admin/okupasi",
       edit: (id: string | number) => `/admin/okupasi/edit/${id}`,
-      editPattern: "/admin/okupasi/edit/:id"
+      editPattern: "/admin/okupasi/edit/:id",
     },
     editAsessi: "/admin/edit-asesi",
     kelolaJadwal: "/admin/kelola-jadwal",
     tambahJadwal: "/admin/tambah-jadwal",
+    apl02: "/admin/apl-02",
   },
   asesor: {
     root: "/asesor",
+    dashboard: "/asesor/dashboard",
     template: "/asesor/template",
     template2: "/asesor/template2",
     dashboardAsesor: "/asesor/dashboard-asesor",
@@ -48,10 +50,11 @@ const paths = {
     fiiadetail: "/asesor/fi.ia.01-detail",
     apl01: "/asesor/apl-01",
     dataSertifikasi: "/asesor/data-sertifikasi",
+    hasil: "/asesor/hasil",
     hasilAsesmen: "/asesor/hasil-asesmen",
   },
   asesi: {
-    root: "/",
+    root: "/asesi",
     dashboard: "/asesi/dashboard",
     apl01: "/asesi/apl-01",
     apl02: "/asesi/apl-02",
@@ -61,7 +64,8 @@ const paths = {
     asesmenMandiriDetail: "/asesi/asesmen-mandiri-detail",
     persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
     asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda",
+    assessmentRecord: "/asesi/assessment-record",
   },
 };
 
-export default paths;
+export default routes;

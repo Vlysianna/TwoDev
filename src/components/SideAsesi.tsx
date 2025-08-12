@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     ClipboardList,
     LogOut,
@@ -8,6 +8,7 @@ import {
     ListCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import paths from "@/routes/paths";
 
 interface MenuItem {
@@ -26,6 +27,8 @@ interface MenuItemProps {
 const SidebarAsesi: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
     const location = useLocation();
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const menuItems: MenuItem[] = [
         {
@@ -52,8 +55,10 @@ const SidebarAsesi: React.FC = () => {
     };
 
     const handleLogout = (): void => {
-        // Add logout logic here
-        console.log("Logout clicked");
+        if (window.confirm("Apakah Anda yakin ingin logout?")) {
+            logout();
+            navigate("/auth/login");
+        }
         setIsMobileMenuOpen(false);
     };
 

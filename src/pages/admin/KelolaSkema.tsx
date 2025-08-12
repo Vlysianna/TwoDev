@@ -1,43 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Filter,
   Download,
   Edit3,
   Eye,
-  Trash2
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import paths from '@/routes/paths';
+import axiosInstance from '@/helper/axios';
 
-interface UserData {
+interface Occupation {
   id: number;
-  okupasi: string;
-  skema: string;
-  tanggalMulai: string;
-  tanggalSelesai: string;
+  name: string;
+}
+
+interface Scheme {
+  id: number;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  occupation: Occupation;
 }
 
 const KelolaMUK: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [schemes, setSchemes] = useState<Scheme[]>([]);
+  const [filteredSchemes, setFilteredSchemes] = useState<Scheme[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const userData: UserData[] = [
-    { id: 1, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
-    { id: 2, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
-    { id: 3, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
-    { id: 4, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
-    { id: 5, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
-    { id: 6, okupasi: 'Pemrogram Junior(Junior Coder)', skema: 'RPL', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
-  ];
+  useEffect(() => {
+    fetchSchemes();
+  }, []);
+
+  useEffect(() => {
+    const filtered = schemes.filter(scheme =>
+      scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      scheme.occupation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      scheme.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredSchemes(filtered);
+  }, [schemes, searchQuery]);
+
+  const fetchSchemes = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axiosInstance.get('/scheme');
+      
+      if (response.data.success) {
+        setSchemes(response.data.data);
+      } else {
+        setError('Gagal memuat data skema');
+      }
+    } catch (error: any) {
+      console.error('Error fetching schemes:', error);
+      setError(error.response?.data?.message || 'Gagal memuat data skema');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEdit = (id: number) => console.log('Edit user:', id);
   const handleView = (id: number) => console.log('View user:', id);
   const handleDelete = (id: number) => console.log('Delete user:', id);
   const handleFilter = () => console.log('Filter clicked');
   const handleExport = () => console.log('Export to Excel clicked');
-  const handleCreateAccount = () => console.log('Create account clicked');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F7FAFC] flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar />
+          <main className="flex-1 overflow-auto p-6">
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E77D35] mx-auto mb-4"></div>
+                <p className="text-gray-600">Memuat data skema...</p>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F7FAFC] flex">
@@ -46,6 +99,14 @@ const KelolaMUK: React.FC = () => {
         <Navbar />
 
         <main className="flex-1 overflow-auto p-6">
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+              <span className="text-red-800">{error}</span>
+            </div>
+          )}
+
           {/* Breadcrumb */}
           <div className="mb-6">
             <nav className="flex text-sm text-gray-500">
@@ -131,41 +192,41 @@ const KelolaMUK: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {userData.map((user, index) => (
+                    {filteredSchemes.map((scheme, index) => (
                       <tr
-                        key={user.id}
+                        key={scheme.id}
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.okupasi}
+                          {scheme.occupation.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.skema}
+                          {scheme.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.tanggalMulai}
+                          {new Date(scheme.start_date).toLocaleDateString('id-ID')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.tanggalSelesai}
+                          {new Date(scheme.end_date).toLocaleDateString('id-ID')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
                             <button
-                              onClick={() => handleEdit(user.id)}
+                              onClick={() => handleEdit(scheme.id)}
                               className="p-2 text-orange-500 hover:bg-orange-50 rounded-md transition-colors"
                               title="Edit"
                             >
                               <Edit3 size={16} />
                             </button>
                             <button
-                              onClick={() => handleView(user.id)}
+                              onClick={() => handleView(scheme.id)}
                               className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                               title="View"
                             >
                               <Eye size={16} />
                             </button>
                             <button
-                              onClick={() => handleDelete(user.id)}
+                              onClick={() => handleDelete(scheme.id)}
                               className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                               title="Delete"
                             >

@@ -9,11 +9,12 @@ function StrukturLSP() {
 
         {/* Section Hero dengan background */}
         <section className="relative min-h-screen">
-          <img
+           <img
             src="/bgsklh.png"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-sm brightness-75 z-0 "
+            className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />
+                <div className="absolute inset-0 bg-[#3171cd] opacity-55 mix-blend-multiply "></div>
 
           <div className="relative z-10 flex items-center justify-center text-center px-4 sm:px-10 md:px-20 py-32 sm:py-40 h-full">
             <div className="text-white max-w-2xl">

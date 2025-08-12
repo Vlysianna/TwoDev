@@ -96,6 +96,10 @@ const TambahMUK: React.FC = () => {
 		}
 	}
 
+	async function handleUploadIA() {}
+	async function handleUploadAK() {}
+	async function handleUploadSoal() {}
+
 	const onSubmit = (data: SkemaType) => {
 		// di sini kirim ke API
 		console.log("Submit data:", data);
@@ -152,10 +156,9 @@ const TambahMUK: React.FC = () => {
 									</button>
 								</div>
 							</div>
-
-							{/* full border line */}
 						</div>
 
+						{/* full border line */}
 						<div className="border-b border-gray-200" />
 
 						{/* Body */}
@@ -358,6 +361,103 @@ const TambahMUK: React.FC = () => {
 									</button>
 								</div>
 							</form>
+
+							{/* full border line */}
+							<div className="border-b border-gray-200" />
+
+							{/* Upload File AK */}
+							<div className="mb-6">
+								<h2 className="text-lg font-semibold text-gray-900 mb-2">
+									Upload File AK
+								</h2>
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									File AK 01
+								</label>
+								<div className="flex items-center gap-2 mb-4">
+									<label className="inline-flex items-center gap-2 bg-[#E77D35] text-white px-4 py-2 rounded-md cursor-pointer">
+										Pilih File
+										<input
+											type="file"
+											accept=".docx"
+											onChange={handleUploadAK}
+											className="hidden"
+										/>
+									</label>
+									<span className="flex-1 bg-gray-100 text-gray-500 text-sm px-3 py-2 rounded-md">
+										Convert file unit dari word
+									</span>
+								</div>
+								<div className="flex items-center gap-2">
+									<button className="px-6 py-2 bg-[#E77D35] text-white rounded-md hover:opacity-95">
+										Tambah AK
+									</button>
+									<button className="px-6 py-2 border border-[#E77D35] text-[#E77D35] rounded-md hover:bg-orange-50">
+										Hapus AK
+									</button>
+								</div>
+							</div>
+
+							{/* full border line */}
+							<div className="border-b border-gray-200" />
+
+							{/* Upload File IA */}
+							<div className="mb-6">
+								<h2 className="text-lg font-semibold text-gray-900 mb-2">
+									Upload File IA
+								</h2>
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									File IA 01
+								</label>
+								<div className="flex items-center gap-2 mb-4">
+									<label className="inline-flex items-center gap-2 bg-[#E77D35] text-white px-4 py-2 rounded-md cursor-pointer">
+										Pilih File
+										<input
+											type="file"
+											accept=".docx"
+											onChange={handleUploadIA}
+											className="hidden"
+										/>
+									</label>
+									<span className="flex-1 bg-gray-100 text-gray-500 text-sm px-3 py-2 rounded-md">
+										Convert file unit dari word
+									</span>
+								</div>
+								<div className="flex items-center gap-2">
+									<button className="px-6 py-2 bg-[#E77D35] text-white rounded-md hover:opacity-95">
+										Tambah IA
+									</button>
+									<button className="px-6 py-2 border border-[#E77D35] text-[#E77D35] rounded-md hover:bg-orange-50">
+										Hapus IA
+									</button>
+								</div>
+							</div>
+
+							{/* full border line */}
+							<div className="border-b border-gray-200" />
+
+							{/* Upload Soal */}
+							<div className="mb-6">
+								<h2 className="text-lg font-semibold text-gray-900 mb-2">
+									Upload Soal
+								</h2>
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									File Soal
+								</label>
+								<div className="flex items-center gap-2 mb-4">
+									<label className="inline-flex items-center gap-2 bg-[#E77D35] text-white px-4 py-2 rounded-md cursor-pointer">
+										Pilih File
+										<input
+											type="file"
+											accept=".docx,.pdf"
+											onChange={handleUploadSoal}
+											className="hidden"
+										/>
+									</label>
+									<span className="flex-1 bg-gray-100 text-gray-500 text-sm px-3 py-2 rounded-md">
+										Pilih file soal
+									</span>
+								</div>
+							</div>
 
 							{/* Submit */}
 							<div>

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import SidebarAsesi from "@/components/SideAsesi";
 import Navbar from "../../components/NavAdmin";
 import {
@@ -7,40 +8,108 @@ import {
 	LayoutDashboard,
 	Clock,
 	ChevronRight,
+	AlertCircle,
 } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/helper/axios';
 
 export default function AsessmentAktif() {
-	const okupasiData = [
-		{
-			id: 1,
-			title: "Okupasi Junior Code",
-			subtitle: "Rekayasa Perangkat Lunak ( RPL )",
-			status: "finished",
-			statusText: "Sewaktu",
-			startDate: "24 Okt, 07:00pm",
-			endDate: "25 Okt, 18:00pm",
-			avatar: "EY",
-			avatarBg: "bg-blue-500",
-			instructor: "Eva Yoanliani, S.kom",
-			role: "Asesor",
-			borderColor: "border-blue-400",
-		},
-		{
-			id: 2,
-			title: "Okupasi Front Office",
-			subtitle: "Perhotelan ( PH )",
-			status: "finished",
-			statusText: "Sewaktu",
-			startDate: "24 Okt, 07:00pm",
-			endDate: "25 Okt, 18:00pm",
-			avatar: "AA",
-			avatarBg: "bg-gray-500",
-			instructor: "Aan Apriansyh, S. Tr Par",
-			role: "Asesor",
-			borderColor: "border-gray-400",
-		},
-	];
+	const { user } = useAuth();
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [assessments, setAssessments] = useState<any[]>([]);
+	const [filteredAssessments, setFilteredAssessments] = useState<any[]>([]);
+	const [searchTerm, setSearchTerm] = useState('');
+
+	useEffect(() => {
+		fetchActiveAssessments();
+	}, [user]);
+
+	useEffect(() => {
+		if (searchTerm.trim() === '') {
+			setFilteredAssessments(assessments);
+		} else {
+			const filtered = assessments.filter(assessment =>
+				assessment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				assessment.subtitle.toLowerCase().includes(searchTerm.toLowerCase())
+			);
+			setFilteredAssessments(filtered);
+		}
+	}, [searchTerm, assessments]);
+
+	const fetchActiveAssessments = async () => {
+		try {
+			setLoading(true);
+			setError(null);
+			
+			const response = await api.get('/assessment/apl2');
+			
+			if (response.data.success && response.data.data.length > 0) {
+				// Filter only active assessments and map to UI format
+				const mappedAssessments = response.data.data
+					.filter((item: any) => {
+						if (!item.assessment_schedule || item.assessment_schedule.length === 0) return false;
+						
+						const now = new Date();
+						const schedule = item.assessment_schedule[0];
+						const start = new Date(schedule.start_date);
+						const end = new Date(schedule.end_date);
+						
+						return now >= start && now <= end; // Only active assessments
+					})
+					.map((item: any, index: number) => ({
+						id: item.id,
+						title: item.occupation?.name || `Assessment ${index + 1}`,
+						subtitle: item.occupation?.scheme?.name || 'Sertifikasi Kompetensi',
+						status: "active",
+						statusText: "Aktif",
+						startDate: formatDate(item.assessment_schedule[0].start_date),
+						endDate: formatDate(item.assessment_schedule[0].end_date),
+						avatar: getInitials(item.assessment_schedule[0]?.assessor?.full_name || 'Unknown'),
+						avatarBg: getRandomColor(index),
+						instructor: item.assessment_schedule[0]?.assessor?.full_name || 'Asesor',
+						role: "Asesor",
+						borderColor: getBorderColor(index),
+					}));
+				
+				setAssessments(mappedAssessments);
+			} else {
+				setAssessments([]);
+			}
+		} catch (error: any) {
+			setError('Gagal memuat data asesmen aktif');
+			setAssessments([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const formatDate = (dateString: string) => {
+		const date = new Date(dateString);
+		return date.toLocaleDateString('id-ID', {
+			day: 'numeric',
+			month: 'short',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+	};
+
+	const getInitials = (name: string) => {
+		return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+	};
+
+	const getRandomColor = (index: number) => {
+		const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-yellow-500', 'bg-gray-500'];
+		return colors[index % colors.length];
+	};
+
+	const getBorderColor = (index: number) => {
+		const colors = ['border-blue-400', 'border-green-400', 'border-purple-400', 'border-red-400', 'border-yellow-400', 'border-gray-400'];
+		return colors[index % colors.length];
+	};
+
+	const okupasiData = filteredAssessments;
 
 	return (
 		<>
@@ -61,27 +130,46 @@ export default function AsessmentAktif() {
 
 					{/* Konten Utama */}
 					<div className="p-6">
-						{/* Konten Utama ya buyunggggggggggggggggggggggggg */}
-						{/* Konten utama */}
-						<main className=" ">
-							<div className="p-6">
-								{/* Header dengan Search dan Filter */}
-								<div className="mb-6">
-									<div className="flex flex-col md:flex-row md:items-center gap-4">
-										{/* Bagian kiri: Selamat datang */}
-										<div className="flex items-center space-x-2">
-											<span className="text-gray-600">Selamat datang,</span>
-											<span className="font-semibold text-gray-900">Asesi</span>
-										</div>
+						{/* Error notification */}
+						{error && (
+							<div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+								<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+								<span className="text-red-800">{error}</span>
+							</div>
+						)}
 
-										{/* Bagian kanan: Search + Filter */}
-										<div className="flex items-center gap-4">
-											{/* Search Bar */}
-											<div className="relative w-full md:w-100">
-												<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+						{/* Loading state */}
+						{loading && (
+							<div className="flex justify-center items-center py-12">
+								<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+							</div>
+						)}
+
+						{!loading && (
+							<>
+								{/* Konten Utama ya buyunggggggggggggggggggggggggg */}
+								{/* Konten utama */}
+								<main className=" ">
+									<div className="p-6">
+										{/* Header dengan Search dan Filter */}
+										<div className="mb-6">
+											<div className="flex flex-col md:flex-row md:items-center gap-4">
+												{/* Bagian kiri: Selamat datang */}
+												<div className="flex items-center space-x-2">
+													<span className="text-gray-600">Selamat datang,</span>
+													<span className="font-semibold text-gray-900">Asesi</span>
+												</div>
+
+												{/* Bagian kanan: Search + Filter */}
+												<div className="flex items-center gap-4">
+													{/* Search Bar */}
+													<div className="relative w-full md:w-100">
+														<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
 												<input
 													type="text"
-													placeholder="Search..."
+													value={searchTerm}
+													onChange={(e) => setSearchTerm(e.target.value)}
+													placeholder="Cari asesmen..."
 													className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 											</div>
@@ -185,6 +273,8 @@ export default function AsessmentAktif() {
 								</div>
 							</div>
 						</main>
+							</>
+						)}
 					</div>
 				</div>
 			</div>

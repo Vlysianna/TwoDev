@@ -6,7 +6,6 @@ import LandingPage from "@/pages/LandingPage/LandingPage";
 import TentangLSP from "@/pages/LandingPage/TentangLSP";
 import Skema from "@/pages/LandingPage/Skema";
 import StrukturLSP from "@/pages/LandingPage/StrukturLSP";
-import PengelolaSDM from "@/pages/LandingPage/PengelolaSDM";
 import Tempatuji from "@/pages/LandingPage/Tempatuji";
 import Asesor from "@/pages/LandingPage/Asesor";
 import Prosedur from "@/pages/LandingPage/Prosedur";
@@ -24,6 +23,7 @@ import KelolaOkupasi from "@/pages/admin/okupasi/KelolaOkupasi";
 import AplZeroTwo from "@/pages/asesi/Apl-02";
 import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
+import DashboardAdmin from "@/pages/admin/DashboardAdmin";
 import AsessmentAktif from "@/pages/asesi/AsesmentAktif";
 import AssassmentMandiri from "@/pages/asesi/AsassmentMandiri";
 import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
@@ -36,6 +36,7 @@ import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
 import AplZeroOneAsesor from "@/pages/asesor/Apl-01-Assesor";
 import DataSertifikasiAsesor from "@/pages/asesor/DataSertifikasiAsesor";
+import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
 import TemplateAsesor from "@/pages/asesor/Template";
@@ -43,7 +44,11 @@ import Template2 from "@/pages/asesor/Template2";
 import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 import FIIA01Page from "@/pages/asesor/FI-IA-01";
 import HasilAsesmen from "@/pages/asesor/Hasil";
-import DashboardAsesor from "@/pages/asesor/dashboard";
+import Dashboard from "@/pages/asesor/dashboard";
+import AssessmentRecord from "@/pages/assesi/AssessmentRecord";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import DashboardHome from "@/components/DashboardHome";
+import AdminApl02 from "@/pages/admin/Apl-02";
 
 const RootLayout = () => <Outlet />;
 
@@ -56,7 +61,6 @@ const router = createBrowserRouter([
       { index: true, element: <LandingPage /> },
       { path: paths.dashboard.about, element: <TentangLSP /> },
       { path: paths.dashboard.struktur, element: <StrukturLSP /> },
-      { path: paths.dashboard.pengelolaSDM, element: <PengelolaSDM /> },
       { path: paths.dashboard.skema, element: <Skema /> },
       { path: paths.dashboard.tempatUji, element: <Tempatuji /> },
       { path: paths.dashboard.asesor, element: <Asesor /> },
@@ -66,9 +70,13 @@ const router = createBrowserRouter([
       { path: paths.dashboard.dokumen, element: <Dokumen /> },
       { path: paths.dashboard.test, element: <Test /> },
 
-      // Auth routes
+      // Dashboard route for authenticated users
+      { path: "/dashboard", element: <ProtectedRoute><DashboardHome /></ProtectedRoute> },
+
+      // Auth routes (public)
       {
         path: paths.auth.root,
+        element: <ProtectedRoute requireAuth={false}><Outlet /></ProtectedRoute>,
         children: [
           { path: paths.auth.login, element: <LoginForm /> },
           { path: paths.auth.register, element: <RegisterPage /> },
@@ -76,10 +84,12 @@ const router = createBrowserRouter([
         ],
       },
 
-      // Admin routes
+      // Admin routes (protected - role 1)
       {
         path: paths.admin.root,
+        element: <ProtectedRoute allowedRoles={[1]}><Outlet /></ProtectedRoute>,
         children: [
+          { index: true, element: <DashboardAdmin /> },
           { path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
           { path: paths.admin.kelolaMUK, element: <KelolaMUK /> },
           { path: paths.admin.editAsesor, element: <EditAsesor /> },
@@ -91,6 +101,7 @@ const router = createBrowserRouter([
           { path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
           { path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
           { path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
+          { path: paths.admin.apl02, element: <AdminApl02 /> },
 
           // Okupasi nested
           {
@@ -100,10 +111,12 @@ const router = createBrowserRouter([
         ],
       },
 
-      // Asesi routes
+      // Asesi routes (protected - role 3)
       {
         path: paths.asesi.root,
+        element: <ProtectedRoute allowedRoles={[3]}><Outlet /></ProtectedRoute>,
         children: [
+          { index: true, element: <DashboardAsesi /> },
           { path: paths.asesi.dashboard, element: <DashboardAsesi /> },
           { path: paths.asesi.apl01, element: <AplZeroOne /> },
           { path: paths.asesi.apl02, element: <AplZeroTwo /> },
@@ -116,13 +129,16 @@ const router = createBrowserRouter([
             element: <PersetujuanAsesmenKerahasiaan />,
           },
           { path: paths.asesi.asesmenPilihanGanda, element: <AsessementPilihanGanda /> },
+          { path: paths.asesi.assessmentRecord, element: <AssessmentRecord /> },
         ],
       },
 
-      // Asesor routes
+      // Asesor routes (protected - role 2)
       {
         path: paths.asesor.root,
+        element: <ProtectedRoute allowedRoles={[2]}><Outlet /></ProtectedRoute>,
         children: [
+          { index: true, element: <DashboardAsesor /> },
           { path: paths.asesor.template, element: <TemplateAsesor /> },
           { path: paths.asesor.template2, element: <Template2 /> },
           { path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
@@ -131,6 +147,7 @@ const router = createBrowserRouter([
           { path: paths.asesor.apl01, element: <AplZeroOneAsesor /> },
           { path: paths.asesor.dataSertifikasi, element: <DataSertifikasiAsesor /> },
           { path: paths.asesor.hasilAsesmen, element: <HasilAsesmen /> },
+          { path: paths.asesor.dashboard, element: <Dashboard /> },
         ],
       },
     ],

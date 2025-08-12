@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
-import { ChevronLeft, FileText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/helper/axios';
 
 export default function AplZeroOne() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  
   const [formData, setFormData] = useState({
     // Data Pribadi
     nama: '',
@@ -37,12 +45,142 @@ export default function AplZeroOne() {
     tahunLulus: ''
   });
 
+  useEffect(() => {
+    // Load existing assessee data if available
+    loadAssesseeData();
+  }, [user]);
+
+  const loadAssesseeData = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await api.get(`/assessee/user/${user.id}`);
+      if (response.data.success && response.data.data) {
+        const data = response.data.data;
+        setFormData({
+          nama: data.full_name || '',
+          noKTPNIK: data.identity_number || '',
+          tempatLahir: data.birth_location || '',
+          tanggalLahir: data.birth_date ? new Date(data.birth_date).toISOString().split('T')[0] : '',
+          jenisKelamin: data.gender === 'Male' ? 'Laki-laki' : data.gender === 'Female' ? 'Perempuan' : '',
+          kewarganegaraan: data.nationality || '',
+          provinsi: '',
+          noTelpKantor: data.office_phone_no || '',
+          kota: '',
+          noHP: data.phone_no || '',
+          noTelpRumah: data.house_phone_no || '',
+          alamat: data.address || '',
+          kodePos: data.postal_code || '',
+          
+          // Data Pekerjaan (from related job data)
+          namaInstitusi: data.jobs?.[0]?.institution_name || '',
+          noTelpRumahPekerjaan: '',
+          bidangPekerjaan: '',
+          jabatan: data.jobs?.[0]?.position || '',
+          noTelpKantorPekerjaan: data.jobs?.[0]?.phone_no || '',
+          alamatKantor: data.jobs?.[0]?.address || '',
+          kodePosKantor: data.jobs?.[0]?.postal_code || '',
+          email: data.jobs?.[0]?.job_email || '',
+
+          // Data Kualfikasi Pendidikan
+          kualifikasiPendidikan: data.educational_qualifications || '',
+          instansi: '',
+          tahunLulus: ''
+        });
+      }
+    } catch (error) {
+      console.log('No existing assessee data found');
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    
+    // Clear error when user starts typing
+    if (error) setError(null);
+    if (success) setSuccess(null);
+  };
+
+  const validateForm = () => {
+    const requiredFields = [
+      { field: 'nama', label: 'Nama' },
+      { field: 'noKTPNIK', label: 'No. KTP/NIK/Paspor' },
+      { field: 'tempatLahir', label: 'Tempat Lahir' },
+      { field: 'tanggalLahir', label: 'Tanggal Lahir' },
+      { field: 'jenisKelamin', label: 'Jenis Kelamin' },
+      { field: 'kewarganegaraan', label: 'Kewarganegaraan' },
+      { field: 'noHP', label: 'No. HP' },
+      { field: 'alamat', label: 'Alamat' },
+      { field: 'kualifikasiPendidikan', label: 'Kualifikasi Pendidikan' }
+    ];
+
+    for (const { field, label } of requiredFields) {
+      if (!formData[field as keyof typeof formData].trim()) {
+        setError(`${label} harus diisi`);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    if (!user?.id) {
+      setError('User tidak ditemukan. Silakan login ulang.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Prepare data according to API schema
+      const apiData = {
+        user_id: user.id,
+        full_name: formData.nama,
+        identity_number: formData.noKTPNIK,
+        birth_date: new Date(formData.tanggalLahir).toISOString(),
+        birth_location: formData.tempatLahir,
+        gender: formData.jenisKelamin,
+        nationality: formData.kewarganegaraan,
+        phone_no: formData.noHP,
+        house_phone_no: formData.noTelpRumah || null,
+        office_phone_no: formData.noTelpKantor || null,
+        address: formData.alamat,
+        postal_code: formData.kodePos || null,
+        educational_qualifications: formData.kualifikasiPendidikan,
+        jobs: formData.namaInstitusi ? [{
+          institution_name: formData.namaInstitusi,
+          address: formData.alamatKantor,
+          postal_code: formData.kodePosKantor,
+          position: formData.jabatan,
+          phone_no: formData.noTelpKantorPekerjaan,
+          job_email: formData.email
+        }] : []
+      };
+
+      const response = await api.post('/assessment/apl1/create-self-data', apiData);
+
+      if (response.data.success) {
+        setSuccess('Data berhasil disimpan! Silakan lanjut ke tahap berikutnya.');
+        
+        // Auto redirect after 2 seconds
+        setTimeout(() => {
+          navigate(paths.asesi.dataSertifikasi);
+        }, 2000);
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Gagal menyimpan data. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -54,9 +192,25 @@ export default function AplZeroOne() {
           <NavbarAsesi title='Permohonan Sertifikasi Kompetensi' icon={<FileText size={20} />} />
         </div>
 
-        <div className="space-y-8 px-4 sm:px-6 lg:px-8 xl:px-40 py-4 sm:py-8 ">
-          {/* Data Pribadi Section */}
-          <div>
+        <div className="space-y-8 px-4 sm:px-6 lg:px-8 xl:px-40 py-4 sm:py-8">
+          {/* Notifications */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+              <span className="text-red-800">{error}</span>
+            </div>
+          )}
+          
+          {success && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+              <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+              <span className="text-green-800">{success}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Data Pribadi Section */}
+            <div>
             <h2 className="text-2xl sm:text-3xl font-medium text-gray-900 mb-2">Data Pribadi</h2>
             <p className="text-gray-600 text-sm mb-6">
               Isi biodata Anda dengan akurat untuk memastikan proses sertifikasi yang lancar.
@@ -414,13 +568,15 @@ export default function AplZeroOne() {
 
           {/* Submit Button */}
           <div className="flex justify-end mt-8">
-            <Link
-              to={paths.asesi.dataSertifikasi}
-              className="bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              Lanjut
-            </Link>
+              {loading ? 'Menyimpan...' : 'Simpan & Lanjut'}
+            </button>
           </div>
+        </form>
         </div>
       </div >
     </div >
