@@ -88,7 +88,7 @@ const SidebarAsesor: React.FC = () => {
                 <Link to={paths.asesor.root} className="p-6">
                     <div className="h-20 flex items-center justify-center">
                         <img
-                            src="img/final logo twodev teks putih 1.svg"
+                            src="/twodev-putih.svg"
                             alt="Logo"
                             className="h-full object-contain"
                         />

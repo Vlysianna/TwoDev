@@ -144,6 +144,7 @@ const router = createBrowserRouter([
           { index: true, element: <DashboardAsesor /> },
           { path: paths.asesor.template, element: <TemplateAsesor /> },
           { path: paths.asesor.template2, element: <Template2 /> },
+          { path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
           { path: paths.asesor.fiia, element: <FIIA01Page /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
           { path: paths.asesor.apl01, element: <AplZeroOneAsesor /> },

@@ -45,11 +45,12 @@ const routes = {
     dashboard: "/asesor/dashboard",
     template: "/asesor/template",
     template2: "/asesor/template2",
+    dashboardAsesor: "/asesor/dashboard-asesor",
+    fiia: "/asesor/fi.ia.01",
     fiiadetail: "/asesor/fi.ia.01-detail",
     apl01: "/asesor/apl-01",
     dataSertifikasi: "/asesor/data-sertifikasi",
     hasil: "/asesor/hasil",
-    fiia: "/asesor/fi.ia.01",
     hasilAsesmen: "/asesor/hasil-asesmen",
   },
   asesi: {
