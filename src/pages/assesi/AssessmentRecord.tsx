@@ -70,12 +70,13 @@ export default function AssessmentRecord() {
                 <h2 className="text-sm font-medium text-gray-800">
                   Skema Sertifikasi (Okupasi)
                 </h2>
-                <div className="flex items-center text-sm text-gray-500">
-                  <div className="w-4 h-4 rounded-full border border-blue-400 flex items-center justify-center mr-1">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  </div>
-                  <span className="text-blue-600">Sewaktu</span>
-                </div>
+                <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" strokeWidth="2"></circle>
+                  <polyline points="12,6 12,12 16,14" strokeWidth="2"></polyline>
+                </svg>
+                <span className="text-sm text-gray-600">Sewaktu</span>
+              </div>
               </div>
 
               {/* Kanan */}
