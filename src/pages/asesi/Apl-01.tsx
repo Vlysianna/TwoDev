@@ -166,6 +166,8 @@ export default function AplZeroOne() {
         }] : []
       };
 
+      console.log('API Data:', apiData);
+
       const response = await api.post('/assessment/apl1/create-self-data', apiData);
 
       if (response.data.success) {

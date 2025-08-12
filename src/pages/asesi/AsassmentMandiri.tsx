@@ -34,7 +34,7 @@ export default function AssassmentMandiri() {
                 // Auto-select first assessment
                 const firstAssessment = response.data.data[0];
                 setSelectedAssessment(firstAssessment);
-                fetchUnitCompetencies(firstAssessment.id);
+                fetchUnitCompetencies(firstAssessment.code);
             }
         } catch (error: any) {
             setError('Gagal memuat data asesmen');
@@ -43,9 +43,9 @@ export default function AssassmentMandiri() {
         }
     };
 
-    const fetchUnitCompetencies = async (assessmentId: number) => {
+    const fetchUnitCompetencies = async (assessmentCode: string) => {
         try {
-            const response = await api.get(`/assessment/apl2/unit-competencies/${assessmentId}`);
+            const response = await api.get(`/assessment/apl2/unit-competencies/${encodeURIComponent(assessmentCode)}`);
             
             if (response.data.success) {
                 setUnitCompetencies(response.data.data);
