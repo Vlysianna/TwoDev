@@ -64,6 +64,7 @@ const routes = {
     persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
     asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda",
     assessmentRecord: "/asesi/assessment-record",
+    assesmentReport: "/asesi/assesment-report",
   },
 };
 

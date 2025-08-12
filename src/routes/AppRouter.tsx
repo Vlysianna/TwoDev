@@ -45,10 +45,11 @@ import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 import FIIA01Page from "@/pages/asesor/FI-IA-01";
 import HasilAsesmen from "@/pages/asesor/Hasil";
 import Dashboard from "@/pages/asesor/dashboard";
-import AssessmentRecord from "@/pages/assesi/AssessmentRecord";
+import AssessmentRecord from "@/pages/assesi/AssesmentRecord";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
+import AssessmentReport from "@/pages/assesi/AssesmentReport";
 
 const RootLayout = () => <Outlet />;
 
@@ -130,6 +131,8 @@ const router = createBrowserRouter([
           },
           { path: paths.asesi.asesmenPilihanGanda, element: <AsessementPilihanGanda /> },
           { path: paths.asesi.assessmentRecord, element: <AssessmentRecord /> },
+          { path: paths.asesi.assessmentRecord, element: <AssessmentRecord /> },
+          { path: paths.asesi.assesmentReport, element: <AssessmentReport /> },
         ],
       },
 
