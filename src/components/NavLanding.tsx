@@ -46,7 +46,7 @@ const NavLanding: React.FC = () => {
     { name: 'Home', path: '/' },
     { name: 'Berita', path: '/berita' },
     { name: 'Galeri', path: '/galeri' },
-    { name: 'Dokumen', path: '/dokumen' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   return (
@@ -224,8 +224,8 @@ const NavLanding: React.FC = () => {
             <Link to="/galeri" className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
               Galeri
             </Link>
-            <Link to="/dokumen" className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
-              Dokumen
+            <Link to="/contact" className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+              Contact
             </Link>
 
             <button className="w-full bg-[#E77D35] hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm mt-4">

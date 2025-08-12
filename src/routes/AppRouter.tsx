@@ -15,7 +15,7 @@ import Asesor from "@/pages/LandingPage/Asesor";
 import Prosedur from "@/pages/LandingPage/Prosedur";
 import Berita from "@/pages/LandingPage/Berita";
 import Galeri from "@/pages/LandingPage/Galeri";
-import Dokumen from "@/pages/LandingPage/Dokumen";
+import Contact from "@/pages/LandingPage/Contact";
 import AplZeroTwo from "@/pages/asesi/Apl-02";
 import DataSertifikasi from "../pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
@@ -54,7 +54,7 @@ export default function AppRouter() {
 				<Route path="/prosedur-pendaftaran" element={<Prosedur />} />
 				<Route path="/berita" element={<Berita />} />
 				<Route path="/galeri" element={<Galeri />} />
-				<Route path="/dokumen" element={<Dokumen />} />
+				<Route path="/contact" element={<Contact />} />
 				<Route path="/test" element={<Test />} />
 				<Route path="/verifikasi" element={<VerifikasiPage/>} />
 				<Route path="/register" element={<RegisterPage/>} />

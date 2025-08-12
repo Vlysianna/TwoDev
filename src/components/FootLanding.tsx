@@ -13,17 +13,14 @@ const FootLanding = () => {
               <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
               <h3 className="font-semibold text-sm sm:text-base md:text-lg">Kontak Admin</h3>
             </div>
-            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
-              <div className="flex items-start gap-2">
-                <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
+            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm font-light">
+              <div className="flex items-start gap-2">                
                 <span className="break-all">Whatsapp: +62812-1234-5678</span>
               </div>
-              <div className="flex items-start gap-2">
-                <Mail className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-2">                
                 <span className="break-all">Email: lspsmkn24jkt@gmail.com</span>
               </div>
-              <div className="flex items-start gap-2">
-                <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-2">                
                 <span>Instagram: @twodev.id</span>
               </div>
             </div>
@@ -35,7 +32,7 @@ const FootLanding = () => {
               <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
               <h3 className="font-semibold text-sm sm:text-base md:text-lg">Lembaga Tertaut</h3>
             </div>
-            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm font-light">
               <div>Lembaga Sertifikasi Profesi</div>
               <div>SMK Negeri 24 Jakarta</div>
               <div>Badan Nasional Sertifikasi Profesi</div>
@@ -48,7 +45,7 @@ const FootLanding = () => {
               <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               <h3 className="font-semibold text-sm sm:text-base md:text-lg">Alamat</h3>
             </div>
-            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm font-light">
               <div>SMK Negeri 24 Jakarta</div>
               <div>Jalan Bambu Hitam, Bambu Apus</div>
               <div>Cipayung, RT.7 / RW.3</div>
@@ -60,20 +57,19 @@ const FootLanding = () => {
             <div className="bg-white rounded-lg p-2 shadow-lg w-full max-w-[180px]">
               <div className="w-full aspect-video bg-gray-100 rounded flex items-center justify-center relative overflow-hidden">
                 {/* Simplified map representation */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-green-100"></div>
-                <div className="absolute top-2 left-2 w-1 h-1 bg-red-500 rounded-full"></div>
-                <div className="absolute top-4 right-3 w-0.5 h-0.5 bg-red-400 rounded-full"></div>
-                <div className="absolute bottom-3 left-4 w-0.5 h-0.5 bg-red-400 rounded-full"></div>
-                <div className="absolute bottom-2 right-2 w-1 h-1 bg-red-500 rounded-full"></div>
-                {/* Grid lines to simulate map */}
-                <div className="absolute inset-0 opacity-20">
-                  <div className="grid grid-cols-4 grid-rows-3 h-full w-full">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <div key={i} className="border border-gray-300 border-opacity-30"></div>
-                    ))}
-                  </div>
-                </div>
-                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 z-10" />
+                <div className="w-full h-80">
+            <iframe
+  title="Location Map"
+ src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3361.429257455506!2d106.89715947418402!3d-6.321756161858795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ed39f3a3c44d%3A0x83f2c08168c334bb!2sSMKN%2024%20Jakarta!5e1!3m2!1sid!2sid!4v1754964923691!5m2!1sid!2sid"
+  height="100%"
+  width="100%"
+  style={{ border: 0 }}
+  allowFullScreen
+  loading="lazy"
+  referrerPolicy="no-referrer-when-downgrade"
+/>
+
+          </div>
               </div>
             </div>
           </div>
