@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import routes from '@/routes/paths';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -54,7 +55,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         case 1: // Admin
           return <Navigate to="/admin" replace />;
         case 2: // Assessor
-          return <Navigate to="/asesor" replace />;
+          return <Navigate to={routes.asesor.dashboardAsesor} replace />;
         case 3: // Assessee
           return <Navigate to="/asesi" replace />;
         default:

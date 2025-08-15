@@ -35,7 +35,7 @@ import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
 import AplZeroOneAsesor from "@/pages/asesor/Apl-01-Assesor";
 import DataSertifikasiAsesor from "@/pages/asesor/DataSertifikasiAsesor";
-import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
+import DashboardAsesor from "@/pages/asesor/dashboard";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
 import TemplateAsesor from "@/pages/asesor/Template";
@@ -44,11 +44,11 @@ import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 import FIIA01Page from "@/pages/asesor/FI-IA-01";
 import HasilAsesmen from "@/pages/asesor/Hasil";
 import Dashboard from "@/pages/asesor/dashboard";
-import AssessmentRecord from "@/pages/assesi/AssesmentRecord";
+import AssessmentRecord from "@/pages/asesor/AssessmentRecord";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
-import AssessmentReport from "@/pages/assesi/AssesmentReport";
+import AssessmentReport from "@/pages/asesor/AssesmentReport";
 import Hasil from "@/pages/asesor/Hasil";
 import Contact from "@/pages/LandingPage/Contact";
 
@@ -132,7 +132,6 @@ const router = createBrowserRouter([
           },
           { path: paths.asesi.asesmenPilihanGanda, element: <AsessementPilihanGanda /> },
           { path: paths.asesi.assessmentRecord, element: <AssessmentRecord /> },
-          { path: paths.asesi.assessmentRecord, element: <AssessmentRecord /> },
           { path: paths.asesi.assesmentReport, element: <AssessmentReport /> },
         ],
       },
@@ -148,6 +147,7 @@ const router = createBrowserRouter([
           { path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
           { path: paths.asesor.fiia, element: <FIIA01Page /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
+          { path: paths.asesor.frak02, element: <AssessmentRecord /> },
           { path: paths.asesor.apl01, element: <AplZeroOneAsesor /> },
           { path: paths.asesor.dataSertifikasi, element: <DataSertifikasiAsesor /> },
           { path: paths.asesor.hasilAsesmen, element: <HasilAsesmen /> },
