@@ -11,7 +11,6 @@ import Asesor from "@/pages/LandingPage/Asesor";
 import Prosedur from "@/pages/LandingPage/Prosedur";
 import Berita from "@/pages/LandingPage/Berita";
 import Galeri from "@/pages/LandingPage/Galeri";
-import Dokumen from "@/pages/LandingPage/Dokumen";
 import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
 import KelolaMUK from "@/pages/admin/KelolaSkema";
 import EditAsesor from "@/pages/admin/EditAsesor";
@@ -51,6 +50,7 @@ import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
 import AssessmentReport from "@/pages/assesi/AssesmentReport";
 import Hasil from "@/pages/asesor/Hasil";
+import Contact from "@/pages/LandingPage/Contact";
 
 const RootLayout = () => <Outlet />;
 
@@ -69,7 +69,7 @@ const router = createBrowserRouter([
       { path: paths.dashboard.prosedurPendaftaran, element: <Prosedur /> },
       { path: paths.dashboard.berita, element: <Berita /> },
       { path: paths.dashboard.galeri, element: <Galeri /> },
-      { path: paths.dashboard.dokumen, element: <Dokumen /> },
+      { path: paths.dashboard.contact, element: <Contact /> },
       { path: paths.dashboard.test, element: <Test /> },
 
       // Dashboard route for authenticated users
