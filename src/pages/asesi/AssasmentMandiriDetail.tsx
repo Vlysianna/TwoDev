@@ -125,26 +125,47 @@ export default function AssessmentMandiriDetail() {
 
                             {/* Filter Kompeten */}
                             <div className="flex flex-wrap items-center gap-3 md:gap-6 flex-none">
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="radio"
-                                        name="filter"
-                                        value="kompeten"
-                                        checked={filterKompeten === 'kompeten'}
-                                        onChange={(e) => handleFilterChange(e.target.value)}
-                                    />
-                                    <span className="text-sm">Semua Kompeten</span>
-                                </label>
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="radio"
-                                        name="filter"
-                                        value="belum"
-                                        checked={filterKompeten === 'belum'}
-                                        onChange={(e) => handleFilterChange(e.target.value)}
-                                    />
-                                    <span className="text-sm">Semua Belum Kompeten</span>
-                                </label>
+                                {[
+                                    { value: "kompeten", label: "Semua Kompeten" },
+                                    { value: "belum", label: "Belum Kompeten" }
+                                ].map(opt => (
+                                    <label
+                                        key={opt.value}
+                                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
+      ${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""}`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="filter"
+                                            value={opt.value}
+                                            checked={filterKompeten === opt.value}
+                                            onChange={(e) => handleFilterChange(e.target.value)}
+                                            className="hidden"
+                                        />
+                                        <span
+                                            className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+        ${filterKompeten === opt.value ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+                                        >
+                                            {filterKompeten === opt.value && (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 20 20"
+                                                    fill="white"
+                                                    className="w-3 h-3"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            )}
+                                        </span>
+                                        <span className={filterKompeten === opt.value ? "text-gray-900" : "text-gray-500"}>
+                                            {opt.label}
+                                        </span>
+                                    </label>
+                                ))}
                             </div>
 
                             {/* Global Bukti Relevan */}
@@ -217,29 +238,72 @@ export default function AssessmentMandiriDetail() {
                                                         rowSpan={item.criteria.length}
                                                     >
                                                         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-                                                            <label className="flex items-center gap-1 text-sm">
+                                                            {/* Opsi Kompeten */}
+                                                            <label
+                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
+        ${pencapaian[item.id] === 'kompeten' ? "bg-[#E77D3533]" : ""}`}
+                                                            >
                                                                 <input
                                                                     type="radio"
                                                                     name={`pencapaian-${item.id}`}
                                                                     value="kompeten"
                                                                     checked={pencapaian[item.id] === 'kompeten'}
-                                                                    onChange={(e) =>
-                                                                        handlePencapaianChange(item.id, e.target.value)
-                                                                    }
+                                                                    onChange={(e) => handlePencapaianChange(item.id, e.target.value)}
+                                                                    className="hidden"
                                                                 />
-                                                                Kompeten
+                                                                <span
+                                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+            ${pencapaian[item.id] === 'kompeten' ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+                                                                >
+                                                                    {pencapaian[item.id] === 'kompeten' && (
+                                                                        <svg
+                                                                            className="w-3 h-3 text-white"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            strokeWidth="3"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path d="M5 13l4 4L19 7" />
+                                                                        </svg>
+                                                                    )}
+                                                                </span>
+                                                                <span className={pencapaian[item.id] === 'kompeten' ? "text-gray-900" : "text-gray-500"}>
+                                                                    Kompeten
+                                                                </span>
                                                             </label>
-                                                            <label className="flex items-center gap-1 text-sm">
+
+                                                            {/* Opsi Belum Kompeten */}
+                                                            <label
+                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
+        ${pencapaian[item.id] === 'belum' ? "bg-[#E77D3533]" : ""}`}
+                                                            >
                                                                 <input
                                                                     type="radio"
                                                                     name={`pencapaian-${item.id}`}
                                                                     value="belum"
                                                                     checked={pencapaian[item.id] === 'belum'}
-                                                                    onChange={(e) =>
-                                                                        handlePencapaianChange(item.id, e.target.value)
-                                                                    }
+                                                                    onChange={(e) => handlePencapaianChange(item.id, e.target.value)}
+                                                                    className="hidden"
                                                                 />
-                                                                Belum Kompeten
+                                                                <span
+                                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+            ${pencapaian[item.id] === 'belum' ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+                                                                >
+                                                                    {pencapaian[item.id] === 'belum' && (
+                                                                        <svg
+                                                                            className="w-3 h-3 text-white"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            strokeWidth="3"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path d="M5 13l4 4L19 7" />
+                                                                        </svg>
+                                                                    )}
+                                                                </span>
+                                                                <span className={pencapaian[item.id] === 'belum' ? "text-gray-900" : "text-gray-500"}>
+                                                                    Belum Kompeten
+                                                                </span>
                                                             </label>
                                                         </div>
                                                     </td>

@@ -22,6 +22,7 @@ interface Occupation {
 interface Scheme {
   id: number;
   name: string;
+  code: string;
   description: string;
   start_date: string;
   end_date: string;
@@ -180,12 +181,6 @@ const KelolaMUK: React.FC = () => {
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
                         Skema
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Tanggal Mulai
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Tanggal Selesai
-                      </th>
                       <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
                         Aksi
                       </th>
@@ -198,16 +193,10 @@ const KelolaMUK: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {scheme.occupation.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {scheme.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(scheme.start_date).toLocaleDateString('id-ID')}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(scheme.end_date).toLocaleDateString('id-ID')}
+                          {scheme.code}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">

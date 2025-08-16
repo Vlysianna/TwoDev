@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import NavbarAsesi from '@/components/ui/NavbarAsesi';
+import { useState } from "react";
+import NavbarAsesor from "@/components/NavAsesor";
+import { FileText } from "lucide-react";
 
 export default function AssessmentRecord() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({});
@@ -55,10 +56,12 @@ export default function AssessmentRecord() {
   };
 
   return (
-          <div className="min-h-screen bg-gray-50">
-        <NavbarAsesi title="" />
-        
-    <div className="pt-20 px-6 pb-6">
+    <div className="min-h-screen bg-gray-50">
+      <NavbarAsesor title="Rekaman Asesmen Kompetensi - FR.AK.02" 
+      icon={<FileText size={20} />}
+      />
+
+      <div className="pt-20 px-6 pb-6">
         <div className="max-w-7xl mx-auto">
           {/* Skema Sertifikasi Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">

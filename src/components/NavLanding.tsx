@@ -33,7 +33,7 @@ const NavLanding: React.FC = () => {
 			setActiveItem("berita");
 		} else if (path.includes(paths.dashboard.galeri)) {
 			setActiveItem("galeri");
-		} else if (path.includes(paths.dashboard.dokumen)) {
+		} else if (path.includes(paths.dashboard.contact)) {
 			setActiveItem("dokumen");
 		}
 	}, [location.pathname]);
@@ -71,7 +71,7 @@ const NavLanding: React.FC = () => {
     { name: 'Home', path: paths.root },
     { name: 'Berita', path: paths.dashboard.berita },
     { name: 'Galeri', path: paths.dashboard.galeri },
-    { name: 'Dokumen', path: paths.dashboard.dokumen },
+    { name: 'Contact', path: paths.dashboard.contact },
   ];
 
 	return (
@@ -277,24 +277,15 @@ const NavLanding: React.FC = () => {
               )}
             </div>
 
-						<Link
-							to={paths.dashboard.berita}
-							className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
-						>
-							Berita
-						</Link>
-						<Link
-							to={paths.dashboard.galeri}
-							className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
-						>
-							Galeri
-						</Link>
-						<Link
-							to={paths.dashboard.dokumen}
-							className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
-						>
-							Dokumen
-						</Link>
+            <Link to={paths.dashboard.berita} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+              Berita
+            </Link>
+            <Link to={paths.dashboard.galeri} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+              Galeri
+            </Link>
+            <Link to={paths.dashboard.contact} className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
+              Contact
+            </Link>
 
             {/* Mobile Authentication Section */}
             {isAuthenticated && user ? (
