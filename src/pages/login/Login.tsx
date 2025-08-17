@@ -1,16 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Eye, EyeClosed, Shield, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Eye, EyeClosed, CheckCircle } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
+import { useForm } from 'react-hook-form';
+
+type FormValues = {
+  email: string
+  password: string
+}
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { isSubmitting }, // isSubmitting = loading state bawaan
+  } = useForm<FormValues>()
+
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [error, setError] = useState('');
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -24,33 +35,36 @@ export default function LoginForm() {
       setSuccessMessage(location.state.message);
     }
     if (location.state?.email) {
-      setEmail(location.state.email);
+      setValue('email', location.state.email);
     }
   }, [location.state]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const onSubmit = async (data: FormValues) => {
+
+    const { email, password } = data;
+
     if (!email || !password) {
       setError('Email dan password harus diisi');
       setSuccessMessage('');
       return;
     }
 
-    try {
-      setIsLoading(true);
-      setError('');
-      setSuccessMessage('');
-      
-      await login(email, password);
-      
+    setError('');
+    setSuccessMessage('');
+    
+    await login(email, password).then(() => {
+      setSuccessMessage('Login berhasil');
       navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Login gagal');
-    } finally {
-      setIsLoading(false);
-    }
+    }).catch((err: any) => {
+      // console.log(err);
+      const errorMessage = err.response?.data?.message || 'Terjadi kesalahan';
+      setError(errorMessage);
+    });
   };
+
+  useEffect(() => {
+    console.log(error);
+  }, [error]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row w-full">
@@ -69,7 +83,8 @@ export default function LoginForm() {
           </div>
 
           {/* Login Form */}
-          <div className="space-y-4 md:space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+            
             {/* Email Field */}
             <div>
               <div className="block text-sm font-medium text-gray-700 mb-1 md:mb-2">
@@ -77,10 +92,9 @@ export default function LoginForm() {
               </div>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Masukkan email anda"
                 className="w-full px-3 py-2 md:py-2.5 bg-[#DADADA33] rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm"
+                {...register("email", { required: "Email wajib diisi" })}
               />
             </div>
 
@@ -92,10 +106,9 @@ export default function LoginForm() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Masukkan password anda"
                   className="w-full px-3 py-2 md:py-2.5 bg-[#DADADA33] rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm pr-10"
+                  {...register("password", { required: "Password wajib diisi" })}
                 />
                 <button
                   onClick={() => setShowPassword(!showPassword)}
@@ -136,11 +149,10 @@ export default function LoginForm() {
             {/* Sign In Button */}
             <button
               type="submit"
-              onClick={handleSubmit}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="w-full flex items-center justify-center bg-[#E77D35] hover:cursor-pointer text-white py-2 md:py-2.5 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Signing In...
@@ -157,7 +169,7 @@ export default function LoginForm() {
                 Register
               </Link>
             </div>
-          </div>
+          </form>
         </div>
         <div className="fixed bottom-0 pb-10 flex items-center justify-center text-xs md:text-sm text-gray-600">
           <span>Developed by</span>
