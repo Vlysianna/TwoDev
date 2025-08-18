@@ -47,6 +47,7 @@ const routes = {
 		template2: "/asesor/template2",
 		dashboardAsesor: "/asesor/dashboard-asesor",
 		cekAsesmenMandiri: "/asesor/cek-apl-02",
+		cekAsesmenMandiriDetail: "/asesor/cek-apl-02-detail",
 		fiia: "/asesor/fi.ia.01",
 		fiiadetail: "/asesor/fi.ia.01-detail",
 		frak02: "/asesor/fr.ak.02",
