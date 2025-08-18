@@ -54,6 +54,7 @@ import Contact from "@/pages/LandingPage/Contact";
 import UmpanBalik from "@/pages/asesi/UmpanBalik";
 import BandingAsesmen from "@/pages/asesi/BandingAsesmen";
 import FRIA02 from "@/pages/asesi/FR-IA-02";
+import CekAsesmenMandiri from "@/pages/asesor/CekAsesmenMandiri";
 
 const RootLayout = () => <Outlet />;
 
@@ -151,6 +152,7 @@ const router = createBrowserRouter([
           { path: paths.asesor.template, element: <TemplateAsesor /> },
           { path: paths.asesor.template2, element: <Template2 /> },
           { path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
+          { path: paths.asesor.cekAsesmenMandiri, element: <CekAsesmenMandiri /> },
           { path: paths.asesor.fiia, element: <FIIA01Page /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
           { path: paths.asesor.frak02, element: <AssessmentRecord /> },
