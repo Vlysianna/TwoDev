@@ -110,21 +110,21 @@ export default function AssessmentMandiriDetail() {
 
                             {/* Search */}
                             <div className="relative flex-1 min-w-[200px]">
-                                <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                    size={16}
-                                />
                                 <input
                                     type="text"
                                     placeholder="Search..."
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                <Search
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                                    size={16}
                                 />
                             </div>
 
                             {/* Filter Kompeten */}
-                            <div className="flex flex-wrap items-center gap-3 md:gap-6 flex-none">
+                            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">
                                 {[
                                     { value: "kompeten", label: "Semua Kompeten" },
                                     { value: "belum", label: "Belum Kompeten" }
@@ -132,7 +132,7 @@ export default function AssessmentMandiriDetail() {
                                     <label
                                         key={opt.value}
                                         className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-      ${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""}`}
+        ${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""}`}
                                     >
                                         <input
                                             type="radio"
@@ -144,7 +144,7 @@ export default function AssessmentMandiriDetail() {
                                         />
                                         <span
                                             className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-        ${filterKompeten === opt.value ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+          ${filterKompeten === opt.value ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
                                         >
                                             {filterKompeten === opt.value && (
                                                 <svg
@@ -186,19 +186,19 @@ export default function AssessmentMandiriDetail() {
 
                     {/* Table */}
                     <div className="overflow-x-auto border border-gray-200 rounded-sm">
-                        <table className="w-full min-w-[800px]">
+                        <table className="w-full min-w-[900px] table-auto">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="p-3 sm:p-7 text-left text-sm font-medium text-gray-700 w-64">
+                                    <th className="p-3 sm:p-5 text-left text-sm font-medium text-gray-700 w-64">
                                         Elemen
                                     </th>
-                                    <th className="p-3 sm:p-7 text-left text-sm font-medium text-gray-700 w-64">
+                                    <th className="p-3 sm:p-5 text-left text-sm font-medium text-gray-700 w-64">
                                         Kriteria Untuk Kerja
                                     </th>
-                                    <th className="p-3 sm:p-7 text-center text-sm font-medium text-gray-700 w-40">
+                                    <th className="p-3 sm:p-5 text-center text-sm font-medium text-gray-700 w-40">
                                         Pencapaian
                                     </th>
-                                    <th className="p-3 sm:p-7 text-center text-sm font-medium text-gray-700 w-40">
+                                    <th className="p-3 sm:p-5 text-center text-sm font-medium text-gray-700 w-40">
                                         Bukti yang relevan
                                     </th>
                                 </tr>
@@ -209,7 +209,7 @@ export default function AssessmentMandiriDetail() {
                                         {item.criteria.map((criteria, criteriaIndex) => (
                                             <tr
                                                 key={criteria.id}
-                                                className={`${criteriaIndex === 0 ? 'border-t border-gray-300' : ''}`}
+                                                className={`${criteriaIndex === 0 ? "border-t border-gray-300" : ""}`}
                                             >
                                                 {criteriaIndex === 0 && (
                                                     <td
@@ -223,39 +223,47 @@ export default function AssessmentMandiriDetail() {
                                                     </td>
                                                 )}
 
+                                                {/* Kriteria */}
                                                 <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-900">
                                                     <div className="flex items-start gap-2">
-                                                        <span className="font-medium text-blue-600 min-w-8">
+                                                        <span className="font-medium text-[#00809D] min-w-8">
                                                             {criteria.id}
                                                         </span>
                                                         <span>{criteria.text}</span>
                                                     </div>
                                                 </td>
 
+                                                {/* Pencapaian */}
+                                                {/* Pencapaian */}
                                                 {criteriaIndex === 0 && (
                                                     <td
-                                                        className="px-2 sm:px-4 py-2 sm:py-3 text-center"
+                                                        className="px-2 sm:px-4 py-2 sm:py-3"
                                                         rowSpan={item.criteria.length}
                                                     >
-                                                        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-                                                            {/* Opsi Kompeten */}
+                                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+                                                            {/* Kompeten */}
                                                             <label
-                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-        ${pencapaian[item.id] === 'kompeten' ? "bg-[#E77D3533]" : ""}`}
+                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+          ${pencapaian[item.id] === "kompeten" ? "bg-[#E77D3533]" : ""}`}
                                                             >
                                                                 <input
                                                                     type="radio"
                                                                     name={`pencapaian-${item.id}`}
                                                                     value="kompeten"
-                                                                    checked={pencapaian[item.id] === 'kompeten'}
-                                                                    onChange={(e) => handlePencapaianChange(item.id, e.target.value)}
+                                                                    checked={pencapaian[item.id] === "kompeten"}
+                                                                    onChange={(e) =>
+                                                                        handlePencapaianChange(item.id, e.target.value)
+                                                                    }
                                                                     className="hidden"
                                                                 />
                                                                 <span
                                                                     className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-            ${pencapaian[item.id] === 'kompeten' ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+            ${pencapaian[item.id] === "kompeten"
+                                                                            ? "bg-[#E77D35] border-[#E77D35]"
+                                                                            : "border-[#E77D35]"
+                                                                        }`}
                                                                 >
-                                                                    {pencapaian[item.id] === 'kompeten' && (
+                                                                    {pencapaian[item.id] === "kompeten" && (
                                                                         <svg
                                                                             className="w-3 h-3 text-white"
                                                                             fill="none"
@@ -267,29 +275,40 @@ export default function AssessmentMandiriDetail() {
                                                                         </svg>
                                                                     )}
                                                                 </span>
-                                                                <span className={pencapaian[item.id] === 'kompeten' ? "text-gray-900" : "text-gray-500"}>
+                                                                <span
+                                                                    className={
+                                                                        pencapaian[item.id] === "kompeten"
+                                                                            ? "text-gray-900"
+                                                                            : "text-gray-500"
+                                                                    }
+                                                                >
                                                                     Kompeten
                                                                 </span>
                                                             </label>
 
-                                                            {/* Opsi Belum Kompeten */}
+                                                            {/* Belum Kompeten */}
                                                             <label
-                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-        ${pencapaian[item.id] === 'belum' ? "bg-[#E77D3533]" : ""}`}
+                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+          ${pencapaian[item.id] === "belum" ? "bg-[#E77D3533]" : ""}`}
                                                             >
                                                                 <input
                                                                     type="radio"
                                                                     name={`pencapaian-${item.id}`}
                                                                     value="belum"
-                                                                    checked={pencapaian[item.id] === 'belum'}
-                                                                    onChange={(e) => handlePencapaianChange(item.id, e.target.value)}
+                                                                    checked={pencapaian[item.id] === "belum"}
+                                                                    onChange={(e) =>
+                                                                        handlePencapaianChange(item.id, e.target.value)
+                                                                    }
                                                                     className="hidden"
                                                                 />
                                                                 <span
                                                                     className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-            ${pencapaian[item.id] === 'belum' ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+            ${pencapaian[item.id] === "belum"
+                                                                            ? "bg-[#E77D35] border-[#E77D35]"
+                                                                            : "border-[#E77D35]"
+                                                                        }`}
                                                                 >
-                                                                    {pencapaian[item.id] === 'belum' && (
+                                                                    {pencapaian[item.id] === "belum" && (
                                                                         <svg
                                                                             className="w-3 h-3 text-white"
                                                                             fill="none"
@@ -301,7 +320,13 @@ export default function AssessmentMandiriDetail() {
                                                                         </svg>
                                                                     )}
                                                                 </span>
-                                                                <span className={pencapaian[item.id] === 'belum' ? "text-gray-900" : "text-gray-500"}>
+                                                                <span
+                                                                    className={
+                                                                        pencapaian[item.id] === "belum"
+                                                                            ? "text-gray-900"
+                                                                            : "text-gray-500"
+                                                                    }
+                                                                >
                                                                     Belum Kompeten
                                                                 </span>
                                                             </label>
@@ -309,6 +334,7 @@ export default function AssessmentMandiriDetail() {
                                                     </td>
                                                 )}
 
+                                                {/* Bukti relevan */}
                                                 {criteriaIndex === 0 && (
                                                     <td
                                                         className="px-2 sm:px-4 py-2 sm:py-3 text-center"
@@ -316,10 +342,8 @@ export default function AssessmentMandiriDetail() {
                                                     >
                                                         <select
                                                             className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-                                                            value={selectedProof[item.id] || ''}
-                                                            onChange={(e) =>
-                                                                handleProofSelection(item.id, e.target.value)
-                                                            }
+                                                            value={selectedProof[item.id] || ""}
+                                                            onChange={(e) => handleProofSelection(item.id, e.target.value)}
                                                         >
                                                             <option value="">Bukti relevan</option>
                                                             <option value="dokumen1">Dokumen 1</option>

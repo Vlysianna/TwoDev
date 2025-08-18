@@ -14,7 +14,6 @@ export default function PersetujuanAsesmenKerahasiaan() {
     const [selectedTUK, setSelectedTUK] = useState('');
     const [tanggal, setTanggal] = useState('');
     const [waktu, setWaktu] = useState('');
-    const [showModal, setShowModal] = useState(false);
     const [assessors, setAssessors] = useState<any[]>([]);
     const [tukOptions, setTukOptions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -230,69 +229,54 @@ export default function PersetujuanAsesmenKerahasiaan() {
                             </div>
 
                             {/* Declaration Sections */}
-                            <div className="mt-8 border-t border-gray-200 pt-6 space-y-6">
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
-                                    <p className="text-gray-700 leading-relaxed">
-                                        Bahwa saya telah mendapatkan penjelasan terkait hak dan prosedur banding asesmen dari asesor.
-                                    </p>
-                                </div>
+                            <div className="mt-8 border-t border-gray-200 pt-6">
+                                <div className="flex flex-col lg:flex-row justify-between gap-6">
+                                    {/* Kiri: isi teks */}
+                                    <div className="flex-1 space-y-6">
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Bahwa saya telah mendapatkan penjelasan terkait hak dan prosedur banding asesmen dari asesor.
+                                            </p>
+                                        </div>
 
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-2">Asesor :</h3>
-                                    <p className="text-gray-700 leading-relaxed">
-                                        Menyatakan tidak akan membuka hasil pekerjaan yang saya peroleh karena penugasan saya sebagai Asesor dalam pekerjaan Asesmen kepada siapapun atau organisasi apapun selain kepada pihak yang berwenang sehubungan dengan kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.
-                                    </p>
-                                </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 mb-2">Asesor :</h3>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Menyatakan tidak akan membuka hasil pekerjaan yang saya peroleh karena penugasan saya sebagai Asesor dalam pekerjaan Asesmen kepada siapapun atau organisasi apapun selain kepada pihak yang berwenang sehubungan dengan kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.
+                                            </p>
+                                        </div>
 
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
-                                    <p className="text-gray-700 leading-relaxed">
-                                        Saya setuju mengikuti asesmen dengan pemahaman bahwa informasi yang dikumpulkan hanya digunakan untuk pengembangan profesional dan hanya dapat diakses oleh orang tertentu saja.
-                                    </p>
-                                </div>
-                            </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Saya setuju mengikuti asesmen dengan pemahaman bahwa informasi yang dikumpulkan hanya digunakan untuk pengembangan profesional dan hanya dapat diakses oleh orang tertentu saja.
+                                            </p>
+                                        </div>
+                                    </div>
 
-                            {/* QR Scan Button */}
-                            <div className="mt-10 border-t border-gray-200 pt-6 flex justify-end">
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="bg-[#E77D35] hover:bg-orange-600 text-white py-3 px-50 rounded-lg transition-colors cursor-pointer"
-                                >
-                                    QR Scan
-                                </button>
-                            </div>
-
-                            {/* Modal */}
-                            {showModal && (
-                                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                                    <div className="bg-white rounded-lg p-6 max-w-sm w-full relative text-center">
-                                        {/* Tombol close */}
-                                        <button
-                                            onClick={() => setShowModal(false)}
-                                            className="absolute top-3 right-3 text-gray-500 hover:text-black hover:cursor-pointer"
-                                        >
-                                            <X size={20} />
-                                        </button>
-
-                                        <h2 className="text-lg font-semibold mb-2">Tanda tangan Asesor</h2>
-                                        <p className="text-sm text-gray-600 mb-4">
-                                            Silakan scan QR Code yang tersedia untuk melakukan tanda tangan
-                                            dan melanjutkan ke tahap berikutnya.
-                                        </p>
-
-                                        {/* Gambar QR */}
-
-                                        <div className="flex justify-center items-center p-10">
+                                    {/* Kanan: QR Code */}
+                                    <div className="flex p-5 justify-center lg:justify-end">
+                                        <div className="border rounded-md p-10 shadow-sm flex items-center">
                                             <img
-                                                src="/img/cthbarkod.svg" // ganti dengan path QR code kamu
+                                                src="/img/cthbarkod.svg"
                                                 alt="QR Code"
-                                                className="w-[200px] h-[200px]"
+                                                className="w-40 h-40"
                                             />
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+
+
+                            <div className="mt-10 border-t border-gray-200 pt-6 flex justify-center sm:justify-end">
+                                <button
+                                    type="submit"
+                                    className="w-full sm:w-auto bg-[#E77D35] hover:bg-orange-600 text-white py-2 px-30 rounded transition-colors cursor-pointer"
+                                >
+                                    Lanjut
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

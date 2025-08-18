@@ -1,76 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Upload, X, Eye, ChevronLeft, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Upload, ChevronLeft, AlertCircle, CheckCircle } from 'lucide-react';
 import NavbarAsesi from '../../components/NavbarAsesi';
 import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/helper/axios';
 
-interface File {
-    id: number;
-    name: string;
-    format: string;
-    size: string;
-}
-
-interface FileUploadAreaProps {
-    title: string;
-    files: File[];
-    onFileRemove: (fileId: number, type: string) => void;
-    type: string;
-}
-
 export default function DataSertifikasi() {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [currentStep, setCurrentStep] = useState(1);
+    const [currentStep] = useState(1);
     const [selectedAssessment, setSelectedAssessment] = useState('');
     const [selectedAssessor, setSelectedAssessor] = useState('');
     const [assessors, setAssessors] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    
-    const [administrativeFiles, setAdministrativeFiles] = useState<File[]>([
-        {
-            id: 1,
-            name: 'Pas foto 3x4 latar belakang merah',
-            format: 'PNG',
-            size: '2MB'
-        },
-        {
-            id: 2,
-            name: 'Kartu Tanda Penduduk ( KTP ) / Kartu Keluarga ( KK )',
-            format: 'PNG',
-            size: '5MB' 
-        }
-    ]);
-    const [supportingFiles, setSupportingFiles] = useState<File[]>([
-        {
-            id: 1,
-            name: 'Sertifikat berbasis kompetensi',
-            format: 'PNG',
-            size: '2MB'
-        },
-        {
-            id: 2,
-            name: 'Fotocopy ijazah terakhir',
-            format: 'PNG',
-            size: '2MB'
-        },
-        {
-            id: 3,
-            name: 'Report semester 1 - 5',
-            format: 'PNG',
-            size: '3MB'
-        },
-        {
-            id: 4,
-            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
-            format: 'PNG',
-            size: '3MB'
-        }
-    ]);
+
+    const [administrativeFiles, setAdministrativeFiles] = useState<Record<string, File | null>>({});
+    const [supportingFiles, setSupportingFiles] = useState<Record<string, File | null>>({});
 
     useEffect(() => {
         fetchAssessors();
@@ -87,12 +35,6 @@ export default function DataSertifikasi() {
         }
     };
 
-    const steps = [
-        { number: 1, title: 'LSP Media', active: currentStep === 1, completed: currentStep > 1 },
-        { number: 2, title: 'LSP Media', active: currentStep === 2, completed: currentStep > 2 },
-        { number: 3, title: 'Tanda Tangan', active: currentStep === 3, completed: false }
-    ];
-
     const assessmentOptions = [
         'Sertifikasi',
         'Sertifikasi Ulang',
@@ -101,11 +43,40 @@ export default function DataSertifikasi() {
         'Lainnya'
     ];
 
-    const handleFileRemove = (fileId: number, type: string) => {
+    const administrativeFilesStatic = [
+        'Copy Kartu Pelajar',
+        'Copy Kartu Keluarga/Copy KTP',
+        'Pas foto 3 x 4 berwarna sebanyak 2 lembar'
+    ];
+
+    const supportingFilesStatic = [
+        {
+            title: 'Copy Raport SMK pada Konsentrasi Keahlian Rekayasa Perangkat Lunak semester 1 s.d. 5 yang telah menyelesaikan mata pelajaran berisi unit kompetensi yang akan diujikan.'
+        },
+        {
+            title: 'Copy sertifikat/Surat Keterangan Praktik Kerja Lapangan (PKL) pada bidang Software Development'
+        }
+    ];
+
+    const handleFileChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        key: string,
+        type: 'administrative' | 'supporting'
+    ) => {
+        if (e.target.files && e.target.files[0]) {
+            if (type === 'administrative') {
+                setAdministrativeFiles(prev => ({ ...prev, [key]: e.target.files![0] }));
+            } else {
+                setSupportingFiles(prev => ({ ...prev, [key]: e.target.files![0] }));
+            }
+        }
+    };
+
+    const handleFileRemove = (key: string, type: 'administrative' | 'supporting') => {
         if (type === 'administrative') {
-            setAdministrativeFiles(files => files.filter(file => file.id !== fileId));
+            setAdministrativeFiles(prev => ({ ...prev, [key]: null }));
         } else {
-            setSupportingFiles(files => files.filter(file => file.id !== fileId));
+            setSupportingFiles(prev => ({ ...prev, [key]: null }));
         }
     };
 
@@ -119,26 +90,22 @@ export default function DataSertifikasi() {
             setLoading(true);
             setError(null);
 
-            // Here you would normally upload files and save assessment data
-            // For now, we'll just simulate the process
             const assessmentData = {
                 user_id: user?.id,
                 assessor_id: parseInt(selectedAssessor),
                 purpose: selectedAssessment,
-                // File URLs would be added here after upload
                 files: {
-                    administrative: administrativeFiles.map(f => f.name),
-                    supporting: supportingFiles.map(f => f.name)
+                    administrative: Object.values(administrativeFiles).map(f => f?.name || ''),
+                    supporting: Object.values(supportingFiles).map(f => f?.name || '')
                 }
             };
 
             console.log('Assessment data to submit:', assessmentData);
 
-            // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             setSuccess('Data berhasil disimpan! Melanjutkan ke tahap berikutnya...');
-            
+
             setTimeout(() => {
                 navigate(paths.asesi.asesmenMandiri);
             }, 2000);
@@ -150,71 +117,109 @@ export default function DataSertifikasi() {
         }
     };
 
-    const FileUploadArea: React.FC<FileUploadAreaProps> = ({ title, files, onFileRemove, type }) => (
-        <div className="bg-white rounded-lg">
-            <h3 className="text-gray-900 font-medium mb-4">{title}</h3>
+    // ⬇️ Komponen Upload Langsung di Sini (tidak dipisah file)
+    const FileUploadArea = ({
+        title,
+        type
+    }: {
+        title: string;
+        type: 'administrative' | 'supporting';
+    }) => {
+        const fileRef = useRef<HTMLInputElement | null>(null);
+        const fileData = type === 'administrative' ? administrativeFiles[title] : supportingFiles[title];
+        const [dragActive, setDragActive] = useState(false);
 
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 mb-4 hover:cursor-pointer transition-colors hover:bg-gray-100">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-800 text-xl mb-2">Choose a file or drag & drop it here</p>
-                <p className="text-gray-500 text-[12px] mb-4">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md border border-gray-300 hover:bg-gray-200 hover:cursor-pointer transition-colors">
-                    Browse File
-                </button>
-            </div>
+        const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDragActive(false);
 
-            <div className="border border-gray-200 rounded-lg p-3 h-50 overflow-y-auto"> {/* Fixed height with scroll */}
-                {files.length > 0 ? (
-                    <div className="space-y-3">
-                        {files.map((file) => (
-                            <div
-                                key={file.id}
-                                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gray-50 border border-gray-200 rounded-lg p-3 hover:cursor-pointer transition-colors"
-                            >
-                                {/* Kiri - Icon + Detail */}
-                                <div className="flex items-center space-x-3 min-w-0">
-                                    <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <Upload className="w-5 h-5 text-white" />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="text-gray-900 font-medium text-sm truncate">{file.name}</p>
-                                        <p className="text-gray-500 text-xs truncate">
-                                            File Format: {file.format} • File Size: {file.size}
-                                        </p>
-                                    </div>
-                                </div>
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleFileChange(
+                    { target: { files: e.dataTransfer.files } } as React.ChangeEvent<HTMLInputElement>,
+                    title,
+                    type
+                );
+            }
+        };
 
-                                {/* Kanan - Tombol */}
-                                <div className="flex items-center space-x-2">
-                                    <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
-                                        <Eye className="w-4 h-4 text-gray-600" />
-                                    </button>
-                                    <button
-                                        onClick={() => onFileRemove(file.id, type)}
-                                        className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
-                                    >
-                                        <X className="w-4 h-4 text-gray-600" />
-                                    </button>
-                                </div>
-                            </div>
-
-                        ))}
+        return (
+            <div
+                onDrop={handleDrop}
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragActive(true);
+                }}
+                onDragLeave={(e) => {
+                    e.preventDefault();
+                    setDragActive(false);
+                }}
+                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border rounded-lg px-4 py-3 transition-colors ${dragActive
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-300 bg-white hover:border-gray-400'
+                    }`}
+            >
+                {/* Info Upload */}
+                <div className="flex items-start sm:items-center space-x-3 flex-1">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 bg-gray-50 shrink-0">
+                        <Upload className="w-5 h-5 text-gray-500" />
                     </div>
-                ) : (
-                    <div className="h-full flex items-center justify-center text-gray-500">
-                        No files uploaded yet
+                    <div className="flex flex-col">
+                        {fileData ? (
+                            <p className="text-gray-700 text-sm font-medium break-all">
+                                {fileData.name} ({(fileData.size / 1024 / 1024).toFixed(1)} MB)
+                            </p>
+                        ) : (
+                            <>
+                                <p className="text-gray-700 text-sm font-medium">
+                                    {dragActive ? 'Lepaskan file di sini...' : 'Choose a file or drag & drop it here'}
+                                </p>
+                                <p className="text-gray-400 text-xs">
+                                    JPEG, PNG, PDF, and MP4 formats, up to 50MB
+                                </p>
+                            </>
+                        )}
                     </div>
-                )}
+                </div>
+
+                {/* Tombol Aksi */}
+                <div className="flex flex-row sm:flex-row gap-2 w-full sm:w-auto">
+                    {fileData && (
+                        <button
+                            type="button"
+                            onClick={() => handleFileRemove(title, type)}
+                            className="flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 hover:bg-red-100 text-sm font-medium cursor-pointer"
+                        >
+                            Hapus
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 text-sm font-medium cursor-pointer"
+                    >
+                        {fileData ? 'Ganti' : 'Browse'}
+                    </button>
+                </div>
+
+                <input
+                    type="file"
+                    ref={fileRef}
+                    className="hidden"
+                    accept=".jpg,.jpeg,.png,.pdf,.mp4"
+                    onChange={(e) => handleFileChange(e, title, type)}
+                />
             </div>
-        </div>
-    );
+        );
+    };
+
 
     return (
         <div className="max-h-screen bg-gray-50">
             <div className="mx-auto">
                 <div className="bg-white rounded-lg shadow-sm mb-8">
                     <NavbarAsesi
-                        title='Bukti Administratif'
+                        title="Data Sertifikasi"
                         icon={
                             <Link to={paths.asesi.apl01} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
@@ -223,15 +228,14 @@ export default function DataSertifikasi() {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-6 pb-7 flex">
-                    {/* Notifications */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 px-4 sm:px-6 pb-7 items-stretch">
                     {error && (
                         <div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
                             <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
                             <span className="text-red-800">{error}</span>
                         </div>
                     )}
-                    
+
                     {success && (
                         <div className="lg:col-span-5 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
                             <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
@@ -239,92 +243,65 @@ export default function DataSertifikasi() {
                         </div>
                     )}
 
-                    {/* Left Column */}
-                    <div className="space-y-6 md:col-span-3 flex flex-col">
-                        {/* Tujuan Assessment */}
-                        <div className="bg-white rounded-lg border border-gray-200 p-6">
-                            <h3 className="text-gray-900 font-medium mb-4">Tujuan Assessment</h3>
+                    <div className="space-y-6 md:col-span-3 flex flex-col h-full">
+                        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
+                            <h3 className="text-gray-900 font-medium mb-4">Tujuan Asesmen</h3>
                             <div className="space-y-3">
-                                {assessmentOptions.map((option) => (
+                                {assessmentOptions.map(option => (
                                     <label key={option} className="flex items-center space-x-3 cursor-pointer">
                                         <input
                                             type="radio"
                                             name="assessment"
                                             value={option}
                                             checked={selectedAssessment === option}
-                                            onChange={(e) => setSelectedAssessment(e.target.value)}
+                                            onChange={e => setSelectedAssessment(e.target.value)}
                                             className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
                                         />
-                                        <span className="text-gray-700 text-sm">{option}</span>
+                                        <span className="text-gray-700 text-sm sm:text-base">{option}</span>
                                     </label>
                                 ))}
                             </div>
-                            <h3 className="text-gray-900 font-medium mt-4 mb-2">Pilih Asesor</h3>
-                            <div className="relative">
-                                <select
-                                    value={selectedAssessor}
-                                    onChange={(e) => setSelectedAssessor(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none"
-                                >
-                                    <option value="">Pilih nama asesor</option>
-                                    {assessors.map((assessor) => (
-                                        <option key={assessor.id} value={assessor.id}>
-                                            {assessor.full_name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </div>
                         </div>
 
-                        <div className="bg-white rounded-lg border border-gray-200 p-6">
-                            <h3 className="text-gray-900 font-medium mb-4">Kelengkapan Bukti Administratif</h3>
-                            <div className="space-y-3">
-                                <FileUploadArea
-                                    title=""
-                                    files={administrativeFiles}
-                                    onFileRemove={handleFileRemove}
-                                    type="administrative"
-                                />
+                        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
+                            <h3 className="text-gray-900 font-medium mb-4 sm:mb-6">Bukti Persyaratan Dasar</h3>
+                            <div className="space-y-6">
+                                {supportingFilesStatic.map((file, index) => (
+                                    <div key={index} className="space-y-3">
+                                        <p className="text-gray-700 text-sm leading-relaxed">{file.title}</p>
+                                        <FileUploadArea title={`Supporting ${index + 1}`} type="supporting" />
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
 
                     {/* Right Column */}
-                    <div className='md:col-span-2 flex flex-col space-y-6'>
-                        <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col">
-                            <h3 className="text-gray-900 font-medium mb-4">Kelengkapan Pemohon</h3>
-                            <div className="space-y-3 flex-grow">
-                                <FileUploadArea
-                                    title=""
-                                    files={supportingFiles}
-                                    onFileRemove={handleFileRemove}
-                                    type="supporting"
-                                />
+                    <div className="md:col-span-1 lg:col-span-2 flex flex-col h-full">
+                        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full flex flex-col">
+                            {/* Bagian Konten */}
+                            <div className="flex-1">
+                                <h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
+                                    Bukti Administratif
+                                </h3>
+                                <div className="space-y-6">
+                                    {administrativeFilesStatic.map((fileName, index) => (
+                                        <div key={index} className="space-y-3">
+                                            <p className="text-gray-700 text-sm font-medium">{fileName}</p>
+                                            <FileUploadArea title={fileName} type="administrative" />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:px-6 sm:py-4 flex flex-col h-full w-full mx-auto">
-                            <div className="text-center mt-4 mb-4 space-y-3">
-                                <textarea
-                                    name="catatan"
-                                    value=""
-                                    placeholder="Catatan"
-                                    rows={3}
-                                    className="w-full px-3 py-3 border border-[#DADADA] rounded-md 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                       text-sm sm:text-base resize-none"
-                                />
+
+                            {/* Bagian Footer (tetap di bawah) */}
+                            <div className="mt-auto pt-4 space-y-3">
                                 <hr className="border-gray-300" />
                                 <div className="w-full">
                                     <button
                                         onClick={handleSubmit}
                                         disabled={loading}
-                                        className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 rounded-md 
-                           transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base"
+                                        className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 sm:py-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
                                     >
                                         {loading ? 'Menyimpan...' : 'Lanjut'}
                                     </button>

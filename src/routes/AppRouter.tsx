@@ -51,6 +51,9 @@ import AdminApl02 from "@/pages/admin/Apl-02";
 import AssessmentReport from "@/pages/asesor/AssesmentReport";
 import Hasil from "@/pages/asesor/Hasil";
 import Contact from "@/pages/LandingPage/Contact";
+import UmpanBalik from "@/pages/asesi/UmpanBalik";
+import BandingAsesmen from "@/pages/asesi/BandingAsesmen";
+import FRIA02 from "@/pages/asesi/FR-IA-02";
 
 const RootLayout = () => <Outlet />;
 
@@ -126,10 +129,13 @@ const router = createBrowserRouter([
           { path: paths.asesi.asesmenAktif, element: <AsessmentAktif /> },
           { path: paths.asesi.asesmenMandiri, element: <AssassmentMandiri /> },
           { path: paths.asesi.asesmenMandiriDetail, element: <AsassmentMandiriDetail /> },
+          { path: paths.asesi.umpanBalik, element: <UmpanBalik /> },
+          { path: paths.asesi.bandingAsesmen, element: <BandingAsesmen /> },
           {
             path: paths.asesi.persetujuanAsesmenKerahasiaan,
             element: <PersetujuanAsesmenKerahasiaan />,
           },
+          { path: paths.asesi.fria02, element: <FRIA02 /> },
           { path: paths.asesi.asesmenPilihanGanda, element: <AsessementPilihanGanda /> },
           { path: paths.asesi.assessmentRecord, element: <AssessmentRecord /> },
           { path: paths.asesi.assesmentReport, element: <AssessmentReport /> },

@@ -45,7 +45,7 @@ const UserMenu: React.FC = () => {
       {/* Tombol Profile */}
       <button
         onClick={() => setIsProfileOpen(!isProfileOpen)}
-        className="flex items-center space-x-2 border border-gray-200 rounded-full px-3 py-2 hover:bg-gray-100 transition cursor-pointer"
+        className="flex items-center sm:space-x-2 border border-gray-200 rounded-full px-2 py-2 hover:bg-gray-100 transition cursor-pointer"
       >
         <img
           src="/img/avatar-asesor.svg"
