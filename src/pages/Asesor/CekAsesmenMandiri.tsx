@@ -184,7 +184,7 @@ export default function CekAsesmenMandiri() {
                                     </div>
 
                                     {/* Competency Units Grid */}
-                                    <div className="max-h-[500px] overflow-y-auto">
+                                    <div className="max-h-[800px] overflow-y-auto">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {dummyCompetencyUnits.map((unit, index) => (
                                                 <div
@@ -310,12 +310,34 @@ export default function CekAsesmenMandiri() {
                                         </div>
                                     </div>
                                     {/* QR Code Section */}
-                                    <div className="mb-6 flex justify-center">
-                                        <div className="p-4 bg-white border rounded-lg w-full h-50 flex justify-center">
+                                    <div className="mb-6 w-full">
+                                        <label
+                                            htmlFor=""
+                                            className="block text-sm font-medium text-gray-700 mb-2"
+                                        >
+                                            Tanda Tangan Asesi
+                                        </label>
+
+                                        <div className="p-4 bg-white border rounded-lg w-full h-40 flex justify-center">
+                                            <img
+                                                src="/img/cthbarkod.svg"
+                                                alt="QR Code"
+                                                className="object-contain"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="mb-6 w-full">
+                                        <label
+                                            htmlFor=""
+                                            className="block text-sm font-medium text-gray-700 mb-2"
+                                        >
+                                            Generate QR
+                                        </label>
+                                        <div className="p-4 bg-white border rounded-lg w-full h-40 flex justify-center">
                                             {/* <img
                                                 src="/img/cthbarkod.svg"
                                                 alt="QR Code"
-                                                className="w-40 h-40 object-contain"
+                                                className="object-contain"
                                             /> */}
                                         </div>
                                     </div>
