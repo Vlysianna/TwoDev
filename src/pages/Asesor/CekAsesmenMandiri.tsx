@@ -216,7 +216,7 @@ export default function CekAsesmenMandiri() {
                                                         )}
 
                                                         <Link
-                                                            to={paths.asesi.asesmenMandiriDetail}
+                                                            to={paths.asesor.cekAsesmenMandiriDetail}
                                                             className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
                                                         >
                                                             Lihat detail
