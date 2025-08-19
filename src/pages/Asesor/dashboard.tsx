@@ -1,4 +1,4 @@
-import { Eye, ListFilter, Search, LayoutDashboard, Clock, ChevronRight } from "lucide-react";
+import { Eye, ListFilter, Search, LayoutDashboard, Clock, ChevronRight, MapPinned } from "lucide-react";
 import { Link } from 'react-router-dom';
 import SidebarAsesor from '@/components/SideAsesor';
 import NavbarAsesor from '@/components/NavAsesor';
@@ -11,65 +11,66 @@ export default function TemplateAsesor() {
             subtitle: "Rekayasa Perangkat Lunak ( RPL )",
             status: "Sewaktu",
             startDate: "24 Okt, 07:00pm",
-            endDate: "25 Okt, 15:00pm",
+            endDate: "24 Okt, 15:00pm",
             avatar: "EY",
             avatarBg: "bg-[#60B5FF]",
             instructor: "Eva Yeprilianti, S.Kom",
             role: "Asesor",
-            borderColor: "border-[#60B5FF]"
+            borderColor: "border-[#60B5FF]",
+            location: "Lab 1"
         },
-        {
-            id: 2,
-            title: "Okupasi Front Office",
-            subtitle: "Perhotelan ( PH )",
-            status: "Sewaktu",
-            startDate: "24 Okt, 07:00pm",
-            endDate: "25 Okt, 15:00pm",
-            avatar: "AA",
-            avatarBg: "bg-[#7A7A73]",
-            instructor: "Aan Aspriansya, S.Tr.Par",
-            role: "Asesor",
-            borderColor: "border-[#7A7A73]"
-        },
-        {
-            id: 3,
-            title: "Okupasi Pastry & Confictionary",
-            subtitle: "Tata Boga ( TBG )",
-            status: "Sewaktu",
-            startDate: "24 Okt, 07:00pm",
-            endDate: "25 Okt, 15:00pm",
-            avatar: "IW",
-            avatarBg: "bg-[#FF7A30]",
-            instructor: "Ibnu Widianto, S.Pd",
-            role: "Asesor",
-            borderColor: "border-[#FF7A30]"
-        },
-        {
-            id: 4,
-            title: "Okupasi Tour Planning",
-            subtitle: "Usaha Layanan Wisata ( ULW )",
-            status: "Sewaktu",
-            startDate: "24 Okt, 07:00pm",
-            endDate: "25 Okt, 15:00pm",
-            avatar: "AW",
-            avatarBg: "bg-[#640D5F]",
-            instructor: "Ana Wijayanti, A.Md",
-            role: "Asesor",
-            borderColor: "border-[#640D5F]"
-        },
-        {
-            id: 5,
-            title: "Okupasi Menjahit Rok",
-            subtitle: "Tata Busana ( TBS )",
-            status: "Sewaktu",
-            startDate: "24 Okt, 07:00pm",
-            endDate: "25 Okt, 15:00pm",
-            avatar: "ES",
-            avatarBg: "bg-[#B33791]",
-            instructor: "Eni Susilawanti, S.Pd",
-            role: "Asesor",
-            borderColor: "border-[#B33791]"
-        },
+        // {
+        //     id: 2,
+        //     title: "Okupasi Front Office",
+        //     subtitle: "Perhotelan ( PH )",
+        //     status: "Sewaktu",
+        //     startDate: "24 Okt, 07:00pm",
+        //     endDate: "25 Okt, 15:00pm",
+        //     avatar: "AA",
+        //     avatarBg: "bg-[#7A7A73]",
+        //     instructor: "Aan Aspriansya, S.Tr.Par",
+        //     role: "Asesor",
+        //     borderColor: "border-[#7A7A73]"
+        // },
+        // {
+        //     id: 3,
+        //     title: "Okupasi Pastry & Confictionary",
+        //     subtitle: "Tata Boga ( TBG )",
+        //     status: "Sewaktu",
+        //     startDate: "24 Okt, 07:00pm",
+        //     endDate: "25 Okt, 15:00pm",
+        //     avatar: "IW",
+        //     avatarBg: "bg-[#FF7A30]",
+        //     instructor: "Ibnu Widianto, S.Pd",
+        //     role: "Asesor",
+        //     borderColor: "border-[#FF7A30]"
+        // },
+        // {
+        //     id: 4,
+        //     title: "Okupasi Tour Planning",
+        //     subtitle: "Usaha Layanan Wisata ( ULW )",
+        //     status: "Sewaktu",
+        //     startDate: "24 Okt, 07:00pm",
+        //     endDate: "25 Okt, 15:00pm",
+        //     avatar: "AW",
+        //     avatarBg: "bg-[#640D5F]",
+        //     instructor: "Ana Wijayanti, A.Md",
+        //     role: "Asesor",
+        //     borderColor: "border-[#640D5F]"
+        // },
+        // {
+        //     id: 5,
+        //     title: "Okupasi Menjahit Rok",
+        //     subtitle: "Tata Busana ( TBS )",
+        //     status: "Sewaktu",
+        //     startDate: "24 Okt, 07:00pm",
+        //     endDate: "25 Okt, 15:00pm",
+        //     avatar: "ES",
+        //     avatarBg: "bg-[#B33791]",
+        //     instructor: "Eni Susilawanti, S.Pd",
+        //     role: "Asesor",
+        //     borderColor: "border-[#B33791]"
+        // },
     ];
 
     return (
@@ -120,6 +121,24 @@ export default function TemplateAsesor() {
                                             </button>
                                         </div>
                                     </div>
+                                    {/* Header Tabs */}
+                                    <div className="flex items-center space-x-2 mb-6 mt-6">
+                                        <button className="px-8 py-2 rounded-md bg-[#E77D35]     text-white">
+                                            RPL ( 3 )
+                                        </button>
+                                        <button className="px-8 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                                            TBG ( 3 )
+                                        </button>
+                                        <button className="px-8 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                                            TBS ( 3 )
+                                        </button>
+                                        <button className="px-8 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                                            PH ( 5 )
+                                        </button>
+                                        <button className="px-8 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                                            ULW ( 3 )
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Grid Kartu Okupasi */}
@@ -143,9 +162,15 @@ export default function TemplateAsesor() {
 
                                                 {/* Status */}
                                                 <div className="flex items-center space-x-1 text-xs text-gray-500">
-                                                    <Clock className="w-3 h-3" />
+                                                    <Clock className="w-5 h-5" />
                                                     <span>{okupasi.status}</span>
                                                 </div>
+                                            </div>
+
+                                            {/* Lokasi */}
+                                            <div className="flex items-center justify-center mt-3 text-sm">
+                                                <MapPinned className="w-5 h-5 mr-1" />
+                                                <span>{okupasi.location}</span>
                                             </div>
 
                                             {/* Tanggal */}
