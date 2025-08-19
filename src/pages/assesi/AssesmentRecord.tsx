@@ -68,65 +68,68 @@ export default function AssessmentRecord() {
       />
 
       <div className="pt-20 px-6 pb-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Skema Sertifikasi Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-              {/* Kiri */}
-              <div className="flex items-center space-x-3 flex-wrap">
-                <h2 className="text-sm font-medium text-gray-800">
-                  Skema Sertifikasi (Okupasi)
-                </h2>
-                <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="12" cy="12" r="10" strokeWidth="2"></circle>
-                    <polyline
-                      points="12,6 12,12 16,14"
-                      strokeWidth="2"
-                    ></polyline>
-                  </svg>
-                  <span className="text-sm text-gray-600">Sewaktu</span>
-                </div>
-              </div>
-
-              {/* Kanan */}
-              <div className="flex flex-wrap items-center space-x-2">
-                <div className="text-sm text-gray-700">
-                  Pemrogram Junior (Junior Coder)
-                </div>
-                <div className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] ml-5">
-                  SMK.RPL.PJ/LSPSMK24/2023
-                </div>
+      <div className="max-w-7xl mx-auto">
+        {/* Skema Sertifikasi Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+            {/* Kiri */}
+            <div className="flex items-center space-x-3 flex-wrap">
+              <h2 className="text-sm font-medium text-gray-800">
+                Skema Sertifikasi (Okupasi)
+              </h2>
+              <div className="flex items-center space-x-2">
+                <svg
+                  className="w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="10" strokeWidth="2"></circle>
+                  <polyline
+                    points="12,6 12,12 16,14"
+                    strokeWidth="2"
+                  ></polyline>
+                </svg>
+                <span className="text-sm text-gray-600">Sewaktu</span>
               </div>
             </div>
-
-            <div className="flex items-center gap-8 mt-2 text-sm text-gray-600">
-              {/* Asesi */}
-              <div className="flex">
-                <span className="font-semibold mr-1">Asesi:</span>
-                <span>Ananda Keizra Oktavian</span>
+            
+            {/* Kanan */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
+              <div className="text-sm text-gray-700">
+                Pemrogram Junior (Junior Coder)
               </div>
-
-              {/* Asesor */}
-              <div className="flex">
-                <span className="font-semibold mr-1">Asesor:</span>
-                <span>Eva Yeprilianti, S.Kom</span>
-              </div>
-
-              {/* Kanan */}
-              <div className="flex items-center space-x-2 text-gray-600 text-sm ml-auto">
-                <span>24 Oktober 2025 | 07:00 – 15:00</span>
-                <span>-</span>
-                <span>24 Oktober 2025 | 07:00 – 15:00</span>
+              <div className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] sm:ml-5">
+                SMK.RPL.PJ/LSPSMK24/2023
               </div>
             </div>
           </div>
 
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
+            {/* Left side - Asesi & Asesor */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+              {/* Asesi */}
+              <div className="flex flex-wrap">
+                <span className="font-semibold mr-1">Asesi:</span>
+                <span>Ananda Keizra Oktavian</span>
+              </div>
+              
+              {/* Asesor */}
+              <div className="flex flex-wrap">
+                <span className="font-semibold mr-1">Asesor:</span>
+                <span>Eva Yeprilianti, S.Kom</span>
+              </div>
+            </div>
+            
+            {/* Right side - Date & Time */}
+            <div className="flex flex-col xl:flex-row xl:items-center space-y-1 xl:space-y-0 xl:space-x-2 text-gray-600 text-sm lg:ml-auto">
+              <span className="whitespace-nowrap">24 Oktober 2025 | 07:00 – 15:00</span>
+              <span className="hidden xl:inline">-</span>
+              <span className="whitespace-nowrap">24 Oktober 2025 | 07:00 – 15:00</span>
+            </div>
+          </div>
+        </div>
+        
           {/* Unit Kompetensi Table */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
             <div className="p-6 border-b border-gray-200">
@@ -188,8 +191,8 @@ export default function AssessmentRecord() {
             </div>
           </div>
 
-          <div className="min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-10 lg:p-10 w-full">
+          <div className=" bg-gray-50 p-2 lg:col-span-20 w-full">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
                 {/* Left Section: Rekomendasi Hasil Asesmen */}
                 <div className="lg:col-span-6 order-1">
@@ -400,6 +403,7 @@ export default function AssessmentRecord() {
             </div>
 
             {/* Bottom Lanjut Button */}
+            </div>
             <div className="flex justify-end mt-6 lg:mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
               <button
                 onClick={handleSubmit}
@@ -407,7 +411,6 @@ export default function AssessmentRecord() {
               >
                 Lanjut
               </button>
-            </div>
           </div>
         </div>
       </div>
