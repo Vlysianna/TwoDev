@@ -1,7 +1,6 @@
-import { ChevronDown, Clipboard, NotepadText } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
-import NavbarAssesor from "../../components/ui/NavbarAssesor";
-
+import NavbarAssesor from "@/components/NavbarAssesor";
+import { ChevronDown, Clipboard, NotepadText } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
 export default function AssessmentRecord() {
   const [selectedOptions, setSelectedOptions] = useState<
@@ -9,16 +8,19 @@ export default function AssessmentRecord() {
   >({});
   const [assesseeName, setAssesseeName] = useState<string>("");
   const [assessorName, setAssessorName] = useState<string>("");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+  const [startDate, setStartDate] = useState(""); // <- state untuk tanggal mulai
+  const [endDate, setEndDate] = useState(""); // <- state untuk tanggal selesai
   const [assessmentResult, setAssessmentResult] = useState<string>("");
   const [followUp, setFollowUp] = useState<string>("");
   const [assessorComments, setAssessorComments] = useState<string>("");
-  const [assesseeDate, setAssesseeDate] = useState<string>("");
-  const [assessorDate, setAssessorDate] = useState<string>("");
-  const [registrationNumber, setRegistrationNumber] = useState<string>("");
-  const [finalAssesseeName, setFinalAssesseeName] = useState<string>("");
-  const [finalAssessorName, setFinalAssessorName] = useState<string>("");
+  const [asesiName, setAsesiName] = useState("");
+  const [asesiDate, setAsesiDate] = useState("");
+  const [asesorName, setAsesorName] = useState("");
+  const [asesorId, setAsesorId] = useState("");
+  const [asesorDate, setAsesorDate] = useState("");
+
+  const asesiDateRef = useRef<HTMLInputElement>(null);
+  const asesorDateRef = useRef<HTMLInputElement>(null);
 
   const competencyUnits = [
     "Menggunakan Struktur Data",
@@ -60,100 +62,74 @@ export default function AssessmentRecord() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavbarAssesor 
+      <NavbarAssesor
         title="Rekaman Asesmen Kompetensi - FR.AK.02"
         icon={<NotepadText className="w-6 h-6" />}
       />
 
       <div className="pt-20 px-6 pb-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Skema Sertifikasi Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-              {/* Kiri */}
-              <div className="flex items-center space-x-3 flex-wrap">
-                <h2 className="text-sm font-medium text-gray-800">
-                  Skema Sertifikasi (Okupasi)
-                </h2>
-                <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="max-w-7xl mx-auto">
+        {/* Skema Sertifikasi Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+            {/* Kiri */}
+            <div className="flex items-center space-x-3 flex-wrap">
+              <h2 className="text-sm font-medium text-gray-800">
+                Skema Sertifikasi (Okupasi)
+              </h2>
+              <div className="flex items-center space-x-2">
+                <svg
+                  className="w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <circle cx="12" cy="12" r="10" strokeWidth="2"></circle>
-                  <polyline points="12,6 12,12 16,14" strokeWidth="2"></polyline>
+                  <polyline
+                    points="12,6 12,12 16,14"
+                    strokeWidth="2"
+                  ></polyline>
                 </svg>
                 <span className="text-sm text-gray-600">Sewaktu</span>
               </div>
-              </div>
-
-              {/* Kanan */}
-              <div className="flex flex-wrap items-center space-x-2">
-                <div className="text-sm text-gray-700">
-                  Pemrogram Junior (Junior Coder)
-                </div>
-                <div className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] ml-5">
-                  SMK.RPL.PJ/LSPSMK24/2023
-                </div>
-              </div>
             </div>
-
-            <div className="grid grid-cols-4 gap-4">
-              <div>
-                <select
-                  value={assesseeName}
-                  onChange={(e) => setAssesseeName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 bg-white text-sm"
-                  style={
-                    { "--tw-ring-color": "#FF7601" } as React.CSSProperties
-                  }
-                >
-                  <option value="">Nama Asesi</option>
-                  <option value="asesi1">Asesi 1</option>
-                  <option value="asesi2">Asesi 2</option>
-                </select>
+            
+            {/* Kanan */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
+              <div className="text-sm text-gray-700">
+                Pemrogram Junior (Junior Coder)
               </div>
-
-              <div>
-                <select
-                  value={assessorName}
-                  onChange={(e) => setAssessorName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 bg-white text-sm"
-                  style={
-                    { "--tw-ring-color": "#FF7601" } as React.CSSProperties
-                  }
-                >
-                  <option value="">Nama Asesor</option>
-                  <option value="asesor1">Asesor 1</option>
-                  <option value="asesor2">Asesor 2</option>
-                </select>
-              </div>
-
-              <div>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  placeholder="Pilih tanggal mulai"
-                  className="w-full sm:w-[68%] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 text-sm sm:ml-42"
-                  style={
-                    { "--tw-ring-color": "#FF7601" } as React.CSSProperties
-                  }
-                />
-              </div>
-
-              <div>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  placeholder="Pilih tanggal selesai"
-                  className="w-full sm:w-[70%] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 text-sm sm:ml-21"
-                  style={
-                    { "--tw-ring-color": "#FF7601" } as React.CSSProperties
-                  }
-                />
+              <div className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] sm:ml-5">
+                SMK.RPL.PJ/LSPSMK24/2023
               </div>
             </div>
           </div>
 
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
+            {/* Left side - Asesi & Asesor */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+              {/* Asesi */}
+              <div className="flex flex-wrap">
+                <span className="font-semibold mr-1">Asesi:</span>
+                <span>Ananda Keizra Oktavian</span>
+              </div>
+              
+              {/* Asesor */}
+              <div className="flex flex-wrap">
+                <span className="font-semibold mr-1">Asesor:</span>
+                <span>Eva Yeprilianti, S.Kom</span>
+              </div>
+            </div>
+            
+            {/* Right side - Date & Time */}
+            <div className="flex flex-col xl:flex-row xl:items-center space-y-1 xl:space-y-0 xl:space-x-2 text-gray-600 text-sm lg:ml-auto">
+              <span className="whitespace-nowrap">24 Oktober 2025 | 07:00 – 15:00</span>
+              <span className="hidden xl:inline">-</span>
+              <span className="whitespace-nowrap">24 Oktober 2025 | 07:00 – 15:00</span>
+            </div>
+          </div>
+        </div>
+        
           {/* Unit Kompetensi Table */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
             <div className="p-6 border-b border-gray-200">
@@ -215,224 +191,226 @@ export default function AssessmentRecord() {
             </div>
           </div>
 
-          {/* Bottom Section with Rekomendasi and Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Left Section: Rekomendasi Hasil Asesmen */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Rekomendasi Hasil Asesmen
-              </h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-10 lg:p-10 w-full">
+          <div className=" bg-gray-50 p-2 lg:col-span-20 w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+                {/* Left Section: Rekomendasi Hasil Asesmen */}
+                <div className="lg:col-span-6 order-1">
+                  <h2 className="text-sm sm:text-base font-semibold text-gray-800 mb-4 lg:mb-6">
+                    Rekomendasi Hasil Asesmen
+                  </h2>
 
-              <div className="mb-3">
-                <div className="flex items-center space-x-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="assessmentResult"
-                      value="kompeten"
-                      checked={assessmentResult === "kompeten"}
-                      onChange={(e) =>
-                        setAssessmentResult(e.target.checked ? "kompeten" : "")
-                      }
-                      className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-2"
-                    />
-                    <span className="text-sm text-gray-700">Kompeten</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="assessmentResult"
-                      value="belum-kompeten"
-                      checked={assessmentResult === "belum-kompeten"}
-                      onChange={(e) =>
-                        setAssessmentResult(
-                          e.target.checked ? "belum-kompeten" : ""
-                        )
-                      }
-                      className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-2"
-                    />
-                    <span className="text-sm text-gray-700">
-                      Belum Kompeten
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tindak lanjut yang dibutuhkan
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  (Masukkan pekerjaan tambahan dan asesmen yang diperlukan untuk
-                  mencapai kompetensi)
-                </p>
-                <textarea
-                  value={followUp}
-                  onChange={(e) => setFollowUp(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
-                  style={
-                    { "--tw-ring-color": "#FF7601" } as React.CSSProperties
-                  }
-                  placeholder="Masukkan tindak lanjut yang dibutuhkan..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Komentar/ Observasi oleh asesor
-                </label>
-                <textarea
-                  value={assessorComments}
-                  onChange={(e) => setAssessorComments(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
-                  style={
-                    { "--tw-ring-color": "#FF7601" } as React.CSSProperties
-                  }
-                  placeholder="Masukkan komentar atau observasi..."
-                />
-              </div>
-            </div>
-
-            {/* Right Section: Asesi and Asesor Details */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="space-y-6">
-                {/* Asesi Section */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    Asesi
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilih Asesi
-                      </label>
-                      <select
-                        value={finalAssesseeName}
-                        onChange={(e) => setFinalAssesseeName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      >
-                        <option value="">Pilih Asesi</option>
-                        <option value="asesi1">Asesi 1</option>
-                        <option value="asesi2">Asesi 2</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilih tanggal
-                      </label>
-                      <div className="relative">
+                  {/* Checkboxes */}
+                  <div className="mb-4 lg:mb-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-6 lg:space-x-8">
+                      <label className="flex items-center">
                         <input
-                          type="date"
-                          value={assesseeDate}
-                          onChange={(e) => setAssesseeDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                          type="checkbox"
+                          name="assessmentResult"
+                          value="kompeten"
+                          checked={assessmentResult === "kompeten"}
+                          onChange={(e) =>
+                            setAssessmentResult(
+                              e.target.checked ? "kompeten" : ""
+                            )
+                          }
+                          className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-3"
                         />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                          <svg
-                            className="h-5 w-5 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Asesor Section */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    Asesor
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilih Asesor
+                        <span className="text-xs sm:text-sm text-gray-700">
+                          Kompeten
+                        </span>
                       </label>
-                      <select
-                        value={finalAssessorName}
-                        onChange={(e) => setFinalAssessorName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      >
-                        <option value="">Pilih Asesor</option>
-                        <option value="asesor1">Asesor 1</option>
-                        <option value="asesor2">Asesor 2</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilih tanggal
-                      </label>
-                      <div className="relative">
+                      <label className="flex items-center">
                         <input
-                          type="date"
-                          value={assessorDate}
-                          onChange={(e) => setAssessorDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                          type="checkbox"
+                          name="assessmentResult"
+                          value="belum-kompeten"
+                          checked={assessmentResult === "belum-kompeten"}
+                          onChange={(e) =>
+                            setAssessmentResult(
+                              e.target.checked ? "belum-kompeten" : ""
+                            )
+                          }
+                          className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-3"
                         />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                          <svg
-                            className="h-5 w-5 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                        </div>
-                      </div>
+                        <span className="text-xs sm:text-sm text-gray-700">
+                          Belum Kompeten
+                        </span>
+                      </label>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      No. Reg
+                  {/* Tindak Lanjut */}
+                  <div className="mb-4 lg:mb-6">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                      Tindak lanjut yang dibutuhkan
                     </label>
-                    <input
-                      type="text"
-                      value={registrationNumber}
-                      onChange={(e) => setRegistrationNumber(e.target.value)}
-                      placeholder="Masukkan nomor reg"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    <p className="text-xs text-gray-500 mb-2">
+                      (Masukkan pekerjaan tambahan dan asesmen yang diperlukan
+                      untuk mencapai kompetensi)
+                    </p>
+                    <div className="border border-gray-300 rounded-md p-3 min-h-[60px] sm:min-h-[80px] focus-within:ring-2 focus-within:ring-orange-500">
+                      <textarea
+                        value={followUp}
+                        onChange={(e) => setFollowUp(e.target.value)}
+                        className="w-full resize-none border-none outline-none text-xs sm:text-sm"
+                        rows={3}
+                        placeholder=""
+                      />
+                    </div>
+                  </div>
+
+                  {/* Komentar Asesor */}
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                      Komentar/ Observasi oleh asesor
+                    </label>
+                    <div className="border border-gray-300 rounded-md p-3 min-h-[60px] sm:min-h-[80px] focus-within:ring-2 focus-within:ring-orange-500">
+                      <textarea
+                        value={assessorComments}
+                        onChange={(e) => setAssessorComments(e.target.value)}
+                        className="w-full resize-none border-none outline-none text-xs sm:text-sm"
+                        rows={3}
+                        placeholder=""
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Middle Section: Asesi and Asesor */}
+                <div className="lg:col-span-4 order-2 lg:order-2">
+                  {/* Asesi Section */}
+                  <div className="mb-8 lg:mb-15">
+                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 mb-3">
+                      Asesi
+                    </h3>
+
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        value={asesiName}
+                        onChange={(e) => setAsesiName(e.target.value)}
+                        className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] text-xs sm:text-sm bg-white"
+                        placeholder="Nama Asesi"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1">
+                        <input
+                          ref={asesiDateRef}
+                          type="date"
+                          value={asesiDate}
+                          onChange={(e) => setAsesiDate(e.target.value)}
+                          className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] text-xs sm:text-sm bg-white cursor-pointer"
+                        />
+                      </div>
+                      <div
+                        className="w-6 h-6 sm:w-8 sm:h-8 border border-gray-300 rounded flex items-center justify-center bg-gray-100 flex-shrink-0 cursor-pointer"
+                        onClick={() => asesiDateRef.current?.showPicker()}
+                      >
+                        <svg
+                          className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Asesor Section */}
+                  <div className="mb-6">
+                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 mb-3">
+                      Asesor
+                    </h3>
+
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        value={asesorName}
+                        onChange={(e) => setAsesorName(e.target.value)}
+                        className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] text-xs sm:text-sm bg-white"
+                        placeholder="Nama Asesor"
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        value={asesorId}
+                        onChange={(e) => setAsesorId(e.target.value)}
+                        className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] text-xs sm:text-sm bg-white"
+                        placeholder="ID Asesor"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1">
+                        <input
+                          ref={asesorDateRef}
+                          type="date"
+                          value={asesorDate}
+                          onChange={(e) => setAsesorDate(e.target.value)}
+                          className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] text-xs sm:text-sm bg-white cursor-pointer"
+                        />
+                      </div>
+                      <div
+                        className="w-6 h-6 sm:w-8 sm:h-8 border border-gray-300 rounded flex items-center justify-center bg-gray-100 flex-shrink-0 cursor-pointer"
+                        onClick={() => asesorDateRef.current?.showPicker()}
+                      >
+                        <svg
+                          className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Section: QR and Generate Button */}
+                <div className="lg:col-span-2 order-3 flex flex-col items-center space-y-6 lg:space-y-10">
+                  {/* QR Code */}
+                  <div className="w-32 h-24 sm:w-36 sm:h-28 lg:w-45 lg:h-30 border-2 border-gray-300 rounded flex items-center justify-center bg-white">
+                    <img
+                      src="/images/qrcode.png"
+                      alt="QR Code"
+                      className="w-20 h-20 sm:w-24 sm:h-24 lg:w-30 lg:h-30 object-contain"
                     />
                   </div>
 
-                  {/* Submit Button */}
-                  <div className="flex justify-end mt-4">
-                    <button
-                      onClick={handleSubmit}
-                      className="text-white font-medium py-3 px-16 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 w-full"
-                      style={{ backgroundColor: "#FF7601" }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#e65a00")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#FF7601")
-                      }
-                    >
-                      Submit
-                    </button>
-                  </div>
+                  {/* Empty space for signature */}
+                  <div className="w-32 h-24 sm:w-36 sm:h-28 lg:w-45 lg:h-30 border-4 border-gray-300 rounded bg-gray-50"></div>
+
+                  {/* Generate QR Button */}
+                  <button className="bg-[#E77D35] hover:bg-[#E77D35] text-white text-xs sm:text-sm px-6 sm:px-8 lg:px-12 py-2 rounded-md transition-colors duration-200 whitespace-nowrap">
+                    Generate QR
+                  </button>
                 </div>
               </div>
             </div>
+
+            {/* Bottom Lanjut Button */}
+            </div>
+            <div className="flex justify-end mt-6 lg:mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+              <button
+                onClick={handleSubmit}
+                className="bg-[#E77D35] hover:bg-[#E77D35] text-white text-xs sm:text-sm font-medium px-8 sm:px-12 lg:px-45 py-2 sm:py-3 rounded-md transition-colors duration-200"
+              >
+                Lanjut
+              </button>
           </div>
         </div>
       </div>
