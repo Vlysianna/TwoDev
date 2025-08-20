@@ -54,6 +54,7 @@ import Contact from "@/pages/LandingPage/Contact";
 import UmpanBalik from "@/pages/asesi/UmpanBalik";
 import BandingAsesmen from "@/pages/asesi/BandingAsesmen";
 import FRIA02 from "@/pages/asesi/FR-IA-02";
+import FRAK05 from "../pages/asesor/FRAK05";
 
 const RootLayout = () => <Outlet />;
 
@@ -159,6 +160,7 @@ const router = createBrowserRouter([
           { path: paths.asesor.hasilAsesmen, element: <HasilAsesmen /> },
           { path: paths.asesor.dashboard, element: <Dashboard /> },
           { path: paths.asesor.hasil, element: <Hasil /> },
+          { path: paths.asesor.frak05, element: <FRAK05 /> },
         ],
       },
     ],

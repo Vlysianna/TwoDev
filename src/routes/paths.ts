@@ -53,6 +53,7 @@ const routes = {
 		dataSertifikasi: "/asesor/data-sertifikasi",
 		hasil: "/asesor/hasil",
 		hasilAsesmen: "/asesor/hasil-asesmen",
+		frak05: "/asesor/fr.ak.05",
 	},
 	asesi: {
 		root: "/asesi",
