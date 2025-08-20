@@ -60,6 +60,8 @@ import PersetujuanKerahasiaan from "@/pages/asesor/PersetujuanKerahasiaan";
 import LembarJawaban from "@/pages/asesor/LembarJawaban";
 import CekAsesmenMandiri from "@/pages/asesor/CekAsesmenMandiri";
 import CekAssessmentMandiriDetail from "@/pages/asesor/CekAsesmenMandiriDetail";
+import PersetujuanAsesmenKerahasiaanAsesor from "@/pages/asesor/PersetujuanAsesmenKerahasiaanAsesor";
+import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
 
 const RootLayout = () => <Outlet />;
 
@@ -157,6 +159,8 @@ const router = createBrowserRouter([
           { path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
           { path: paths.asesor.cekAsesmenMandiri, element: <CekAsesmenMandiri /> },
           { path: paths.asesor.cekAsesmenMandiriDetail, element: <CekAssessmentMandiriDetail /> },
+          { path: paths.asesor.persetujuanAsesmenKerahasiaanAsesor, element: <PersetujuanAsesmenKerahasiaanAsesor /> },
+          { path: paths.asesor.faktaIntegritas, element: <FaktaIntegritas /> },
           { path: paths.asesor.fiia, element: <FIIA01Page /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
           { path: paths.asesor.frak02, element: <AssessmentRecord /> },

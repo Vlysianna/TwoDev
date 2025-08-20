@@ -48,6 +48,8 @@ const routes = {
 		dashboardAsesor: "/asesor/dashboard-asesor",
 		cekAsesmenMandiri: "/asesor/cek-apl-02",
 		cekAsesmenMandiriDetail: "/asesor/cek-apl-02-detail",
+		persetujuanAsesmenKerahasiaanAsesor: "/asesor/persetujuan-asesmen-kerahasiaan-asesor",
+		faktaIntegritas: "/asesor/fakta-integritas",
 		fiia: "/asesor/fi.ia.01",
 		fiiadetail: "/asesor/fi.ia.01-detail",
 		frak02: "/asesor/fr.ak.02",
