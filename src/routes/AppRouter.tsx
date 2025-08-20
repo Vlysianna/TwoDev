@@ -54,7 +54,10 @@ import Contact from "@/pages/LandingPage/Contact";
 import UmpanBalik from "@/pages/asesi/UmpanBalik";
 import BandingAsesmen from "@/pages/asesi/BandingAsesmen";
 import FRIA02 from "@/pages/asesi/FR-IA-02";
-import FRAK05 from "../pages/asesor/FRAK05";
+import FRAK05 from "@/pages/asesor/FRAK05";
+import AsesmenMandiri from "@/pages/asesor/AsesmenMandiri";
+import PersetujuanKerahasiaan from "@/pages/asesor/PersetujuanKerahasiaan";
+import LembarJawaban from "@/pages/asesor/LembarJawaban";
 
 const RootLayout = () => <Outlet />;
 
@@ -161,6 +164,9 @@ const router = createBrowserRouter([
           { path: paths.asesor.dashboard, element: <Dashboard /> },
           { path: paths.asesor.hasil, element: <Hasil /> },
           { path: paths.asesor.frak05, element: <FRAK05 /> },
+          { path: paths.asesor.asesmenMandiri, element: <AsesmenMandiri /> },
+          { path: paths.asesor.persetujuanKerahasiaan, element: <PersetujuanKerahasiaan /> },
+          { path: paths.asesor.lembarJawaban, element: <LembarJawaban /> },
         ],
       },
     ],

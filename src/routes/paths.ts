@@ -54,6 +54,9 @@ const routes = {
 		hasil: "/asesor/hasil",
 		hasilAsesmen: "/asesor/hasil-asesmen",
 		frak05: "/asesor/fr.ak.05",
+		asesmenMandiri: "/asesor/asesmen-mandiri",
+		persetujuanKerahasiaan: "/asesor/persetujuan-kerahasiaan",
+		lembarJawaban: "/asesor/lembar-jawaban",
 	},
 	asesi: {
 		root: "/asesi",
