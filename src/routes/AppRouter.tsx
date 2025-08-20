@@ -141,8 +141,6 @@ const router = createBrowserRouter([
           },
           { path: paths.asesi.fria02, element: <FRIA02 /> },
           { path: paths.asesi.asesmenPilihanGanda, element: <AsessementPilihanGanda /> },
-          { path: paths.asesi.assessmentRecord, element: <AssessmentRecord /> },
-          { path: paths.asesi.assesmentReport, element: <AssessmentReport /> },
         ],
       },
 
@@ -167,6 +165,8 @@ const router = createBrowserRouter([
           { path: paths.asesor.asesmenMandiri, element: <AsesmenMandiri /> },
           { path: paths.asesor.persetujuanKerahasiaan, element: <PersetujuanKerahasiaan /> },
           { path: paths.asesor.lembarJawaban, element: <LembarJawaban /> },
+          { path: paths.asesor.assessmentRecord, element: <AssessmentRecord /> },
+          { path: paths.asesor.assesmentReport, element: <AssessmentReport /> },
         ],
       },
     ],

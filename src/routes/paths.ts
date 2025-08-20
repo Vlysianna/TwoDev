@@ -57,6 +57,8 @@ const routes = {
 		asesmenMandiri: "/asesor/asesmen-mandiri",
 		persetujuanKerahasiaan: "/asesor/persetujuan-kerahasiaan",
 		lembarJawaban: "/asesor/lembar-jawaban",
+		assessmentRecord: "/asesor/assessment-record",
+		assesmentReport: "/asesor/assesment-report",
 	},
 	asesi: {
 		root: "/asesi",
@@ -71,9 +73,7 @@ const routes = {
 		bandingAsesmen : "/asesi/banding-asesmen",
 		persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
 		fria02: "/asesi/fr-ia-02",
-		asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda",
-		assessmentRecord: "/asesi/assessment-record",
-		assesmentReport: "/asesi/assesment-report",
+		asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda"
 	},
 };
 
