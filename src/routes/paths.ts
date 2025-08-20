@@ -50,6 +50,7 @@ const routes = {
 		cekAsesmenMandiriDetail: "/asesor/cek-apl-02-detail",
 		persetujuanAsesmenKerahasiaanAsesor: "/asesor/persetujuan-asesmen-kerahasiaan-asesor",
 		faktaIntegritas: "/asesor/fakta-integritas",
+		fria03: "/asesor/fr-ia-03",
 		fiia: "/asesor/fi.ia.01",
 		fiiadetail: "/asesor/fi.ia.01-detail",
 		frak02: "/asesor/fr.ak.02",

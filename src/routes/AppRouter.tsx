@@ -62,6 +62,7 @@ import CekAsesmenMandiri from "@/pages/asesor/CekAsesmenMandiri";
 import CekAssessmentMandiriDetail from "@/pages/asesor/CekAsesmenMandiriDetail";
 import PersetujuanAsesmenKerahasiaanAsesor from "@/pages/asesor/PersetujuanAsesmenKerahasiaanAsesor";
 import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
+import FRIA03 from "@/pages/asesor/FR-IA-03";
 
 const RootLayout = () => <Outlet />;
 
@@ -161,6 +162,7 @@ const router = createBrowserRouter([
           { path: paths.asesor.cekAsesmenMandiriDetail, element: <CekAssessmentMandiriDetail /> },
           { path: paths.asesor.persetujuanAsesmenKerahasiaanAsesor, element: <PersetujuanAsesmenKerahasiaanAsesor /> },
           { path: paths.asesor.faktaIntegritas, element: <FaktaIntegritas /> },
+          { path: paths.asesor.fria03, element: <FRIA03 /> },
           { path: paths.asesor.fiia, element: <FIIA01Page /> },
           { path: paths.asesor.fiiadetail, element: <FIIADetail /> },
           { path: paths.asesor.frak02, element: <AssessmentRecord /> },
