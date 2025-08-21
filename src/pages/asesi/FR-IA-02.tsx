@@ -98,7 +98,7 @@ export default function FRIA02() {
         <div className="min-h-screen bg-gray-50">
             <div className="mx-auto">
                 {/* Header */}
-                <div className="bg-white rounded-lg shadow-sm mb-8">
+                <div className="bg-white rounded-lg shadow-sm mb-5">
                     <NavbarAsesi
                         title='Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02'
                         icon={
@@ -171,7 +171,7 @@ export default function FRIA02() {
 
                         {/* Petunjuk */}
                         <div className="border-t border-gray-200 pt-4">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-2">A. Petunjuk</h3>
+                            <h3 className="text-sm font-medium text-gray-800 mb-2">A. Petunjuk</h3>
                             <ol className="list-decimal list-inside text-sm text-gray-700 space-y-1">
                                 {petunjukList.map((item, index) => (
                                     <li key={index}>{item}</li>
@@ -182,7 +182,7 @@ export default function FRIA02() {
 
                     {/* Skenario Tugas Praktik Demonstrasi */}
                     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-                        <h3 className="text-xl font-semibold text-gray-800 mb-6">B. Skenario Tugas Praktik Demonstrasi</h3>
+                        <h3 className="text-sm font-medium text-gray-800 mb-6">B. Skenario Tugas Praktik Demonstrasi</h3>
 
                         {/* Tabs */}
                         <div className="flex gap-2 mb-6 overflow-x-auto">
