@@ -1,4 +1,4 @@
-import { ChevronDown, Clipboard } from 'lucide-react';
+import { ChevronDown, Clipboard, ArrowLeft } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import NavbarAsesor from '@/components/NavAsesor';
 
@@ -188,7 +188,7 @@ const FIIA01Page = () => {
       {/* Navbar Header */}
       <NavbarAsesor 
         title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - F1-IA-01"
-        icon={<Clipboard className="w-6 h-6" />}
+        icon={<ArrowLeft size={20} />}
       />
 
       {/* Filter Section Card - Responsive */}
