@@ -554,7 +554,7 @@ export default function AplZeroOne() {
           </form>
           {/* Modal */}
           {modalStep !== null && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-50">
+            <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/5 z-50">
               <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full text-center h-100 flex flex-col">
                 {/* Step 1 */}
                 {modalStep === 1 && (

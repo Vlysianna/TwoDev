@@ -20,8 +20,8 @@ interface Occupation {
 interface Assessor {
   id: number;
   full_name: string;
-  user: {
-    email: string;
+  user?: {
+    email?: string;
   };
 }
 
@@ -62,7 +62,7 @@ const TambahJadwal: React.FC = () => {
 
   const fetchOccupations = async () => {
     try {
-      const response = await axiosInstance.get('/occupation');
+  const response = await axiosInstance.get('/occupations');
       if (response.data.success) {
         setOccupations(response.data.data);
       }
@@ -119,7 +119,7 @@ const TambahJadwal: React.FC = () => {
           )
         };
 
-        const scheduleResponse = await axiosInstance.post('/schedule', scheduleData);
+  const scheduleResponse = await axiosInstance.post('/schedules', scheduleData);
         
         if (scheduleResponse.data.success) {
           setSuccess('Jadwal berhasil ditambahkan!');
@@ -295,7 +295,7 @@ const TambahJadwal: React.FC = () => {
                               <option value="">Pilih Asesor</option>
                               {assessors.map((assessor) => (
                                 <option key={assessor.id} value={assessor.id}>
-                                  {assessor.full_name} - {assessor.user.email}
+                                      {assessor.full_name} - {assessor.user?.email ?? '—'}
                                 </option>
                               ))}
                             </select>

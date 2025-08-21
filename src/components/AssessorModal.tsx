@@ -15,6 +15,7 @@ interface AssessorModalProps {
   assessor?: {
     id: number;
     email: string;
+    full_name?: string;
     assessor?: {
       id: number;
       full_name: string;
@@ -54,7 +55,7 @@ const AssessorModal: React.FC<AssessorModalProps> = ({
         setFormData({
           email: assessor.email,
           password: '',
-          full_name: assessor.assessor?.full_name || '',
+          full_name: assessor.assessor?.full_name || (assessor.full_name as string) || '',
           scheme_id: assessor.assessor?.scheme_id?.toString() || '',
           address: assessor.assessor?.address || '',
           phone_no: assessor.assessor?.phone_no || '',
@@ -106,8 +107,9 @@ const AssessorModal: React.FC<AssessorModalProps> = ({
           onClose();
         }
       } else {
-        // For edit mode, update user and assessor separately
-        const userUpdateData: any = { email: formData.email };
+  // For edit mode, update user and assessor separately
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userUpdateData: any = { email: formData.email };
         if (formData.password) {
           userUpdateData.password = formData.password;
         }
@@ -128,9 +130,10 @@ const AssessorModal: React.FC<AssessorModalProps> = ({
         onSuccess();
         onClose();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving assessor:', error);
-      setError(error.response?.data?.message || 'Failed to save assessor');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((error as any)?.response?.data?.message || 'Failed to save assessor');
     } finally {
       setLoading(false);
     }
@@ -139,7 +142,7 @@ const AssessorModal: React.FC<AssessorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-white/5">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">

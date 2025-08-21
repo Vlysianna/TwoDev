@@ -22,7 +22,7 @@ export default function TambahSkema() {
       setError(null);
       setSuccess(null);
 
-      const response = await axiosInstance.post('/scheme', data);
+  const response = await axiosInstance.post('/schemes', data);
       
       if (response.data.success) {
         setSuccess('Skema berhasil ditambahkan!');
@@ -30,9 +30,9 @@ export default function TambahSkema() {
       } else {
         setError(response.data.message || 'Gagal menambahkan skema');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating scheme:', error);
-      setError(error.response?.data?.message || 'Gagal menambahkan skema');
+      setError('Gagal menambahkan skema');
     } finally {
       setLoading(false);
     }

@@ -31,11 +31,24 @@ interface Schedule {
   id: number;
   start_date: string;
   end_date: string;
-  occupation: Occupation;
+  assessment: {
+    id: number;
+    occupation: Occupation;
+  };
 }
 
+type AssessmentRaw = {
+  id: number;
+  start_date?: string;
+  end_date?: string;
+  assessment: {
+    id: number;
+    occupation: Occupation;
+  };
+};
+
 const KelolaJadwal: React.FC = () => {
-    const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery] = useState<string>('');
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -47,8 +60,8 @@ const KelolaJadwal: React.FC = () => {
 
     useEffect(() => {
       const filtered = schedules.filter(schedule =>
-        schedule.occupation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        schedule.occupation.scheme.name.toLowerCase().includes(searchQuery.toLowerCase())
+        schedule.assessment.occupation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        schedule.assessment.occupation.scheme.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredSchedules(filtered);
     }, [schedules, searchQuery]);
@@ -57,16 +70,23 @@ const KelolaJadwal: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axiosInstance.get('/schedule');
+        const response = await axiosInstance.get('/schedules');
         
         if (response.data.success) {
-          setSchedules(response.data.data);
+          // map backend response to local Schedule[] shape
+          const items = response.data.data as AssessmentRaw[];
+          setSchedules(items.map((s) => ({
+            id: s.id,
+            start_date: s.start_date,
+            end_date: s.end_date,
+            assessment: s.assessment,
+          })));
         } else {
           setError('Gagal memuat data jadwal');
         }
-      } catch (error: any) {
-        console.error('Error fetching schedules:', error);
-        setError(error.response?.data?.message || 'Gagal memuat data jadwal');
+  } catch (error: unknown) {
+  console.error('Error fetching schedules:', error);
+  setError('Gagal memuat data jadwal');
       } finally {
         setLoading(false);
       }
@@ -196,10 +216,10 @@ const KelolaJadwal: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {schedule.occupation.scheme.name}
+                          {schedule.assessment.occupation.scheme.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {schedule.occupation.name}
+                          {schedule.assessment.occupation.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {new Date(schedule.start_date).toLocaleDateString('id-ID')}

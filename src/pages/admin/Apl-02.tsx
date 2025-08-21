@@ -52,7 +52,7 @@ export default function AdminApl02() {
 
   const fetchOccupations = async () => {
     try {
-      const response = await api.get('/occupation');
+  const response = await api.get('/occupations');
       if (response.data.success) {
         setOccupations(response.data.data);
       }

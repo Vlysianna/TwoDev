@@ -58,17 +58,19 @@ const KelolaAkunAsesor: React.FC = () => {
       setLoading(true);
       setError(null);
       const response = await api.get('/user');
-      
-      if (response.data.success) {
+      if (response?.data?.success) {
+        const data = Array.isArray(response.data.data) ? response.data.data : [];
         // Filter for assessor users (role_id === 2)
-        const assessorUsers = response.data.data.filter((user: User) => user.role.id === 2);
+        const assessorUsers = data.filter((user: User) => user.role && user.role.id === 2);
         setUsers(assessorUsers);
       } else {
-        setError('Gagal memuat data pengguna');
+        setError(response?.data?.message || 'Gagal memuat data pengguna');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching users:', error);
-      setError(error.response?.data?.message || 'Gagal memuat data pengguna');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (error as any)?.response?.data?.message || 'Gagal memuat data pengguna';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -87,8 +89,22 @@ const KelolaAkunAsesor: React.FC = () => {
   };
 
   const handleView = (id: number) => {
-    // TODO: Implement view functionality
-    console.log('View user:', id);
+    (async () => {
+      try {
+        const res = await api.get(`/user/${id}`);
+        if (res?.data?.success) {
+          setModalMode('edit');
+          setSelectedAssessor(res.data.data);
+          setIsModalOpen(true);
+        } else {
+          setError(res?.data?.message || 'Gagal memuat data pengguna');
+        }
+      } catch (err) {
+        console.error('Failed to fetch user detail:', err);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setError((err as any)?.response?.data?.message || 'Gagal memuat detail pengguna');
+      }
+    })();
   };
 
   const handleDeleteClick = (user: User) => {
@@ -105,9 +121,11 @@ const KelolaAkunAsesor: React.FC = () => {
       await fetchUsers(); // Refresh the list
       setIsDeleteModalOpen(false);
       setAssessorToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting user:', error);
-      setError(error.response?.data?.message || 'Gagal menghapus pengguna');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (error as any)?.response?.data?.message || 'Gagal menghapus pengguna';
+      setError(msg);
     } finally {
       setDeleteLoading(false);
     }

@@ -13,6 +13,7 @@ import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import paths from '@/routes/paths';
 import axiosInstance from '@/helper/axios';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 
 interface Occupation {
   id: number;
@@ -30,11 +31,14 @@ interface Scheme {
 }
 
 const KelolaMUK: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery] = useState<string>('');
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [filteredSchemes, setFilteredSchemes] = useState<Scheme[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   useEffect(() => {
     fetchSchemes();
@@ -53,16 +57,16 @@ const KelolaMUK: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axiosInstance.get('/scheme');
+      const response = await axiosInstance.get('/schemes');
       
       if (response.data.success) {
         setSchemes(response.data.data);
       } else {
         setError('Gagal memuat data skema');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching schemes:', error);
-      setError(error.response?.data?.message || 'Gagal memuat data skema');
+      setError('Gagal memuat data skema');
     } finally {
       setLoading(false);
     }
@@ -70,7 +74,28 @@ const KelolaMUK: React.FC = () => {
 
   const handleEdit = (id: number) => console.log('Edit user:', id);
   const handleView = (id: number) => console.log('View user:', id);
-  const handleDelete = (id: number) => console.log('Delete user:', id);
+  const handleDelete = (id: number) => {
+    setDeletingId(id);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingId) return;
+    try {
+      setDeleteLoading(true);
+      await axiosInstance.delete(`/schemes/${deletingId}`);
+      // optimistic update
+      setSchemes(prev => prev.filter(s => s.id !== deletingId));
+      setFilteredSchemes(prev => prev.filter(s => s.id !== deletingId));
+      setDeleteModalOpen(false);
+      setDeletingId(null);
+    } catch (error: unknown) {
+      console.error('Error deleting scheme:', error);
+      setError('Gagal menghapus skema');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
   const handleFilter = () => console.log('Filter clicked');
   const handleExport = () => console.log('Export to Excel clicked');
 
@@ -116,6 +141,15 @@ const KelolaMUK: React.FC = () => {
               <span className="text-[#000000]">Kelengkapan MUK</span>
             </nav>
           </div>
+          {/* Confirm Delete Modal */}
+          <ConfirmDeleteModal
+            isOpen={deleteModalOpen}
+            onClose={() => { setDeleteModalOpen(false); setDeletingId(null); }}
+            onConfirm={confirmDelete}
+            loading={deleteLoading}
+            title="Hapus Skema"
+            message="Apakah Anda yakin ingin menghapus skema ini? Tindakan ini tidak dapat dibatalkan."
+          />
 
           {/* Page Title */}
           <div className="mb-6">
@@ -215,7 +249,7 @@ const KelolaMUK: React.FC = () => {
                               <Eye size={16} />
                             </button>
                             <button
-                              onClick={() => handleDelete(scheme.id)}
+                                  onClick={() => { setDeletingId(scheme.id); setDeleteModalOpen(true); }}
                               className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                               title="Delete"
                             >

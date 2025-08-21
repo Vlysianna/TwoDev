@@ -63,16 +63,19 @@ const KelolaAkunAsesi: React.FC = () => {
 
       // Fetch all users and filter for assessees (role_id = 3)
       const response = await api.get('/user');
-      if (response.data && response.data.success) {
+      if (response?.data?.success) {
         // Filter for assessee users only
-        const assesseeUsers = response.data.data.filter((user: UserData) => user.role && user.role.id === 3);
+        const data = Array.isArray(response.data.data) ? response.data.data : [];
+        const assesseeUsers = data.filter((user: UserData) => user.role && user.role.id === 3);
         setUsers(assesseeUsers);
       } else {
-        setError('Gagal memuat data asesi');
+        setError(response?.data?.message || 'Gagal memuat data asesi');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to fetch assessees:', error);
-      setError('Gagal memuat data asesi');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const msg = (error as any)?.response?.data?.message || 'Gagal memuat data asesi';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -91,8 +94,20 @@ const KelolaAkunAsesi: React.FC = () => {
   };
 
   const handleView = async (id: number) => {
-    console.log('View user:', id);
-    // TODO: Navigate to view page or open view modal
+    try {
+      const res = await api.get(`/user/${id}`);
+      if (res?.data?.success) {
+        setModalMode('edit');
+        setSelectedAssessee(res.data.data);
+        setIsModalOpen(true);
+      } else {
+        setError(res?.data?.message || 'Gagal memuat data pengguna');
+      }
+    } catch (err) {
+      console.error('Failed to fetch user detail:', err);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any)?.response?.data?.message || 'Gagal memuat detail pengguna');
+    }
   };
 
   const handleDeleteClick = (user: UserData) => {
@@ -105,13 +120,15 @@ const KelolaAkunAsesi: React.FC = () => {
 
     try {
       setDeleteLoading(true);
-      await api.delete(`/user/${assesseeToDelete.id}`);
+  await api.delete(`/user/${assesseeToDelete.id}`);
       await fetchAssessees(); // Refresh the list
       setIsDeleteModalOpen(false);
       setAssesseeToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting user:', error);
-      setError(error.response?.data?.message || 'Gagal menghapus pengguna');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const msg = (error as any)?.response?.data?.message || 'Gagal menghapus pengguna';
+      setError(msg);
     } finally {
       setDeleteLoading(false);
     }
