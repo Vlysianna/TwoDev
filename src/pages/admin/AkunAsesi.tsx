@@ -9,13 +9,15 @@ import {
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import AssesseeModal from '@/components/AssesseeModal';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import AssesseeModal from '@/components/AssesseeModal';
+import { useNavigate } from 'react-router-dom';
 import api from '@/helper/axios';
 
 interface UserData {
   id: number;
   email: string;
+  full_name?: string;
   role: {
     id: number;
     name: string;
@@ -42,10 +44,10 @@ const KelolaAkunAsesi: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  // Detail modal state (for view only)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAssessee, setSelectedAssessee] = useState<UserData | null>(null);
+  const navigate = useNavigate();
   
   // Delete modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -82,24 +84,20 @@ const KelolaAkunAsesi: React.FC = () => {
   };
 
   const handleCreate = () => {
-    setModalMode('create');
-    setSelectedAssessee(null);
-    setIsModalOpen(true);
+    navigate('/admin/edit-asesi');
   };
 
-  const handleEdit = async (user: UserData) => {
-    setModalMode('edit');
-    setSelectedAssessee(user);
-    setIsModalOpen(true);
+
+  const handleEdit = (user: UserData) => {
+    navigate(`/admin/edit-asesi/${user.id}`);
   };
 
   const handleView = async (id: number) => {
     try {
       const res = await api.get(`/user/${id}`);
       if (res?.data?.success) {
-        setModalMode('edit');
         setSelectedAssessee(res.data.data);
-        setIsModalOpen(true);
+        setIsDetailModalOpen(true);
       } else {
         setError(res?.data?.message || 'Gagal memuat data pengguna');
       }
@@ -134,9 +132,7 @@ const KelolaAkunAsesi: React.FC = () => {
     }
   };
 
-  const handleModalSuccess = () => {
-    fetchAssessees(); // Refresh the list
-  };
+  // No modal success needed for create/edit
 
   const handleFilter = () => console.log('Filter clicked');
   const handleExport = () => console.log('Export to Excel clicked');
@@ -239,6 +235,9 @@ const KelolaAkunAsesi: React.FC = () => {
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
                         Role
                       </th>
+                        <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                          Verifikasi
+                        </th>
                       <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
                         Actions
                       </th>
@@ -251,7 +250,7 @@ const KelolaAkunAsesi: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.assessee?.full_name || '-'}
+                          {user.assessee?.full_name || user.full_name || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {user.email}
@@ -261,6 +260,16 @@ const KelolaAkunAsesi: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                           {user.role.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {(() => {
+                            type ResultDoc = { approved?: boolean };
+                            type AssesseeResult = { docs?: ResultDoc[] };
+                            const assessee = user.assessee as { results?: AssesseeResult[] } | undefined;
+                            if (!assessee || !assessee.results || assessee.results.length === 0) return 'Belum';
+                            const hasApproved = assessee.results.some((r) => Array.isArray(r.docs) && (r.docs as ResultDoc[]).some((d) => d.approved));
+                            return hasApproved ? 'Terverifikasi' : 'Belum';
+                          })()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
@@ -297,13 +306,14 @@ const KelolaAkunAsesi: React.FC = () => {
         </main>
       </div>
 
-      {/* Assessee Modal */}
+
+      {/* Assessee Detail Modal (View only) */}
       <AssesseeModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={handleModalSuccess}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onSuccess={() => {}}
         assessee={selectedAssessee}
-        mode={modalMode}
+        mode="show"
       />
 
       {/* Delete Confirmation Modal */}

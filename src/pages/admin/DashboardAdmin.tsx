@@ -115,15 +115,32 @@ const Dashboard: React.FC = () => {
             setLoading(true);
             setError(null);
 
-            // Fetch dashboard statistics
-            const dashboardResponse = await api.get('/dashboard');
-            if (dashboardResponse.data.success) {
+            // Fetch dashboard statistics (backend endpoint: /api/dashboard/admin/)
+            const dashboardResponse = await api.get('/dashboard/admin/');
+            if (dashboardResponse.data && dashboardResponse.data.success) {
+                const summary = dashboardResponse.data.data.summary;
                 setStats({
-                    totalSchemes: dashboardResponse.data.data.totalSchemes,
-                    totalAssessments: dashboardResponse.data.data.totalAssessments,
-                    totalAssessors: dashboardResponse.data.data.totalAssessors,
-                    totalAssesses: dashboardResponse.data.data.totalAssesses
+                    totalSchemes: summary.totalSchemes ?? 0,
+                    totalAssessments: summary.totalAssessments ?? 0,
+                    totalAssessors: summary.totalAssessors ?? 0,
+                    totalAssesses: summary.totalAssessees ?? 0,
                 });
+
+                // populate schedules if present
+                const schedulesData = dashboardResponse.data.data.schedules;
+                if (Array.isArray(schedulesData)) {
+                    type ServerScheduleRow = { id: number; assessment_id: number; occupation_name: string; schema_name: string; start_date: string; end_date: string };
+                    const arr = schedulesData as ServerScheduleRow[];
+                    setSchedules(arr.slice(0, 5).map((row) => ({
+                        id: row.id,
+                        assessment: {
+                            id: row.assessment_id,
+                            occupation: { name: row.occupation_name, scheme: { name: row.schema_name } },
+                        },
+                        start_date: row.start_date,
+                        end_date: row.end_date,
+                    })));
+                }
             }
 
             // Fetch schedules (backend exposes /api/schedules)

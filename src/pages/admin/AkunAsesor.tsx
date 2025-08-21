@@ -30,6 +30,7 @@ interface Assessor {
 interface User {
   id: number;
   email: string;
+  full_name?: string;
   role: Role;
   assessor?: Assessor;
 }
@@ -39,9 +40,8 @@ const KelolaAkunAsesor: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  // Detail modal state (for view only)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAssessor, setSelectedAssessor] = useState<User | null>(null);
   
   // Delete modal states
@@ -76,16 +76,14 @@ const KelolaAkunAsesor: React.FC = () => {
     }
   };
 
+
+  // Navigation for create/edit
   const handleCreate = () => {
-    setModalMode('create');
-    setSelectedAssessor(null);
-    setIsModalOpen(true);
+    window.location.href = '/admin/asesor/create';
   };
 
   const handleEdit = (user: User) => {
-    setModalMode('edit');
-    setSelectedAssessor(user);
-    setIsModalOpen(true);
+    window.location.href = `/admin/asesor/edit/${user.id}`;
   };
 
   const handleView = (id: number) => {
@@ -93,9 +91,8 @@ const KelolaAkunAsesor: React.FC = () => {
       try {
         const res = await api.get(`/user/${id}`);
         if (res?.data?.success) {
-          setModalMode('edit');
           setSelectedAssessor(res.data.data);
-          setIsModalOpen(true);
+          setIsDetailModalOpen(true);
         } else {
           setError(res?.data?.message || 'Gagal memuat data pengguna');
         }
@@ -131,9 +128,7 @@ const KelolaAkunAsesor: React.FC = () => {
     }
   };
 
-  const handleModalSuccess = () => {
-    fetchUsers(); // Refresh the list
-  };
+  // No modal success needed for create/edit
 
   const handleFilter = () => console.log('Filter clicked');
   const handleExport = () => console.log('Export to Excel clicked');
@@ -248,7 +243,7 @@ const KelolaAkunAsesor: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.assessor?.full_name || '-'}
+                          {user.assessor?.full_name || user.full_name || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {user.email}
@@ -291,13 +286,14 @@ const KelolaAkunAsesor: React.FC = () => {
         </main>
       </div>
 
-      {/* Assessor Modal */}
+
+      {/* Assessor Detail Modal (View only) */}
       <AssessorModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={handleModalSuccess}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onSuccess={() => {}}
         assessor={selectedAssessor}
-        mode={modalMode}
+        mode="show"
       />
 
       {/* Delete Confirmation Modal */}

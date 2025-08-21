@@ -18,20 +18,21 @@ import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 interface Occupation {
   id: number;
   name: string;
+  scheme: {
+    id: number;
+    code: string;
+    name: string;
+  };
 }
 
 interface Scheme {
   id: number;
   name: string;
   code: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  occupation: Occupation;
 }
 
 const KelolaMUK: React.FC = () => {
-  const [searchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [filteredSchemes, setFilteredSchemes] = useState<Scheme[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -39,16 +40,32 @@ const KelolaMUK: React.FC = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
+  const [occupations, setOccupations] = useState<Occupation[]>([]);
+  const [occupationModalOpen, setOccupationModalOpen] = useState(false);
+  const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
 
   useEffect(() => {
     fetchSchemes();
+    fetchOccupations();
   }, []);
 
+  const fetchOccupations = async () => {
+    try {
+      const response = await axiosInstance.get('/api/occupations');
+      if (response.data.success) {
+        setOccupations(response.data.data);
+      } else {
+        setError('Gagal memuat data okupasi');
+      }
+    } catch (error) {
+      setError('Gagal memuat data okupasi');
+    }
+  };
   useEffect(() => {
     const filtered = schemes.filter(scheme =>
       scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      scheme.occupation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      scheme.description.toLowerCase().includes(searchQuery.toLowerCase())
+      scheme.code.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredSchemes(filtered);
   }, [schemes, searchQuery]);
@@ -57,7 +74,7 @@ const KelolaMUK: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axiosInstance.get('/schemes');
+  const response = await axiosInstance.get('/api/schemes');
       
       if (response.data.success) {
         setSchemes(response.data.data);
@@ -83,7 +100,7 @@ const KelolaMUK: React.FC = () => {
     if (!deletingId) return;
     try {
       setDeleteLoading(true);
-      await axiosInstance.delete(`/schemes/${deletingId}`);
+  await axiosInstance.delete(`/api/schemes/${deletingId}`);
       // optimistic update
       setSchemes(prev => prev.filter(s => s.id !== deletingId));
       setFilteredSchemes(prev => prev.filter(s => s.id !== deletingId));
@@ -97,7 +114,26 @@ const KelolaMUK: React.FC = () => {
     }
   };
   const handleFilter = () => console.log('Filter clicked');
-  const handleExport = () => console.log('Export to Excel clicked');
+  const handleExport = async () => {
+    setExportLoading(true);
+    setError(null);
+    try {
+  const response = await axiosInstance.get('/api/schemes/export/excel', {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'schemes.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      setError('Gagal mengekspor data ke Excel');
+    } finally {
+      setExportLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -183,7 +219,17 @@ const KelolaMUK: React.FC = () => {
                 <h2 className="text-[20px] sm:text-[26px] font-semibold text-[#000000]">
                   Kelengkapan MUK
                 </h2>
-                <div className="flex flex-wrap gap-3 sm:space-x-3">
+                <div className="flex flex-wrap gap-3 sm:space-x-3 items-center">
+                  <div className="relative w-full sm:w-auto">
+                    <input
+                      type="text"
+                      placeholder="Cari skema..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 w-full sm:w-64"
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                  </div>
                   <button
                     onClick={handleFilter}
                     className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto"
@@ -193,9 +239,14 @@ const KelolaMUK: React.FC = () => {
                   </button>
                   <button
                     onClick={handleExport}
-                    className="bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors w-full sm:w-[152px] h-[41px]"
+                    className="bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors w-full sm:w-[152px] h-[41px] flex items-center justify-center"
+                    disabled={exportLoading}
                   >
-                    Export ke Excel
+                    {exportLoading ? (
+                      <span className="flex items-center"><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>Exporting...</span>
+                    ) : (
+                      <>Export ke Excel</>
+                    )}
                   </button>
                 </div>
               </div>
@@ -210,10 +261,10 @@ const KelolaMUK: React.FC = () => {
                   <thead>
                     <tr className="bg-[#E77D35] text-white">
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Nama Okupasi
+                        Judul Skema
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Skema
+                        Nomor Skema
                       </th>
                       <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
                         Aksi
@@ -249,14 +300,44 @@ const KelolaMUK: React.FC = () => {
                               <Eye size={16} />
                             </button>
                             <button
-                                  onClick={() => { setDeletingId(scheme.id); setDeleteModalOpen(true); }}
+                              onClick={() => { setDeletingId(scheme.id); setDeleteModalOpen(true); }}
                               className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                               title="Delete"
                             >
                               <Trash2 size={16} />
                             </button>
+                            <button
+                              onClick={() => { setSelectedScheme(scheme); setOccupationModalOpen(true); }}
+                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
+                              title="Lihat Okupasi"
+                            >
+                              Okupasi
+                            </button>
                           </div>
                         </td>
+      {/* Occupation Modal */}
+      {occupationModalOpen && selectedScheme && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Daftar Okupasi untuk Skema: <span className="text-orange-600">{selectedScheme.name}</span></h3>
+            <ul className="mb-4 max-h-60 overflow-y-auto">
+              {occupations.filter(o => o.scheme.id === selectedScheme.id).length === 0 ? (
+                <li className="text-gray-500">Belum ada okupasi untuk skema ini.</li>
+              ) : (
+                occupations.filter(o => o.scheme.id === selectedScheme.id).map(o => (
+                  <li key={o.id} className="py-1 border-b last:border-b-0">{o.name}</li>
+                ))
+              )}
+            </ul>
+            <button
+              className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+              onClick={() => setOccupationModalOpen(false)}
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
                       </tr>
                     ))}
                   </tbody>
