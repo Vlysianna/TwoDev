@@ -40,6 +40,7 @@ import Template2 from "@/pages/asesor/Template2";
 import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
 import AplZeroOneAsesor from "@/pages/asesor/Apl-01-Assesor";
 import DataSertifikasiAsesor from "@/pages/asesor/DataSertifikasiAsesor";
+import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
 
 export default function AppRouter() {
 	return (
@@ -87,6 +88,7 @@ export default function AppRouter() {
 				<Route path="/FIIADetail" element={<FIIADetail />} />
 				<Route path="/apl-01-asesor" element={<AplZeroOneAsesor />} />
 				<Route path="/data-sertifikasi-asesor" element={<DataSertifikasiAsesor />} />
+				<Route path="/biodata-asesor" element={<BiodataAsesor />} />
 			</Routes>
 		</BrowserRouter>
 	);
