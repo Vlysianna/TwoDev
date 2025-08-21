@@ -1,316 +1,459 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Upload, ChevronLeft, AlertCircle, CheckCircle } from 'lucide-react';
-import NavbarAsesi from '../../components/NavbarAsesi';
-import { Link, useNavigate } from 'react-router-dom';
-import paths from '@/routes/paths';
-import { useAuth } from '@/contexts/AuthContext';
-import api from '@/helper/axios';
+import React, { useEffect, useRef, useState } from "react";
+import { Upload, ChevronLeft, AlertCircle, CheckCircle } from "lucide-react";
+import NavbarAsesi from "../../components/NavbarAsesi";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import paths from "@/routes/paths";
+import api from "@/helper/axios";
+import { motion } from "framer-motion";
+import { useForm, Controller } from "react-hook-form";
+import useSWR from "swr";
+
+type FormValues = {
+	purpose: string;
+	school_report_card: File | null;
+	field_work_practice_certificate: File | null;
+	student_card: File | null;
+	family_card: File | null;
+	id_card: File | null;
+};
+
+const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
 export default function DataSertifikasi() {
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const [currentStep] = useState(1);
-    const [selectedAssessment, setSelectedAssessment] = useState('');
-    const [selectedAssessor, setSelectedAssessor] = useState('');
-    const [assessors, setAssessors] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
+	const { id_assessment, id_asesor } = useParams();
+	const asesiId = localStorage.getItem("asesiId");
 
-    const [administrativeFiles, setAdministrativeFiles] = useState<Record<string, File | null>>({});
-    const [supportingFiles, setSupportingFiles] = useState<Record<string, File | null>>({});
+	// const { user } = useAuth();
+	const navigate = useNavigate();
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState<string | null>(null);
+	const [modalStep, setModalStep] = useState<number | null>(null);
 
-    useEffect(() => {
-        fetchAssessors();
-    }, []);
+	const {
+		control,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<FormValues>({
+		defaultValues: {
+			purpose: "",
+			school_report_card: null,
+			field_work_practice_certificate: null,
+			student_card: null,
+			family_card: null,
+			id_card: null,
+		},
+	});
 
-    const fetchAssessors = async () => {
-        try {
-            const response = await api.get('/assessor');
-            if (response.data.success) {
-                setAssessors(response.data.data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch assessors:', error);
-        }
-    };
+	const assessmentOptions = [
+		"Sertifikasi",
+		"Sertifikasi Ulang",
+		"Pengakuan Kompetensi Terkini ( PKT )",
+		"Rekognisi Pembelajaran Lampau",
+		"Lainnya",
+	];
 
-    const assessmentOptions = [
-        'Sertifikasi',
-        'Sertifikasi Ulang',
-        'Pengakuan Kompetensi Terkini ( PKT )',
-        'Rekognisi Pembelajaran Lampau',
-        'Lainnya'
-    ];
+	const administrativeFilesStatic = [
+		{
+			title: "Copy Kartu Pelajar",
+			name: "student_card",
+		},
+		{
+			title: "Copy Kartu Keluarga/Copy KTP",
+			name: "family_card",
+		},
+		{
+			title: "Pas foto 3 x 4 berwarna sebanyak 2 lembar",
+			name: "id_card",
+		},
+	];
 
-    const administrativeFilesStatic = [
-        'Copy Kartu Pelajar',
-        'Copy Kartu Keluarga/Copy KTP',
-        'Pas foto 3 x 4 berwarna sebanyak 2 lembar'
-    ];
+	const supportingFilesStatic = [
+		{
+			title:
+				"Copy Raport SMK pada Konsentrasi Keahlian Rekayasa Perangkat Lunak semester 1 s.d. 5",
+			name: "school_report_card",
+		},
+		{
+			title:
+				"Copy sertifikat/Surat Keterangan Praktik Kerja Lapangan (PKL) pada bidang Software Development",
+			name: "field_work_practice_certificate",
+		},
+	];
 
-    const supportingFilesStatic = [
-        {
-            title: 'Copy Raport SMK pada Konsentrasi Keahlian Rekayasa Perangkat Lunak semester 1 s.d. 5 yang telah menyelesaikan mata pelajaran berisi unit kompetensi yang akan diujikan.'
-        },
-        {
-            title: 'Copy sertifikat/Surat Keterangan Praktik Kerja Lapangan (PKL) pada bidang Software Development'
-        }
-    ];
+	const { data: approveData, mutate } = useSWR(
+		`/assessments/apl-01/results/${id_assessment}`,
+		fetcher
+	);
 
-    const handleFileChange = (
-        e: React.ChangeEvent<HTMLInputElement>,
-        key: string,
-        type: 'administrative' | 'supporting'
-    ) => {
-        if (e.target.files && e.target.files[0]) {
-            if (type === 'administrative') {
-                setAdministrativeFiles(prev => ({ ...prev, [key]: e.target.files![0] }));
-            } else {
-                setSupportingFiles(prev => ({ ...prev, [key]: e.target.files![0] }));
-            }
-        }
-    };
+	const onSubmit = async (data: FormValues) => {
+		try {
+			setLoading(true);
+			setError(null);
 
-    const handleFileRemove = (key: string, type: 'administrative' | 'supporting') => {
-        if (type === 'administrative') {
-            setAdministrativeFiles(prev => ({ ...prev, [key]: null }));
-        } else {
-            setSupportingFiles(prev => ({ ...prev, [key]: null }));
-        }
-    };
+			const asesiId = localStorage.getItem("asesiId");
 
-    const handleSubmit = async () => {
-        if (!selectedAssessment || !selectedAssessor) {
-            setError('Harap pilih tujuan assessment dan asesor');
-            return;
-        }
+			await api.put(
+				`/assessments/apl-01/upload-certificate-docs/${id_asesor}/${asesiId}`,
+				data,
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				}
+			);
 
-        try {
-            setLoading(true);
-            setError(null);
+			setSuccess("Data berhasil disimpan! Melanjutkan ke tahap berikutnya...");
 
-            const assessmentData = {
-                user_id: user?.id,
-                assessor_id: parseInt(selectedAssessor),
-                purpose: selectedAssessment,
-                files: {
-                    administrative: Object.values(administrativeFiles).map(f => f?.name || ''),
-                    supporting: Object.values(supportingFiles).map(f => f?.name || '')
-                }
-            };
+			setModalStep(1);
+		} catch (error: any) {
+			setError("Gagal menyimpan data. Silakan coba lagi.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-            console.log('Assessment data to submit:', assessmentData);
+	const handleNext = () => {
+		if (modalStep === 1) {
+			setModalStep(2);
+		} else if (modalStep === 3) {
+			// setModalStep(null);
+			navigate(
+				paths.asesi.assessment.dataSertifikasi(
+					id_assessment ?? 0,
+					id_asesor ?? 0
+				)
+			);
+		}
+	};
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+	useEffect(() => {
+		console.log(approveData);
+		if (approveData && approveData.length > 0) {
+			const filterApprove = approveData.find(
+				(item: any) => item.result.assessee_id
+			);
+			console.log(filterApprove);
+			if (filterApprove) {
+				if (filterApprove.approved) {
+					setModalStep(3);
+				} else {
+					setModalStep(1);
+				}
+			}
+		}
+	}, [approveData]);
 
-            setSuccess('Data berhasil disimpan! Melanjutkan ke tahap berikutnya...');
+	const handleRefresh = () => mutate();
 
-            setTimeout(() => {
-                navigate(paths.asesi.asesmenMandiri);
-            }, 2000);
+	useEffect(() => {
+		handleRefresh();
+	}, []);
 
-        } catch (error: any) {
-            setError('Gagal menyimpan data. Silakan coba lagi.');
-        } finally {
-            setLoading(false);
-        }
-    };
+	// Komponen File Upload dengan Controller
+	const FileUploadArea = ({
+		field,
+	}: {
+		field: {
+			value: File | null;
+			onChange: (file: File | null) => void;
+		};
+	}) => {
+		const fileRef = useRef<HTMLInputElement | null>(null);
+		const fileData = field.value;
+		const [dragActive, setDragActive] = useState(false);
 
-    // ⬇️ Komponen Upload Langsung di Sini (tidak dipisah file)
-    const FileUploadArea = ({
-        title,
-        type
-    }: {
-        title: string;
-        type: 'administrative' | 'supporting';
-    }) => {
-        const fileRef = useRef<HTMLInputElement | null>(null);
-        const fileData = type === 'administrative' ? administrativeFiles[title] : supportingFiles[title];
-        const [dragActive, setDragActive] = useState(false);
+		const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+			e.preventDefault();
+			setDragActive(false);
+			if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+				field.onChange(e.dataTransfer.files[0]);
+			}
+		};
 
-        const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setDragActive(false);
+		return (
+			<div
+				onDrop={handleDrop}
+				onDragOver={(e) => {
+					e.preventDefault();
+					setDragActive(true);
+				}}
+				onDragLeave={() => setDragActive(false)}
+				className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border rounded-lg px-4 py-3 transition-colors ${
+					dragActive
+						? "border-blue-500 bg-blue-50"
+						: "border-gray-300 bg-white hover:border-gray-400"
+				}`}
+			>
+				{/* Info Upload */}
+				<div className="flex items-start sm:items-center space-x-3 flex-1">
+					<div className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 bg-gray-50 shrink-0">
+						<Upload className="w-5 h-5 text-gray-500" />
+					</div>
+					<div className="flex flex-col">
+						{fileData ? (
+							<p className="text-gray-700 text-sm font-medium break-all">
+								{fileData.name} ({(fileData.size / 1024 / 1024).toFixed(1)} MB)
+							</p>
+						) : (
+							<>
+								<p className="text-gray-700 text-sm font-medium">
+									{dragActive
+										? "Lepaskan file di sini..."
+										: "Choose a file or drag & drop it here"}
+								</p>
+								<p className="text-gray-400 text-xs">
+									JPEG, PNG, PDF, and MP4 formats, up to 50MB
+								</p>
+							</>
+						)}
+					</div>
+				</div>
 
-            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                handleFileChange(
-                    { target: { files: e.dataTransfer.files } } as React.ChangeEvent<HTMLInputElement>,
-                    title,
-                    type
-                );
-            }
-        };
+				{/* Tombol Aksi */}
+				<div className="flex flex-row sm:flex-row gap-2 w-full sm:w-auto">
+					{fileData && (
+						<button
+							type="button"
+							onClick={() => field.onChange(null)}
+							className="flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 hover:bg-red-100 text-sm font-medium cursor-pointer"
+						>
+							Hapus
+						</button>
+					)}
+					<button
+						type="button"
+						onClick={() => fileRef.current?.click()}
+						className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 text-sm font-medium cursor-pointer"
+					>
+						{fileData ? "Ganti" : "Browse"}
+					</button>
+				</div>
 
-        return (
-            <div
-                onDrop={handleDrop}
-                onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragActive(true);
-                }}
-                onDragLeave={(e) => {
-                    e.preventDefault();
-                    setDragActive(false);
-                }}
-                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border rounded-lg px-4 py-3 transition-colors ${dragActive
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 bg-white hover:border-gray-400'
-                    }`}
-            >
-                {/* Info Upload */}
-                <div className="flex items-start sm:items-center space-x-3 flex-1">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 bg-gray-50 shrink-0">
-                        <Upload className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <div className="flex flex-col">
-                        {fileData ? (
-                            <p className="text-gray-700 text-sm font-medium break-all">
-                                {fileData.name} ({(fileData.size / 1024 / 1024).toFixed(1)} MB)
-                            </p>
-                        ) : (
-                            <>
-                                <p className="text-gray-700 text-sm font-medium">
-                                    {dragActive ? 'Lepaskan file di sini...' : 'Choose a file or drag & drop it here'}
-                                </p>
-                                <p className="text-gray-400 text-xs">
-                                    JPEG, PNG, PDF, and MP4 formats, up to 50MB
-                                </p>
-                            </>
-                        )}
-                    </div>
-                </div>
+				<input
+					type="file"
+					ref={fileRef}
+					className="hidden"
+					accept=".jpg,.jpeg,.png,.pdf,.mp4"
+					onChange={(e) => field.onChange(e.target.files?.[0] || null)}
+				/>
+			</div>
+		);
+	};
 
-                {/* Tombol Aksi */}
-                <div className="flex flex-row sm:flex-row gap-2 w-full sm:w-auto">
-                    {fileData && (
-                        <button
-                            type="button"
-                            onClick={() => handleFileRemove(title, type)}
-                            className="flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 hover:bg-red-100 text-sm font-medium cursor-pointer"
-                        >
-                            Hapus
-                        </button>
-                    )}
-                    <button
-                        type="button"
-                        onClick={() => fileRef.current?.click()}
-                        className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 text-sm font-medium cursor-pointer"
-                    >
-                        {fileData ? 'Ganti' : 'Browse'}
-                    </button>
-                </div>
+	return (
+		<div className="max-h-screen bg-gray-50">
+			<div className="mx-auto">
+				<div className="bg-white rounded-lg shadow-sm mb-8">
+					<NavbarAsesi
+						title="Data Sertifikasi"
+						icon={
+							<Link
+								to={paths.asesi.assessment.apl01(
+									id_assessment ?? 0,
+									id_asesor ?? 0
+								)}
+								className="text-gray-500 hover:text-gray-600"
+							>
+								<ChevronLeft size={20} />
+							</Link>
+						}
+					/>
+				</div>
 
-                <input
-                    type="file"
-                    ref={fileRef}
-                    className="hidden"
-                    accept=".jpg,.jpeg,.png,.pdf,.mp4"
-                    onChange={(e) => handleFileChange(e, title, type)}
-                />
-            </div>
-        );
-    };
+				<div>
+					<form
+						onSubmit={handleSubmit(onSubmit)}
+						className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 px-4 sm:px-6 pb-7 items-stretch"
+					>
+						{error && (
+							<div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+								<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+								<span className="text-red-800">{error}</span>
+							</div>
+						)}
 
+						{success && (
+							<div className="lg:col-span-5 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
+								<CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+								<span className="text-green-800">{success}</span>
+							</div>
+						)}
 
-    return (
-        <div className="max-h-screen bg-gray-50">
-            <div className="mx-auto">
-                <div className="bg-white rounded-lg shadow-sm mb-8">
-                    <NavbarAsesi
-                        title="Data Sertifikasi"
-                        icon={
-                            <Link to={paths.asesi.apl01} className="text-gray-500 hover:text-gray-600">
-                                <ChevronLeft size={20} />
-                            </Link>
-                        }
-                    />
-                </div>
+						{/* Left */}
+						<div className="space-y-6 md:col-span-3 flex flex-col h-full">
+							<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
+								<h3 className="text-gray-900 font-medium mb-4">
+									Tujuan Asesmen
+								</h3>
+								<div className="space-y-3">
+									{assessmentOptions.map((option) => (
+										<label
+											key={option}
+											className="flex items-center space-x-3 cursor-pointer"
+										>
+											<Controller
+												name="purpose"
+												control={control}
+												rules={{ required: "Harap pilih tujuan asesmen" }}
+												render={({ field }) => (
+													<input
+														type="radio"
+														value={option}
+														checked={field.value === option}
+														onChange={(e) => field.onChange(e.target.value)}
+														className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
+													/>
+												)}
+											/>
+											<span className="text-gray-700 text-sm sm:text-base">
+												{option}
+											</span>
+										</label>
+									))}
+								</div>
+								{errors.purpose && (
+									<p className="text-red-600 text-sm mt-2">
+										{errors.purpose.message}
+									</p>
+								)}
+							</div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 px-4 sm:px-6 pb-7 items-stretch">
-                    {error && (
-                        <div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
-                            <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-                            <span className="text-red-800">{error}</span>
-                        </div>
-                    )}
+							<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
+								<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
+									Bukti Persyaratan Dasar
+								</h3>
+								<div className="space-y-6">
+									{supportingFilesStatic.map((file, index) => (
+										<div key={index} className="space-y-3">
+											<p className="text-gray-700 text-sm leading-relaxed">
+												{file.title}
+											</p>
+											<Controller
+												name={file.name as keyof FormValues}
+												control={control}
+												render={({ field }) => (
+													<FileUploadArea
+														field={{
+															value: field.value as File | null,
+															onChange: field.onChange as (
+																file: File | null
+															) => void,
+														}}
+													/>
+												)}
+											/>
+										</div>
+									))}
+								</div>
+							</div>
+						</div>
 
-                    {success && (
-                        <div className="lg:col-span-5 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
-                            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                            <span className="text-green-800">{success}</span>
-                        </div>
-                    )}
+						{/* Right */}
+						<div className="md:col-span-1 lg:col-span-2 flex flex-col h-full">
+							<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full flex flex-col">
+								<div className="flex-1">
+									<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
+										Bukti Administratif
+									</h3>
+									<div className="space-y-6">
+										{administrativeFilesStatic.map((fileName, index) => (
+											<div key={index} className="space-y-3">
+												<p className="text-gray-700 text-sm font-medium">
+													{fileName.title}
+												</p>
+												<Controller
+													name={fileName.name as keyof FormValues}
+													control={control}
+													render={({ field }) => (
+														<FileUploadArea
+															field={{
+																value: field.value as File | null,
+																onChange: field.onChange as (
+																	file: File | null
+																) => void,
+															}}
+														/>
+													)}
+												/>
+											</div>
+										))}
+									</div>
+								</div>
 
-                    <div className="space-y-6 md:col-span-3 flex flex-col h-full">
-                        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
-                            <h3 className="text-gray-900 font-medium mb-4">Tujuan Asesmen</h3>
-                            <div className="space-y-3">
-                                {assessmentOptions.map(option => (
-                                    <label key={option} className="flex items-center space-x-3 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="assessment"
-                                            value={option}
-                                            checked={selectedAssessment === option}
-                                            onChange={e => setSelectedAssessment(e.target.value)}
-                                            className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
-                                        />
-                                        <span className="text-gray-700 text-sm sm:text-base">{option}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
-                            <h3 className="text-gray-900 font-medium mb-4 sm:mb-6">Bukti Persyaratan Dasar</h3>
-                            <div className="space-y-6">
-                                {supportingFilesStatic.map((file, index) => (
-                                    <div key={index} className="space-y-3">
-                                        <p className="text-gray-700 text-sm leading-relaxed">{file.title}</p>
-                                        <FileUploadArea title={`Supporting ${index + 1}`} type="supporting" />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="md:col-span-1 lg:col-span-2 flex flex-col h-full">
-                        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full flex flex-col">
-                            {/* Bagian Konten */}
-                            <div className="flex-1">
-                                <h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
-                                    Bukti Administratif
-                                </h3>
-                                <div className="space-y-6">
-                                    {administrativeFilesStatic.map((fileName, index) => (
-                                        <div key={index} className="space-y-3">
-                                            <p className="text-gray-700 text-sm font-medium">{fileName}</p>
-                                            <FileUploadArea title={fileName} type="administrative" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Bagian Footer (tetap di bawah) */}
-                            <div className="mt-auto pt-4 space-y-3">
-                                <hr className="border-gray-300" />
-                                <div className="w-full">
-                                    <button
-                                        onClick={handleSubmit}
-                                        disabled={loading}
-                                        className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 sm:py-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
-                                    >
-                                        {loading ? 'Menyimpan...' : 'Lanjut'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+								<div className="mt-auto pt-4 space-y-3">
+									<hr className="border-gray-300" />
+									<div className="w-full">
+										<button
+											type="submit"
+											disabled={loading}
+											className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 sm:py-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
+										>
+											{loading ? "Menyimpan..." : "Lanjut"}
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+					{/* Modal */}
+					{modalStep !== null && (
+						<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+							<div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full text-center flex flex-col">
+								{modalStep === 1 && (
+									<>
+										<img
+											src="/img/modal-persetujuan.svg"
+											alt="Generate QR"
+											className="mx-auto mb-4 w-40"
+										/>
+										<h2 className="text-lg font-semibold">Generate QR</h2>
+										<button
+											onClick={handleNext}
+											className="bg-[#E77D35] text-white w-full py-2 rounded mt-6"
+										>
+											Lanjut
+										</button>
+									</>
+								)}
+								{modalStep === 2 && (
+									<div>
+										<img
+											src="/img/menunggu-persetujuan.svg"
+											alt="Menunggu admin"
+											className="mx-auto mb-4 w-40"
+										/>
+										<h2 className="text-lg font-semibold">
+											Menunggu persetujuan admin
+										</h2>
+									</div>
+								)}
+								{modalStep === 3 && (
+									<>
+										<motion.img
+											src="/img/setuju.svg"
+											alt="Berhasil"
+											className="mx-auto mb-4 w-24"
+											initial={{ opacity: 0, scale: 0.5 }}
+											animate={{ opacity: 1, scale: [0.5, 1.2, 1] }}
+											transition={{ duration: 0.6 }}
+										/>
+										<h2 className="text-lg font-semibold mt-4">
+											Pengajuan Anda berhasil disetujui.
+										</h2>
+										<button
+											onClick={handleNext}
+											className="bg-[#E77D35] text-white w-full py-2 rounded mt-6"
+										>
+											Lanjut
+										</button>
+									</>
+								)}
+							</div>
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	);
 }

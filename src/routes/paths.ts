@@ -48,7 +48,8 @@ const routes = {
 		dashboardAsesor: "/asesor/dashboard-asesor",
 		cekAsesmenMandiri: "/asesor/cek-apl-02",
 		cekAsesmenMandiriDetail: "/asesor/cek-apl-02-detail",
-		persetujuanAsesmenKerahasiaanAsesor: "/asesor/persetujuan-asesmen-kerahasiaan-asesor",
+		persetujuanAsesmenKerahasiaanAsesor:
+			"/asesor/persetujuan-asesmen-kerahasiaan-asesor",
 		faktaIntegritas: "/asesor/fakta-integritas",
 		fria03: "/asesor/fr-ia-03",
 		fiia: "/asesor/fi.ia.01",
@@ -68,17 +69,38 @@ const routes = {
 	asesi: {
 		root: "/asesi",
 		dashboard: "/asesi/dashboard",
-		apl01: "/asesi/apl-01",
-		apl02: "/asesi/apl-02",
-		dataSertifikasi: "/asesi/data-sertifikasi",
+		assessment: {
+			root: "/asesi/assessment",
+			apl01: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-01`,
+			apl01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/apl-01",
+			dataSertifikasi: (
+				id_assessment: string | number,
+				id_asesor: string | number
+			) => `/asesi/assessment/${id_assessment}/${id_asesor}/data-sertifikasi`,
+			dataSertifikasiPattern:
+				"/asesi/assessment/:id_assessment/:id_asesor/data-sertifikasi",
+			apl02: "/asesi/assessment/apl-02",
+			asesmenMandiri: (
+				id_assessment: string | number,
+				id_asesor: string | number
+			) => `/asesi/assessment/${id_assessment}/${id_asesor}/asesmen-mandiri`,
+			asesmenMandiriPattern:
+				"/asesi/assessment/:id_assessment/:id_asesor/asesmen-mandiri",
+			asesmenMandiriDetail: (
+				id_assessment: string | number,
+				id_asesor: string | number
+			) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/asesmen-mandiri-detail`,
+			asesmenMandiriDetailPattern:
+				"/asesi/assessment/:id_assessment/:id_asesor/asesmen-mandiri-detail",
+		},
 		asesmenAktif: "/asesi/asesmen-aktif",
-		asesmenMandiri: "/asesi/asesmen-mandiri",
-		asesmenMandiriDetail: "/asesi/asesmen-mandiri-detail",
 		umpanBalik: "/asesi/umpan-balik",
 		bandingAsesmen: "/asesi/banding-asesmen",
 		persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
 		fria02: "/asesi/fr-ia-02",
-		asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda"
+		asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda",
 	},
 };
 
