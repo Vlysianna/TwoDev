@@ -212,47 +212,25 @@ const FIIA01Page = () => {
           </div>
         </div>
         
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between mt-6 lg:mt-8 gap-4 lg:gap-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full lg:w-auto">
-            <div className="dropdown-container">
-              <CustomDropdown 
-                dropdownKey="namaAsesi"
-                placeholder="Pilih Nama Asesi"
-                className="sm:min-w-[200px]"
-              />
-            </div>
-            <div className="dropdown-container">
-              <CustomDropdown 
-                dropdownKey="namaAsesor"
-                placeholder="Pilih Nama Asesor"
-                className="sm:min-w-[200px]"
-              />
-            </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-6 gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <span className="text-sm text-gray-500">
+              <span className="font-bold">Asesi:</span> Ananda Keizha Oktavian
+            </span>
+            <span className="text-sm text-gray-500">
+              <span className="font-bold">Asesor:</span> Eva Yeprilaini, S.Kom
+            </span>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full lg:w-auto">
-            <div className="relative">
-              <label className="block text-xs text-gray-500 mb-2 font-medium">Tanggal dimulai</label>
-              <input 
-                type="date" 
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E77D35]/20 focus:border-[#E77D35] text-gray-700 sm:min-w-[160px]"
-              />
-            </div>
-            
-            <div className="relative">
-              <label className="block text-xs text-gray-500 mb-2 font-medium">Tanggal selesai</label>
-              <input 
-                type="date" 
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E77D35]/20 focus:border-[#E77D35] text-gray-700 sm:min-w-[160px]"
-              />
-            </div>
-          </div>
+          <span className="text-sm text-gray-500">
+            24 Oktober 2025 | 07:00 - 15:00 - 24 Oktober 2025 | 07:00 - 15:00
+          </span>
         </div>
       </div>
 
       {/* Main Content Card - Responsive */}
       <div className="bg-white mx-4 lg:mx-6 mt-4 lg:mt-6 rounded-lg shadow-sm border p-4 lg:p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between mb-6 gap-4">
           <div className="flex flex-wrap gap-2">
             {['All unit (8)', 'K-Pekerjaan 1', 'K-Pekerjaan 2', 'K-Pekerjaan 3'].map((tab) => (
               <button 
@@ -267,6 +245,18 @@ const FIIA01Page = () => {
                 {tab}
               </button>
             ))}
+          </div>
+          
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center justify-between w-full min-w-[520px]">
+              <span className="text-sm text-gray-600">Completion</span>
+              <span className="text-sm font-medium text-gray-900">100%</span>
+            </div>
+            <div className="w-full">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-[#E77D35] h-2 rounded-full" style={{ width: '100%' }}></div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -309,11 +299,12 @@ const FIIA01Page = () => {
 
       {/* Recommendations Card - Responsive */}
       <div className="bg-white mx-4 lg:mx-6 mt-4 lg:mt-6 mb-6 rounded-lg shadow-sm border p-4 lg:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Rekomendasi</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_0.8fr] gap-6 lg:gap-8 items-start">
+          {/* Left Column - Rekomendasi */}
+          <div className="lg:col-span-1 h-full flex flex-col">
+            <h3 className="text-xl font-medium text-gray-900 mb-4">Rekomendasi</h3>
             
-            <div className="space-y-4 mb-6">
+            <div className="space-y-3 mb-6">
               <label className="flex items-start space-x-3 cursor-pointer">
                 <input
                   type="radio"
@@ -345,81 +336,177 @@ const FIIA01Page = () => {
               </label>
             </div>
 
-            <div className="space-y-4">
+            {/* Form Fields in 2 columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
               {[
-                { label: 'Pada', width: 'w-full sm:w-48' },
-                { label: 'Kelompok Pekerjaan', width: 'w-full sm:w-48' },
-                { label: 'Unit', width: 'w-full sm:w-48' },
-                { label: 'Elemen', width: 'w-full sm:w-48' },
-                { label: 'KUK', width: 'w-full sm:w-48' }
+                { label: 'Pada', placeholder: 'Masukkan kata' },
+                { label: 'Kelompok Pekerjaan', placeholder: 'Masukkan Kelompok Pekerjaan' },
+                { label: 'Unit', placeholder: 'Masukkan unit' },
+                { label: 'Elemen', placeholder: 'Masukkan elemen' },
+                { label: 'KUK', placeholder: 'Masukkan KUK', fullWidth: true }
               ].map((field, index) => (
-                <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <label className="text-sm font-medium text-gray-700 sm:w-32 flex-shrink-0">{field.label}</label>
-                  <span className="text-sm text-gray-700 hidden sm:block">:</span>
+                <div key={index} className={field.fullWidth ? 'sm:col-span-2' : ''}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{field.label}</label>
                   <input 
                     type="text" 
-                    className={`${field.width} bg-transparent border-0 border-b border-gray-400 focus:border-[#E77D35] focus:outline-none pb-1 text-sm transition-colors`}
-                    placeholder=""
+                    placeholder={field.placeholder}
+                    className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E77D35]/20 focus:border-[#E77D35] placeholder-gray-400 transition-all"
                   />
                 </div>
               ))}
             </div>
+            
+            {/* Spacer to push content to bottom alignment */}
+            <div className="flex-grow"></div>
           </div>
 
-          <div>
-            <div className="mb-8">
+          {/* Middle Column - Asesi & Asesor */}
+          <div className="h-full flex flex-col">
+            <div className="mb-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Asesi</h3>
               
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                <div className="dropdown-container flex-1">
-                  <CustomDropdown 
-                    dropdownKey="pilihAsesi"
-                    placeholder="Pilih Asesi"
-                  />
-                </div>
-                <div className="relative sm:w-40">
-                  <input 
-                    type="date" 
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E77D35]/20 focus:border-[#E77D35] text-gray-700"
-                    placeholder="Pilih tanggal"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Asesor</h3>
-              
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="dropdown-container flex-1">
-                  <CustomDropdown 
-                    dropdownKey="pilihAsesor"
-                    placeholder="Pilih Asesor"
-                  />
-                </div>
-                <div className="relative sm:w-40">
-                  <input 
-                    type="date" 
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E77D35]/20 focus:border-[#E77D35] text-gray-700"
-                    placeholder="Pilih tanggal"
-                  />
-                </div>
-              </div>
-              
-              <div className="mb-6">
-                <h4 className="text-base font-medium text-gray-900 mb-2">No. Reg</h4>
+              <div className="mb-3">
                 <input 
                   type="text" 
-                  placeholder="Masukkan nomor reg"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E77D35]/20 focus:border-[#E77D35] placeholder-gray-400 transition-all"
+                  value="Ananda Keizha Oktavian"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+                  readOnly
                 />
+              </div>
+              
+              <div className="relative">
+                <input 
+                  type="text" 
+                  value="24 Oktober 2025"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
+                  readOnly
+                />
+                <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
+                  <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
+                  <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
+                </svg>
               </div>
             </div>
 
-            <button className="w-full bg-[#E77D35] text-white py-3 rounded-lg font-medium hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md">
-              Submit
-            </button>
+            <div className="mb-auto">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Asesor</h3>
+              
+              <div className="mb-3">
+                <input 
+                  type="text" 
+                  value="Eva Yeprilaini, S.Kom"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+                  readOnly
+                />
+              </div>
+              
+              <div className="mb-3">
+                <input 
+                  type="text" 
+                  value="24102026"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+                  readOnly
+                />
+              </div>
+              
+              <div className="relative">
+                <input 
+                  type="text" 
+                  value="24 Oktober 2025"
+                  className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
+                  readOnly
+                />
+                <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
+                  <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
+                  <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
+                </svg>
+              </div>
+            </div>
+            
+            {/* Spacer to align bottom */}
+            <div className="flex-grow"></div>
           </div>
+
+          {/* Right Column - QR Code */}
+          <div className="px-2 h-full flex flex-col">
+            <div className="space-y-4 flex-grow flex flex-col justify-between">
+              {/* Existing QR Code */}
+              <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center">
+                <div className="w-24 h-24 bg-white rounded border flex items-center justify-center">
+                  <svg className="w-20 h-20" viewBox="0 0 100 100" fill="none">
+                    {/* QR Code pattern */}
+                    <rect x="0" y="0" width="100" height="100" fill="white"/>
+                    <rect x="0" y="0" width="30" height="30" fill="black"/>
+                    <rect x="5" y="5" width="20" height="20" fill="white"/>
+                    <rect x="10" y="10" width="10" height="10" fill="black"/>
+                    <rect x="70" y="0" width="30" height="30" fill="black"/>
+                    <rect x="75" y="5" width="20" height="20" fill="white"/>
+                    <rect x="80" y="10" width="10" height="10" fill="black"/>
+                    <rect x="0" y="70" width="30" height="30" fill="black"/>
+                    <rect x="5" y="75" width="20" height="20" fill="white"/>
+                    <rect x="10" y="80" width="10" height="10" fill="black"/>
+                    <rect x="40" y="10" width="5" height="5" fill="black"/>
+                    <rect x="50" y="10" width="5" height="5" fill="black"/>
+                    <rect x="60" y="10" width="5" height="5" fill="black"/>
+                    <rect x="40" y="20" width="5" height="5" fill="black"/>
+                    <rect x="60" y="20" width="5" height="5" fill="black"/>
+                    <rect x="40" y="30" width="5" height="5" fill="black"/>
+                    <rect x="50" y="30" width="5" height="5" fill="black"/>
+                    <rect x="40" y="40" width="5" height="5" fill="black"/>
+                    <rect x="60" y="40" width="5" height="5" fill="black"/>
+                    <rect x="70" y="40" width="5" height="5" fill="black"/>
+                    <rect x="80" y="40" width="5" height="5" fill="black"/>
+                    <rect x="90" y="40" width="5" height="5" fill="black"/>
+                    <rect x="40" y="50" width="5" height="5" fill="black"/>
+                    <rect x="50" y="50" width="5" height="5" fill="black"/>
+                    <rect x="70" y="50" width="5" height="5" fill="black"/>
+                    <rect x="90" y="50" width="5" height="5" fill="black"/>
+                    <rect x="40" y="60" width="5" height="5" fill="black"/>
+                    <rect x="60" y="60" width="5" height="5" fill="black"/>
+                    <rect x="80" y="60" width="5" height="5" fill="black"/>
+                    <rect x="40" y="80" width="5" height="5" fill="black"/>
+                    <rect x="50" y="80" width="5" height="5" fill="black"/>
+                    <rect x="60" y="80" width="5" height="5" fill="black"/>
+                    <rect x="70" y="80" width="5" height="5" fill="black"/>
+                    <rect x="80" y="80" width="5" height="5" fill="black"/>
+                    <rect x="90" y="80" width="5" height="5" fill="black"/>
+                    <rect x="40" y="90" width="5" height="5" fill="black"/>
+                    <rect x="60" y="90" width="5" height="5" fill="black"/>
+                    <rect x="80" y="90" width="5" height="5" fill="black"/>
+                  </svg>
+                </div>
+              </div>
+              
+              {/* Empty QR Code placeholder */}
+              <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center h-32">
+                <div className="text-center">
+                  <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  <p className="text-sm text-gray-500">QR Code akan muncul di sini</p>
+                </div>
+              </div>
+              
+              {/* Generate QR Button */}
+              <button className="w-full bg-[#E77D35] text-white py-2 rounded-lg font-medium hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md text-sm">
+                Generate QR
+              </button>
+              
+              {/* Spacer to align bottom */}
+              <div className="flex-grow-0"></div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Lanjut Button at the bottom */}
+        <div className="mt-8 flex justify-end">
+          <button className="bg-[#E77D35] text-white px-40 py-3 rounded-lg font-medium hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md">
+            Lanjut
+          </button>
         </div>
       </div>
     </div>
