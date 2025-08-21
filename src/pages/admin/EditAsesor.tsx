@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '@/helper/axios';
 import { ChevronDown, Calendar, Eye, EyeOff, EyeClosed } from 'lucide-react';
 import Sidebar from '@/components/ui/SideAdmin';
 import Navbar from '@/components/ui/NavAdmin';
@@ -31,6 +33,8 @@ interface FormData {
 }
 
 const EditAsesor: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -58,6 +62,50 @@ const EditAsesor: React.FC = () => {
     emailPekerjaan: '',
     jenjangPendidikan: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  // Fetch data if editing
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      api.get(`/user/${id}`)
+        .then(res => {
+          const user = res.data.data;
+          setFormData({
+            email: user.email || '',
+            password: '',
+            nama: user.full_name || '',
+            noKTPNIKPasport: user.assessor?.identity_number || '',
+            tempatLahir: user.assessor?.birth_location || '',
+            tanggalLahir: user.assessor?.birth_date || '',
+            jenisKelamin: user.assessor?.gender || '',
+            kewarganegaraan: user.assessor?.nationality || '',
+            provinsi: '', // Not available in BE, leave blank or map if exists
+            noTeleponRumah: user.assessor?.house_phone_no || '',
+            kota: '', // Not available in BE, leave blank or map if exists
+            noHP: user.assessor?.phone_no || '',
+            noTeleponKantor: user.assessor?.office_phone_no || '',
+            alamat: user.assessor?.address || '',
+            kodePos: user.assessor?.postal_code || '',
+            namaInstansiPerusahaan: '', // Not available in BE
+            noTeleponInstansi: '', // Not available in BE
+            bidangPekerjaan: '', // Not available in BE
+            jabatan: '', // Not available in BE
+            noTeleponBidang: '', // Not available in BE
+            alamatKantor: '', // Not available in BE
+            kodePosKantor: '', // Not available in BE
+            emailPekerjaan: '', // Not available in BE
+            jenjangPendidikan: user.assessor?.educational_qualifications || '',
+          });
+        })
+        .catch(err => {
+          setError(err?.response?.data?.message || 'Gagal memuat data asesor');
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -67,9 +115,55 @@ const EditAsesor: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setLoading(true);
+    setError(null);
+    try {
+      if (id) {
+        // Edit mode
+        await api.put(`/user/assessor/${id}`, {
+          email: formData.email,
+          password: formData.password || undefined, // Only send if changed
+          full_name: formData.nama,
+          identity_number: formData.noKTPNIKPasport,
+          birth_location: formData.tempatLahir,
+          birth_date: formData.tanggalLahir,
+          gender: formData.jenisKelamin,
+          nationality: formData.kewarganegaraan,
+          house_phone_no: formData.noTeleponRumah,
+          office_phone_no: formData.noTeleponKantor,
+          address: formData.alamat,
+          postal_code: formData.kodePos,
+          phone_no: formData.noHP,
+          educational_qualifications: formData.jenjangPendidikan,
+        });
+      } else {
+        // Create mode
+        await api.post('/user/assessor', {
+          email: formData.email,
+          password: formData.password,
+          full_name: formData.nama,
+          identity_number: formData.noKTPNIKPasport,
+          birth_location: formData.tempatLahir,
+          birth_date: formData.tanggalLahir,
+          gender: formData.jenisKelamin,
+          nationality: formData.kewarganegaraan,
+          house_phone_no: formData.noTeleponRumah,
+          office_phone_no: formData.noTeleponKantor,
+          address: formData.alamat,
+          postal_code: formData.kodePos,
+          phone_no: formData.noHP,
+          educational_qualifications: formData.jenjangPendidikan,
+        });
+      }
+      setSuccess(true);
+      setTimeout(() => navigate('/admin/kelola-akun-asesor'), 1200);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Gagal menyimpan data asesor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -497,12 +591,14 @@ const EditAsesor: React.FC = () => {
               {/* Submit Button */}
               <div className="flex justify-end pt-4">
                 <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="bg-[#E77D35] hover:bg-orange-500 text-white font-normal w-[168px] h-[41px] rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  type="submit"
+                  disabled={loading}
+                  className="bg-[#E77D35] hover:bg-orange-500 text-white font-normal w-[168px] h-[41px] rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60"
                 >
-                  Submit
+                  {loading ? 'Menyimpan...' : 'Submit'}
                 </button>
+                {error && <div className="text-red-600 mt-2">{error}</div>}
+                {success && <div className="text-green-600 mt-2">Berhasil disimpan!</div>}
               </div>
             </div>
           </div>

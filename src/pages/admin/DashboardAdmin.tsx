@@ -9,6 +9,9 @@ import {
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import api from '@/helper/axios';
+import { useToast } from '@/components/ui/useToast';
+import { useNavigate } from 'react-router-dom';
+import paths from '@/routes/paths';
 
 interface DashboardStats {
     totalSchemes: number;
@@ -19,10 +22,16 @@ interface DashboardStats {
 
 interface ScheduleData {    
     id: number;
-    occupation: {
-        name: string;
-        scheme: {
+    assessment: {
+        id: number;
+        code?: string;
+        occupation: {
+            id?: number;
             name: string;
+            scheme: {
+                id?: number;
+                name: string;
+            };
         };
     };
     start_date: string;
@@ -36,6 +45,21 @@ interface VerificationData {
     tanggalKirim: string;
 }
 
+type ScheduleResponseRaw = {
+    id: number;
+    assessment: {
+        id: number;
+        code?: string;
+        occupation: {
+            id?: number;
+            name: string;
+            scheme: { id?: number; name: string };
+        };
+    };
+    start_date: string;
+    end_date: string;
+};
+
 const Dashboard: React.FC = () => {
     const [stats, setStats] = useState<DashboardStats>({
         totalSchemes: 0,
@@ -46,56 +70,96 @@ const Dashboard: React.FC = () => {
     const [schedules, setSchedules] = useState<ScheduleData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ open: boolean; action?: 'delete' | 'approve' | 'reject'; id?: number; message?: string }>({ open: false });
 
-    // Mock verification data (as there's no verification endpoint yet)
-    const verificationData: VerificationData[] = [
-        {
-            id: 1,
-            username: 'Salmah Nadya',
-            buktiUpload: 'Lihat Bukti',
-            tanggalKirim: '31/07/2025 02.23'
-        },
-        {
-            id: 2,
-            username: 'Ahmad Rizki',
-            buktiUpload: 'Lihat Bukti', 
-            tanggalKirim: '30/07/2025 14.15'
-        },
-        {
-            id: 3,
-            username: 'Dewi Sari',
-            buktiUpload: 'Lihat Bukti',
-            tanggalKirim: '29/07/2025 09.30'
+    const [verificationData, setVerificationData] = useState<VerificationData[]>([]);
+
+    type PendingDoc = {
+        id: number;
+        purpose?: string;
+        created_at?: string;
+        result?: {
+            id?: number;
+            created_at?: string;
+            assessee?: { user?: { full_name?: string; email?: string } };
+        };
+    };
+
+    
+
+    const loadPendingVerifications = React.useCallback(async () => {
+        try {
+            const res = await api.get('/assessments/verification/pending');
+            if (res.data && res.data.success) {
+                const docs = res.data.data as PendingDoc[];
+                const mapped = docs.map((d) => ({
+                    id: d.id,
+                    username: d.result?.assessee?.user?.full_name || d.result?.assessee?.user?.email || 'Unknown',
+                    buktiUpload: d.purpose || 'Bukti Upload',
+                    tanggalKirim: new Date(d.result?.created_at || d.created_at || '').toLocaleString(),
+                }));
+                setVerificationData(mapped);
+            }
+        } catch (err) {
+            console.error('Failed to fetch verification pending', err);
         }
-    ];
+    }, []);
 
     useEffect(() => {
-        fetchDashboardData();
-    }, []);
+        void fetchDashboardData();
+        void loadPendingVerifications();
+    }, [loadPendingVerifications]);
 
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // Fetch dashboard statistics
-            const dashboardResponse = await api.get('/dashboard');
-            if (dashboardResponse.data.success) {
+            // Fetch dashboard statistics (backend endpoint: /api/dashboard/admin/)
+            const dashboardResponse = await api.get('/dashboard/admin/');
+            if (dashboardResponse.data && dashboardResponse.data.success) {
+                const summary = dashboardResponse.data.data.summary;
                 setStats({
-                    totalSchemes: dashboardResponse.data.data.totalSchemes,
-                    totalAssessments: dashboardResponse.data.data.totalAssessments,
-                    totalAssessors: dashboardResponse.data.data.totalAssessors,
-                    totalAssesses: dashboardResponse.data.data.totalAssesses
+                    totalSchemes: summary.totalSchemes ?? 0,
+                    totalAssessments: summary.totalAssessments ?? 0,
+                    totalAssessors: summary.totalAssessors ?? 0,
+                    totalAssesses: summary.totalAssessees ?? 0,
                 });
+
+                // populate schedules if present
+                const schedulesData = dashboardResponse.data.data.schedules;
+                if (Array.isArray(schedulesData)) {
+                    type ServerScheduleRow = { id: number; assessment_id: number; occupation_name: string; schema_name: string; start_date: string; end_date: string };
+                    const arr = schedulesData as ServerScheduleRow[];
+                    setSchedules(arr.slice(0, 5).map((row) => ({
+                        id: row.id,
+                        assessment: {
+                            id: row.assessment_id,
+                            occupation: { name: row.occupation_name, scheme: { name: row.schema_name } },
+                        },
+                        start_date: row.start_date,
+                        end_date: row.end_date,
+                    })));
+                }
             }
 
-            // Fetch schedules
-            const schedulesResponse = await api.get('/schedule');
+            // Fetch schedules (backend exposes /api/schedules)
+            const schedulesResponse = await api.get('/schedules');
             if (schedulesResponse.data.success) {
-                setSchedules(schedulesResponse.data.data.slice(0, 5)); // Show only first 5 schedules
+                // backend returns schedules with assessment -> occupation -> scheme
+                const items = schedulesResponse.data.data as unknown;
+                if (Array.isArray(items)) {
+                    const arr = items as ScheduleResponseRaw[];
+                    setSchedules(arr.slice(0, 5).map((s) => ({
+                        id: s.id,
+                        assessment: s.assessment,
+                        start_date: s.start_date,
+                        end_date: s.end_date,
+                    })));
+                }
             }
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to fetch dashboard data:', error);
             setError('Gagal memuat data dashboard');
         } finally {
@@ -111,12 +175,33 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  const handleEdit = (id: number) => console.log('Edit:', id);
-  const handleView = (id: number) => console.log('View:', id);
-  const handleDelete = (id: number) => console.log('Delete:', id);
-  const handleApprove = (id: number) => console.log('Approve:', id);
-  const handleReject = (id: number) => console.log('Reject:', id);
-  const handleViewBukti = (id: number) => console.log('View bukti:', id);
+    const navigate = useNavigate();
+
+    const handleEdit = (id: number) => {
+        // navigate to Kelola Jadwal and attach id as query param (detail/edit handled there)
+        navigate(`${paths.admin.kelolaJadwal}?id=${id}`);
+    };
+
+    const handleView = (id: number) => {
+        navigate(`${paths.admin.kelolaJadwal}?id=${id}`);
+    };
+
+    const handleDelete = async (id: number) => {
+        setConfirmModal({ open: true, action: 'delete', id, message: 'Yakin ingin menghapus jadwal ini?' });
+    };
+        const toast = useToast();
+
+            const handleApprove = async (id: number) => {
+                setConfirmModal({ open: true, action: 'approve', id, message: 'Setujui verifikasi ini?' });
+            };
+
+        const handleReject = (id: number) => {
+            setConfirmModal({ open: true, action: 'reject', id, message: 'Tolak verifikasi ini? Anda akan diarahkan ke halaman detail untuk tindakan lanjutan.' });
+        };
+
+    const handleViewBukti = (id: number) => {
+        navigate(`${paths.admin.verifikasi}?id=${id}`);
+    };
 
   if (loading) {
     return (
@@ -137,6 +222,55 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F7FAFC] flex">
+            {/* Confirmation Modal */}
+            {confirmModal.open && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/5">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+                        <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
+                        <p className="text-sm text-gray-600 mb-4">{confirmModal.message}</p>
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => setConfirmModal({ open: false })} className="px-4 py-2 border rounded">Batal</button>
+                            <button
+                                onClick={async () => {
+                                    const id = confirmModal.id;
+                                    const act = confirmModal.action;
+                                    setConfirmModal({ open: false });
+                                    if (!id || !act) return;
+                                    try {
+                                        if (act === 'delete') {
+                                            const res = await api.delete(`/schedules/${id}`);
+                                            if (res.data && res.data.success) {
+                                                setSchedules((prev) => prev.filter((s) => s.id !== id));
+                                                toast.show({ title: 'Berhasil', description: 'Jadwal dihapus', type: 'success' });
+                                            } else {
+                                                setError('Gagal menghapus jadwal');
+                                                toast.show({ title: 'Gagal', description: 'Gagal menghapus jadwal', type: 'error' });
+                                            }
+                                        } else if (act === 'approve') {
+                                            const res = await api.post(`/assessments/verification/${id}/approve`);
+                                            if (res.data && res.data.success) {
+                                                await loadPendingVerifications();
+                                                toast.show({ title: 'Berhasil', description: 'Verifikasi disetujui', type: 'success' });
+                                            } else {
+                                                toast.show({ title: 'Gagal', description: 'Gagal menyetujui verifikasi', type: 'error' });
+                                            }
+                                        } else if (act === 'reject') {
+                                            // navigate to detail page for manual reject handling
+                                            navigate(`${paths.admin.verifikasi}?id=${id}`);
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        toast.show({ title: 'Error', description: 'Terjadi error', type: 'error' });
+                                    }
+                                }}
+                                className="px-4 py-2 bg-[#E77D35] text-white rounded"
+                            >
+                                Ya
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
     <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
     <Navbar />
@@ -164,7 +298,7 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
                         <hr className="my-4" />
-                        <button className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                        <button onClick={() => navigate(paths.admin.kelolaMUK)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
                             Lihat Detail
                             <span>→</span>
                         </button>
@@ -182,7 +316,7 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
                         <hr className="my-4" />
-                        <button className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                        <button onClick={() => navigate(paths.admin.apl02)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
                             Lihat Detail
                             <span>→</span>
                         </button>
@@ -200,7 +334,7 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
                         <hr className="my-4" />
-                        <button className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                        <button onClick={() => navigate(paths.admin.kelolaAkunAsesor)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
                             Lihat Detail
                             <span>→</span>
                         </button>
@@ -218,7 +352,7 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
                         <hr className="my-4" />
-                        <button className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                        <button onClick={() => navigate(paths.admin.kelolaAkunAsesi)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
                         Lihat Detail
                         <span>→</span>
                         </button>
@@ -230,7 +364,7 @@ const Dashboard: React.FC = () => {
                     <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Jadwal Assasmen</h2>
-                            <button className="text-sm text-gray-500 hover:text-[#E77D35]">
+                            <button onClick={() => navigate(paths.admin.kelolaJadwal)} className="text-sm text-gray-500 hover:text-[#E77D35]">
                             Lihat Semua &gt;&gt;
                             </button>
                         </div>
@@ -273,10 +407,10 @@ const Dashboard: React.FC = () => {
                                             className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                              {item.occupation.scheme.name}
+                                              {item.assessment.occupation.scheme.name}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                              {item.occupation.name}
+                                              {item.assessment.occupation.name}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                               {formatDate(item.start_date)}
@@ -323,7 +457,7 @@ const Dashboard: React.FC = () => {
                     <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Verifikasi Approval</h2>
-                            <button className="text-sm text-gray-500 hover:text-[#E77D35]">
+                            <button onClick={() => navigate(paths.admin.verifikasi)} className="text-sm text-gray-500 hover:text-[#E77D35]">
                                 Lihat Semua &gt;&gt;
                             </button>
                         </div>

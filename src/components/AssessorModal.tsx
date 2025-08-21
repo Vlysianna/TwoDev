@@ -1,313 +1,249 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, AlertCircle } from 'lucide-react';
+import BaseModal from './BaseModal';
 import api from '@/helper/axios';
 
-interface Scheme {
-  id: number;
-  code: string;
-  name: string;
+interface AssessorData {
+  id?: number;
+  email?: string;
+  full_name?: string; // Add this for user.full_name
+  assessor?: {
+    id?: number;
+    full_name?: string;
+    phone_no?: string;
+    identity_number?: string;
+    birth_date?: string;
+    birth_location?: string;
+    gender?: string;
+    nationality?: string;
+    house_phone_no?: string;
+    office_phone_no?: string;
+    address?: string;
+    postal_code?: string;
+    educational_qualifications?: string;
+    scheme_id?: number;
+  };
 }
 
 interface AssessorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  assessor?: {
-    id: number;
-    email: string;
-    assessor?: {
-      id: number;
-      full_name: string;
-      scheme_id: number;
-      address: string;
-      phone_no: string;
-      birth_date: string;
-    };
-  } | null;
-  mode: 'create' | 'edit';
+  assessor: AssessorData | null;
+  mode: 'create' | 'edit' | 'show';
 }
 
-const AssessorModal: React.FC<AssessorModalProps> = ({
-  isOpen,
-  onClose,
-  onSuccess,
-  assessor,
-  mode
-}) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    full_name: '',
-    scheme_id: '',
-    address: '',
-    phone_no: '',
-    birth_date: ''
-  });
-  const [schemes, setSchemes] = useState<Scheme[]>([]);
+const initialForm = {
+  full_name: '',
+  phone_no: '',
+  identity_number: '',
+  birth_date: '',
+  birth_location: '',
+  gender: '',
+  nationality: '',
+  house_phone_no: '',
+  office_phone_no: '',
+  address: '',
+  postal_code: '',
+  educational_qualifications: '',
+  email: '',
+  scheme_id: '',
+};
+
+const AssessorModal: React.FC<AssessorModalProps> = ({ isOpen, onClose, onSuccess, assessor, mode }) => {
+  const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchSchemes();
-      if (mode === 'edit' && assessor) {
-        setFormData({
-          email: assessor.email,
-          password: '',
-          full_name: assessor.assessor?.full_name || '',
-          scheme_id: assessor.assessor?.scheme_id?.toString() || '',
-          address: assessor.assessor?.address || '',
-          phone_no: assessor.assessor?.phone_no || '',
-          birth_date: assessor.assessor?.birth_date ? assessor.assessor.birth_date.split('T')[0] : ''
-        });
-      } else {
-        setFormData({
-          email: '',
-          password: '',
-          full_name: '',
-          scheme_id: '',
-          address: '',
-          phone_no: '',
-          birth_date: ''
-        });
-      }
+    if (assessor && (mode === 'edit' || mode === 'show')) {
+      setForm({
+        ...initialForm,
+        ...assessor.assessor,
+        full_name: assessor.full_name || '',
+        email: assessor.email || '',
+        scheme_id: assessor.assessor?.scheme_id ? String(assessor.assessor.scheme_id) : '',
+      });
+    } else {
+      setForm(initialForm);
     }
-  }, [isOpen, mode, assessor]);
+    setError(null);
+  }, [assessor, mode, isOpen]);
 
-  const fetchSchemes = async () => {
-    try {
-      const response = await api.get('/scheme');
-      if (response.data.success) {
-        setSchemes(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching schemes:', error);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     try {
       if (mode === 'create') {
-        const response = await api.post('/user/assessor', formData);
-        if (response.data.success) {
-          onSuccess();
-          onClose();
-        }
-      } else {
-        // For edit mode, update user and assessor separately
-        const userUpdateData: any = { email: formData.email };
-        if (formData.password) {
-          userUpdateData.password = formData.password;
-        }
-
-        await api.put(`/user/${assessor?.id}`, userUpdateData);
-        
-        if (assessor?.assessor) {
-          const assessorUpdateData = {
-            full_name: formData.full_name,
-            scheme_id: parseInt(formData.scheme_id),
-            address: formData.address,
-            phone_no: formData.phone_no,
-            birth_date: formData.birth_date
-          };
-          await api.put(`/assessor/${assessor.assessor.id}`, assessorUpdateData);
-        }
-        
-        onSuccess();
-        onClose();
+        await api.post('/user/assessor', { ...form, scheme_id: Number(form.scheme_id) });
+      } else if (mode === 'edit' && assessor) {
+        await api.put(`/user/assessor/${assessor.id}`, { ...form, scheme_id: Number(form.scheme_id) });
       }
-    } catch (error: any) {
-      console.error('Error saving assessor:', error);
-      setError(error.response?.data?.message || 'Failed to save assessor');
+      onSuccess();
+      onClose();
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Gagal menyimpan data';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isOpen) return null;
+  const isReadOnly = mode === 'show';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {mode === 'create' ? 'Buat Akun Assessor' : 'Edit Akun Assessor'}
+    <BaseModal isOpen={isOpen} onClose={onClose} widthClass="max-w-lg w-full">
+      <div className="bg-white rounded-lg overflow-hidden">
+        <div className="bg-[#E77D35] px-6 py-4">
+          <h2 className="text-xl font-semibold text-white">
+            {mode === 'create' && 'Buat Akun Asesor'}
+            {mode === 'edit' && 'Edit Akun Asesor'}
+            {mode === 'show' && 'Detail Akun Asesor'}
           </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-          >
-            <X size={20} />
-          </button>
         </div>
-
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6">
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
-              <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-              <span className="text-red-800">{error}</span>
+        {mode === 'show' ? (
+          <div className="p-6 text-gray-700">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Nama Lengkap</div>
+                <div className="font-medium">{form.full_name || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Email</div>
+                <div className="font-medium">{form.email || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">No. HP</div>
+                <div className="font-medium">{form.phone_no || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">NIK</div>
+                <div className="font-medium">{form.identity_number || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Tanggal Lahir</div>
+                <div className="font-medium">{form.birth_date || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Tempat Lahir</div>
+                <div className="font-medium">{form.birth_location || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Jenis Kelamin</div>
+                <div className="font-medium">{form.gender || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Kewarganegaraan</div>
+                <div className="font-medium">{form.nationality || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">No. Telp Rumah</div>
+                <div className="font-medium">{form.house_phone_no || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">No. Telp Kantor</div>
+                <div className="font-medium">{form.office_phone_no || '-'}</div>
+              </div>
+              <div className="col-span-2">
+                <div className="text-xs text-gray-500 mb-1">Alamat</div>
+                <div className="font-medium">{form.address || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Kode Pos</div>
+                <div className="font-medium">{form.postal_code || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Pendidikan</div>
+                <div className="font-medium">{form.educational_qualifications || '-'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Skema</div>
+                <div className="font-medium">{form.scheme_id || '-'}</div>
+              </div>
             </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Email */}
-            <div className="md:col-span-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email *
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="md:col-span-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password {mode === 'create' ? '*' : '(Leave empty to keep current)'}
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required={mode === 'create'}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-              />
-            </div>
-
-            {/* Full Name */}
-            <div className="md:col-span-2">
-              <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-2">
-                Nama Lengkap *
-              </label>
-              <input
-                type="text"
-                id="full_name"
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-              />
-            </div>
-
-            {/* Scheme */}
-            <div>
-              <label htmlFor="scheme_id" className="block text-sm font-medium text-gray-700 mb-2">
-                Skema *
-              </label>
-              <select
-                id="scheme_id"
-                name="scheme_id"
-                value={formData.scheme_id}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-              >
-                <option value="">Pilih Skema</option>
-                {schemes.map((scheme) => (
-                  <option key={scheme.id} value={scheme.id}>
-                    {scheme.code} - {scheme.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone_no" className="block text-sm font-medium text-gray-700 mb-2">
-                No. Telepon *
-              </label>
-              <input
-                type="tel"
-                id="phone_no"
-                name="phone_no"
-                value={formData.phone_no}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-              />
-            </div>
-
-            {/* Birth Date */}
-            <div>
-              <label htmlFor="birth_date" className="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal Lahir *
-              </label>
-              <input
-                type="date"
-                id="birth_date"
-                name="birth_date"
-                value={formData.birth_date}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-              />
-            </div>
-
-            {/* Address */}
-            <div className="md:col-span-2">
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                Alamat *
-              </label>
-              <textarea
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                required
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-              />
+            <div className="mt-6 flex justify-end gap-2">
+              <button type="button" onClick={onClose} className="btn btn-ghost">Tutup</button>
             </div>
           </div>
-
-          {/* Footer */}
-          <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-[#E77D35] text-white rounded-md text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50"
-            >
-              {loading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              ) : (
-                <Save size={16} />
-              )}
-              {loading ? 'Menyimpan...' : 'Simpan'}
-            </button>
-          </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6">
+            {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-3">{error}</div>}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Nama Lengkap</label>
+                <input name="full_name" value={form.full_name} onChange={handleChange} readOnly={isReadOnly} required className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Email</label>
+                <input name="email" value={form.email} onChange={handleChange} readOnly={isReadOnly || mode==='edit'} required className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">No. HP</label>
+                <input name="phone_no" value={form.phone_no} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">NIK</label>
+                <input name="identity_number" value={form.identity_number} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Tanggal Lahir</label>
+                <input type="date" name="birth_date" value={form.birth_date} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Tempat Lahir</label>
+                <input name="birth_location" value={form.birth_location} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Jenis Kelamin</label>
+                <select name="gender" value={form.gender} onChange={handleChange} disabled={isReadOnly} className="input input-bordered w-full">
+                  <option value="">Pilih</option>
+                  <option value="Laki-laki">Laki-laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Kewarganegaraan</label>
+                <input name="nationality" value={form.nationality} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">No. Telp Rumah</label>
+                <input name="house_phone_no" value={form.house_phone_no} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">No. Telp Kantor</label>
+                <input name="office_phone_no" value={form.office_phone_no} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm mb-1 text-gray-700">Alamat</label>
+                <input name="address" value={form.address} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Kode Pos</label>
+                <input name="postal_code" value={form.postal_code} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Pendidikan</label>
+                <input name="educational_qualifications" value={form.educational_qualifications} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+              </div>
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Skema</label>
+                <input name="scheme_id" value={form.scheme_id} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" placeholder="ID Skema" />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button type="button" onClick={onClose} className="btn btn-ghost">Tutup</button>
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? 'Menyimpan...' : 'Simpan'}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
-    </div>
+    </BaseModal>
   );
 };
 

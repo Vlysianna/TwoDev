@@ -30,6 +30,7 @@ interface Assessor {
 interface User {
   id: number;
   email: string;
+  full_name?: string;
   role: Role;
   assessor?: Assessor;
 }
@@ -39,9 +40,8 @@ const KelolaAkunAsesor: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  // Detail modal state (for view only)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAssessor, setSelectedAssessor] = useState<User | null>(null);
   
   // Delete modal states
@@ -58,37 +58,50 @@ const KelolaAkunAsesor: React.FC = () => {
       setLoading(true);
       setError(null);
       const response = await api.get('/user');
-      
-      if (response.data.success) {
+      if (response?.data?.success) {
+        const data = Array.isArray(response.data.data) ? response.data.data : [];
         // Filter for assessor users (role_id === 2)
-        const assessorUsers = response.data.data.filter((user: User) => user.role.id === 2);
+        const assessorUsers = data.filter((user: User) => user.role && user.role.id === 2);
         setUsers(assessorUsers);
       } else {
-        setError('Gagal memuat data pengguna');
+        setError(response?.data?.message || 'Gagal memuat data pengguna');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching users:', error);
-      setError(error.response?.data?.message || 'Gagal memuat data pengguna');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (error as any)?.response?.data?.message || 'Gagal memuat data pengguna';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
+
+  // Navigation for create/edit
   const handleCreate = () => {
-    setModalMode('create');
-    setSelectedAssessor(null);
-    setIsModalOpen(true);
+    window.location.href = '/admin/asesor/create';
   };
 
   const handleEdit = (user: User) => {
-    setModalMode('edit');
-    setSelectedAssessor(user);
-    setIsModalOpen(true);
+    window.location.href = `/admin/asesor/edit/${user.id}`;
   };
 
   const handleView = (id: number) => {
-    // TODO: Implement view functionality
-    console.log('View user:', id);
+    (async () => {
+      try {
+        const res = await api.get(`/user/${id}`);
+        if (res?.data?.success) {
+          setSelectedAssessor(res.data.data);
+          setIsDetailModalOpen(true);
+        } else {
+          setError(res?.data?.message || 'Gagal memuat data pengguna');
+        }
+      } catch (err) {
+        console.error('Failed to fetch user detail:', err);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setError((err as any)?.response?.data?.message || 'Gagal memuat detail pengguna');
+      }
+    })();
   };
 
   const handleDeleteClick = (user: User) => {
@@ -105,17 +118,17 @@ const KelolaAkunAsesor: React.FC = () => {
       await fetchUsers(); // Refresh the list
       setIsDeleteModalOpen(false);
       setAssessorToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting user:', error);
-      setError(error.response?.data?.message || 'Gagal menghapus pengguna');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (error as any)?.response?.data?.message || 'Gagal menghapus pengguna';
+      setError(msg);
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  const handleModalSuccess = () => {
-    fetchUsers(); // Refresh the list
-  };
+  // No modal success needed for create/edit
 
   const handleFilter = () => console.log('Filter clicked');
   const handleExport = () => console.log('Export to Excel clicked');
@@ -230,7 +243,7 @@ const KelolaAkunAsesor: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.assessor?.full_name || '-'}
+                          {user.assessor?.full_name || user.full_name || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {user.email}
@@ -273,13 +286,14 @@ const KelolaAkunAsesor: React.FC = () => {
         </main>
       </div>
 
-      {/* Assessor Modal */}
+
+      {/* Assessor Detail Modal (View only) */}
       <AssessorModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={handleModalSuccess}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onSuccess={() => {}}
         assessor={selectedAssessor}
-        mode={modalMode}
+        mode="show"
       />
 
       {/* Delete Confirmation Modal */}
