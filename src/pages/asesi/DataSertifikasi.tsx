@@ -118,6 +118,7 @@ export default function DataSertifikasi() {
 			setModalStep(2);
 		} else if (modalStep === 3) {
 			// setModalStep(null);
+			localStorage.removeItem("asesiId");
 			navigate(
 				paths.asesi.assessment.dataSertifikasi(
 					id_assessment ?? 0,
