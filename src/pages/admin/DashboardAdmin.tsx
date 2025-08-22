@@ -89,7 +89,7 @@ const Dashboard: React.FC = () => {
 
     const loadPendingVerifications = React.useCallback(async () => {
         try {
-            const res = await api.get('/assessments/verification/pending');
+            const res = await api.get('/assessments/apl-01/results/unapproved');
             if (res.data && res.data.success) {
                 const docs = res.data.data as PendingDoc[];
                 const mapped = docs.map((d) => ({
@@ -247,7 +247,7 @@ const Dashboard: React.FC = () => {
                                                 toast.show({ title: 'Gagal', description: 'Gagal menghapus jadwal', type: 'error' });
                                             }
                                         } else if (act === 'approve') {
-                                            const res = await api.post(`/assessments/verification/${id}/approve`);
+                                            const res = await api.post(`/approval/apl01`, { docId: id });
                                             if (res.data && res.data.success) {
                                                 await loadPendingVerifications();
                                                 toast.show({ title: 'Berhasil', description: 'Verifikasi disetujui', type: 'success' });
