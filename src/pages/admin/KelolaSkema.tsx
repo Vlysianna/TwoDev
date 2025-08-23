@@ -8,7 +8,7 @@ import {
   Trash2,
   AlertCircle
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import paths from '@/routes/paths';
@@ -44,6 +44,9 @@ const KelolaMUK: React.FC = () => {
   const [occupations, setOccupations] = useState<Occupation[]>([]);
   const [occupationModalOpen, setOccupationModalOpen] = useState(false);
   const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewingScheme, setViewingScheme] = useState<Scheme | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchSchemes();
@@ -52,7 +55,7 @@ const KelolaMUK: React.FC = () => {
 
   const fetchOccupations = async () => {
     try {
-      const response = await axiosInstance.get('/api/occupations');
+  const response = await axiosInstance.get('/occupations');
       if (response.data.success) {
         setOccupations(response.data.data);
       } else {
@@ -74,7 +77,7 @@ const KelolaMUK: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-  const response = await axiosInstance.get('/api/schemes');
+  const response = await axiosInstance.get('/schemes');
       
       if (response.data.success) {
         setSchemes(response.data.data);
@@ -89,8 +92,15 @@ const KelolaMUK: React.FC = () => {
     }
   };
 
-  const handleEdit = (id: number) => console.log('Edit user:', id);
-  const handleView = (id: number) => console.log('View user:', id);
+  const handleEdit = (id: number) => {
+    // navigate to tambahSkema page with id query param for editing
+    navigate(`${paths.admin.tambahSkema}?id=${id}`);
+  };
+  const handleView = (id: number) => {
+    const scheme = schemes.find(s => s.id === id) || null;
+    setViewingScheme(scheme);
+    setViewModalOpen(true);
+  };
   const handleDelete = (id: number) => {
     setDeletingId(id);
     setDeleteModalOpen(true);
@@ -100,7 +110,7 @@ const KelolaMUK: React.FC = () => {
     if (!deletingId) return;
     try {
       setDeleteLoading(true);
-  await axiosInstance.delete(`/api/schemes/${deletingId}`);
+  await axiosInstance.delete(`/schemes/${deletingId}`);
       // optimistic update
       setSchemes(prev => prev.filter(s => s.id !== deletingId));
       setFilteredSchemes(prev => prev.filter(s => s.id !== deletingId));
@@ -118,7 +128,7 @@ const KelolaMUK: React.FC = () => {
     setExportLoading(true);
     setError(null);
     try {
-  const response = await axiosInstance.get('/api/schemes/export/excel', {
+  const response = await axiosInstance.get('/schemes/export/excel', {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
