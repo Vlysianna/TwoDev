@@ -8,7 +8,7 @@ import {
   Trash2,
   AlertCircle
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import paths from '@/routes/paths';
@@ -44,9 +44,6 @@ const KelolaMUK: React.FC = () => {
   const [occupations, setOccupations] = useState<Occupation[]>([]);
   const [occupationModalOpen, setOccupationModalOpen] = useState(false);
   const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [viewingScheme, setViewingScheme] = useState<Scheme | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchSchemes();
@@ -92,15 +89,8 @@ const KelolaMUK: React.FC = () => {
     }
   };
 
-  const handleEdit = (id: number) => {
-    // navigate to tambahSkema page with id query param for editing
-    navigate(`${paths.admin.tambahSkema}?id=${id}`);
-  };
-  const handleView = (id: number) => {
-    const scheme = schemes.find(s => s.id === id) || null;
-    setViewingScheme(scheme);
-    setViewModalOpen(true);
-  };
+  const handleEdit = (id: number) => console.log('Edit user:', id);
+  const handleView = (id: number) => console.log('View user:', id);
   const handleDelete = (id: number) => {
     setDeletingId(id);
     setDeleteModalOpen(true);
