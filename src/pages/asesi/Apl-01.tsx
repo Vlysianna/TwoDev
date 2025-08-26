@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { FileText, AlertCircle, CheckCircle } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { Controller, useForm } from "react-hook-form";
+import { useAssessmentParams } from "@/components/IsApproveApl01";
 
 // Types
 interface AssesseeJobRequest {
@@ -36,7 +37,7 @@ interface AssesseeRequest {
 }
 
 export default function AplZeroOne() {
-	const { id_assessment, id_asesor } = useParams();
+	const { id_assessment, id_asesor } = useAssessmentParams();
 
 	const { user } = useAuth();
 	const navigate = useNavigate();

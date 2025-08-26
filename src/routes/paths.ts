@@ -71,7 +71,7 @@ const routes = {
 	},
 	asesi: {
 		root: "/asesi",
-		dashboard: "/asesi/dashboard",
+		dashboard: "/asesi",
 		assessment: {
 			root: "/asesi/assessment",
 			apl01: (id_assessment: string | number, id_asesor: string | number) =>
@@ -92,13 +92,17 @@ const routes = {
 				"/asesi/assessment/:id_assessment/:id_asesor/asesmen-mandiri",
 			asesmenMandiriDetail: (
 				id_assessment: string | number,
-				id_asesor: string | number
+				id_asesor: string | number,
+				id_unit: string | number
 			) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/asesmen-mandiri-detail`,
+				`/asesi/assessment/${id_assessment}/${id_asesor}/asesmen-mandiri/${id_unit}`,
 			asesmenMandiriDetailPattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/asesmen-mandiri-detail",
+				"/asesi/assessment/:id_assessment/:id_asesor/asesmen-mandiri/:id_unit",
+			frak03: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/fr.ak.03`,
+			frak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/fr.ak.03",
 		},
-		asesmenAktif: "/asesi/asesmen-aktif",
+		asesmenDiikuti: "/asesi/asesmen/diikuti",
 		umpanBalik: "/asesi/umpan-balik",
 		bandingAsesmen: "/asesi/banding-asesmen",
 		persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
