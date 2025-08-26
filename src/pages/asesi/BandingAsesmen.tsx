@@ -61,7 +61,7 @@ export default function BandingAsesmen() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="mx-auto">
-                <div className="bg-white rounded-lg shadow-sm mb-8">
+                <div className="bg-white rounded-lg shadow-sm mb-5">
                     <NavbarAsesi
                         title='Umpan balik dan catatan asesmen'
                         icon={
@@ -71,7 +71,7 @@ export default function BandingAsesmen() {
                         }
                     />
                 </div>
-                <div className="m-10">
+                <div className="m-5">
                     {/* MAIN CONTENT */}
                     <div className="bg-white rounded-lg shadow-sm p-4 mb-4 space-y-4">
                         {/* Baris 1 */}
@@ -105,7 +105,7 @@ export default function BandingAsesmen() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {/* Left Column - Questions */}
                         <div className="bg-white rounded-lg shadow-sm py-6 px-10">
                             <h3 className="font-medium text-gray-900 mb-6">
@@ -293,7 +293,7 @@ export default function BandingAsesmen() {
                     </div>
 
                     {/* Bottom Section */}
-                    <div className="mt-8 pt-6 border-t border-gray-200 bg-white rounded-lg shadow-sm p-5 space-y-6">
+                    <div className="mt-4 pt-6 border-t border-gray-200 bg-white rounded-lg shadow-sm p-5 space-y-4">
                         {/* Baris 1 */}
                         <p className="text-sm text-gray-700 font-medium">
                             Banding ini diajukan atas alasan sebagai berikut :

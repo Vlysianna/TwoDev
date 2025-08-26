@@ -277,7 +277,7 @@ export default function AsessementPilihanGanda() {
                         <div className="space-y-8">
                             {sampleQuestions.map((question) => (
                                 <div key={question.id} className="border-b border-gray-100 pb-6 last:border-b-0">
-                                    <h3 className="font-semibold text-gray-800 mb-4">
+                                    <h3 className="font-semibold text-gray-800">
                                         Soal {question.number}
                                     </h3>
                                     <p className="text-gray-700 mb-4">
