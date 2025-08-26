@@ -1,7 +1,7 @@
 import Navbar from '../../components/NavAdmin';
 import Sidebar from '../../components/SideAdmin';
 import { Eye, SquareCheck } from "lucide-react";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import api from '@/helper/axios';
 import { useToast } from '@/components/ui/useToast';
 
@@ -30,23 +30,24 @@ type PendingDoc = ResultDoc & { result?: ResultDetail };
 
 export default function VerifikasiPage() {
   const [items, setItems] = useState<PendingDoc[]>([]);
+  const [filter, setFilter] = useState<'pending' | 'approved'>('pending');
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<ResultDetail | null>(null);
   const toast = useToast();
 
-  const fetchPending = async () => {
+  const fetchPending = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get('/assessments/verification/pending');
-      if (res.data.success) setItems(res.data.data || []);
+  const res = await api.get(`/assessments/verification/${filter === 'pending' ? 'pending' : 'approved'}`);
+  if (res.data.success) setItems(res.data.data || []);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
 
-  useEffect(() => { fetchPending(); }, []);
+  useEffect(() => { void fetchPending(); }, [fetchPending]);
 
   const openDetail = async (resultId: number) => {
     try {
@@ -90,9 +91,15 @@ export default function VerifikasiPage() {
               <h1 className="text-2xl font-bold text-gray-800 mb-2">Verifikasi Approval</h1>
 
               <div className="flex justify-end">
-                <button onClick={fetchPending} className="flex items-center px-4 text-sm font-medium text-orange-600 border border-orange-500 rounded hover:bg-orange-100 transition mb-6">
-                  Refresh
-                </button>
+                <div className="flex items-center space-x-2 mb-6">
+                  <div className="flex rounded-md overflow-hidden border">
+                    <button onClick={() => setFilter('pending')} className={`px-3 py-1 text-sm ${filter === 'pending' ? 'bg-orange-500 text-white' : 'text-orange-600 bg-white'}`}>Pending</button>
+                    <button onClick={() => setFilter('approved')} className={`px-3 py-1 text-sm ${filter === 'approved' ? 'bg-orange-500 text-white' : 'text-orange-600 bg-white'}`}>Approved</button>
+                  </div>
+                  <button onClick={fetchPending} className="flex items-center px-4 text-sm font-medium text-orange-600 border border-orange-500 rounded hover:bg-orange-100 transition">
+                    Refresh
+                  </button>
+                </div>
               </div>
 
               <div className="overflow-x-auto bg-white shadow-md rounded-lg">
@@ -120,9 +127,13 @@ export default function VerifikasiPage() {
                             <button onClick={() => { const id = row.result_id || row.result?.id; if (id) openDetail(id); }} className="text-orange-500 hover:text-orange-700" title="Lihat">
                               <Eye size={18} />
                             </button>
-                            <button onClick={() => { const id = row.result_id || row.result?.id; if (id) approve(id); }} className="text-orange-500 hover:text-orange-700" title="Setujui">
-                              <SquareCheck size={18} />
-                            </button>
+                            {filter === 'pending' ? (
+                              <button onClick={() => { const id = row.result_id || row.result?.id; if (id) approve(id); }} className="text-orange-500 hover:text-orange-700" title="Setujui">
+                                <SquareCheck size={18} />
+                              </button>
+                            ) : (
+                              <span className="text-green-600 font-medium">Terverifikasi</span>
+                            )}
                           </td>
                         </tr>
                       ))

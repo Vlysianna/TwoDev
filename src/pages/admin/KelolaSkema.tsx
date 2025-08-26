@@ -52,7 +52,7 @@ const KelolaMUK: React.FC = () => {
 
   const fetchOccupations = async () => {
     try {
-      const response = await axiosInstance.get('/api/occupations');
+  const response = await axiosInstance.get('/occupations');
       if (response.data.success) {
         setOccupations(response.data.data);
       } else {
@@ -74,7 +74,7 @@ const KelolaMUK: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-  const response = await axiosInstance.get('/api/schemes');
+  const response = await axiosInstance.get('/schemes');
       
       if (response.data.success) {
         setSchemes(response.data.data);
@@ -100,7 +100,7 @@ const KelolaMUK: React.FC = () => {
     if (!deletingId) return;
     try {
       setDeleteLoading(true);
-  await axiosInstance.delete(`/api/schemes/${deletingId}`);
+  await axiosInstance.delete(`/schemes/${deletingId}`);
       // optimistic update
       setSchemes(prev => prev.filter(s => s.id !== deletingId));
       setFilteredSchemes(prev => prev.filter(s => s.id !== deletingId));
@@ -118,7 +118,7 @@ const KelolaMUK: React.FC = () => {
     setExportLoading(true);
     setError(null);
     try {
-  const response = await axiosInstance.get('/api/schemes/export/excel', {
+  const response = await axiosInstance.get('/schemes/export/excel', {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));

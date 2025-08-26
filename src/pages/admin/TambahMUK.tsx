@@ -19,6 +19,7 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import api from "@/helper/axios";
+import { useNavigate } from "react-router-dom";
 
 const defaultValues: SkemaType = {
 	jurusan: "",
@@ -35,6 +36,7 @@ const defaultValues: SkemaType = {
 };
 
 const TambahMUK: React.FC = () => {
+	const navigate = useNavigate();
 	const {
 		register,
 		handleSubmit,
@@ -49,6 +51,9 @@ const TambahMUK: React.FC = () => {
 	const [year, setYear] = useState(new Date().getFullYear());
 
 	const [openValue, setOpenValue] = useState<string | undefined>(undefined);
+	const [occupations, setOccupations] = useState<{ id: number; name: string; scheme?: { id: number; code: string; name: string } }[]>([]);
+	const [schemes, setSchemes] = useState<{ id: number; code: string; name: string }[]>([]);
+	const [submitting, setSubmitting] = useState(false);
 
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -63,6 +68,22 @@ const TambahMUK: React.FC = () => {
 		const nomorSKM = `SKM.${pilihSkema}.${pilihOkupasi}/${school}/${year}`;
 		setValue("nomorSKM", nomorSKM);
 	}, [pilihSkema, pilihOkupasi, school, year, setValue]);
+
+	useEffect(() => {
+		// fetch occupations and schemes for selects
+		api.get('/occupations')
+			.then(res => setOccupations(res.data.data || []))
+			.catch(() => setOccupations([]));
+
+		api.get('/schemes')
+			.then(res => setSchemes(res.data.data || []))
+			.catch(() => setSchemes([]));
+	}, []);
+
+	// filter occupations by selected scheme (pilihSkema holds scheme id)
+	const filteredOccupations = pilihSkema
+		? occupations.filter((o) => o.scheme && Number(pilihSkema) === Number(o.scheme.id))
+		: occupations;
 
 	useEffect(() => {
 		console.log(openValue);
@@ -100,17 +121,36 @@ const TambahMUK: React.FC = () => {
 	async function handleUploadAK() {}
 	async function handleUploadSoal() {}
 
-	const onSubmit = (data: SkemaType) => {
-		// di sini kirim ke API
-		console.log("Submit data:", data);
+	const onSubmit = async (data: SkemaType) => {
+		// prepare payload
+		const occupationId = Number(data.pilihOkupasi) || undefined;
+		if (!occupationId) {
+			alert('Pilih Okupasi terlebih dahulu');
+			return;
+		}
 
-		const skema = convertSkemaToPostPayload(data, Number(data.pilihOkupasi));
+		const skema = convertSkemaToPostPayload(data, occupationId);
 
-		console.log(skema);
-
-		api
-			.post("/assessment/apl2/create-assessment", skema)
-			.then((res) => console.log(res.data));
+		try {
+			setSubmitting(true);
+			// POST to /assessments/create (app mounts assessmentRoutes on /api/assessments)
+			const res = await api.post('/assessments/create', skema);
+			if (res?.data?.success) {
+				alert('APL berhasil dibuat');
+				// navigate to assessments list or refresh
+				navigate('/admin/assessments');
+			} else {
+				alert('Gagal membuat APL');
+			}
+		} catch (err: unknown) {
+			console.error(err);
+			// try to read axios response message if present
+			// @ts-expect-error - err may come from axios with response structure
+			const message = err?.response?.data?.message || 'Terjadi kesalahan';
+			alert(message);
+		} finally {
+			setSubmitting(false);
+		}
 	};
 
 	return (
@@ -163,7 +203,7 @@ const TambahMUK: React.FC = () => {
 
 						{/* Body */}
 						<div className="space-y-6">
-							<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+										<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 								{/* Skema & Okupasi */}
 								<div>
 									<h2 className="text-lg font-semibold text-gray-900 mb-2">
@@ -177,20 +217,23 @@ const TambahMUK: React.FC = () => {
 											</label>
 
 											<div className="relative w-full">
-												<select
-													{...register("pilihSkema", {
-														required: "Pilih Skema wajib diisi",
-													})}
-													className={`w-full px-3 py-2 border rounded-md appearance-none ${
-														errors.pilihSkema
-															? "border-red-500"
-															: "border-gray-300"
-													}`}
-												>
-													<option value="">Pilih Skema</option>
-													<option value="skema1">Skema 1</option>
-													<option value="skema2">Skema 2</option>
-												</select>
+														<select
+															{...register("pilihSkema", {
+																required: "Pilih Skema wajib diisi",
+															})}
+															className={`w-full px-3 py-2 border rounded-md appearance-none ${
+																errors.pilihSkema
+																	? "border-red-500"
+																	: "border-gray-300"
+															}`}
+														>
+															<option value="">Pilih Skema</option>
+															{schemes.map((s) => (
+																<option key={s.id} value={s.id}>
+																	{s.code} - {s.name}
+																</option>
+															))}
+														</select>
 												<ChevronDown
 													size={18}
 													className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
@@ -219,8 +262,11 @@ const TambahMUK: React.FC = () => {
 													}`}
 												>
 													<option value="">Pilih Okupasi</option>
-													<option value="1">Okupasi 1</option>
-													<option value="2">Okupasi 2</option>
+													{filteredOccupations.map((o) => (
+														<option key={o.id} value={o.id}>
+															{o.name}
+														</option>
+													))}
 												</select>
 												<ChevronDown
 													size={18}
@@ -355,9 +401,10 @@ const TambahMUK: React.FC = () => {
 								<div>
 									<button
 										type="submit"
-										className="px-10 bg-[#E77D35] text-white py-3 rounded-md hover:opacity-95 transition-colors"
+										disabled={submitting}
+										className="px-10 bg-[#E77D35] text-white py-3 rounded-md hover:opacity-95 transition-colors disabled:opacity-60"
 									>
-										Tambah APL
+										{submitting ? 'Menyimpan...' : 'Tambah APL'}
 									</button>
 								</div>
 							</form>
@@ -460,12 +507,13 @@ const TambahMUK: React.FC = () => {
 							</div>
 
 							{/* Submit */}
-							<div>
+								<div>
 								<button
 									type="submit"
-									className="w-full bg-[#E77D35] text-white py-3 rounded-md font-semibold hover:opacity-95 transition-colors"
+									disabled={submitting}
+									className="w-full bg-[#E77D35] text-white py-3 rounded-md font-semibold hover:opacity-95 transition-colors disabled:opacity-60"
 								>
-									Simpan MUK
+									{submitting ? 'Menyimpan...' : 'Simpan MUK'}
 								</button>
 							</div>
 						</div>
@@ -496,8 +544,8 @@ export function parseHTMLToSchema(html: string): {
 	if (tables.length === 0)
 		throw new Error("Tidak ada tabel ditemukan dalam dokumen.");
 
-	let jurusan = "";
-	let judulSkema = "";
+	const jurusan = "";
+	const judulSkema = "";
 	let year = "";
 	let school = "";
 	const units: Unit[] = [];
@@ -505,7 +553,6 @@ export function parseHTMLToSchema(html: string): {
 	let currentUnit: Unit | null = null;
 	let currentElemen: Element | null = null;
 	let elemenCounter = 1;
-	let itemCounter = 1;
 
 	for (const table of tables) {
 		const rows = Array.from(table.querySelectorAll("tr"));
@@ -567,7 +614,6 @@ export function parseHTMLToSchema(html: string): {
 					units[units.length - 1].elemen.push(currentElemen);
 				}
 				elemenCounter++;
-				itemCounter = 1;
 				continue;
 			}
 		}
