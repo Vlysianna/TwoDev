@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function FRIA02() {
+export default function Ia02() {
     const { user } = useAuth();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -102,7 +102,7 @@ export default function FRIA02() {
                     <NavbarAsesi
                         title='Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02'
                         icon={
-                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
+                            <Link to={'#'} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -231,7 +231,7 @@ export default function FRIA02() {
                                         )}
 
                                         <Link
-                                            to={paths.asesi.asesmenMandiriDetail}
+                                            to={paths.asesi.assessment.apl02DetailPattern}
                                             className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
                                         >
                                             Lihat detail

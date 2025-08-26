@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import api from '@/helper/axios';
 import NavbarAsesor from '@/components/NavAsesor';
 
-export default function CekAsesmenMandiri() {
+export default function CekApl02() {
     const { user } = useAuth();
     const [selectedAssessor, setSelectedAssessor] = useState('');
     const [selectedDate, setSelectedDate] = useState('');
@@ -135,7 +135,7 @@ export default function CekAsesmenMandiri() {
                     <NavbarAsesor
                         title='Asesmen Mandiri'
                         icon={
-                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.assessment.dataSertifikasiPattern} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -216,7 +216,7 @@ export default function CekAsesmenMandiri() {
                                                         )}
 
                                                         <Link
-                                                            to={paths.asesor.cekAsesmenMandiriDetail}
+                                                            to={paths.asesor.cekApl02Detail}
                                                             className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
                                                         >
                                                             Lihat detail

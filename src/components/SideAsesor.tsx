@@ -32,14 +32,22 @@ const SidebarAsesor: React.FC = () => {
             name: "List Asesment Aktif",
             icon: ClipboardList,
             section: "main",
-            path: "/dashboard-asesi",
+            path: "/asesor/dashboard-asesor",
         },
         {
             name: "Asesment Aktif",
             icon: ListCheck,
             section: "main",
-            path: "/asesmen-aktif-asesi",
+            path: "/asesor/dashboard-asesmen-mandiri",
         },
+        {
+            name: "Penilaian",
+            icon: ListCheck,
+            section: "main",
+            path: "/asesor/dashboard-penilaian",
+        },
+
+
     ];
 
     const handleItemClick = (): void => {
