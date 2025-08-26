@@ -179,13 +179,13 @@ const router = createBrowserRouter([
 								path: paths.asesi.assessment.asesmenMandiriPattern,
 								element: <AssassmentMandiri />,
 							},
+							{
+								path: paths.asesi.assessment.asesmenMandiriDetailPattern,
+								element: <AsassmentMandiriDetail />,
+							},
 						],
 					},
-					{ path: paths.asesi.asesmenAktif, element: <AsessmentAktif /> },
-					{
-						path: paths.asesi.assessment.asesmenMandiriDetailPattern,
-						element: <AsassmentMandiriDetail />,
-					},
+					{ path: paths.asesi.asesmenDiikuti, element: <AsessmentAktif /> },
 					{ path: paths.asesi.umpanBalik, element: <UmpanBalik /> },
 					{ path: paths.asesi.bandingAsesmen, element: <BandingAsesmen /> },
 					{
