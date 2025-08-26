@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import api from '@/helper/axios';
 import NavbarAsesor from '@/components/NavAsesor';
 
-export default function PersetujuanAsesmenKerahasiaanAsesor() {
+export default function CekAk01() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [selectedAsesi, setSelectedAsesi] = useState('');
@@ -98,7 +98,7 @@ export default function PersetujuanAsesmenKerahasiaanAsesor() {
                     <NavbarAsesor
                         title='Persetujuan Asesmen dan Kerahasiaan'
                         icon={
-                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.assessment.dataSertifikasiPattern} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }

@@ -19,52 +19,44 @@ import VerifikasiPage from "@/pages/admin/verifikasi";
 import RegisterPage from "@/pages/admin/register";
 import EditAsesi from "@/pages/admin/EditAsessi";
 import KelolaOkupasi from "@/pages/admin/okupasi/KelolaOkupasi";
-import AplZeroTwo from "@/pages/asesi/Apl-02";
 import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
 import DashboardAdmin from "@/pages/admin/DashboardAdmin";
 import AsessmentAktif from "@/pages/asesi/AsesmentAktif";
-import AssassmentMandiri from "@/pages/asesi/AsassmentMandiri";
-import AsassmentMandiriDetail from "@/pages/asesi/AssasmentMandiriDetail";
-import PersetujuanAsesmenKerahasiaan from "@/pages/asesi/PersetujuanAsesmenKerahasiaan";
-import AsessementPilihanGanda from "@/pages/asesi/AsessmentPilihanGanda";
 import Test from "@/pages/LandingPage/Test";
 import TambahSkema from "@/pages/admin/TambahMUK";
 import KelolaJurusan from "@/pages/admin/kelolaJur";
 import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
-import AplZeroOneAsesor from "@/pages/asesor/Apl-01-Assesor";
-import DataSertifikasiAsesor from "@/pages/asesor/DataSertifikasiAsesor";
-import DashboardAsesor from "@/pages/asesor/dashboard";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
-import TemplateAsesor from "@/pages/asesor/Template";
-import Template2 from "@/pages/asesor/Template2";
-import FIIADetail from "@/pages/asesor/FI.IA.01-Detail";
-import FIIA01Page from "@/pages/asesor/FI-IA-01";
-import HasilAsesmen from "@/pages/asesor/Hasil";
-import Dashboard from "@/pages/asesor/dashboard";
-import AssessmentRecord from "@/pages/asesor/AssessmentRecord";
+import Ia01Detail from "@/pages/asesor/Ia-01-Detail";
+import Ia01 from "@/pages/asesor/Ia-01";
+import HasilAsesmen from "@/pages/asesor/HasilAsesmen";
+import Ak02 from "@/pages/asesor/Ak-02";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
-import AssessmentReport from "@/pages/asesor/AssesmentReport";
-import Hasil from "@/pages/asesor/Hasil";
 import Contact from "@/pages/LandingPage/Contact";
-import UmpanBalik from "@/pages/asesi/UmpanBalik";
-import BandingAsesmen from "@/pages/asesi/BandingAsesmen";
-import FRIA02 from "@/pages/asesi/FR-IA-02";
-import FRAK05 from "@/pages/asesor/FRAK05";
-import AsesmenMandiri from "@/pages/asesor/AsesmenMandiri";
-import PersetujuanKerahasiaan from "@/pages/asesor/PersetujuanKerahasiaan";
+import Ak05 from "@/pages/asesor/Ak-05";
 import LembarJawaban from "@/pages/asesor/LembarJawaban";
-import CekAsesmenMandiri from "@/pages/asesor/CekAsesmenMandiri";
-import CekAssessmentMandiriDetail from "@/pages/asesor/CekAsesmenMandiriDetail";
-import PersetujuanAsesmenKerahasiaanAsesor from "@/pages/asesor/PersetujuanAsesmenKerahasiaanAsesor";
+import CekApl02 from "@/pages/asesor/Apl-02";
+import CekAk01 from "@/pages/asesor/Ak-01";
 import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
-import FRIA03 from "@/pages/asesor/FR-IA-03";
+import Ia03 from "@/pages/asesor/Ia-03";
 import IsApproveApl01 from "@/components/IsApproveApl01";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
+import Apl02 from "@/pages/asesi/Apl-02";
+import Apl02Detail from "@/pages/asesi/Apl-02-Detail";
+import Ak04 from "@/pages/asesi/Ak-04";
+import Ia05 from "@/pages/asesi/Ia-05";
+import Ia02 from "@/pages/asesi/Ia-02";
+import Ak01 from "@/pages/asesi/Ak-01";
+import Ak03 from "@/pages/asesi/Ak-03";
+import CekApl02Detail from "@/pages/asesor/Apl-02-Detail";
+import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
+import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
+import DashboardAsesmenMandiri from "@/pages/asesor/DashboardAsesmenMandiri";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 
@@ -172,32 +164,31 @@ const router = createBrowserRouter([
 								path: paths.asesi.assessment.apl01Pattern,
 								element: <AplZeroOne />,
 							},
-							{ path: paths.asesi.assessment.apl02, element: <AplZeroTwo /> },
 							{
 								path: paths.asesi.assessment.dataSertifikasiPattern,
 								element: <DataSertifikasi />,
 							},
 							{
-								path: paths.asesi.assessment.asesmenMandiriPattern,
-								element: <AssassmentMandiri />,
+								path: paths.asesi.assessment.apl02Pattern,
+								element: <Apl02 />,
 							},
 							{
-								path: paths.asesi.assessment.asesmenMandiriDetailPattern,
-								element: <AsassmentMandiriDetail />,
+								path: paths.asesi.assessment.apl02DetailPattern,
+								element: <Apl02Detail />,
 							},
 						],
 					},
 					{ path: paths.asesi.asesmenDiikuti, element: <AsessmentAktif /> },
-					{ path: paths.asesi.umpanBalik, element: <UmpanBalik /> },
-					{ path: paths.asesi.bandingAsesmen, element: <BandingAsesmen /> },
 					{
-						path: paths.asesi.persetujuanAsesmenKerahasiaan,
-						element: <PersetujuanAsesmenKerahasiaan />,
+						path: paths.asesi.ak01,
+						element: <Ak01 />,
 					},
-					{ path: paths.asesi.fria02, element: <FRIA02 /> },
+					{ path: paths.asesi.ak03, element: <Ak03 /> },
+					{ path: paths.asesi.ak04, element: <Ak04 /> },
+					{ path: paths.asesi.ia02, element: <Ia02 /> },
 					{
-						path: paths.asesi.asesmenPilihanGanda,
-						element: <AsessementPilihanGanda />,
+						path: paths.asesi.ia05,
+						element: <Ia05 />,
 					},
 					{ path: paths.asesi.dataAsesi, element: <DataAssesi /> },
 				],
@@ -213,49 +204,31 @@ const router = createBrowserRouter([
 				),
 				children: [
 					{ index: true, element: <DashboardAsesor /> },
-					{ path: paths.asesor.template, element: <TemplateAsesor /> },
-					{ path: paths.asesor.template2, element: <Template2 /> },
 					{ path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
+					{ path: paths.asesor.dashboardAsesmenMandiri, element: <DashboardAsesmenMandiri /> },
+					{ path: paths.asesor.dashboardPenilaian, element: <DashboardPenilaian /> },
 					{ path: paths.asesor.biodata, element: <BiodataAsesor /> },
-					{
-						path: paths.asesor.cekAsesmenMandiri,
-						element: <CekAsesmenMandiri />,
-					},
-					{
-						path: paths.asesor.cekAsesmenMandiriDetail,
-						element: <CekAssessmentMandiriDetail />,
-					},
-					{
-						path: paths.asesor.persetujuanAsesmenKerahasiaanAsesor,
-						element: <PersetujuanAsesmenKerahasiaanAsesor />,
-					},
 					{ path: paths.asesor.faktaIntegritas, element: <FaktaIntegritas /> },
-					{ path: paths.asesor.fria03, element: <FRIA03 /> },
-					{ path: paths.asesor.fiia, element: <FIIA01Page /> },
-					{ path: paths.asesor.fiiadetail, element: <FIIADetail /> },
-					{ path: paths.asesor.frak02, element: <AssessmentRecord /> },
-					{ path: paths.asesor.apl01, element: <AplZeroOneAsesor /> },
 					{
-						path: paths.asesor.dataSertifikasi,
-						element: <DataSertifikasiAsesor />,
+						path: paths.asesor.cekApl02,
+						element: <CekApl02 />,
 					},
+					{
+						path: paths.asesor.cekApl02Detail,
+						element: <CekApl02Detail />,
+					},
+					{ path: paths.asesor.ia01, element: <Ia01 /> },
+					{ path: paths.asesor.ia01Detail, element: <Ia01Detail /> },
+					{ path: paths.asesor.ia03, element: <Ia03 /> },
+					{
+						path: paths.asesor.cekAk01,
+						element: <CekAk01 />,
+					},
+					{ path: paths.asesor.ak02, element: <Ak02 /> },
+					{ path: paths.asesor.ak05, element: <Ak05 /> },
 					{ path: paths.asesor.hasilAsesmen, element: <HasilAsesmen /> },
-					{ path: paths.asesor.dashboard, element: <Dashboard /> },
-					{ path: paths.asesor.hasil, element: <Hasil /> },
-					{ path: paths.asesor.frak05, element: <FRAK05 /> },
-					{ path: paths.asesor.asesmenMandiri, element: <AsesmenMandiri /> },
-					{
-						path: paths.asesor.persetujuanKerahasiaan,
-						element: <PersetujuanKerahasiaan />,
-					},
 					{ path: paths.asesor.lembarJawaban, element: <LembarJawaban /> },
-					{
-						path: paths.asesor.assessmentRecord,
-						element: <AssessmentRecord />,
-					},
-					{ path: paths.asesor.assesmentReport, element: <AssessmentReport /> },
 					{ path: paths.asesor.dataAsesor, element: <DataAsesor /> },
-																
 				],
 			},
 		],

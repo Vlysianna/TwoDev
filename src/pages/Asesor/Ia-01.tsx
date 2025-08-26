@@ -2,7 +2,7 @@ import { ChevronDown, Clipboard, ArrowLeft } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import NavbarAsesor from '@/components/NavAsesor';
 
-const FIIA01Page = () => {
+const Ia01 = () => {
   const [selectedKPekerjaan, setSelectedKPekerjaan] = useState('All unit (8)');
   const [recommendation, setRecommendation] = useState<'kompeten' | 'belum' | null>(null);
   
@@ -513,4 +513,4 @@ const FIIA01Page = () => {
   );
 };
 
-export default FIIA01Page;
+export default Ia01;

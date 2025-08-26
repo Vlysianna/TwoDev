@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 import NavbarAsesor from '@/components/NavAsesor';
 
-export default function CekAssessmentMandiriDetail() {
+export default function CekApl02Detail() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterKompeten, setFilterKompeten] = useState<'all' | 'kompeten' | 'belum'>("kompeten"); // Ini aku defaultin jadi kompeten smua y
     const [globalProof, setGlobalProof] = useState("dokumen1"); // Ini aku default in dokumen 1 smua y
@@ -96,7 +96,7 @@ export default function CekAssessmentMandiriDetail() {
                     <NavbarAsesor
                         title='Detail'
                         icon={
-                            <Link to={paths.asesor.cekAsesmenMandiri} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesor.cekApl02} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }

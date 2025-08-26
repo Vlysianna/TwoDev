@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import SidebarAsesor from '@/components/SideAsesor';
 import NavAsesor from '@/components/NavAsesor';
 
-export default function TemplateAsesor() {
+export default function DashboardPenilaian() {
     // Contoh data siswa
     const siswaData = [
         { id: 1, nama: "Adelia Tri Ramadhani" },
@@ -41,13 +41,16 @@ export default function TemplateAsesor() {
                     {/* Tab Buttons */}
                     <div className="flex items-center space-x-2 mb-6">
                         <button className="px-4 py-2 rounded-md bg-[#E77D35] text-white font-medium">
-                            Asesmen Mandiri
+                            FR.IA.01
                         </button>
                         <button className="px-4 py-2 rounded-md text-gray-600 hover:bg-gray-100">
-                            Persetujuan & Kerahasiaan
+                            FR.IA.03
                         </button>
                         <button className="px-4 py-2 rounded-md text-gray-600 hover:bg-gray-100">
-                            Lembar Jawaban
+                            FR.AK.02
+                        </button>
+                        <button className="px-4 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                            FR.AK.05
                         </button>
                     </div>
 
@@ -89,7 +92,7 @@ export default function TemplateAsesor() {
                                                 to={`/apl-02/${siswa.id}`}
                                                 className="text-orange-500 underline text-xs"
                                             >
-                                                Cek APL 02 &rarr;
+                                                Cek IA 01 &rarr;
                                             </Link>
                                         </td>
                                     </tr>

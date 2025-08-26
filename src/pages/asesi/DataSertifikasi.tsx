@@ -137,7 +137,7 @@ export default function DataSertifikasi() {
 			// setModalStep(null);
 			localStorage.removeItem("asesiId");
 			navigate(
-				paths.asesi.assessment.asesmenMandiri(
+				paths.asesi.assessment.apl02(
 					id_assessment ?? 0,
 					id_asesor ?? 0
 				)

@@ -57,7 +57,7 @@ const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: strin
   );
 };
 
-export default function FIIADetail() {
+export default function Ia01Detail() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterKompeten, setFilterKompeten] = useState<'all' | 'kompeten' | 'belum'>('all');
   const [pencapaian, setPencapaian] = useState<Record<number, string>>({});

@@ -4,7 +4,7 @@ import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 
-export default function BandingAsesmen() {
+export default function Ak04() {
     const [selectedCertificates, setSelectedCertificates] = useState([
         'J.620100.004.02',
         'J.620100.009.01',

@@ -58,17 +58,13 @@ const evidenceOptions: EvidenceOptionType[] = [
 	"Raport semester 1 s.d. 5",
 ];
 
-export default function AssessmentMandiriDetail() {
+export default function Apl02Detail() {
 	const { id_unit } = useParams();
 	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
 	const navigate = useNavigate();
 	const { user } = useAuth();
 
-	useEffect(() => {
-		fetchElements();
-	}, [user]);
-
-	const { handleSubmit, control } = useForm<FormValues>();
+	const { handleSubmit, control, setValue, getValues } = useForm<FormValues>();
 
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filterKompeten, setFilterKompeten] = useState("all");
@@ -82,9 +78,13 @@ export default function AssessmentMandiriDetail() {
 	const [elements, setElements] = useState<AssessmentElement[]>([]);
 
 	useEffect(() => {
+		fetchElements();
+	}, [user]);
+
+	useEffect(() => {
 		if (elements.length < 0) {
 			navigate(
-				routes.asesi.assessment.asesmenMandiri(id_assessment, id_asesor)
+				routes.asesi.assessment.apl02(id_assessment, id_asesor)
 			);
 		}
 	}, [elements]);
@@ -103,17 +103,22 @@ export default function AssessmentMandiriDetail() {
 		}));
 	};
 
+
 	const handleFilterChange = (value: string) => {
 		setFilterKompeten(value);
 
 		if (value === "kompeten" || value === "belum") {
+			const isKompeten = value === "kompeten";
 			const newPencapaian: { [key: number]: string } = {};
 			elements.forEach((item) => {
 				newPencapaian[item.id] = value;
+				// update react-hook-form value
+				setValue(`elements.${item.id}.is_competent`, isKompeten);
 			});
 			setPencapaian(newPencapaian);
 		}
 	};
+
 
 	const handleGlobalProofChange = (value: string) => {
 		setGlobalProof(value);
@@ -121,8 +126,13 @@ export default function AssessmentMandiriDetail() {
 		const newProof: { [key: number]: string } = {};
 		elements.forEach((item) => {
 			newProof[item.id] = value;
+			// update react-hook-form value
+			if (value) {
+				setValue(`elements.${item.id}.evidence`, [value]);
+			} else {
+				setValue(`elements.${item.id}.evidence`, []);
+			}
 		});
-
 		setSelectedProof(newProof);
 	};
 
@@ -179,7 +189,7 @@ export default function AssessmentMandiriDetail() {
 							title="Detail"
 							icon={
 								<Link
-									to={paths.asesi.assessment.asesmenMandiri(
+									to={paths.asesi.assessment.apl02(
 										id_assessment,
 										id_asesor
 									)}
@@ -224,9 +234,8 @@ export default function AssessmentMandiriDetail() {
 									].map((opt) => (
 										<label
 											key={opt.value}
-											className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition ${
-												filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
-											}`}
+											className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition ${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
+												}`}
 										>
 											<input
 												type="radio"
@@ -237,11 +246,10 @@ export default function AssessmentMandiriDetail() {
 												className="hidden"
 											/>
 											<span
-												className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-													filterKompeten === opt.value
+												className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${filterKompeten === opt.value
 														? "bg-[#E77D35] border-[#E77D35]"
 														: "border-[#E77D35]"
-												}`}
+													}`}
 											>
 												{filterKompeten === opt.value && (
 													<svg
@@ -346,9 +354,8 @@ export default function AssessmentMandiriDetail() {
 																<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
 																	{/* Kompeten */}
 																	<label
-																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${
-																			selected === true ? "bg-[#E77D3533]" : ""
-																		}`}
+																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${selected === true ? "bg-[#E77D3533]" : ""
+																			}`}
 																	>
 																		<input
 																			type="radio"
@@ -358,11 +365,10 @@ export default function AssessmentMandiriDetail() {
 																			className="hidden"
 																		/>
 																		<span
-																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-																				selected === true
+																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${selected === true
 																					? "bg-[#E77D35] border-[#E77D35]"
 																					: "border-[#E77D35]"
-																			}`}
+																				}`}
 																		>
 																			{selected === true && (
 																				<svg
@@ -389,9 +395,8 @@ export default function AssessmentMandiriDetail() {
 
 																	{/* Belum Kompeten */}
 																	<label
-																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${
-																			selected === false ? "bg-[#E77D3533]" : ""
-																		}`}
+																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${selected === false ? "bg-[#E77D3533]" : ""
+																			}`}
 																	>
 																		<input
 																			type="radio"
@@ -401,11 +406,10 @@ export default function AssessmentMandiriDetail() {
 																			className="hidden"
 																		/>
 																		<span
-																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-																				selected === false
+																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${selected === false
 																					? "bg-[#E77D35] border-[#E77D35]"
 																					: "border-[#E77D35]"
-																			}`}
+																				}`}
 																		>
 																			{selected === false && (
 																				<svg

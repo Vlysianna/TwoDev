@@ -2,7 +2,7 @@ import { useState } from "react";
 import NavbarAsesor from "@/components/NavAsesor";
 import { FileText } from "lucide-react";
 
-export default function AssessmentRecord() {
+export default function Ak02() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({});
   const [assesseeName, setAssesseeName] = useState<string>('');
   const [assessorName, setAssessorName] = useState<string>('');

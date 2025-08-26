@@ -95,7 +95,7 @@ export default function IsApproveApl01({
 				if (filterApproveData.approved) {
 					if (
 						location.pathname ===
-						routes.asesi.assessment.asesmenMandiriDetail(
+						routes.asesi.assessment.apl02_detail(
 							id_assessment,
 							id_asesor,
 							id_unit!
@@ -103,7 +103,7 @@ export default function IsApproveApl01({
 					) {
 						return null;
 					}
-					return routes.asesi.assessment.asesmenMandiri(
+					return routes.asesi.assessment.apl02(
 						id_assessment,
 						id_asesor
 					);
