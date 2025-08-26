@@ -4,6 +4,7 @@ import api from '@/helper/axios';
 interface User {
   id: number;
   email: string;
+  full_name: string;
   role_id: number;
 }
 

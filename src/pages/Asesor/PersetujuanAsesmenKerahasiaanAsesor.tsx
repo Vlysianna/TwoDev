@@ -1,0 +1,293 @@
+import React, { useState, useEffect } from 'react';
+import { FileCheck2, ChevronLeft, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import paths from '@/routes/paths';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/helper/axios';
+import NavbarAsesor from '@/components/NavAsesor';
+
+export default function PersetujuanAsesmenKerahasiaanAsesor() {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    const [selectedAsesi, setSelectedAsesi] = useState('');
+    const [selectedAsesor, setSelectedAsesor] = useState('');
+    const [selectedTUK, setSelectedTUK] = useState('');
+    const [tanggal, setTanggal] = useState('');
+    const [waktu, setWaktu] = useState('');
+    const [assessors, setAssessors] = useState<any[]>([]);
+    const [tukOptions, setTukOptions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetchAssessors();
+        fetchTUKOptions();
+    }, []);
+
+    const fetchAssessors = async () => {
+        try {
+            const response = await api.get('/assessor');
+            if (response.data.success) {
+                setAssessors(response.data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch assessors:', error);
+        }
+    };
+
+    const fetchTUKOptions = async () => {
+        try {
+            // Assuming you have a TUK endpoint
+            const tukMockData = [
+                { id: 1, name: 'TUK LSP Media' },
+                { id: 2, name: 'TUK Tempat Kerja' },
+                { id: 3, name: 'TUK Mandiri' }
+            ];
+            setTukOptions(tukMockData);
+        } catch (error) {
+            console.error('Failed to fetch TUK options:', error);
+        }
+    };
+
+    type CheckedItemKey =
+        | 'verifikasiPortofolio'
+        | 'reviewProduk'
+        | 'observasiLangsung'
+        | 'kegiatanTerstruktur'
+        | 'pertanyaanLisan'
+        | 'pertanyaanTertulis'
+        | 'pertanyaanWawancara'
+        | 'lainnya';
+
+    const [checkedItems, setCheckedItems] = useState<Record<CheckedItemKey, boolean>>({
+        verifikasiPortofolio: false,
+        reviewProduk: false,
+        observasiLangsung: false,
+        kegiatanTerstruktur: false,
+        pertanyaanLisan: false,
+        pertanyaanTertulis: false,
+        pertanyaanWawancara: false,
+        lainnya: false
+    });
+
+    const checkboxOptions: { key: CheckedItemKey; label: string }[] = [
+        { key: 'verifikasiPortofolio', label: 'Verifikasi Portofolio' },
+        { key: 'reviewProduk', label: 'Review Produk' },
+        { key: 'observasiLangsung', label: 'Observasi Langsung' },
+        { key: 'kegiatanTerstruktur', label: 'Kegiatan Terstruktur' },
+        { key: 'pertanyaanLisan', label: 'Pertanyaan Lisan' },
+        { key: 'pertanyaanTertulis', label: 'Pertanyaan Tertulis' },
+        { key: 'pertanyaanWawancara', label: 'Pertanyaan Wawancara' },
+        { key: 'lainnya', label: 'Lainnya' }
+    ];
+
+
+    const handleCheckboxChange = (key: CheckedItemKey) => {
+        setCheckedItems(prev => ({
+            ...prev,
+            [key]: !prev[key]
+        }));
+    };
+
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="mx-auto">
+                <div className="bg-white rounded-lg shadow-sm mb-8">
+                    <NavbarAsesor
+                        title='Persetujuan Asesmen dan Kerahasiaan'
+                        icon={
+                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
+                                <ChevronLeft size={20} />
+                            </Link>
+                        }
+                    />
+                </div>
+                <div className="px-6 pb-7">
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                        {/* Header Section */}
+                        <div className="mb-4 border-b border-gray-200 pb-4">
+                            <div className="flex items-center gap-2">
+                                <FileCheck2 className="text-black-500" size={20} />
+                                <h2 className="text-lg font-semibold text-gray-800">
+                                    Persetujuan Asesmen dan Kerahasiaan
+                                </h2>
+                            </div>
+                            <p className="text-gray-600 text-sm mt-2">
+                                Persetujuan Asesmen ini untuk menjamin bahwa Asesi telah diberi arahan secara rinci tentang perencanaan dan proses asesmen
+                            </p>
+                        </div>
+
+                        <div className="pt-6">
+                            {/* Top grid 2 columns */}
+                            {/* Top grid responsive */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+                                {/* Left column */}
+                                <div className="lg:col-span-7">
+                                    <h2 className="font-semibold text-gray-800 mb-3">
+                                        Skema Sertifikasi (KKNI/Okupasi/Klaster)
+                                    </h2>
+                                    <div className="text-sm mb-7 flex flex-wrap items-center gap-2">
+                                        <span className="text-gray-700">Pemrogram Junior (Junior Coder)</span>
+                                        <span className="bg-orange-100 text-[#E77D35] text-xs rounded px-2 py-1 select-none">
+                                            SKM.RPL.PJ/LSPSMK24/2023
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                                        <select
+                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
+                                            value={selectedAsesi}
+                                            onChange={(e) => setSelectedAsesi(e.target.value)}
+                                        >
+                                            <option value="">Pilih Asesi</option>
+                                            <option value="asesi1">Asesi 1</option>
+                                            <option value="asesi2">Asesi 2</option>
+                                        </select>
+                                        <select
+                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
+                                            value={selectedAsesor}
+                                            onChange={(e) => setSelectedAsesor(e.target.value)}
+                                        >
+                                            <option value="">Pilih Asesor</option>
+                                            <option value="asesor1">Asesor 1</option>
+                                            <option value="asesor2">Asesor 2</option>
+                                        </select>
+                                    </div>
+
+                                    <label className="block mb-2 text-sm font-medium text-gray-700">
+                                        Pelaksanaan asesmen disepakati pada:
+                                    </label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <input
+                                            type="date"
+                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
+                                            value={tanggal}
+                                            onChange={(e) => setTanggal(e.target.value)}
+                                        />
+                                        <input
+                                            type="time"
+                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
+                                            value={waktu}
+                                            onChange={(e) => setWaktu(e.target.value)}
+                                        />
+                                        <select
+                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
+                                            value={selectedTUK}
+                                            onChange={(e) => setSelectedTUK(e.target.value)}
+                                        >
+                                            <option value="">TUK</option>
+                                            <option value="tuk1">TUK 1</option>
+                                            <option value="tuk2">TUK 2</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Right column */}
+                                <div className="lg:col-span-5">
+                                    <h2 className="font-semibold text-gray-800 mb-3">Bukti yang akan dikumpulkan</h2>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm mt-4">
+                                        {checkboxOptions.map(option => {
+                                            const checked = checkedItems[option.key];
+                                            return (
+                                                <label
+                                                    key={option.key}
+                                                    className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
+                                    ${checked ? "bg-orange-100 " : ""}`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        className="hidden"
+                                                        checked={checked}
+                                                        onChange={() => handleCheckboxChange(option.key)}
+                                                    />
+                                                    <span
+                                                        className={`w-4 h-4 flex items-center justify-center rounded-xs border-2
+                                    ${checked ? "bg-orange-500 border-orange-500" : "border-orange-400"}`}
+                                                    >
+                                                        {checked && (
+                                                            <svg
+                                                                className="w-3 h-3 text-white"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth="2"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        )}
+                                                    </span>
+                                                    <span className={checked ? "text-gray-900" : "text-gray-500"}>
+                                                        {option.label}
+                                                    </span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Declaration Sections */}
+                            <div className="mt-8 border-t border-gray-200 pt-6">
+                                <div className="flex flex-col lg:flex-row justify-between gap-6">
+                                    {/* Kiri: isi teks */}
+                                    <div className="flex-1 space-y-6">
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Bahwa saya telah mendapatkan penjelasan terkait hak dan prosedur banding asesmen dari asesor.
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 mb-2">Asesor :</h3>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Menyatakan tidak akan membuka hasil pekerjaan yang saya peroleh karena penugasan saya sebagai Asesor dalam pekerjaan Asesmen kepada siapapun atau organisasi apapun selain kepada pihak yang berwenang sehubungan dengan kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                Saya setuju mengikuti asesmen dengan pemahaman bahwa informasi yang dikumpulkan hanya digunakan untuk pengembangan profesional dan hanya dapat diakses oleh orang tertentu saja.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Kanan: QR Code */}
+                                    <div className="flex flex-col items-center lg:items-end p-5 space-y-4">
+                                        <div className="border rounded-md p-10 shadow-sm flex items-center w-60 h-60">
+                                            {/* <img
+                                                src="/img/cthbarkod.svg"
+                                                alt="QR Code"
+                                                className="w-40 h-40"
+                                            /> */}
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-[#E77D35] hover:bg-orange-600 text-white py-2 rounded transition-colors cursor-pointer"
+                                        >
+                                            Generate
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div className="mt-10 border-t border-gray-200 pt-6 flex justify-center sm:justify-end">
+                                <button
+                                    type="submit"
+                                    className="w-full sm:w-auto bg-[#E77D35] hover:bg-orange-600 text-white py-2 px-30 rounded transition-colors cursor-pointer"
+                                >
+                                    Lanjut
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

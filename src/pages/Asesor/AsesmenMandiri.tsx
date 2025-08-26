@@ -1,0 +1,104 @@
+import { Search, LayoutDashboard } from "lucide-react";
+import { Link } from 'react-router-dom';
+import SidebarAsesor from '@/components/SideAsesor';
+import NavAsesor from '@/components/NavAsesor';
+
+export default function TemplateAsesor() {
+    // Contoh data siswa
+    const siswaData = [
+        { id: 1, nama: "Adelia Tri Ramadhani" },
+        { id: 2, nama: "Ahmad Akmal Fauzan" },
+        { id: 3, nama: "Ahmad Zaqi" },
+        { id: 4, nama: "Aisha Sekar Arina Putri" },
+        { id: 5, nama: "Alfina Komarul Asih" },
+        { id: 6, nama: "Amelia" },
+        { id: 7, nama: "Ananda Keizha Oktavian" },
+        { id: 8, nama: "Andhika Dani Natawidjaja" },
+        { id: 9, nama: "Ari Reivansyah" },
+        { id: 10, nama: "Darin Fairuz Romli" },
+        { id: 11, nama: "Eru Nur Al Kafini" },
+        { id: 12, nama: "Fajri Darmawan" },
+        { id: 13, nama: "Iftikhar Azhar Chaudhry" },
+    ];
+
+    return (
+        <div className="flex min-h-screen bg-gray-50">
+            {/* Sidebar */}
+            <div className="inset-y-0 left-0 lg:w-64 md:w-0 bg-white shadow-md">
+                <SidebarAsesor />
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1">
+                {/* Navbar */}
+                <div className="sticky top-0 z-10 bg-white shadow-sm">
+                    <NavAsesor title="Overview" icon={<LayoutDashboard size={25} />}/>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+
+                    {/* Tab Buttons */}
+                    <div className="flex items-center space-x-2 mb-6">
+                        <button className="px-4 py-2 rounded-md bg-[#E77D35] text-white font-medium">
+                            Asesmen Mandiri
+                        </button>
+                        <button className="px-4 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                            Persetujuan & Kerahasiaan
+                        </button>
+                        <button className="px-4 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                            Lembar Jawaban
+                        </button>
+                    </div>
+
+                    {/* Search + Generate */}
+                    <div className="flex items-center justify-between mb-6">
+                        {/* Search Bar */}
+                        <div className="relative flex-1 max-w-5xl mr-6">
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-md"
+                            />
+                            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        </div>
+
+                        {/* Generate Button */}
+                        <button className="px-6 py-2 bg-[#E77D35] text-white rounded-md hover:bg-orange-6000">
+                            Generate All
+                        </button>
+                    </div>
+
+                    {/* Tabel */}
+                    <div className="overflow-x-auto bg-white rounded-md shadow">
+                        <table className="min-w-full border border-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-4 py-4 border-b text-left text-sm font-medium">No</th>
+                                    <th className="px-4 py-4 border-b text-left text-sm font-medium">Nama Siswa</th>
+                                    <th className="px-4 py-4 border-b text-center text-sm font-medium">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {siswaData.map((siswa, index) => (
+                                    <tr key={siswa.id} className="hover:bg-gray-50">
+                                        <td className="px-4 py-4 border-b text-sm text-gray-700">{index + 1}</td>
+                                        <td className="px-4 py-4 border-b text-sm text-gray-900">{siswa.nama}</td>
+                                        <td className="px-4 py-4 border-b text-center">
+                                            <Link
+                                                to={`/apl-02/${siswa.id}`}
+                                                className="text-orange-500 underline text-xs"
+                                            >
+                                                Cek APL 02 &rarr;
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

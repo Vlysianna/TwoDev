@@ -5,7 +5,7 @@ import {
     LogOut,
     Menu,
     X,
-    ListCheck,
+    ListChecks,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -38,10 +38,10 @@ const SidebarAsesi: React.FC = () => {
             path: paths.asesi.dashboard,
         },
         {
-            name: "Asesmen Aktif",
-            icon: ListCheck,
+            name: "Asesmen Diikuti",
+            icon: ListChecks,
             section: "main",
-            path: paths.asesi.asesmenAktif,
+            path: paths.asesi.asesmenDiikuti,
         },
     ];
 

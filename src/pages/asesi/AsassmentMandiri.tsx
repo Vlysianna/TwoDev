@@ -1,308 +1,263 @@
-import React, { useState, useEffect } from 'react';
-import { Upload, X, Eye, Monitor, ChevronLeft, ChevronRight, AlertCircle, CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import NavbarAsesi from '@/components/NavbarAsesi';
-import paths from '@/routes/paths';
-import { useAuth } from '@/contexts/AuthContext';
-import api from '@/helper/axios';
+import { useState, useEffect } from "react";
+import { Monitor, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import NavbarAsesi from "@/components/NavbarAsesi";
+import paths from "@/routes/paths";
+import { useAuth } from "@/contexts/AuthContext";
+import api from "@/helper/axios";
+import { useAssessmentParams } from "@/components/IsApproveApl01";
+import { QRCodeCanvas } from "qrcode.react";
+import { getAssesseeUrl } from "@/lib/hashids";
 
 export default function AssassmentMandiri() {
-    const { user } = useAuth();
-    const [selectedAssessor, setSelectedAssessor] = useState('');
-    const [selectedDate, setSelectedDate] = useState('');
-    const [recommendation, setRecommendation] = useState('can-continue');
-    const [showModal, setShowModal] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [assessments, setAssessments] = useState<any[]>([]);
-    const [unitCompetencies, setUnitCompetencies] = useState<any[]>([]);
-    const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
-    const [availableAssessors, setAvailableAssessors] = useState<any[]>([]);
+	const { id_assessment, id_asesor, id_result, id_asesi } =
+		useAssessmentParams();
 
-    useEffect(() => {
-        fetchAvailableAssessments();
-        fetchAvailableAssessors();
-    }, [user]);
+	const { user } = useAuth();
+	const [loading, setLoading] = useState(false); // Changed to false for demo
+	const [error, setError] = useState<string | null>(null);
+	const [assessments, setAssessments] = useState<any>();
+	const [unitCompetencies, setUnitCompetencies] = useState<any[]>([]);
+	const [completedUnits, setCompletedUnits] = useState<number>(0);
 
-    const fetchAvailableAssessments = async () => {
-        try {
-            setLoading(true);
-            const response = await api.get('/assessment/apl2');
-            
-            if (response.data.success && response.data.data.length > 0) {
-                setAssessments(response.data.data);
-                // Auto-select first assessment
-                const firstAssessment = response.data.data[0];
-                setSelectedAssessment(firstAssessment);
-                fetchUnitCompetencies(firstAssessment.id);
-            }
-        } catch (error: any) {
-            setError('Gagal memuat data asesmen');
-        } finally {
-            setLoading(false);
-        }
-    };
+	const [valueQr, setValueQr] = useState("");
 
-    const fetchUnitCompetencies = async (assessmentId: number) => {
-        try {
-            const response = await api.get(`/assessment/apl2/unit-competencies/${assessmentId}`);
-            
-            if (response.data.success) {
-                setUnitCompetencies(response.data.data);
-            }
-        } catch (error: any) {
-            console.log('Error fetching unit competencies:', error);
-        }
-    };
+	useEffect(() => {
+		fetchAssessment();
+		fetchUnitCompetencies();
+	}, [user]);
 
-    const fetchAvailableAssessors = async () => {
-        try {
-            const response = await api.get('/assessor');
-            
-            if (response.data.success) {
-                setAvailableAssessors(response.data.data);
-            }
-        } catch (error: any) {
-            console.log('Error fetching assessors:', error);
-        }
-    };
+	useEffect(() => {
+		if (unitCompetencies) {
+			const completed = unitCompetencies.filter((unit: any) => unit.finished);
+			setCompletedUnits(completed.length);
+		}
+	}, [unitCompetencies]);
 
-    const competencyUnits = unitCompetencies.map((unit, index) => ({
-        id: unit.id,
-        title: unit.title,
-        code: unit.unit_code,
-        status: index === 0 ? 'Finished' : 'pending' // Mock status for now
-    }));
+	const fetchAssessment = async () => {
+		try {
+			setLoading(true);
+			const response = await api.get(`/assessments/${id_assessment}`);
+			if (response.data.success) {
+				setAssessments(response.data.data);
+				console.log(response.data.data);
+			}
+		} catch (error: any) {
+			setError("Gagal memuat data asesmen");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="mx-auto">
-                <div className="bg-white rounded-lg shadow-sm mb-8">
-                    <NavbarAsesi
-                        title='Banding Asesmen'
-                        icon={
-                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
-                                <ChevronLeft size={20} />
-                            </Link>
-                        }
-                    />
-                </div>
+	const fetchUnitCompetencies = async () => {
+		try {
+			const response = await api.get(`/assessments/apl-02/units/${id_result}`);
 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-6 pb-7 items-stretch">
-                    {/* Error notification */}
-                    {error && (
-                        <div className="lg:col-span-5 mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
-                            <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-                            <span className="text-red-800">{error}</span>
-                        </div>
-                    )}
+			if (response.data.success) {
+				setUnitCompetencies(response.data.data);
+			}
+		} catch (error: any) {
+			console.log("Error fetching unit competencies:", error);
+		}
+	};
 
-                    {/* Loading state */}
-                    {loading && (
-                        <div className="lg:col-span-5 flex justify-center items-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-                        </div>
-                    )}
+	const handleGenerateQRCode = async (id: number) => {
+		try {
+			const response = await api.put(
+				`/assessments/apl-02/result/assessee/${id_result}/approve`
+			);
 
-                    {!loading && (
-                        <>
-                            {/* Left Section - Certification Scheme */}
-                            <div className="lg:col-span-3 h-full">
-                                <div className="bg-white rounded-lg p-6">
-                                    <div className="mb-6">
-                                        <div className="flex justify-between items-start flex-wrap gap-5">
-                                            {/* Kiri */}
-                                            <div>
-                                                <h2 className="text-lg font-semibold text-gray-800 mb-1">Skema Sertifikasi</h2>
-                                                <p className="text-sm text-gray-600">Okupasi</p>
-                                            </div>
+			console.log(response.data);
+			if (response.data.success) {
+				setValueQr(getAssesseeUrl(id));
+			}
+		} catch (error) {
+			console.log("Error fetching unit competencies:", error);
+		}
+	};
 
-                                            {/* Kanan */}
-                                            <div className="lg:text-right sm:text-start">
-                                                <h3 className="font-medium text-gray-800 mb-1">
-                                                    {selectedAssessment?.occupation?.name || 'Pemrogram Junior ( Junior Coder )'}
-                                                </h3>
-                                                <span className="bg-orange-50 text-orange-600 text-sm px-3 py-1 rounded-sm">
-                                                    {selectedAssessment?.code || 'SKMLRPLPJR/LSPSMK24/2023'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+	return (
+		<div className="min-h-screen bg-gray-50">
+			<div className="mx-auto">
+				<div className="bg-white rounded-lg shadow-sm mb-8">
+					<NavbarAsesi
+						title="Asesmen Mandiri"
+						icon={
+							<Link
+								to={paths.asesi.dashboard}
+								className="text-gray-500 hover:text-gray-600"
+							>
+								<ChevronLeft size={20} />
+							</Link>
+						}
+					/>
+				</div>
 
-                                    {/* Competency Units Grid */}
-                                    <div className="max-h-[500px] overflow-y-auto">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {competencyUnits.map((unit, index) => (
-                                        <div
-                                            key={unit.id}
-                                            className="bg-gray-50 rounded-lg p-4 border"
-                                        >
-                                            <div className="flex items-start mb-3">
-                                                <div className="bg-orange-100 rounded p-2 mr-3">
-                                                    <Monitor size={20} className="text-orange-500" />
-                                                </div>
-                                                <h4 className="font-medium text-gray-800 flex-1">
-                                                    Unit kompetensi {unit.id}
-                                                </h4>
-                                            </div>
+				<div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-6 pb-7 items-stretch">
+					{/* Error notification */}
+					{error && (
+						<div className="lg:col-span-5 mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+							<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+							<span className="text-red-800">{error}</span>
+						</div>
+					)}
 
-                                            <h5 className="font-medium text-gray-800 mb-2 text-sm leading-tight">
-                                                {unit.title}
-                                            </h5>
+					{/* Loading state */}
+					{loading && (
+						<div className="lg:col-span-5 flex justify-center items-center py-12">
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+						</div>
+					)}
 
-                                            <p className="text-xs text-gray-500 mb-4">{unit.code}</p>
+					{!loading && (
+						<>
+							{/* Left Section - Certification Scheme */}
+							<div className="lg:col-span-3 h-full">
+								<div className="bg-white rounded-lg p-6 h-full">
+									<div className="mb-6">
+										<div className="flex justify-between items-start flex-wrap gap-5">
+											{/* Left */}
+											<div>
+												<h2 className="text-lg font-semibold text-gray-800 mb-1">
+													Skema Sertifikasi
+												</h2>
+												<p className="text-sm text-gray-600">Okupasi</p>
+											</div>
 
-                                            <div className="flex items-center justify-between">
-                                                {unit.status === "Finished" ? (
-                                                    <span className="px-3 py-1 bg-orange-100 text-orange-500 text-xs rounded-sm">
-                                                        Finished
-                                                    </span>
-                                                ) : (
-                                                    <div></div>
-                                                )}
+											{/* Right */}
+											<div className="lg:text-right sm:text-start">
+												<h3 className="font-medium text-gray-800 mb-2">
+													{assessments?.occupation?.name ||
+														"Pemrogram Junior ( Junior Coder )"}
+												</h3>
+												<span className="bg-[#E77D3533] text-[#E77D35] text-sm px-3 py-1 rounded-md font-sm">
+													{assessments?.code || "SKMLRPLPJR/LSPSMK24/2023"}
+												</span>
+											</div>
+										</div>
+									</div>
 
-                                                <Link to={paths.asesi.asesmenMandiriDetail} className="text-orange-500 hover:text-orange-600 text-sm flex items-center hover:underline hover:cursor-pointer">
-                                                    Lihat detail
-                                                    <ChevronRight size={14} className="ml-1" />
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+									{/* Competency Units Grid */}
+									<div className="max-h-[500px] overflow-y-auto">
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+											{unitCompetencies.map((unit) => (
+												<div
+													key={unit.id}
+													className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
+												>
+													<div className="flex items-center mb-3">
+														<div className="rounded-lg mr-3 flex-shrink-0">
+															<Monitor size={16} className="text-[#E77D35]" />
+														</div>
+														<h4 className="font-medium text-[#E77D35] text-sm">
+															Unit kompetensi {unit.id}
+														</h4>
+													</div>
 
-                        </div>
-                    </div>
+													<h5 className="font-medium text-gray-800 mb-2 text-md leading-tight">
+														{unit.title}
+													</h5>
 
-                    {/* Right Section - Assessment Review */}
-                    <div className="lg:col-span-2 h-full">
-                        <div className="bg-white rounded-lg p-6">
-                            {/* Progress Bar */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-medium text-gray-700">Completion</span>
-                                    <span className="text-sm font-medium text-orange-500">35%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-orange-500 h-2 rounded-full" style={{ width: '35%' }}></div>
-                                </div>
-                            </div>
+													<p className="text-xs text-gray-500 mb-4">
+														{unit.unit_code}
+													</p>
 
-                            <h3 className="text-lg font-semibold text-gray-800 mb-6">Ditinjau oleh Asesor</h3>
+													<div className="flex items-center justify-between">
+														{unit.finished ? (
+															<span className="px-3 py-1 bg-[#E77D3533] text-[#E77D35] text-xs rounded">
+																Finished
+															</span>
+														) : (
+															<div></div>
+														)}
 
-                            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6'>
-                                {/* Assessor Selection */}
-                                <div className="mb-4 col-span-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Pilih Asesor
-                                    </label>
-                                    <select
-                                        className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={selectedAssessor}
-                                        onChange={(e) => setSelectedAssessor(e.target.value)}
-                                    >
-                                        <option value="">Pilih asesor...</option>
-                                        {availableAssessors.map((assessor) => (
-                                            <option key={assessor.id} value={assessor.id}>
-                                                {assessor.full_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+														<Link
+															to={paths.asesi.assessment.asesmenMandiriDetail(
+																id_assessment,
+																id_asesor,
+																unit.id
+															)}
+															className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
+														>
+															Lihat detail
+															<ChevronRight size={14} className="ml-1" />
+														</Link>
+													</div>
+												</div>
+											))}
+										</div>
+									</div>
+								</div>
+							</div>
 
-                                {/* Date Selection */}
-                                <div className="mb-6 col-span-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Pilih tanggal
-                                    </label>
-                                    <input
-                                        type="date"
-                                        className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                    />
-                                </div>
-                            </div>
+							{/* Right Section - Assessment Review */}
+							<div className="lg:col-span-2 h-full">
+								<div className="bg-white rounded-lg p-6 h-full">
+									{/* Progress Bar */}
+									<div className="mb-6">
+										<div className="flex justify-between items-center mb-2">
+											<span className="text-sm font-medium text-gray-700">
+												Completion
+											</span>
+											<span className="text-sm font-medium text-[#E77D35]">
+												{100 * (unitCompetencies.length / completedUnits)}%
+											</span>
+										</div>
+										<div className="w-full bg-gray-200 rounded-full h-3">
+											<div
+												className="bg-[#E77D35] h-3 rounded-full transition-all duration-300"
+												style={{
+													width:
+														completedUnits > 0
+															? `${
+																	100 *
+																	(unitCompetencies.length / completedUnits)
+															  }%`
+															: "0%",
+												}}
+											></div>
+										</div>
+									</div>
 
-                            {/* Recommendation */}
-                            <div className="mb-6">
-                                <h4 className="text-sm font-medium text-gray-700 mb-3">Rekomendasi</h4>
-                                <div className="space-y-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
-                                    <div className="col-span-1">
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="recommendation"
-                                                value="can-continue"
-                                                checked={recommendation === 'can-continue'}
-                                                onChange={(e) => setRecommendation(e.target.value)}
-                                                className="mr-3 text-orange-500 focus:ring-orange-500"
-                                            />
-                                            <span className="text-sm text-gray-700">Asesmen dapat dilanjutkan</span>
-                                        </label>
-                                    </div>
-                                    <div className="col-span-1">
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="recommendation"
-                                                value="need-improvement"
-                                                checked={recommendation === 'need-improvement'}
-                                                onChange={(e) => setRecommendation(e.target.value)}
-                                                className="mr-3 text-orange-500 focus:ring-orange-500"
-                                            />
-                                            <span className="text-sm text-gray-700">Perlu perbaikan</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+									{/* QR Code Section */}
+									<div className="mb-6 flex justify-center">
+										<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
+											{valueQr && (
+												<QRCodeCanvas
+													value={valueQr}
+													size={256}
+													className="w-40 h-40 object-contain"
+												>
+													{valueQr}
+												</QRCodeCanvas>
+											)}
+											<button
+												onClick={(_) => handleGenerateQRCode(Number(id_asesi))}
+												className="block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+											>
+												Generate QR Code
+											</button>
+										</div>
+									</div>
 
-                            {/* QR Scan Button */}
-                            <div className="w-full">
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="w-full block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
-                                >
-                                    QR Scan
-                                </button>
-                            </div>
-
-                            {/* Modal */}
-                            {showModal && (
-                                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                                    <div className="bg-white rounded-lg p-6 max-w-sm w-full relative text-center">
-                                        {/* Tombol close */}
-                                        <button
-                                            onClick={() => setShowModal(false)}
-                                            className="absolute top-3 right-3 text-gray-500 hover:text-black hover:cursor-pointer"
-                                        >
-                                            <X size={20} />
-                                        </button>
-
-                                        <h2 className="text-lg font-semibold mb-2">Tanda tangan Asesor</h2>
-                                        <p className="text-sm text-gray-600 mb-4">
-                                            Silakan scan QR Code yang tersedia untuk melakukan tanda tangan
-                                            dan melanjutkan ke tahap berikutnya.
-                                        </p>
-
-                                        {/* Gambar QR */}
-
-                                        <div className="flex justify-center items-center p-10">
-                                            <img
-                                                src="/img/cthbarkod.svg" // ganti dengan path QR code kamu
-                                                alt="QR Code"
-                                                className="w-[200px] h-[200px]"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                        </>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+									{/* Submit Button */}
+									<div className="w-full">
+										<Link
+											to={paths.asesi.assessment.frak03(
+												id_assessment,
+												id_asesor
+											)} // arahkan ke route yang kamu mau
+											className={`w-full block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`}
+										>
+											Lanjut
+										</Link>
+									</div>
+								</div>
+							</div>
+						</>
+					)}
+				</div>
+			</div>
+		</div>
+	);
 }

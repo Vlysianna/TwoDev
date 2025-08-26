@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Search,
-    Filter,
-    Download,
-    Edit3,
-    Eye,
-    Trash2,
-    Grid3X3,
-    FileText,
-    Users,
-    UserCheck,
-    AlertCircle
-} from 'lucide-react';
+import { Filter, Edit3, Eye, Trash2, AlertCircle } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import JadwalViewModal from '@/components/JadwalViewModal';
+import JadwalEditModal from '@/components/JadwalEditModal';
 import paths from '@/routes/paths';
 import axiosInstance from '@/helper/axios';
 
@@ -29,17 +20,38 @@ interface Occupation {
 
 interface Schedule {
   id: number;
-  start_date: string;
-  end_date: string;
-  occupation: Occupation;
+  start_date?: string | null;
+  end_date?: string | null;
+  assessment: {
+    id: number;
+    occupation: Occupation;
+  };
 }
 
+type AssessmentRaw = {
+  id: number;
+  start_date?: string;
+  end_date?: string;
+  assessment: {
+    id: number;
+    occupation: Occupation;
+  };
+};
+
 const KelolaJadwal: React.FC = () => {
-    const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery] = useState<string>('');
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedJadwal, setSelectedJadwal] = useState<Schedule | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
       fetchSchedules();
@@ -47,8 +59,8 @@ const KelolaJadwal: React.FC = () => {
 
     useEffect(() => {
       const filtered = schedules.filter(schedule =>
-        schedule.occupation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        schedule.occupation.scheme.name.toLowerCase().includes(searchQuery.toLowerCase())
+        schedule.assessment.occupation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        schedule.assessment.occupation.scheme.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredSchedules(filtered);
     }, [schedules, searchQuery]);
@@ -57,26 +69,121 @@ const KelolaJadwal: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axiosInstance.get('/schedule');
+        const response = await axiosInstance.get('/schedules');
         
         if (response.data.success) {
-          setSchedules(response.data.data);
+          // map backend response to local Schedule[] shape
+          const items = response.data.data as AssessmentRaw[];
+          setSchedules(items.map((s) => ({
+            id: s.id,
+            start_date: s.start_date,
+            end_date: s.end_date,
+            assessment: s.assessment,
+          })));
         } else {
           setError('Gagal memuat data jadwal');
         }
-      } catch (error: any) {
-        console.error('Error fetching schedules:', error);
-        setError(error.response?.data?.message || 'Gagal memuat data jadwal');
+  } catch (error: unknown) {
+  console.error('Error fetching schedules:', error);
+  setError('Gagal memuat data jadwal');
       } finally {
         setLoading(false);
       }
     };
    
-     const handleEdit = (id: number) => console.log('Edit user:', id);
-     const handleView = (id: number) => console.log('View user:', id);
-     const handleDelete = (id: number) => console.log('Delete user:', id);
+    const handleEdit = (id: number) => {
+      const jadwal = schedules.find(s => s.id === id) || null;
+      setSelectedJadwal(jadwal);
+      setShowEditModal(true);
+    };
+
+    const handleView = (id: number) => {
+      const jadwal = schedules.find(s => s.id === id) || null;
+      setSelectedJadwal(jadwal);
+      setShowViewModal(true);
+    };
+    const handleEditSave = async (data: { start_date: string; end_date: string }) => {
+      if (!selectedJadwal) return;
+      try {
+        setEditLoading(true);
+        setError(null);
+        setSuccess(null);
+        const res = await axiosInstance.put(`/schedules/${selectedJadwal.id}`, {
+          start_date: data.start_date,
+          end_date: data.end_date
+        });
+        if (res.data?.success) {
+          setSuccess('Jadwal berhasil diupdate');
+          await fetchSchedules();
+          setShowEditModal(false);
+          setSelectedJadwal(null);
+        } else {
+          setError(res.data?.message || 'Gagal update jadwal');
+        }
+      } catch (err) {
+        setError('Gagal update jadwal');
+      } finally {
+        setEditLoading(false);
+        setTimeout(() => setSuccess(null), 3000);
+      }
+    };
+
+    const handleDelete = async () => {
+      if (!deleteId) return;
+      try {
+        setLoading(true);
+        setError(null);
+        setSuccess(null);
+        const res = await axiosInstance.delete(`/schedules/${deleteId}`);
+        if (res.data?.success) {
+          setSuccess('Jadwal berhasil dihapus');
+          await fetchSchedules();
+        } else {
+          setError(res.data?.message || 'Gagal menghapus jadwal');
+        }
+      } catch (err) {
+        console.error('Error deleting schedule:', err);
+        setError('Gagal menghapus jadwal');
+      } finally {
+        setLoading(false);
+        setShowDeleteModal(false);
+        setDeleteId(null);
+        setTimeout(() => setSuccess(null), 3000);
+      }
+    };
+
      const handleFilter = () => console.log('Filter clicked');
-     const handleExport = () => console.log('Export to Excel clicked');
+
+     const handleExport = () => {
+       // export filteredSchedules to CSV (Excel-friendly)
+       if (!filteredSchedules || filteredSchedules.length === 0) {
+         setError('Tidak ada data untuk diekspor');
+         setTimeout(() => setError(null), 2500);
+         return;
+       }
+
+       const headers = ['Skema', 'Nama Okupasi', 'Tanggal Mulai', 'Tanggal Selesai'];
+       const rows = filteredSchedules.map(s => [
+         s.assessment?.occupation?.scheme?.name ?? '',
+         s.assessment?.occupation?.name ?? '',
+         s.start_date ? new Date(s.start_date).toLocaleDateString('id-ID') : '',
+         s.end_date ? new Date(s.end_date).toLocaleDateString('id-ID') : ''
+       ]);
+
+       const csvContent = [headers, ...rows].map(e => e.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+       const bom = '\uFEFF'; // UTF-8 BOM for Excel
+       const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+       const url = URL.createObjectURL(blob);
+       const a = document.createElement('a');
+       a.href = url;
+       a.download = `jadwal-asesmen-${new Date().toISOString().slice(0,10)}.csv`;
+       document.body.appendChild(a);
+       a.click();
+       a.remove();
+       URL.revokeObjectURL(url);
+       setSuccess('Ekspor selesai. File akan diunduh.');
+       setTimeout(() => setSuccess(null), 3000);
+     };
 
      if (loading) {
        return (
@@ -108,6 +215,12 @@ const KelolaJadwal: React.FC = () => {
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
                     <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
                     <span className="text-red-800">{error}</span>
+                  </div>
+                )}
+                {success && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
+                    <svg className="w-5 h-5 text-green-600 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <span className="text-green-800">{success}</span>
                   </div>
                 )}
 
@@ -196,16 +309,16 @@ const KelolaJadwal: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {schedule.occupation.scheme.name}
+                          {schedule.assessment.occupation.scheme.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {schedule.occupation.name}
+                          {schedule.assessment.occupation.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(schedule.start_date).toLocaleDateString('id-ID')}
+                          {schedule.start_date ? new Date(schedule.start_date).toLocaleDateString('id-ID') : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(schedule.end_date).toLocaleDateString('id-ID')}
+                          {schedule.end_date ? new Date(schedule.end_date).toLocaleDateString('id-ID') : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
@@ -223,13 +336,39 @@ const KelolaJadwal: React.FC = () => {
                             >
                               <Eye size={16} />
                             </button>
+      {/* Modal View Jadwal */}
+      <JadwalViewModal
+        isOpen={showViewModal}
+        onClose={() => { setShowViewModal(false); setSelectedJadwal(null); }}
+        jadwal={selectedJadwal as any}
+      />
+      {/* Modal Edit Jadwal */}
+      <JadwalEditModal
+        isOpen={showEditModal}
+        onClose={() => { setShowEditModal(false); setSelectedJadwal(null); }}
+        jadwal={selectedJadwal as any}
+        onSave={handleEditSave}
+        loading={editLoading}
+      />
                             <button
-                              onClick={() => handleDelete(schedule.id)}
+                              onClick={() => {
+                                setDeleteId(schedule.id);
+                                setShowDeleteModal(true);
+                              }}
                               className="p-2 text-orange-500 hover:bg-red-50 rounded-md transition-colors"
                               title="Delete"
                             >
                               <Trash2 size={16} />
                             </button>
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => { setShowDeleteModal(false); setDeleteId(null); }}
+        onConfirm={handleDelete}
+        loading={loading}
+        title="Hapus Jadwal?"
+        message="Apakah Anda yakin ingin menghapus jadwal ini? Tindakan ini tidak dapat dibatalkan."
+      />
                           </div>
                         </td>
                       </tr>

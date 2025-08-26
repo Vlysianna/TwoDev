@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Monitor, ChevronLeft, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavbarAsesor from '@/components/NavAsesor';
-import paths from '@/routes/paths';
 
 interface Criteria {
   id: string;
@@ -121,7 +120,7 @@ export default function FIIADetail() {
         <NavbarAsesor
           title="Detail"
           icon={
-            <Link to={paths.asesi.asesmenMandiri} className="text-gray-500 hover:text-gray-600">
+            <Link to="/asesmen-mandiri" className="text-gray-500 hover:text-gray-600">
               <ChevronLeft size={20} />
             </Link>
           }
@@ -151,27 +150,79 @@ export default function FIIADetail() {
             />
           </div>
 
-          {/* Filter */}
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2">
+          {/* Filter Kompeten */}
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">            
+            
+            <label
+              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
+                ${filterKompeten === 'kompeten' ? "bg-[#E77D3533]" : ""}`}
+            >
               <input
                 type="radio"
                 name="filter"
                 value="kompeten"
                 checked={filterKompeten === 'kompeten'}
                 onChange={() => handleFilterChange('kompeten')}
+                className="hidden"
               />
-              <span className="text-sm">Ceklis Semua Ya</span>
+              <span
+                className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                  ${filterKompeten === 'kompeten' ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+              >
+                {filterKompeten === 'kompeten' && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="w-3 h-3"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+              </span>
+              <span className={filterKompeten === 'kompeten' ? "text-gray-900" : "text-gray-500"}>
+                Ceklis Semua Ya
+              </span>
             </label>
-            <label className="flex items-center gap-2">
+
+            <label
+              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
+                ${filterKompeten === 'belum' ? "bg-[#E77D3533]" : ""}`}
+            >
               <input
                 type="radio"
                 name="filter"
                 value="belum"
                 checked={filterKompeten === 'belum'}
                 onChange={() => handleFilterChange('belum')}
+                className="hidden"
               />
-              <span className="text-sm">Ceklis Semua Tidak</span>
+              <span
+                className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                  ${filterKompeten === 'belum' ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+              >
+                {filterKompeten === 'belum' && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="w-3 h-3"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+              </span>
+              <span className={filterKompeten === 'belum' ? "text-gray-900" : "text-gray-500"}>
+                Ceklis Semua Tidak
+              </span>
             </label>
           </div>
         </div>
@@ -216,27 +267,99 @@ export default function FIIADetail() {
                         </td>
                       )}
                       {idx === 0 && (
-                        <td rowSpan={item.criteria.length} className="px-4 py-3 text-center">
-                          <div className="flex justify-center gap-3">
-                            <label className="flex items-center gap-1 text-sm">
+                        <td
+                          className="px-2 sm:px-4 py-2 sm:py-3"
+                          rowSpan={item.criteria.length}
+                        >
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+                            {/* Kompeten */}
+                            <label
+                              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+                                ${pencapaian[item.id] === "kompeten" ? "bg-[#E77D3533]" : ""}`}
+                            >
                               <input
                                 type="radio"
                                 name={`pencapaian-${item.id}`}
                                 value="kompeten"
-                                checked={pencapaian[item.id] === 'kompeten'}
-                                onChange={(e) => handlePencapaianChange(item.id, e.target.value)}
+                                checked={pencapaian[item.id] === "kompeten"}
+                                onChange={(e) =>
+                                  handlePencapaianChange(item.id, e.target.value)
+                                }
+                                className="hidden"
                               />
-                              Ya
+                              <span
+                                className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                  ${pencapaian[item.id] === "kompeten"
+                                    ? "bg-[#E77D35] border-[#E77D35]"
+                                    : "border-[#E77D35]"
+                                  }`}
+                              >
+                                {pencapaian[item.id] === "kompeten" && (
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span
+                                className={
+                                  pencapaian[item.id] === "kompeten"
+                                    ? "text-gray-900"
+                                    : "text-gray-500"
+                                }
+                              >
+                                Ya
+                              </span>
                             </label>
-                            <label className="flex items-center gap-1 text-sm">
+
+                            {/* Belum Kompeten */}
+                            <label
+                              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+                                ${pencapaian[item.id] === "belum" ? "bg-[#E77D3533]" : ""}`}
+                            >
                               <input
                                 type="radio"
                                 name={`pencapaian-${item.id}`}
                                 value="belum"
-                                checked={pencapaian[item.id] === 'belum'}
-                                onChange={(e) => handlePencapaianChange(item.id, e.target.value)}
+                                checked={pencapaian[item.id] === "belum"}
+                                onChange={(e) =>
+                                  handlePencapaianChange(item.id, e.target.value)
+                                }
+                                className="hidden"
                               />
-                              Tidak
+                              <span
+                                className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                  ${pencapaian[item.id] === "belum"
+                                    ? "bg-[#E77D35] border-[#E77D35]"
+                                    : "border-[#E77D35]"
+                                  }`}
+                              >
+                                {pencapaian[item.id] === "belum" && (
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span
+                                className={
+                                  pencapaian[item.id] === "belum"
+                                    ? "text-gray-900"
+                                    : "text-gray-500"
+                                }
+                              >
+                                Tidak
+                              </span>
                             </label>
                           </div>
                         </td>

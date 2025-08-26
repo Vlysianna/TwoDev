@@ -1,67 +1,34 @@
 import { ChevronLeft, Clock, AlertCircle, CheckCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
-import api from '@/helper/axios';
 
 export default function AsessementPilihanGanda() {
     const { user } = useAuth();
-    const [assessmentId, setAssessmentId] = useState<number | null>(null);
-    const [questions, setQuestions] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [showModalConfirmSubmit, setShowModalConfirmSubmit] = useState(false);
 
-    useEffect(() => {
-        // Try to get assessment ID from URL params or use default
-        const urlParams = new URLSearchParams(window.location.search);
-        const id = urlParams.get('assessmentId');
-        const assessmentIdToUse = id ? parseInt(id) : 1; // Default to 1 if no ID provided
-        
-        setAssessmentId(assessmentIdToUse);
-        fetchQuestions(assessmentIdToUse);
-    }, []);
-
-    const fetchQuestions = async (id: number) => {
-        try {
-            setLoading(true);
-            const response = await api.get(`/questions/assessment/${id}`);
-            
-            if (response.data.success) {
-                setQuestions(response.data.data);
-                // Initialize answers state
-                const initialAnswers: Record<string, string> = {};
-                response.data.data.forEach((q: any, index: number) => {
-                    initialAnswers[`soal${index + 1}`] = '';
-                });
-                setAnswers(initialAnswers);
-            } else {
-                // Fallback to sample questions if no API data
-                setQuestions(sampleQuestions);
-                const initialAnswers: Record<string, string> = {};
-                sampleQuestions.forEach((q: any, index: number) => {
-                    initialAnswers[`soal${index + 1}`] = '';
-                });
-                setAnswers(initialAnswers);
-            }
-        } catch (error: any) {
-            console.log('Using sample questions due to API error:', error);
-            setQuestions(sampleQuestions);
-            const initialAnswers: Record<string, string> = {};
-            sampleQuestions.forEach((q: any, index: number) => {
-                initialAnswers[`soal${index + 1}`] = '';
-            });
-            setAnswers(initialAnswers);
-        } finally {
-            setLoading(false);
-        }
+    // ----- DATA STATIS -----
+    type Option = { value: string; label: string };
+    type Question = {
+        id: string;
+        number: number;
+        question: string;
+        options: Option[];
     };
 
-    const sampleQuestions = [
+    const asesi = "Ananda Keizha Oktavian";
+    const asesor = "Eva Yeprilianti, S.Kom";
+    const tanggal = "24 Oktober 2025";
+    const waktu = "07:00 - 15:00";
+    const skema = "Pemrogram Junior ( Junior Coder )";
+    const kodeSkema = "SKM.RPL.PJ/LSPSMK24/2023";
+
+    const sampleQuestions: Question[] = [
         {
             id: 'soal1',
             number: 1,
@@ -174,11 +141,13 @@ export default function AsessementPilihanGanda() {
         }
     ];
 
+    // State jawaban
+    const initialAnswers: Record<string, string> = {};
+    sampleQuestions.forEach((q) => {
+        initialAnswers[q.id] = '';
+    });
 
-    type Answers = {
-        [key: string]: string;
-    };
-
+    const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
 
     const handleAnswerChange = (questionId: string, value: string) => {
         setAnswers(prev => ({
@@ -188,28 +157,18 @@ export default function AsessementPilihanGanda() {
     };
 
     const handleSubmit = async () => {
+
         try {
             setSubmitting(true);
             setError(null);
 
-            // Convert answers to API format
-            const submissionData = {
-                assessee_id: user?.id, // You might need to get assessee ID from user
-                answers: Object.entries(answers).map(([key, value], index) => ({
-                    question_id: questions[index]?.id || index + 1,
-                    answer: value
-                })).filter(item => item.answer) // Only submit answered questions
-            };
+            // Simulasi submit sukses (tidak ada API)
+            console.log("Jawaban tersimpan:", answers);
 
-            const response = await api.post('/questions/submit-answers', submissionData);
-
-            if (response.data.success) {
-                setSuccess('Jawaban berhasil disimpan!');
-                setTimeout(() => {
-                    // Navigate to next step or results page
-                    window.history.back();
-                }, 2000);
-            }
+            setSuccess('Jawaban berhasil disimpan!');
+            setTimeout(() => {
+                window.history.back();
+            }, 2000);
         } catch (error: any) {
             setError('Gagal menyimpan jawaban. Silakan coba lagi.');
         } finally {
@@ -218,7 +177,7 @@ export default function AsessementPilihanGanda() {
     };
 
     // Hitung progress
-    const totalQuestions = questions.length;
+    const totalQuestions = sampleQuestions.length;
     const answeredCount = Object.values(answers).filter(ans => ans !== '').length;
     const progressPercent = Math.round((answeredCount / totalQuestions) * 100);
 
@@ -239,12 +198,6 @@ export default function AsessementPilihanGanda() {
 
                 {/* Content */}
                 <div className="px-4 sm:px-6 pb-7">
-                    {/* Loading State */}
-                    {loading && (
-                        <div className="flex justify-center items-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-                        </div>
-                    )}
 
                     {/* Error State */}
                     {error && (
@@ -262,13 +215,12 @@ export default function AsessementPilihanGanda() {
                         </div>
                     )}
 
-                    {!loading && (
                     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                         {/* Header Info */}
                         <div className="mb-8">
-                            <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-4">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                                 {/* Kiri */}
-                                <div>
+                                <div className="flex-1">
                                     <h2 className="text-sm font-medium text-gray-800 flex items-center gap-2">
                                         Skema Sertifikasi ( Okupasi )
                                         <span className="text-gray-400 text-xs flex items-center gap-1">
@@ -276,28 +228,40 @@ export default function AsessementPilihanGanda() {
                                             Sewaktu
                                         </span>
                                     </h2>
-                                    <div className="text-sm text-gray-500 mt-1">
-                                        Asesi: <span className="text-gray-800">Ananda Keizha Oktavian</span> &nbsp;|&nbsp;
-                                        Asesor: <span className="text-gray-800">Eva Yeprilianti, S.Kom</span> &nbsp;|&nbsp;
-                                        24 Oktober 2025 | 07:00 - 15:00
+                                    {/* Mobile (tampil per baris) */}
+                                    <div className="text-sm text-gray-500 mt-1 flex flex-col gap-1 sm:hidden">
+                                        <div>
+                                            Asesi: <span className="text-gray-800">{asesi}</span>
+                                        </div>
+                                        <div>
+                                            Asesor: <span className="text-gray-800">{asesor}</span>
+                                        </div>
+                                        <div>
+                                            {tanggal} | {waktu}
+                                        </div>
+                                    </div>
+
+                                    {/* Desktop (tetap sejajar) */}
+                                    <div className="text-sm text-gray-500 mt-1 hidden sm:block">
+                                        Asesi: <span className="text-gray-800">{asesi}</span> &nbsp;|&nbsp;
+                                        Asesor: <span className="text-gray-800">{asesor}</span> &nbsp;|&nbsp;
+                                        {tanggal} | {waktu}
                                     </div>
                                 </div>
 
                                 {/* Kanan */}
-                                <div className="text-left lg:text-right">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                        <p className="text-sm text-gray-800 font-medium">
-                                            Pemrogram Junior ( Junior Coder )
-                                        </p>
+                                <div className="flex-1 text-left sm:text-right">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
+                                        <p className="text-sm text-gray-800 font-medium">{skema}</p>
                                         <p className="text-xs text-orange-600 bg-orange-100 px-2 py-0.5 rounded w-fit">
-                                            SKM.RPL.PJ/LSPSMK24/2023
+                                            {kodeSkema}
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <span className="text-xs text-gray-500">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 mt-2 w-full">
+                                        <span className="text-xs text-gray-500 whitespace-nowrap">
                                             Assesmen awal: {answeredCount} / {totalQuestions}
                                         </span>
-                                        <div className="w-28 bg-gray-200 rounded-full h-1.5">
+                                        <div className="flex-1 sm:w-28 bg-gray-200 rounded-full h-1.5">
                                             <div
                                                 className="bg-orange-400 h-1.5 rounded-full transition-all"
                                                 style={{ width: `${progressPercent}%` }}
@@ -311,9 +275,9 @@ export default function AsessementPilihanGanda() {
 
                         {/* Questions */}
                         <div className="space-y-8">
-                            {questions.map((question) => (
+                            {sampleQuestions.map((question) => (
                                 <div key={question.id} className="border-b border-gray-100 pb-6 last:border-b-0">
-                                    <h3 className="font-semibold text-gray-800 mb-4">
+                                    <h3 className="font-semibold text-gray-800">
                                         Soal {question.number}
                                     </h3>
                                     <p className="text-gray-700 mb-4">
@@ -358,17 +322,49 @@ export default function AsessementPilihanGanda() {
                         {/* Submit Button */}
                         <div className="mt-8 pt-6 border-t border-gray-100">
                             <div className="flex justify-end">
-                                <button 
-                                    onClick={handleSubmit}
+                                <button
+                                    onClick={() => setShowModalConfirmSubmit(true)}
                                     disabled={submitting}
-                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors"
+                                    className="w-full lg:w-auto bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white lg:px-20 py-2 rounded transition-colors cursor-pointer"
                                 >
-                                    {submitting ? 'Menyimpan...' : 'Simpan Jawaban'}
+                                    {submitting ? 'Menyimpan...' : 'Kirim'}
                                 </button>
                             </div>
                         </div>
+                        {showModalConfirmSubmit && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-[999]">
+                                <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full text-center">
+                                    <div className="mb-4 flex justify-center">
+                                        <img src="/img/confirm-submit.svg" alt="Pria Sigma" />
+                                    </div>
+
+                                    <h2 className="font-bold text-lg mb-2">Konfirmasi Pengiriman Jawaban</h2>
+                                    <p className="text-gray-500 text-sm mb-10">
+                                        Anda tidak dapat mengubah atau menambah jawaban. Pastikan seluruh soal telah dijawab dan diperiksa dengan cermat sebelum melanjutkan.
+                                    </p>
+
+                                    <div className="flex justify-between gap-2">
+                                        <button
+                                            onClick={() => setShowModalConfirmSubmit(false)}
+                                            className="flex-1 border border-[#E77D35] text-[#E77D35] py-2 rounded hover:bg-orange-50 cursor-pointer"
+                                        >
+                                            Batalkan
+                                        </button>
+                                        <Link
+                                            onClick={() => {
+                                                setShowModalConfirmSubmit(false);
+                                                handleSubmit(); // ⬅️ Jalankan submit
+                                            }}
+                                            to={paths.asesi.asesmenPilihanGanda}
+                                            className="flex-1 bg-[#E77D35] text-white py-2 rounded hover:bg-orange-600 cursor-pointer text-center"
+                                        >
+                                            Lanjut
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    )}
                 </div>
             </div>
         </div>

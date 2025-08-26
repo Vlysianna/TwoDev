@@ -1,9 +1,17 @@
-import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Search, ListFilter, Clock, ChevronRight, LayoutDashboard } from "lucide-react";
-import { Link } from 'react-router-dom';
-import SidebarAsesor from '@/components/SideAsesor';
-import NavbarAsesor from '@/components/NavAsesor';
+import React from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Eye,
+  ListFilter,
+  Search,
+  LayoutDashboard,
+  Clock,
+  ChevronRight,
+  MapPinned,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import SidebarAsesor from "@/components/SideAsesor";
+import NavbarAsesor from "@/components/NavAsesor";
 
 const DashboardAsesor: React.FC = () => {
   const { user } = useAuth();
@@ -20,7 +28,8 @@ const DashboardAsesor: React.FC = () => {
       avatarBg: "bg-[#60B5FF]",
       instructor: "Eva Yeprilianti, S.Kom",
       role: "Asesor",
-      borderColor: "border-[#60B5FF]"
+      borderColor: "border-[#60B5FF]",
+      location: "Lab 1",
     },
     {
       id: 2,
@@ -33,7 +42,8 @@ const DashboardAsesor: React.FC = () => {
       avatarBg: "bg-[#7A7A73]",
       instructor: "Aan Aspriansya, S.Tr.Par",
       role: "Asesor",
-      borderColor: "border-[#7A7A73]"
+      borderColor: "border-[#7A7A73]",
+      location: "Lab 2",
     },
     {
       id: 3,
@@ -46,7 +56,8 @@ const DashboardAsesor: React.FC = () => {
       avatarBg: "bg-[#FF7A30]",
       instructor: "Ibnu Widianto, S.Pd",
       role: "Asesor",
-      borderColor: "border-[#FF7A30]"
+      borderColor: "border-[#FF7A30]",
+      location: "Lab 3",
     },
     {
       id: 4,
@@ -59,7 +70,8 @@ const DashboardAsesor: React.FC = () => {
       avatarBg: "bg-[#640D5F]",
       instructor: "Ana Wijayanti, A.Md",
       role: "Asesor",
-      borderColor: "border-[#640D5F]"
+      borderColor: "border-[#640D5F]",
+      location: "Lab 4",
     },
     {
       id: 5,
@@ -72,7 +84,8 @@ const DashboardAsesor: React.FC = () => {
       avatarBg: "bg-[#B33791]",
       instructor: "Eni Susilawanti, S.Pd",
       role: "Asesor",
-      borderColor: "border-[#B33791]"
+      borderColor: "border-[#B33791]",
+      location: "Lab 5",
     },
   ];
 
@@ -91,51 +104,81 @@ const DashboardAsesor: React.FC = () => {
         </div>
 
         {/* Main Body */}
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {/* Header Welcome */}
-          <div className="mb-6 px-4">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Selamat Datang, {user?.email || "Asesor"}
-            </h2>
-            <p className="text-gray-600">
-              Kelola penilaian dan asesmen peserta dari dashboard ini.
-            </p>
-          </div>
+        <main className="p-6">
+          {/* Header Welcome + Search + Filter */}
+          <div className="mb-6">
+            <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-600">Selamat datang,</span>
+                <span className="font-semibold text-gray-900">
+                  {user?.email || "Asesor"}
+                </span>
+              </div>
 
-          {/* Search + Filter */}
-          <div className="mb-6 px-4 flex flex-col md:flex-row md:items-center gap-4">
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <div className="flex items-center gap-4">
+                <div className="relative w-full md:w-80">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <button className="flex-shrink-0 flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-sm hover:bg-gray-50">
+                  <ListFilter className="w-4 h-4 text-gray-600" />
+                  <span className="text-gray-600">Filter</span>
+                </button>
+              </div>
             </div>
-            <button className="flex-shrink-0 flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-sm hover:bg-gray-50">
-              <ListFilter className="w-4 h-4 text-gray-600" />
-              <span className="text-gray-600">Filter</span>
-            </button>
+
+            {/* Tabs */}
+            <div className="flex items-center space-x-2 mt-6">
+              <button className="px-8 py-2 rounded-md bg-[#E77D35] text-white">
+                RPL (3)
+              </button>
+              <button className="px-8 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                TBG (3)
+              </button>
+              <button className="px-8 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                TBS (3)
+              </button>
+              <button className="px-8 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                PH (5)
+              </button>
+              <button className="px-8 py-2 rounded-md text-gray-600 hover:bg-gray-100">
+                ULW (3)
+              </button>
+            </div>
           </div>
 
           {/* Grid Okupasi */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {okupasiData.map((okupasi) => (
               <div
                 key={okupasi.id}
                 className={`bg-white rounded-lg shadow-sm border-b-4 ${okupasi.borderColor} hover:shadow-md transition-shadow`}
               >
+                {/* Header */}
                 <div className="p-4 border-b border-gray-100">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">{okupasi.title}</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      {okupasi.title}
+                    </h3>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">{okupasi.subtitle}</p>
                   <div className="flex items-center space-x-1 text-xs text-gray-500">
-                    <Clock className="w-3 h-3" />
+                    <Clock className="w-4 h-4" />
                     <span>{okupasi.status}</span>
                   </div>
                 </div>
 
+                {/* Lokasi */}
+                <div className="flex items-center justify-center mt-3 text-sm">
+                  <MapPinned className="w-5 h-5 mr-1" />
+                  <span>{okupasi.location}</span>
+                </div>
+
+                {/* Timeline */}
                 <div className="px-4 pt-3 pb-10">
                   <div className="flex flex-col items-center">
                     <div className="flex justify-between w-full text-sm text-gray-500 mb-2">
@@ -151,18 +194,26 @@ const DashboardAsesor: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Footer */}
                 <div className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 ${okupasi.avatarBg} rounded-full flex items-center justify-center text-white text-sm font-medium`}>
+                      <div
+                        className={`w-8 h-8 ${okupasi.avatarBg} rounded-full flex items-center justify-center text-white text-sm font-medium`}
+                      >
                         {okupasi.avatar}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{okupasi.instructor}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {okupasi.instructor}
+                        </p>
                         <p className="text-xs text-gray-500">{okupasi.role}</p>
                       </div>
                     </div>
-                    <Link to="/apl-01" className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+                    <Link
+                      to="/apl-01"
+                      className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+                    >
                       <ChevronRight className="w-4 h-4 text-white" />
                     </Link>
                   </div>

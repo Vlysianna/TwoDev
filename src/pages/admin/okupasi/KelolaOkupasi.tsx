@@ -1,40 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Edit, Eye, Trash2, Filter, X, ChevronDown } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
-import { Link, useNavigate } from 'react-router-dom';
-import paths from '@/routes/paths';
+import axiosInstance from '@/helper/axios';
 import NavAdmin from '@/components/NavAdmin';
 
 interface OkupasiData {
   id: number;
-  namaOkupasi: string;
-  jurusan: string;
-  tanggalMulai: string;
-  tanggalSelesai: string;
+  name: string;
+  scheme?: { id: number; name: string; code?: string } | null;
+  tanggalMulai?: string;
+  tanggalSelesai?: string;
 }
 
 const KelolaOkupasi: React.FC = () => {
-  const navigate = useNavigate();
+  // navigation is not used in this page (detail/edit handled inline)
   
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editingOkupasi, setEditingOkupasi] = useState<OkupasiData | null>(null);
-  
-  const [formData, setFormData] = useState({ namaOkupasi: '', jurusan: '' });
-  const [editFormData, setEditFormData] = useState({ namaOkupasi: '', jurusan: '' });
+
+  // form stores name and selected scheme id as string
+  const [formData, setFormData] = useState({ name: '', schemeId: '' });
+  const [editFormData, setEditFormData] = useState({ name: '', schemeId: '' });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isEditDropdownOpen, setIsEditDropdownOpen] = useState(false);
 
-  const [okupasiData, setOkupasiData] = useState<OkupasiData[]>([
-    { id: 1, namaOkupasi: 'Pemrogram Junior', jurusan: 'Rekayasa Perangkat Lunak', tanggalMulai: '22/07/2025', tanggalSelesai: '23/07/2025' },
-    { id: 2, namaOkupasi: 'Network Administrator', jurusan: 'Teknik Komputer dan Jaringan', tanggalMulai: '24/07/2025', tanggalSelesai: '25/07/2025' },
-    { id: 3, namaOkupasi: 'Multimedia Designer', jurusan: 'Multimedia', tanggalMulai: '26/07/2025', tanggalSelesai: '27/07/2025' },
-  ]);
-
-  const jurusanOptions = [
-    'Rekayasa Perangkat Lunak',
-    'Teknik Komputer dan Jaringan', 
-    'Multimedia',
-  ];
+  const [okupasiData, setOkupasiData] = useState<OkupasiData[]>([]);
+  const [schemes, setSchemes] = useState<{ id: number; name: string }[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -47,33 +40,37 @@ const KelolaOkupasi: React.FC = () => {
   };
 
   const handleJurusanSelect = (value: string) => {
-    setFormData(prev => ({ ...prev, jurusan: value }));
+    setFormData(prev => ({ ...prev, schemeId: value }));
     setIsDropdownOpen(false);
   };
 
   const handleEditJurusanSelect = (value: string) => {
-    setEditFormData(prev => ({ ...prev, jurusan: value }));
+    setEditFormData(prev => ({ ...prev, schemeId: value }));
     setIsEditDropdownOpen(false);
   };
 
   const handleTambahOkupasi = () => {
-    if (formData.namaOkupasi && formData.jurusan) {
-      const newOkupasi: OkupasiData = {
-        id: okupasiData.length + 1,
-        namaOkupasi: formData.namaOkupasi,
-        jurusan: formData.jurusan,
-        tanggalMulai: new Date().toLocaleDateString('id-ID'),
-        tanggalSelesai: new Date().toLocaleDateString('id-ID')
-      };
-      setOkupasiData(prev => [...prev, newOkupasi]);
-      setFormData({ namaOkupasi: '', jurusan: '' });
+    // create via API
+  if (formData.name && formData.schemeId) {
+      setError(null);
+      axiosInstance.post('/occupations', {
+    name: formData.name,
+    scheme_id: Number(formData.schemeId),
+      })
+      .then(() => {
+        fetchOccupations();
+    setFormData({ name: '', schemeId: '' });
+      })
+      .catch(() => setError('Gagal menambah okupasi'));
     }
   };
 
   const handleEdit = (id: number) => {
-    console.log('Edit okupasi:', id);
-    // Navigate to edit page with the ocupasi ID
-    navigate(paths.admin.okupasi.edit(id));
+    const occ = okupasiData.find((o: any) => o.id === id);
+    if (!occ) return;
+  setEditingOkupasi(occ);
+  setEditFormData({ name: occ.name, schemeId: occ.scheme?.id ? String(occ.scheme.id) : '' });
+    setIsEditModalOpen(true);
   };
 
   const handleView = (id: number) => {
@@ -83,33 +80,75 @@ const KelolaOkupasi: React.FC = () => {
   };
 
   const handleDelete = (id: number) => {
-    console.log('Delete okupasi:', id);
-    // Show confirmation dialog before delete
-    if (window.confirm('Apakah Anda yakin ingin menghapus okupasi ini?')) {
-      // Add delete logic here
-      console.log(`Okupasi dengan ID ${id} berhasil dihapus`);
-      // In real application, you would update the state or refetch data
-      const okupasi = okupasiData.find(item => item.id === id);
-      if (okupasi) {
-        setEditingOkupasi(okupasi);
-        setEditFormData({ namaOkupasi: okupasi.namaOkupasi, jurusan: okupasi.jurusan });
-        setIsEditModalOpen(true);
-      }
-    }
+    if (!window.confirm('Apakah Anda yakin ingin menghapus okupasi ini?')) return;
+    setError(null);
+    axiosInstance.delete(`/occupations/${id}`)
+      .then(() => setOkupasiData(prev => prev.filter(item => item.id !== id)))
+      .catch(() => setError('Gagal menghapus okupasi'));
   };
 
   const handleSaveEdit = () => {
-    if (editingOkupasi) {
-      setOkupasiData(prev => prev.map(item =>
-        item.id === editingOkupasi.id
-          ? { ...item, namaOkupasi: editFormData.namaOkupasi, jurusan: editFormData.jurusan }
-          : item
-      ));
+    if (!editingOkupasi) return;
+    setError(null);
+    axiosInstance.put(`/occupations/${editingOkupasi.id}`, {
+      name: editFormData.name,
+      scheme_id: Number(editFormData.schemeId),
+    })
+    .then(() => {
+      fetchOccupations();
       setIsEditModalOpen(false);
       setEditingOkupasi(null);
-      setEditFormData({ namaOkupasi: '', jurusan: '' });
+      setEditFormData({ name: '', schemeId: '' });
+    })
+    .catch(() => setError('Gagal memperbarui okupasi'));
+  };
+
+  const fetchOccupations = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axiosInstance.get('/occupations');
+      if (res.data?.success) {
+        setOkupasiData(res.data.data || []);
+      } else {
+        setError('Gagal memuat okupasi');
+      }
+    } catch (e) {
+      setError('Gagal memuat okupasi');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const fetchSchemes = async () => {
+    try {
+      const res = await axiosInstance.get('/schemes');
+      if (res.data?.success) setSchemes(res.data.data || []);
+    } catch (_) {
+      // ignore
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const res = await axiosInstance.get('/occupations/export/excel', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'occupations.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      setError('Gagal mengekspor data');
+    }
+  };
+
+  useEffect(() => {
+    fetchOccupations();
+    fetchSchemes();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -140,9 +179,9 @@ const KelolaOkupasi: React.FC = () => {
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 hover:bg-gray-50"
                   >
                     <div className="flex items-center justify-between">
-                      {formData.jurusan ? (
+                      {formData.schemeId ? (
                         <div className="flex items-center gap-2 sm:gap-3">
-                          <span className="font-medium text-gray-900 text-sm sm:text-base truncate">{formData.jurusan}</span>
+                          <span className="font-medium text-gray-900 text-sm sm:text-base truncate">{schemes.find(s => String(s.id) === formData.schemeId)?.name || formData.schemeId}</span>
                         </div>
                       ) : (
                         <span className="text-gray-500 text-sm sm:text-base">Pilih Jurusan</span>
@@ -153,14 +192,14 @@ const KelolaOkupasi: React.FC = () => {
                   
                   {isDropdownOpen && (
                     <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
-                      {jurusanOptions.map((option) => (
+                      {schemes.map((s) => (
                         <button
-                          key={option}
+                          key={s.id}
                           type="button"
-                          onClick={() => handleJurusanSelect(option)}
+                          onClick={() => handleJurusanSelect(String(s.id))}
                           className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-left hover:bg-orange-50 hover:text-orange-600 transition-colors first:rounded-t-lg last:rounded-b-lg text-sm sm:text-base"
                         >
-                          <span className="font-medium">{option}</span>
+                          <span className="font-medium">{s.name}</span>
                         </button>
                       ))}
                     </div>
@@ -171,8 +210,8 @@ const KelolaOkupasi: React.FC = () => {
                 <label className="block text-sm font-medium mb-2 text-gray-700">Nama Okupasi</label>
                 <input
                   type="text"
-                  name="namaOkupasi"
-                  value={formData.namaOkupasi}
+                  name="name"
+                  value={formData.name}
                   onChange={handleFormChange}
                   placeholder="Masukkan nama okupasi"
                   className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
@@ -182,7 +221,7 @@ const KelolaOkupasi: React.FC = () => {
             <button
               onClick={handleTambahOkupasi}
               className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${
-                !formData.namaOkupasi || !formData.jurusan
+                !formData.name || !formData.schemeId
                   ? 'bg-[#E77D35] text-white hover:bg-gray-400 hover:cursor-not-allowed'
                   : 'bg-[#E77D35] hover:bg-[#E77D35]/90 text-white hover:shadow-md'
               }`}
@@ -209,8 +248,8 @@ const KelolaOkupasi: React.FC = () => {
                 <div key={item.id} className={`p-4 border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 truncate">{item.namaOkupasi}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{item.jurusan}</p>
+                      <h4 className="font-medium text-gray-900 truncate">{item.name}</h4>
+                      <p className="text-sm text-gray-600 mt-1">{item.scheme?.name || '-'}</p>
                     </div>
                   </div>
                   <div className="flex justify-end gap-1 mt-3">
@@ -228,6 +267,7 @@ const KelolaOkupasi: React.FC = () => {
                       <Eye size={16} />
                     </button>
                     <button 
+                      onClick={() => handleDelete(item.id)}
                       className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
                       title="Delete"
                     >
@@ -249,11 +289,11 @@ const KelolaOkupasi: React.FC = () => {
                 </thead>
                 <tbody>
                   {okupasiData.map((item, index) => (
-                    <tr key={item.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-[#E77D35]/10 transition-colors`}>
+                      <tr key={item.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-[#E77D35]/10 transition-colors`}>
                       <td className="px-4 lg:px-6 py-4">
-                        <span className="font-medium text-gray-900">{item.jurusan}</span>
+                        <span className="font-medium text-gray-900">{item.scheme?.name || '-'}</span>
                       </td>
-                      <td className="px-4 lg:px-6 py-4 font-medium text-gray-900">{item.namaOkupasi}</td>
+                      <td className="px-4 lg:px-6 py-4 font-medium text-gray-900">{item.name}</td>
                       <td className="px-4 lg:px-6 py-4">
                         <div className="flex justify-center gap-1">
                           <button 
@@ -270,6 +310,7 @@ const KelolaOkupasi: React.FC = () => {
                             <Eye size={16} />
                           </button>
                           <button 
+                            onClick={() => handleDelete(item.id)}
                             className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
                             title="Delete"
                           >
@@ -311,9 +352,9 @@ const KelolaOkupasi: React.FC = () => {
                       className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] transition-all duration-200 hover:bg-gray-50"
                     >
                       <div className="flex items-center justify-between">
-                        {editFormData.jurusan ? (
+                        {editFormData.schemeId ? (
                           <div className="flex items-center gap-2 sm:gap-3">
-                            <span className="font-medium text-gray-900 text-sm sm:text-base truncate">{editFormData.jurusan}</span>
+                            <span className="font-medium text-gray-900 text-sm sm:text-base truncate">{schemes.find(s => String(s.id) === editFormData.schemeId)?.name || editFormData.schemeId}</span>
                           </div>
                         ) : (
                           <span className="text-gray-500 text-sm sm:text-base">Pilih Jurusan</span>
@@ -324,14 +365,14 @@ const KelolaOkupasi: React.FC = () => {
                     
                     {isEditDropdownOpen && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
-                        {jurusanOptions.map((option) => (
+                        {schemes.map((s) => (
                           <button
-                            key={option}
+                            key={s.id}
                             type="button"
-                            onClick={() => handleEditJurusanSelect(option)}
+                            onClick={() => handleEditJurusanSelect(String(s.id))}
                             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-left hover:bg-[#E77D35]/10 hover:text-[#E77D35] transition-colors first:rounded-t-lg last:rounded-b-lg text-sm sm:text-base"
                           >
-                            <span className="font-medium">{option}</span>
+                            <span className="font-medium">{s.name}</span>
                           </button>
                         ))}
                       </div>
@@ -342,8 +383,8 @@ const KelolaOkupasi: React.FC = () => {
                   <label className="block text-sm font-medium mb-2 text-gray-700">Nama Okupasi</label>
                   <input
                     type="text"
-                    name="namaOkupasi"
-                    value={editFormData.namaOkupasi}
+                    name="name"
+                    value={editFormData.name}
                     onChange={handleEditFormChange}
                     placeholder="Masukkan nama okupasi"
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] transition-all duration-200"
@@ -361,7 +402,7 @@ const KelolaOkupasi: React.FC = () => {
                 <button 
                   onClick={handleSaveEdit}
                   className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors order-1 sm:order-2 ${
-                    !editFormData.namaOkupasi || !editFormData.jurusan
+                    !editFormData.name || !editFormData.schemeId
                       ? 'bg-[#E77D35] text-white hover:bg-gray-400 hover:cursor-not-allowed'
                       : 'bg-[#E77D35] hover:bg-[#E77D35]/90 text-white hover:shadow-md'
                   }`}

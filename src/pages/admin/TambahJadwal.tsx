@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
 import { Calendar, Plus, Trash2, AlertCircle, CheckCircle } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import paths from '@/routes/paths';
 import axiosInstance from '@/helper/axios';
 import { useForm } from "react-hook-form";
 
@@ -20,9 +22,6 @@ interface Occupation {
 interface Assessor {
   id: number;
   full_name: string;
-  user: {
-    email: string;
-  };
 }
 
 interface ScheduleDetailForm {
@@ -38,7 +37,8 @@ interface ScheduleForm {
 }
 
 const TambahJadwal: React.FC = () => {
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<ScheduleForm>({
+  const navigate = useNavigate();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<ScheduleForm>({
     defaultValues: {
       schedule_details: [{ assessor_id: 0, location: '' }]
     }
@@ -46,6 +46,7 @@ const TambahJadwal: React.FC = () => {
 
   const [occupations, setOccupations] = useState<Occupation[]>([]);
   const [assessors, setAssessors] = useState<Assessor[]>([]);
+  const [assessorsLoading, setAssessorsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,34 +54,48 @@ const TambahJadwal: React.FC = () => {
     { assessor_id: 0, location: '' }
   ]);
 
-  const watchedDetails = watch('schedule_details');
-
+  // initial load: occupations + assessors
   useEffect(() => {
-    fetchOccupations();
-    fetchAssessors();
+    (async () => {
+      try {
+        const occResp = await axiosInstance.get('/occupations');
+        if (occResp.data?.success) {
+          setOccupations(occResp.data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching occupations:', err);
+      }
+
+      try {
+        setAssessorsLoading(true);
+        const resp = await axiosInstance.get('/assessor');
+        if (resp.data && resp.data.success) {
+          const list: Assessor[] = resp.data.data;
+          setAssessors(list);
+          console.log('Assessor list:', list); // Debug log
+
+          // set first assessor as default for first row if none selected
+          if (list.length > 0) {
+            setScheduleDetails(prev => {
+              const firstSelected = prev.some(d => d.assessor_id && d.assessor_id !== 0);
+              if (!firstSelected && prev.length > 0) {
+                const firstId = list[0].id;
+                const newDetails = prev.map((d, i) => (i === 0 ? { ...d, assessor_id: firstId } : d));
+                setValue('schedule_details', newDetails);
+                return newDetails;
+              }
+              return prev;
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching assessors:', err);
+        setError('Gagal memuat daftar asesor dari server');
+      } finally {
+        setAssessorsLoading(false);
+      }
+    })();
   }, []);
-
-  const fetchOccupations = async () => {
-    try {
-      const response = await axiosInstance.get('/occupation');
-      if (response.data.success) {
-        setOccupations(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching occupations:', error);
-    }
-  };
-
-  const fetchAssessors = async () => {
-    try {
-      const response = await axiosInstance.get('/assessor');
-      if (response.data.success) {
-        setAssessors(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching assessors:', error);
-    }
-  };
 
   const addScheduleDetail = () => {
     const newDetails = [...scheduleDetails, { assessor_id: 0, location: '' }];
@@ -103,7 +118,7 @@ const TambahJadwal: React.FC = () => {
       setSuccess(null);
 
       // Create assessment first
-      const assessmentResponse = await axiosInstance.post('/assessment/apl2/create-assessment', {
+      const assessmentResponse = await axiosInstance.post('/assessments/create', {
         occupation_id: data.occupation_id,
         code: `ASM-${Date.now()}` // Generate unique code
       });
@@ -119,25 +134,24 @@ const TambahJadwal: React.FC = () => {
           )
         };
 
-        const scheduleResponse = await axiosInstance.post('/schedule', scheduleData);
+  const scheduleResponse = await axiosInstance.post('/schedules', scheduleData);
         
         if (scheduleResponse.data.success) {
           setSuccess('Jadwal berhasil ditambahkan!');
-          // Reset form
-          setValue('occupation_id', 0);
-          setValue('start_date', '');
-          setValue('end_date', '');
-          setScheduleDetails([{ assessor_id: 0, location: '' }]);
-          setValue('schedule_details', [{ assessor_id: 0, location: '' }]);
+          setTimeout(() => {
+            navigate(paths.admin.kelolaJadwal || '/admin/kelola-jadwal');
+          }, 1000);
         } else {
           setError(scheduleResponse.data.message || 'Gagal membuat jadwal');
         }
       } else {
         setError('Gagal membuat assessment');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating schedule:', error);
-      setError(error.response?.data?.message || 'Gagal membuat jadwal');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (error as any)?.response?.data?.message || 'Gagal membuat jadwal';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -285,19 +299,31 @@ const TambahJadwal: React.FC = () => {
                             <select
                               {...register(`schedule_details.${index}.assessor_id` as const)}
                               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none"
+                              value={detail.assessor_id || ''}
                               onChange={(e) => {
                                 const newDetails = [...scheduleDetails];
                                 newDetails[index].assessor_id = parseInt(e.target.value);
                                 setScheduleDetails(newDetails);
                                 setValue('schedule_details', newDetails);
                               }}
+                              disabled={assessorsLoading}
                             >
-                              <option value="">Pilih Asesor</option>
-                              {assessors.map((assessor) => (
-                                <option key={assessor.id} value={assessor.id}>
-                                  {assessor.full_name} - {assessor.user.email}
-                                </option>
-                              ))}
+                              {assessorsLoading ? (
+                                <option value="">Memuat asesor...</option>
+                              ) : (
+                                <>
+                                  <option value="">Pilih Asesor</option>
+                                  {assessors.length === 0 ? (
+                                    <option value="">Tidak ada asesor</option>
+                                  ) : (
+                                    assessors.map((assessor) => (
+                                      <option key={assessor.id} value={assessor.id}>
+                                        {assessor.full_name}
+                                      </option>
+                                    ))
+                                  )}
+                                </>
+                              )}
                             </select>
                           </div>
 
@@ -310,6 +336,7 @@ const TambahJadwal: React.FC = () => {
                               {...register(`schedule_details.${index}.location` as const)}
                               placeholder="Contoh: Ruang Lab 1"
                               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none"
+                              value={detail.location}
                               onChange={(e) => {
                                 const newDetails = [...scheduleDetails];
                                 newDetails[index].location = e.target.value;
