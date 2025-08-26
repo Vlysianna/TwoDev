@@ -69,6 +69,7 @@ const routes = {
 		lembarJawaban: "/asesor/lembar-jawaban",
 		assessmentRecord: "/asesor/assessment-record",
 		assesmentReport: "/asesor/assesment-report",
+		dataAsesor: "/asesor/data-asesor",
 	},
 	asesi: {
 		root: "/asesi",
@@ -109,6 +110,7 @@ const routes = {
 		persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
 		fria02: "/asesi/fr-ia-02",
 		asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda",
+		dataAsesi: "/asesi/data-asesi",
 	},
 };
 

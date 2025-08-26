@@ -65,6 +65,8 @@ import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
 import FRIA03 from "@/pages/asesor/FR-IA-03";
 import IsApproveApl01 from "@/components/IsApproveApl01";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
+import DataAsesor from "@/pages/public/DataAsesor";
+import DataAssesi from "@/pages/public/DataAssesi";
 
 const RootLayout = () => <Outlet />;
 
@@ -197,6 +199,7 @@ const router = createBrowserRouter([
 						path: paths.asesi.asesmenPilihanGanda,
 						element: <AsessementPilihanGanda />,
 					},
+					{ path: paths.asesi.dataAsesi, element: <DataAssesi /> },
 				],
 			},
 
@@ -251,6 +254,8 @@ const router = createBrowserRouter([
 						element: <AssessmentRecord />,
 					},
 					{ path: paths.asesor.assesmentReport, element: <AssessmentReport /> },
+					{ path: paths.asesor.dataAsesor, element: <DataAsesor /> },
+																
 				],
 			},
 		],
