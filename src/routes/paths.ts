@@ -48,6 +48,7 @@ const routes = {
 		dashboard: "/asesor/dashboard",
 		template: "/asesor/template",
 		template2: "/asesor/template2",
+		biodata: "/asesor/biodata",
 		dashboardAsesor: "/asesor/dashboard-asesor",
 		cekAsesmenMandiri: "/asesor/cek-apl-02",
 		cekAsesmenMandiriDetail: "/asesor/cek-apl-02-detail",

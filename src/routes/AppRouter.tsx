@@ -64,6 +64,7 @@ import PersetujuanAsesmenKerahasiaanAsesor from "@/pages/asesor/PersetujuanAsesm
 import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
 import FRIA03 from "@/pages/asesor/FR-IA-03";
 import IsApproveApl01 from "@/components/IsApproveApl01";
+import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
 
 const RootLayout = () => <Outlet />;
 
@@ -120,21 +121,21 @@ const router = createBrowserRouter([
 				),
 				children: [
 					{ index: true, element: <DashboardAdmin /> },
-          { path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
-          { path: paths.admin.kelolaMUK, element: <KelolaMUK /> },
-          { path: paths.admin.editAsesor, element: <EditAsesor /> },
-          { path: paths.admin.createAsesor, element: <EditAsesor /> },
-          { path: paths.admin.editAsesorPattern, element: <EditAsesor /> },
-          { path: paths.admin.editAsessi, element: <EditAsessi /> },
-          { path: '/admin/edit-asesi/:id', element: <EditAsesi /> },
-          { path: paths.admin.kelolaAkunAsesor, element: <KelolaAkunAsesor /> },
-          { path: paths.admin.editAsesi, element: <EditAsesi /> },
-          { path: paths.admin.verifikasi, element: <VerifikasiPage /> },
-          { path: paths.admin.tambahSkema, element: <TambahSkema /> },
-          { path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
-          { path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
-          { path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
-          { path: paths.admin.apl02, element: <AdminApl02 /> },
+					{ path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
+					{ path: paths.admin.kelolaMUK, element: <KelolaMUK /> },
+					{ path: paths.admin.editAsesor, element: <EditAsesor /> },
+					{ path: paths.admin.createAsesor, element: <EditAsesor /> },
+					{ path: paths.admin.editAsesorPattern, element: <EditAsesor /> },
+					{ path: paths.admin.editAsessi, element: <EditAsessi /> },
+					{ path: "/admin/edit-asesi/:id", element: <EditAsesi /> },
+					{ path: paths.admin.kelolaAkunAsesor, element: <KelolaAkunAsesor /> },
+					{ path: paths.admin.editAsesi, element: <EditAsesi /> },
+					{ path: paths.admin.verifikasi, element: <VerifikasiPage /> },
+					{ path: paths.admin.tambahSkema, element: <TambahSkema /> },
+					{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
+					{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
+					{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
+					{ path: paths.admin.apl02, element: <AdminApl02 /> },
 
 					// Okupasi nested
 					{
@@ -212,6 +213,7 @@ const router = createBrowserRouter([
 					{ path: paths.asesor.template, element: <TemplateAsesor /> },
 					{ path: paths.asesor.template2, element: <Template2 /> },
 					{ path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
+					{ path: paths.asesor.biodata, element: <BiodataAsesor /> },
 					{
 						path: paths.asesor.cekAsesmenMandiri,
 						element: <CekAsesmenMandiri />,
