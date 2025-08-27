@@ -1,28 +1,23 @@
-import {
-  ChevronLeft,
-  Clock,
-  AlertCircle,
-  Monitor,
-} from "lucide-react";
+import { ChevronLeft, Clock, AlertCircle, Monitor } from "lucide-react";
 import { useEffect, useState } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentParams } from "@/components/IsApproveApl01";
-import type { Result } from "@/model/result-model";
-import type { GroupIA } from "@/model/ia02-model";
+import type { GroupIA, ResultIA02 } from "@/model/ia02-model";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl } from "@/lib/hashids";
 
 export default function Ia02() {
-  const { id_result, id_assessment, id_asesi, id_asesor } = useAssessmentParams();
+  const { id_result, id_assessment, id_asesi, id_asesor } =
+    useAssessmentParams();
 
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<Result>({
+  const [result, setResult] = useState<ResultIA02>({
     id: 0,
     assessment: {
       id: 0,
@@ -51,6 +46,13 @@ export default function Ia02() {
     tuk: "N/A",
     is_competent: false,
     created_at: "0000-00-00T00:00:00.000Z",
+    ia02_header: {
+      id: 0,
+      approved_assessee: false,
+      approved_assessor: false,
+      created_at: "0000-00-00T00:00:00.000Z",
+      updated_at: "0000-00-00T00:00:00.000Z",
+    },
   });
   const [groups, setGroups] = useState<GroupIA[]>([]);
 
@@ -66,9 +68,13 @@ export default function Ia02() {
 
   const fetchResult = async (id_result: string) => {
     try {
-      const response = await api.get(`/assessments/result/${id_result}`);
+      const response = await api.get(`/assessments/ia-02/result/${id_result}`);
       if (response.data.success) {
         setResult(response.data.data);
+
+        if (response.data.data.ia02_header.approved_assessee) {
+          setQrValue(getAssesseeUrl(Number(id_asesi)));
+        }
       }
     } catch (error: any) {
       console.log("Error fetching result:", error);
@@ -121,7 +127,10 @@ export default function Ia02() {
           <NavbarAsesi
             title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02"
             icon={
-              <Link to={paths.asesi.assessment.apl02(id_assessment, id_asesor)} className="text-gray-500 hover:text-gray-600">
+              <Link
+                to={paths.asesi.assessment.apl02(id_assessment, id_asesor)}
+                className="text-gray-500 hover:text-gray-600"
+              >
                 <ChevronLeft size={20} />
               </Link>
             }
@@ -359,8 +368,15 @@ export default function Ia02() {
                     </QRCodeCanvas>
                   )}
                   <button
-                    onClick={() => handleGenerateQRCode(Number(id_asesi))}
-                    className="block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                    disabled={qrValue !== ""}
+                    onClick={() => {
+                      if (!qrValue) handleGenerateQRCode(Number(id_asesi));
+                    }}
+                    className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                      !qrValue
+                        ? "hover:bg-orange-600"
+                        : "cursor-not-allowed opacity-50"
+                    }`}
                   >
                     Generate QR Code
                   </button>
