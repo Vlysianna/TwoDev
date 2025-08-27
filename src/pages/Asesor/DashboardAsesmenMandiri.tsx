@@ -19,57 +19,23 @@ type RawAssessee = {
     [k: string]: unknown;
 };
 
-export default function TemplateAsesor() {
-    const [assessees, setAssessees] = useState<Assessee[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        let mounted = true;
-        async function load() {
-            setLoading(true);
-            try {
-                const res = await api.get('/assessee');
-                if (!mounted) return;
-                console.log('API /assessee response:', res.data);
-                if (res.data && (res.data.success || res.data.data)) {
-                    const raw: RawAssessee[] = (res.data.data || []) as RawAssessee[];
-                    // find assessees missing user/full_name and fetch user by user_id when available
-                    const missing = raw.filter(a => !(a.user?.full_name) && !a.full_name && a.user_id);
-                    if (missing.length > 0) {
-                        // fetch users in parallel
-                        const userPromises = missing.map(m => api.get(`/users/${m.user_id}`).then(r => ({ id: m.id, user: r.data?.data || null })).catch(() => ({ id: m.id, user: null })));
-                        const users = await Promise.all(userPromises);
-                        const userMap = new Map(users.map(u => [u.id, u.user]));
-                        const merged = raw.map(ritem => ({ ...ritem, user: ritem.user || userMap.get(ritem.id) }));
-                        setAssessees(merged as Assessee[]);
-                    } else {
-                        setAssessees(raw as Assessee[]);
-                    }
-                } else {
-                    setAssessees([]);
-                }
-            } catch (err: unknown) {
-                let msg = String(err);
-                try {
-                    const parsed = JSON.parse(JSON.stringify(err || {}));
-                    if (parsed && parsed.response?.data?.message) {
-                        msg = parsed.response.data.message;
-                    } else if (parsed && parsed.message) {
-                        msg = parsed.message;
-                    }
-                } catch {
-                    // keep String(err)
-                }
-                setError(msg);
-            } finally {
-                if (mounted) setLoading(false);
-            }
-        }
-
-        load();
-        return () => { mounted = false };
-    }, []);
+export default function DashboardAsesmenMandiri() {
+    // Contoh data siswa
+    const siswaData = [
+        { id: 1, nama: "Adelia Tri Ramadhani" },
+        { id: 2, nama: "Ahmad Akmal Fauzan" },
+        { id: 3, nama: "Ahmad Zaqi" },
+        { id: 4, nama: "Aisha Sekar Arina Putri" },
+        { id: 5, nama: "Alfina Komarul Asih" },
+        { id: 6, nama: "Amelia" },
+        { id: 7, nama: "Ananda Keizha Oktavian" },
+        { id: 8, nama: "Andhika Dani Natawidjaja" },
+        { id: 9, nama: "Ari Reivansyah" },
+        { id: 10, nama: "Darin Fairuz Romli" },
+        { id: 11, nama: "Eru Nur Al Kafini" },
+        { id: 12, nama: "Fajri Darmawan" },
+        { id: 13, nama: "Iftikhar Azhar Chaudhry" },
+    ];
 
     return (
         <div className="flex min-h-screen bg-gray-50">

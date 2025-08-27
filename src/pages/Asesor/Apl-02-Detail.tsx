@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { Monitor, ChevronLeft, Search } from 'lucide-react';
-import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
+import NavbarAsesor from '@/components/NavAsesor';
 
-export default function AssessmentMandiriDetail() {
+export default function CekApl02Detail() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterKompeten, setFilterKompeten] = useState('all');
-    const [selectedProof, setSelectedProof] = useState<{ [key: number]: string | undefined }>({});
-    const [pencapaian, setPencapaian] = useState<{ [key: number]: string | undefined }>({});
-    const [globalProof, setGlobalProof] = useState(''); // dropdown header
-
-
+    const [filterKompeten, setFilterKompeten] = useState<'all' | 'kompeten' | 'belum'>("kompeten"); // Ini aku defaultin jadi kompeten smua y
+    const [globalProof, setGlobalProof] = useState("dokumen1"); // Ini aku default in dokumen 1 smua y
+    
     const assessmentData = [
         {
             id: 1,
@@ -39,6 +36,14 @@ export default function AssessmentMandiriDetail() {
         }
     ];
 
+    const [pencapaian, setPencapaian] = useState<{ [key: number]: string }>(
+        Object.fromEntries(assessmentData.map(item => [item.id, "kompeten"])) // Ini aku defaultin jadi kompeten smua y
+    );
+
+    const [selectedProof, setSelectedProof] = useState<{ [key: number]: string }>(
+        Object.fromEntries(assessmentData.map(item => [item.id, "dokumen1"]))  // Ini aku default in dokumen 1 smua y
+    );
+    
     const handleProofSelection = (criteriaId: number, value: string) => {
         setSelectedProof(prev => ({
             ...prev,
@@ -54,7 +59,7 @@ export default function AssessmentMandiriDetail() {
     };
 
 
-    const handleFilterChange = (value: string) => {
+    const handleFilterChange = (value: 'all' | 'kompeten' | 'belum') => {
         setFilterKompeten(value);
 
         if (value === 'kompeten' || value === 'belum') {
@@ -88,10 +93,10 @@ export default function AssessmentMandiriDetail() {
         <div className="min-h-screen bg-gray-50">
             <div className="mx-auto">
                 <div className="bg-white rounded-lg shadow-sm mb-8">
-                    <NavbarAsesi
+                    <NavbarAsesor
                         title='Detail'
                         icon={
-                            <Link to={paths.asesi.asesmenMandiri} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesor.cekApl02} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -139,7 +144,7 @@ export default function AssessmentMandiriDetail() {
                                             name="filter"
                                             value={opt.value}
                                             checked={filterKompeten === opt.value}
-                                            onChange={(e) => handleFilterChange(e.target.value)}
+                                            onChange={(e) => handleFilterChange(e.target.value as 'all' | 'kompeten' | 'belum')}
                                             className="hidden"
                                         />
                                         <span
@@ -233,7 +238,6 @@ export default function AssessmentMandiriDetail() {
                                                     </div>
                                                 </td>
 
-                                                {/* Pencapaian */}
                                                 {/* Pencapaian */}
                                                 {criteriaIndex === 0 && (
                                                     <td

@@ -4,7 +4,7 @@ import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 
-export default function UmpanBalik() {
+export default function Ak03() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterKompeten, setFilterKompeten] = useState('all');
     const [hasil, setHasil] = useState<{ [key: number]: string }>({});
@@ -102,7 +102,7 @@ export default function UmpanBalik() {
                     <NavbarAsesi
                         title='Umpan balik dan catatan asesmen'
                         icon={
-                            <Link to={paths.asesi.asesmenMandiri} className="text-gray-500 hover:text-gray-600">
+                            <Link to={"#"} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -417,7 +417,7 @@ export default function UmpanBalik() {
                                         Batalkan
                                     </button>
                                     <Link
-                                        to={paths.asesi.asesmenPilihanGanda}
+                                        to={paths.asesi.ia05}
                                         className="flex-1 bg-[#E77D35] text-white py-2 rounded hover:bg-orange-600 cursor-pointer text-center"
                                     >
                                         Lanjut

@@ -1,27 +1,54 @@
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import routes from "@/routes/paths";
-import { useEffect, useState, type JSX } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+	createContext,
+	useContext,
+	useEffect,
+	useState,
+	type JSX,
+} from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+
+type AssessmentParams = {
+	id_assessment: string;
+	id_asesor: string;
+	id_asesi: string;
+	id_result: string;
+};
+
+const AssessmentContext = createContext<AssessmentParams | null>(null);
+
+export function useAssessmentParams() {
+	const ctx = useContext(AssessmentContext);
+	if (!ctx)
+		throw new Error(
+			"useAssessmentParams must be used within AssessmentProvider"
+		);
+	return ctx;
+}
 
 export default function IsApproveApl01({
 	children,
 }: {
 	children: JSX.Element | JSX.Element[];
 }) {
-	const { id_assessment, id_asesor } = useParams();
+	const { id_assessment, id_asesor, id_unit } = useParams();
 
-	const { user } = useAuth();
+	// const { user } = useAuth();
 	const navigate = useNavigate();
+	const location = useLocation();
 
-	if (!id_assessment || !id_asesor) {
-		navigate(routes.asesi.dashboard);
-		return <></>;
-	}
+	useEffect(() => {
+		if (!id_assessment || !id_asesor) {
+			navigate(routes.asesi.dashboard);
+		}
+	}, [id_assessment, id_asesor, navigate]);
 
-	const [approveData, setApproveData] = useState<any[]>([]); // sesuaikan type
+	const [approveData, setApproveData] = useState<any[] | undefined>(undefined); // sesuaikan type
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [filterApproveData, setFilterApproveData] = useState<any>(undefined);
 
 	useEffect(() => {
 		const fetchApprove = async () => {
@@ -41,8 +68,6 @@ export default function IsApproveApl01({
 			} catch (err) {
 				console.error("Failed to fetch approve:", err);
 				setError("Terjadi kesalahan saat mengambil data");
-			} finally {
-				setLoading(false);
 			}
 		};
 
@@ -50,34 +75,53 @@ export default function IsApproveApl01({
 	}, []);
 
 	useEffect(() => {
-		const asesiId = localStorage.getItem("asesiId");
+		if (approveData == undefined) return;
+		setFilterApproveData(
+			approveData.find((data) => data.result.assessor_id == id_asesor)
+		);
+		setLoading(false);
+	}, [approveData]);
 
-		if (!id_assessment || !id_asesor) return;
+	useEffect(() => {
+		if (!id_assessment || !id_asesor) {
+			navigate(routes.asesi.dashboard, { replace: true });
+			return;
+		}
+
+		if (!approveData || filterApproveData == undefined) return;
 
 		const navigateTo = () => {
-			if (!loading) {
-				if (approveData.length > 0 && approveData[0].approved) {
-					return routes.asesi.assessment.asesmenMandiri(
-						id_assessment,
-						id_asesor
-					);
-				}
-
-				if (asesiId) {
-					return routes.asesi.assessment.dataSertifikasi(
+			if (approveData.length > 0) {
+				if (filterApproveData.approved) {
+					if (
+						location.pathname ===
+						routes.asesi.assessment.apl02_detail(
+							id_assessment,
+							id_asesor,
+							id_unit!
+						)
+					) {
+						return null;
+					}
+					return routes.asesi.assessment.apl02(
 						id_assessment,
 						id_asesor
 					);
 				} else {
-					return routes.asesi.assessment.apl01(id_assessment, id_asesor);
+					return routes.asesi.assessment.dataSertifikasi(
+						id_assessment,
+						id_asesor
+					);
 				}
 			} else {
-				return routes.asesi.assessment.apl01(id_assessment, id_asesor);
+				return routes.asesi.dashboard;
 			}
 		};
 
-		navigate(navigateTo());
-	}, [approveData]);
+		const path = navigateTo();
+
+		if (path) navigate(path, { replace: true });
+	}, [filterApproveData]);
 
 	return (
 		<>
@@ -86,7 +130,16 @@ export default function IsApproveApl01({
 					<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
 				</div>
 			) : (
-				children
+				<AssessmentContext.Provider
+					value={{
+						id_assessment: id_assessment!,
+						id_asesor: id_asesor!,
+						id_result: filterApproveData?.result_id,
+						id_asesi: filterApproveData?.result.assessee_id,
+					}}
+				>
+					{children}
+				</AssessmentContext.Provider>
 			)}
 		</>
 	);

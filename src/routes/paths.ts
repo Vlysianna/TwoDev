@@ -45,33 +45,27 @@ const routes = {
 	},
 	asesor: {
 		root: "/asesor",
-		dashboard: "/asesor/dashboard",
-		template: "/asesor/template",
-		template2: "/asesor/template2",
+		biodata: "/asesor/biodata",
 		dashboardAsesor: "/asesor/dashboard-asesor",
-		cekAsesmenMandiri: "/asesor/cek-apl-02",
-		cekAsesmenMandiriDetail: "/asesor/cek-apl-02-detail",
-		persetujuanAsesmenKerahasiaanAsesor:
-			"/asesor/persetujuan-asesmen-kerahasiaan-asesor",
+		dashboardAsesmenMandiri: "/asesor/dashboard-asesmen-mandiri",
+		dashboardPenilaian: "/asesor/dashboard-penilaian",
 		faktaIntegritas: "/asesor/fakta-integritas",
-		fria03: "/asesor/fr-ia-03",
-		fiia: "/asesor/fi.ia.01",
-		fiiadetail: "/asesor/fi.ia.01-detail",
-		frak02: "/asesor/fr.ak.02",
-		apl01: "/asesor/apl-01",
+		cekApl02: "/asesor/cek-apl-02",
+		cekApl02Detail: "/asesor/cek-apl-02-detail",
+		ia01: "/asesor/ia-01",
+		ia01Detail: "/asesor/ia-01-detail",
+		ia03: "/asesor/ia-03",
+		cekAk01: "/asesor/cek-ak-01",
+		ak02: "/asesor/ak-02",
+		ak05: "/asesor/ak-05",
 		dataSertifikasi: "/asesor/data-sertifikasi",
-		hasil: "/asesor/hasil",
 		hasilAsesmen: "/asesor/hasil-asesmen",
-		frak05: "/asesor/fr.ak.05",
-		asesmenMandiri: "/asesor/asesmen-mandiri",
-		persetujuanKerahasiaan: "/asesor/persetujuan-kerahasiaan",
 		lembarJawaban: "/asesor/lembar-jawaban",
-		assessmentRecord: "/asesor/assessment-record",
-		assesmentReport: "/asesor/assesment-report",
+		dataAsesor: "/asesor/data-asesor",
 	},
 	asesi: {
 		root: "/asesi",
-		dashboard: "/asesi/dashboard",
+		dashboard: "/asesi",
 		assessment: {
 			root: "/asesi/assessment",
 			apl01: (id_assessment: string | number, id_asesor: string | number) =>
@@ -83,27 +77,31 @@ const routes = {
 			) => `/asesi/assessment/${id_assessment}/${id_asesor}/data-sertifikasi`,
 			dataSertifikasiPattern:
 				"/asesi/assessment/:id_assessment/:id_asesor/data-sertifikasi",
-			apl02: "/asesi/assessment/apl-02",
-			asesmenMandiri: (
+			apl02: (
 				id_assessment: string | number,
 				id_asesor: string | number
-			) => `/asesi/assessment/${id_assessment}/${id_asesor}/asesmen-mandiri`,
-			asesmenMandiriPattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/asesmen-mandiri",
-			asesmenMandiriDetail: (
+			) => `/asesi/assessment/${id_assessment}/${id_asesor}/apl-02`,
+			apl02Pattern:
+				"/asesi/assessment/:id_assessment/:id_asesor/apl-02",
+			apl02_detail: (
 				id_assessment: string | number,
-				id_asesor: string | number
+				id_asesor: string | number,
+				id_unit: string | number
 			) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/asesmen-mandiri-detail`,
-			asesmenMandiriDetailPattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/asesmen-mandiri-detail",
+				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-02-detail/${id_unit}`,
+			apl02DetailPattern:
+				"/asesi/assessment/:id_assessment/:id_asesor/apl-02-detail/:id_unit",
+			frak03: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/fr.ak.03`,
+			frak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/fr.ak.03",
 		},
-		asesmenAktif: "/asesi/asesmen-aktif",
-		umpanBalik: "/asesi/umpan-balik",
-		bandingAsesmen: "/asesi/banding-asesmen",
-		persetujuanAsesmenKerahasiaan: "/asesi/persetujuan-asesmen-kerahasiaan",
-		fria02: "/asesi/fr-ia-02",
-		asesmenPilihanGanda: "/asesi/asesmen-pilihan-ganda",
+		asesmenDiikuti: "/asesi/asesmen/diikuti",
+		ak01: "/asesi/ak-01",
+		ak04: "/asesi/ak-04",
+		ak03: "/asesi/ak-03",
+		ia02: "/asesi/ia-02",
+		ia05: "/asesi/ia-05",
+		dataAsesi: "/asesi/data-asesi",
 	},
 };
 

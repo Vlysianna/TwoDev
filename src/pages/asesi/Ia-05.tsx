@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function AsessementPilihanGanda() {
+export default function Ia05() {
     const { user } = useAuth();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -189,7 +189,7 @@ export default function AsessementPilihanGanda() {
                     <NavbarAsesi
                         title='Lembar Jawaban Pilihan Ganda'
                         icon={
-                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
+                            <Link to={'#'} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -277,7 +277,7 @@ export default function AsessementPilihanGanda() {
                         <div className="space-y-8">
                             {sampleQuestions.map((question) => (
                                 <div key={question.id} className="border-b border-gray-100 pb-6 last:border-b-0">
-                                    <h3 className="font-semibold text-gray-800 mb-4">
+                                    <h3 className="font-semibold text-gray-800">
                                         Soal {question.number}
                                     </h3>
                                     <p className="text-gray-700 mb-4">
@@ -355,7 +355,7 @@ export default function AsessementPilihanGanda() {
                                                 setShowModalConfirmSubmit(false);
                                                 handleSubmit(); // ⬅️ Jalankan submit
                                             }}
-                                            to={paths.asesi.asesmenPilihanGanda}
+                                            to={"#"}
                                             className="flex-1 bg-[#E77D35] text-white py-2 rounded hover:bg-orange-600 cursor-pointer text-center"
                                         >
                                             Lanjut

@@ -12,7 +12,7 @@ interface Question {
   tanggapan: string;
 }
 
-export default function FRIA03() {
+export default function Ia03() {
     const { user } = useAuth();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -134,7 +134,7 @@ export default function FRIA03() {
                     <NavbarAsesor
                         title='Pertanyaan Untuk Mendukung Observasi - FR.IA.03'
                         icon={
-                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.assessment.dataSertifikasiPattern} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }

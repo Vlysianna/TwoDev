@@ -5,7 +5,7 @@ import NavbarAsesor from "@/components/NavbarAsesor";
 
 
 
-export default function FRAK05() {
+export default function Ak05() {
   const [catatan, setCatatan] = useState("");
 
   return (

@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Upload, ChevronLeft, AlertCircle, CheckCircle } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import api from "@/helper/axios";
 import { motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import useSWR from "swr";
+import { useAssessmentParams } from "@/components/IsApproveApl01";
 
 type FormValues = {
 	purpose: string;
@@ -20,7 +21,7 @@ type FormValues = {
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
 export default function DataSertifikasi() {
-	const { id_assessment, id_asesor } = useParams();
+	const { id_assessment, id_asesor } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
 
 	// const { user } = useAuth();
@@ -29,6 +30,7 @@ export default function DataSertifikasi() {
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [modalStep, setModalStep] = useState<number | null>(null);
+	const [filterApproveData, setFilterApproveData] = useState<any>(undefined);
 
 	const {
 		control,
@@ -91,11 +93,26 @@ export default function DataSertifikasi() {
 			setLoading(true);
 			setError(null);
 
-			const asesiId = localStorage.getItem("asesiId");
+			const formData = new FormData();
 
-			await api.put(
-				`/assessments/apl-01/upload-certificate-docs/${id_asesor}/${asesiId}`,
-				data,
+			// Object.entries(data).forEach(([key, value]) => {
+			// 	if (value) {
+			// 		formData.append(key, value);
+			// 	}
+			// });
+			formData.append("purpose", data.purpose);
+			formData.append("assessor_id", String(id_asesor));
+			formData.append("assessee_id", String(asesiId));
+			formData.append("assessment_id", String(id_assessment));
+
+			await api.post(
+				`/assessments/apl-01/create-certificate-docs`,
+				{
+					...data,
+					assessor_id: id_asesor,
+					assessee_id: asesiId,
+					assessment_id: id_assessment,
+				},
 				{
 					headers: {
 						"Content-Type": "multipart/form-data",
@@ -120,7 +137,7 @@ export default function DataSertifikasi() {
 			// setModalStep(null);
 			localStorage.removeItem("asesiId");
 			navigate(
-				paths.asesi.assessment.dataSertifikasi(
+				paths.asesi.assessment.apl02(
 					id_assessment ?? 0,
 					id_asesor ?? 0
 				)
@@ -129,21 +146,20 @@ export default function DataSertifikasi() {
 	};
 
 	useEffect(() => {
-		console.log(approveData);
-		if (approveData && approveData.length > 0) {
-			const filterApprove = approveData.find(
-				(item: any) => item.result.assessee_id
-			);
-			console.log(filterApprove);
-			if (filterApprove) {
-				if (filterApprove.approved) {
-					setModalStep(3);
-				} else {
-					setModalStep(1);
-				}
-			}
-		}
+		if (approveData == undefined) return;
+		setFilterApproveData(
+			approveData.find((data: any) => data.result.assessor_id == id_asesor)
+		);
+		setLoading(false);
 	}, [approveData]);
+
+	useEffect(() => {
+		console.log(filterApproveData);
+		if (filterApproveData && filterApproveData.length > 0) {
+			const approved = filterApproveData.some((item: any) => item.approved);
+			setModalStep(approved ? 3 : 1);
+		}
+	}, [filterApproveData]);
 
 	const handleRefresh = () => mutate();
 

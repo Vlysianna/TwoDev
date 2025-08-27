@@ -6,7 +6,7 @@ import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/helper/axios';
 
-export default function PersetujuanAsesmenKerahasiaan() {
+export default function Ak01() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [selectedAsesi, setSelectedAsesi] = useState('');
@@ -98,7 +98,7 @@ export default function PersetujuanAsesmenKerahasiaan() {
                     <NavbarAsesi
                         title='Persetujuan Asesmen dan Kerahasiaan'
                         icon={
-                            <Link to={paths.asesi.dataSertifikasi} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesi.assessment.dataSertifikasiPattern} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
