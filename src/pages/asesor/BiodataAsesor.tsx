@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Menu, Calendar, Upload, FileText } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { ArrowLeft, Upload } from 'lucide-react';
 import NavbarAsesor from '@/components/NavAsesor';
+import api from '@/helper/axios';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function BiodataAsesor() {
   const [formData, setFormData] = useState({
@@ -14,7 +17,7 @@ export default function BiodataAsesor() {
     catatan: ''
   });
 
-  const [files, setFiles] = useState({
+  const [files, setFiles] = useState<Record<string, File | null>>({
     npwp: null,
     coverBuku: null,
     sertifikatAsesor: null,
@@ -22,24 +25,98 @@ export default function BiodataAsesor() {
     ktp: null
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  const { user } = useAuth();
+  const [assessor, setAssessor] = useState<Record<string, unknown> | null>(null);
+  const [assessorDetail, setAssessorDetail] = useState<Record<string, unknown> | null>(null);
+  const [saving, setSaving] = useState<boolean>(false);
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target as HTMLInputElement;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  const handleFileChange = (fileType) => (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (fileType: string) => (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
     setFiles(prev => ({
       ...prev,
       [fileType]: file
     }));
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData, files);
+  useEffect(() => {
+    const load = async () => {
+      if (!user) return;
+      try {
+        // get assessor by user id
+        const resp = await api.get(`/assessor/user/${user.id}`);
+        if (resp.data?.success) {
+          setAssessor(resp.data.data);
+          // try load assessor detail
+          try {
+            const det = await api.get(`/assessor-detail/${resp.data.data.id}`);
+            if (det.data?.success) setAssessorDetail(det.data.data);
+          } catch {
+            // ignore missing detail
+          }
+        }
+      } catch {
+        // no assessor yet
+      }
+    };
+
+    load();
+  }, [user]);
+
+  const handleSubmit = async () => {
+    if (!user) return;
+  setSaving(true);
+  try {
+      // 1) If files present, upload each and get paths
+      const uploaded: Record<string, string> = {};
+      for (const key of Object.keys(files)) {
+        const file = files[key];
+        if (file) {
+          const fd = new FormData();
+          fd.append('file', file);
+          // server uploads route expects 'apl-01' folder structure; use generic uploads endpoint
+          const up = await api.post('/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          if (up.data?.success && up.data.data?.path) uploaded[key] = up.data.data.path;
+        }
+      }
+
+      // 2) If assessor exists, update basic fields
+      const assessorId = assessor?.id;
+      if (assessorId) {
+        await api.put(`/assessor/${assessorId}`, {
+          address: formData.alamat,
+          phone_no: formData.noTelp,
+          birth_date: formData.tanggalLahir,
+          no_reg_met: formData.noRegMET,
+          scheme_id: assessor.scheme_id ?? undefined,
+          user_id: assessor.user_id ?? user.id,
+        });
+      }
+
+      // 3) Upsert assessor-detail
+      if (assessorId) {
+        await api.post(`/assessor-detail/${assessorId}`, {
+          tax_id_number: formData.noRegMET || assessorDetail?.tax_id_number || uploaded.npwp || '',
+          bank_book_cover: uploaded.coverBuku || assessorDetail?.bank_book_cover || '',
+          certificate: uploaded.sertifikatAsesor || assessorDetail?.certificate || '',
+          national_id: uploaded.ktp || assessorDetail?.national_id || '',
+        });
+      }
+
+      alert('Data berhasil disimpan');
+    } catch (error) {
+      console.error(error);
+      alert('Gagal menyimpan data');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -186,9 +263,13 @@ export default function BiodataAsesor() {
                       <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
                     </div>
                   </div>
-                  <button className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto">
+                  <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                    <input type="file" className="hidden" onChange={handleFileChange('npwp')} />
                     Browse File
-                  </button>
+                  </label>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.npwp ? files.npwp.name : assessorDetail?.['tax_id_number'] ? String(assessorDetail['tax_id_number']) : 'Belum ada file terpilih'}
+                  </div>
                 </div>
               </div>
 
@@ -205,9 +286,13 @@ export default function BiodataAsesor() {
                       <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
                     </div>
                   </div>
-                  <button className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto">
+                  <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                    <input type="file" className="hidden" onChange={handleFileChange('coverBuku')} />
                     Browse File
-                  </button>
+                  </label>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.coverBuku ? files.coverBuku.name : assessorDetail?.['bank_book_cover'] ? String(assessorDetail['bank_book_cover']) : 'Belum ada file terpilih'}
+                  </div>
                 </div>
               </div>
 
@@ -224,9 +309,13 @@ export default function BiodataAsesor() {
                       <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
                     </div>
                   </div>
-                  <button className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto">
+                  <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                    <input type="file" className="hidden" onChange={handleFileChange('sertifikatAsesor')} />
                     Browse File
-                  </button>
+                  </label>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.sertifikatAsesor ? files.sertifikatAsesor.name : assessorDetail?.['certificate'] ? String(assessorDetail['certificate']) : 'Belum ada file terpilih'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -250,9 +339,13 @@ export default function BiodataAsesor() {
                       <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
                     </div>
                   </div>
-                  <button className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto">
+                  <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                    <input type="file" className="hidden" onChange={handleFileChange('pasFoto')} />
                     Browse File
-                  </button>
+                  </label>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.pasFoto ? files.pasFoto.name : 'Belum ada file terpilih'}
+                  </div>
                 </div>
               </div>
 
@@ -269,9 +362,13 @@ export default function BiodataAsesor() {
                       <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
                     </div>
                   </div>
-                  <button className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto">
+                  <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                    <input type="file" className="hidden" onChange={handleFileChange('ktp')} />
                     Browse File
-                  </button>
+                  </label>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.ktp ? files.ktp.name : assessorDetail?.['national_id'] ? String(assessorDetail['national_id']) : 'Belum ada file terpilih'}
+                  </div>
                 </div>
               </div>
 
@@ -295,9 +392,10 @@ export default function BiodataAsesor() {
         <div className="mt-6 flex justify-end">
           <button
             onClick={handleSubmit}
-            className="w-full sm:w-auto sm:px-60 px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+            disabled={saving}
+            className={`w-full sm:w-auto sm:px-60 px-8 py-3 ${saving ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`}
           >
-            Lanjut
+            {saving ? 'Menyimpan...' : 'Lanjut'}
           </button>
         </div>
       </div>

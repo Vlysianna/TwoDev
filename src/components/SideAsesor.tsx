@@ -6,6 +6,7 @@ import {
     Menu,
     X,
     ListCheck,
+    FileText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import paths from "@/routes/paths";
@@ -39,6 +40,12 @@ const SidebarAsesor: React.FC = () => {
             icon: ListCheck,
             section: "main",
             path: "/asesor/dashboard-asesmen-mandiri",
+        },
+        {
+            name: "Biodata Asesor",
+            icon: FileText,
+            section: "main",
+            path: paths.asesor.biodata,
         },
         {
             name: "Penilaian",
