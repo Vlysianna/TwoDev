@@ -6,6 +6,7 @@ import {
     Menu,
     X,
     ListCheck,
+    FileText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import paths from "@/routes/paths";
@@ -29,16 +30,22 @@ const SidebarAsesor: React.FC = () => {
 
     const menuItems: MenuItem[] = [
         {
-            name: "List Asesment Aktif",
+            name: "Asesmen Diikuti",
             icon: ClipboardList,
             section: "main",
             path: "/asesor/dashboard-asesor",
         },
         {
-            name: "Asesment Aktif",
+            name: "Asesmen Mandiri",
             icon: ListCheck,
             section: "main",
             path: "/asesor/dashboard-asesmen-mandiri",
+        },
+        {
+            name: "Biodata Asesor",
+            icon: FileText,
+            section: "main",
+            path: paths.asesor.biodata,
         },
         {
             name: "Penilaian",

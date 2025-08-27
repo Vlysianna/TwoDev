@@ -30,22 +30,22 @@ import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
-import Ia01Detail from "@/pages/asesor/Ia-01-Detail";
-import Ia01 from "@/pages/asesor/Ia-01";
-import HasilAsesmen from "@/pages/asesor/HasilAsesmen";
-import Ak02 from "@/pages/asesor/Ak-02";
+import Ia01Detail from "@/pages/Asesor/Ia-01-Detail";
+import Ia01 from "@/pages/Asesor/Ia-01";
+import HasilAsesmen from "@/pages/Asesor/HasilAsesmen";
+import Ak02 from "@/pages/Asesor/Ak-02";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
 import Contact from "@/pages/LandingPage/Contact";
-import Ak05 from "@/pages/asesor/Ak-05";
-import LembarJawaban from "@/pages/asesor/LembarJawaban";
-import CekApl02 from "@/pages/asesor/Apl-02";
-import CekAk01 from "@/pages/asesor/Ak-01";
-import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
-import Ia03 from "@/pages/asesor/Ia-03";
+import Ak05 from "@/pages/Asesor/Ak-05";
+import LembarJawaban from "@/pages/Asesor/LembarJawaban";
+import CekApl02 from "@/pages/Asesor/Apl-02";
+import CekAk01 from "@/pages/Asesor/Ak-01";
+import FaktaIntegritas from "@/pages/Asesor/FaktaIntegritas";
+import Ia03 from "@/pages/Asesor/Ia-03";
 import IsApproveApl01 from "@/components/IsApproveApl01";
-import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
+import BiodataAsesor from "@/pages/Asesor/BiodataAsesor";
 import Apl02 from "@/pages/asesi/Apl-02";
 import Apl02Detail from "@/pages/asesi/Apl-02-Detail";
 import Ak04 from "@/pages/asesi/Ak-04";
@@ -53,22 +53,27 @@ import Ia05 from "@/pages/asesi/Ia-05";
 import Ia02 from "@/pages/asesi/Ia-02";
 import Ak01 from "@/pages/asesi/Ak-01";
 import Ak03 from "@/pages/asesi/Ak-03";
-import CekApl02Detail from "@/pages/asesor/Apl-02-Detail";
-import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
-import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
-import DashboardAsesmenMandiri from "@/pages/asesor/DashboardAsesmenMandiri";
+import CekApl02Detail from "@/pages/Asesor/Apl-02-Detail";
+import DashboardAsesor from "@/pages/Asesor/DashboardAsesor";
+import DashboardPenilaian from "@/pages/Asesor/DashboardPenilaian";
+import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 
-const RootLayout = () => <Outlet />;
 
 const router = createBrowserRouter([
 	{
 		path: paths.root,
-		element: <RootLayout />,
+		element: <Outlet />,
 		children: [
 			// Landing & Public Pages
 			{ index: true, element: <LandingPage /> },
+				// legacy path for older links to APL-02 (accepts id param)
+				{ path: "/apl-02/:id", element: <Apl02 /> },
+			// legacy/alternate path for assesmen aktif (avoid 404 on older links)
+			{ path: "/asesmen-aktif-asesi", element: <AsessmentAktif /> },
+			// assessor legacy path (some links point here instead of the new /asesor/... path)
+			{ path: "/asesmen-aktif-asesor", element: <DashboardAsesor /> },
 			{ path: paths.dashboard.about, element: <TentangLSP /> },
 			{ path: paths.dashboard.struktur, element: <StrukturLSP /> },
 			{ path: paths.dashboard.skema, element: <Skema /> },
