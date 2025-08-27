@@ -14,7 +14,11 @@ export default function ElementField({
 	useForm,
 	removeElement,
 }: {
-	elementFields: FieldArrayWithId<SkemaType, `unit.${number}.elemen`, "id">[];
+	elementFields: FieldArrayWithId<
+		SkemaType,
+		`groups_ia.units.${number}.elements`,
+		"id"
+	>[];
 	unitIndex: number;
 	elementIndex: number;
 	useForm: {
@@ -32,7 +36,7 @@ export default function ElementField({
 		remove: removeItem,
 	} = useFieldArray({
 		control,
-		name: `unit.${unitIndex}.elemen.${elementIndex}.item`,
+		name: `groups_ia.units.${unitIndex}.elements.${elementIndex}.details`,
 	});
 
 	return (
@@ -63,7 +67,9 @@ export default function ElementField({
 				<label>
 					Deskripsi Elemen
 					<input
-						{...register(`unit.${unitIndex}.elemen.${elementIndex}.text`)}
+						{...register(
+							`groups_ia.units.${unitIndex}.elements.${elementIndex}.title`
+						)}
 						style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 						className="w-full px-3 py-2 border rounded-md border-gray-300"
 					/>
@@ -80,7 +86,7 @@ export default function ElementField({
 						<div style={{ display: "flex", flexDirection: "row", gap: "1em" }}>
 							<input
 								{...register(
-									`unit.${unitIndex}.elemen.${elementIndex}.item.${itemIndex}.text`
+									`groups_ia.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.description`
 								)}
 								style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 								className="w-full px-3 py-2 border rounded-md border-gray-300"
@@ -99,13 +105,23 @@ export default function ElementField({
 							</button>
 						</div>
 					</label>
+					<label>
+						Benchmark
+						<input
+							{...register(
+								`groups_ia.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.benchmark`
+							)}
+							style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
+							className="w-full px-3 py-2 border rounded-md border-gray-300"
+						/>
+					</label>
 				</div>
 			))}
 
 			<div style={{ display: "flex", gap: "0.5em" }}>
 				<button
 					type="button"
-					onClick={() => appendItem({ id: "", text: "" })}
+					onClick={() => appendItem({ id: "", description: "", benchmark: "" })}
 					className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
 				>
 					Tambah Item

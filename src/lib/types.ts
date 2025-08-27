@@ -1,57 +1,85 @@
-
 export type SkemaType = {
-  jurusan: string;
-  pilihSkema: string;
-  pilihOkupasi: string;
-  nomorSKM: string;
-  unit: Unit[];
+	jurusan: string;
+	pilihSkema: string;
+	pilihOkupasi: string;
+	code: string;
+	uc_apl02s: UnitAPL02[];
+	groups_ia: {
+		name: string;
+		scenario: string;
+		duration: number;
+		units: UnitIA01[];
+		tools: [];
+		qa_ia03: [];
+	};
 };
 
-export type Unit = {
-  kode: string;
-  judul: string;
-  elemen: Element[];
+export type UnitAPL02 = {
+	unit_code: string;
+	title: string;
+	elements: ElementAPL02[];
 };
 
-export type Element = {
-  id: string;
-  text: string;
-  item: ItemElement[];
+export type ElementAPL02 = {
+	id: string;
+	title: string;
+	details: ItemElementAPL02[];
 };
 
-export type ItemElement = {
-  id: string;
-  text: string;
+export type ItemElementAPL02 = {
+	id: string;
+	description: string;
+};
+
+export type UnitIA01 = {
+	unit_code: string;
+	title: string;
+	elements: ElementIA01[];
+};
+
+export type ElementIA01 = {
+	id: string;
+	title: string;
+	details: ItemElementIA01[];
+};
+
+export type ItemElementIA01 = {
+	id: string;
+	description: string;
+	benchmark: string;
 };
 
 type SkemaTypeRaw = {
-  occupation_id: number;
-  code: string;
-  unit_competencies: {
-    unit_code: string;
-    title: string;
-    elements: {
-      title: string;
-      element_details: {
-        description: string;
-      }[];
-    }[];
-  }[];
+	occupation_id: number;
+	code: string;
+	unit_competencies: {
+		unit_code: string;
+		title: string;
+		elements: {
+			title: string;
+			element_details: {
+				description: string;
+			}[];
+		}[];
+	}[];
 };
 
-export function convertSkemaToPostPayload(skema: SkemaType, occupation_id: number): SkemaTypeRaw {
-  return {
-    occupation_id,
-    code: skema.nomorSKM,
-    unit_competencies: skema.unit.map((unit) => ({
-      unit_code: unit.kode,
-      title: unit.judul,
-      elements: unit.elemen.map((elemen) => ({
-        title: elemen.text,
-        element_details: elemen.item.map((item) => ({
-          description: item.text,
-        })),
-      })),
-    })),
-  };
+export function convertSkemaToPostPayload(
+	skema: SkemaType,
+	occupation_id: number
+): SkemaTypeRaw {
+	return {
+		occupation_id,
+		code: skema.code,
+		unit_competencies: skema.uc_apl02s.map((unit) => ({
+			unit_code: unit.unit_code,
+			title: unit.title,
+			elements: unit.elements.map((elemen) => ({
+				title: elemen.title,
+				element_details: elemen.details.map((item) => ({
+					description: item.description,
+				})),
+			})),
+		})),
+	};
 }
