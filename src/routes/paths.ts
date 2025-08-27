@@ -94,13 +94,23 @@ const routes = {
 			frak03: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/fr.ak.03`,
 			frak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/fr.ak.03",
+			ia02: (
+				id_assessment: string | number,
+				id_asesor: string | number
+			) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-02`,
+			ia02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-02",
+			ia05: (
+				id_assessment: string | number,
+				id_asesor: string | number
+			) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-05`,
+			ia05Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-05",
 		},
 		asesmenDiikuti: "/asesi/asesmen/diikuti",
 		ak01: "/asesi/ak-01",
 		ak04: "/asesi/ak-04",
 		ak03: "/asesi/ak-03",
-		ia02: "/asesi/ia-02",
-		ia05: "/asesi/ia-05",
 		dataAsesi: "/asesi/data-asesi",
 	},
 };

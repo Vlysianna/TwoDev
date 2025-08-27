@@ -243,7 +243,7 @@ export default function Apl02() {
 									{/* Submit Button */}
 									<div className="w-full">
 										<Link
-											to={paths.asesi.assessment.frak03(
+											to={paths.asesi.assessment.ia02(
 												id_assessment,
 												id_asesor
 											)} // arahkan ke route yang kamu mau
