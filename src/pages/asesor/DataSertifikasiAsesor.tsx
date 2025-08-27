@@ -1,90 +1,44 @@
-import React, { useState } from 'react';
-import { Upload, X, Eye, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, X, Eye, ChevronLeft, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavbarAsesor from '@/components/NavAsesor';
+import paths from '@/routes/paths';
+import api from '@/helper/axios';
 
-interface File {
+interface LocalFileMeta {
     id: number;
+    file?: File; // actual file
     name: string;
     format: string;
     size: string;
+    field?: string; // mapping to backend field name (e.g. student_card)
+    uploadedUrl?: string;
 }
 
 interface FileUploadAreaProps {
     title: string;
-    files: File[];
+    files: LocalFileMeta[];
     onFileRemove: (fileId: number, type: string) => void;
+    onFileAdd: (type: string, fileList: FileList | null) => void;
     type: string;
+    uploading?: boolean;
 }
 
 export default function DataSertifikasiAsesor() {
-    const [currentStep, setCurrentStep] = useState(1);
     const [selectedAssessment, setSelectedAssessment] = useState('');
     const [selectedAssessor, setSelectedAssessor] = useState('');
-    const [administrativeFiles, setAdministrativeFiles] = useState<File[]>([
-        {
-            id: 1,
-            name: 'Pas foto 3x4 latar belakang merah',
-            format: 'PNG',
-            size: '2MB'
-        },
-        {
-            id: 2,
-            name: 'Kartu Tanda Penduduk ( KTP ) / Kartu Keluarga ( KK )',
-            format: 'PNG',
-            size: '5MB'
-        }
-    ]);
-    const [supportingFiles, setSupportingFiles] = useState<File[]>([
-        {
-            id: 1,
-            name: 'Sertifikat berbasis kompetensi',
-            format: 'PNG',
-            size: '2MB'
-        },
-        {
-            id: 2,
-            name: 'Fotocopy ijazah terakhir',
-            format: 'PNG',
-            size: '2MB'
-        },
-        {
-            id: 3,
-            name: 'Report semester 1 - 5',
-            format: 'PNG',
-            size: '3MB'
-        },
-        {
-            id: 4,
-            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
-            format: 'PNG',
-            size: '3MB'
-        },
-        {
-            id: 4,
-            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
-            format: 'PNG',
-            size: '3MB'
-        },
-        {
-            id: 4,
-            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
-            format: 'PNG',
-            size: '3MB'
-        },
-        {
-            id: 4,
-            name: 'Fotocopy Surat keterangan pengalaman kerja minimal 1 tahun',
-            format: 'PNG',
-            size: '3MB'
-        }
-    ]);
+    interface AssessorOption { id: number; user?: { full_name?: string } }
+    const [assessors, setAssessors] = useState<AssessorOption[]>([]);
+    const [administrativeFiles, setAdministrativeFiles] = useState<LocalFileMeta[]>([]);
+    const [supportingFiles, setSupportingFiles] = useState<LocalFileMeta[]>([]);
+    const [uploading, setUploading] = useState(false);
+    const [message, setMessage] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [assessmentId, setAssessmentId] = useState<number | null>(null);
+    const [assesseeId, setAssesseeId] = useState<number | null>(null); // integrate with previous step later
+    const [assessments, setAssessments] = useState<{ id: number; code: string }[]>([]);
 
-    const steps = [
-        { number: 1, title: 'LSP Media', active: currentStep === 1, completed: currentStep > 1 },
-        { number: 2, title: 'LSP Media', active: currentStep === 2, completed: currentStep > 2 },
-        { number: 3, title: 'Tanda Tangan', active: currentStep === 3, completed: false }
-    ];
+    // steps UI reserved (not rendered yet)
 
     const assessmentOptions = [
         'Sertifikasi',
@@ -94,26 +48,110 @@ export default function DataSertifikasiAsesor() {
         'Lainnya'
     ];
 
-    const handleFileRemove = (fileId: number, type: string) => {
+        const handleFileRemove = (fileId: number, type: string) => {
         if (type === 'administrative') {
-            setAdministrativeFiles(files => files.filter(file => file.id !== fileId));
+                        setAdministrativeFiles(files => files.filter(file => file.id !== fileId));
         } else {
-            setSupportingFiles(files => files.filter(file => file.id !== fileId));
+                        setSupportingFiles(files => files.filter(file => file.id !== fileId));
         }
     };
 
-    const FileUploadArea: React.FC<FileUploadAreaProps> = ({ title, files, onFileRemove, type }) => (
+    const handleFileAdd = (type: string, fileList: FileList | null) => {
+            if (!fileList || !fileList.length) return;
+            const file = fileList[0];
+            const meta: LocalFileMeta = {
+                id: Date.now(),
+                file,
+                name: file.name,
+                format: file.type.split('/')[1] || 'unknown',
+                size: (file.size / 1024).toFixed(1) + 'KB',
+        // default field left undefined so user can choose the document type
+        };
+            if (type === 'administrative') setAdministrativeFiles(prev => [...prev, meta]);
+            else setSupportingFiles(prev => [...prev, meta]);
+        };
+
+            useEffect(() => {
+                (async () => {
+                    try {
+                        const [assessorRes, assessmentRes] = await Promise.all([
+                            api.get('/assessor'),
+                            api.get('/assessments')
+                        ]);
+                        if (assessorRes.data.success) setAssessors(assessorRes.data.data);
+                        if (assessmentRes.data.success) setAssessments(assessmentRes.data.data);
+                        const storedAssessee = localStorage.getItem('assessee_id');
+                        if (storedAssessee) setAssesseeId(Number(storedAssessee));
+                    } catch (e) {
+                        console.error('Gagal init data', e);
+                    }
+                })();
+            }, []);
+
+        const submitUploads = async () => {
+                    if (!assessmentId) {
+                        setError('Pilih assessment terlebih dahulu');
+                        return;
+                    }
+                    if (!assesseeId) {
+                        setError('Assessee belum tersedia. Lengkapi data sebelumnya.');
+                        return;
+                    }
+                    if (!selectedAssessor) {
+                        setError('Pilih asesor');
+                return;
+            }
+            setUploading(true);
+            setError(null);
+            setMessage(null);
+            try {
+                const combined = [...administrativeFiles, ...supportingFiles];
+
+                // ensure required student_card is present
+                const hasStudentCard = combined.some(f => f.field === 'student_card' && f.file);
+                if (!hasStudentCard) {
+                    setError('Dokumen wajib "Kartu Pelajar (student_card)" belum dipilih/upload');
+                    return;
+                }
+
+                // build FormData to send files using their assigned field keys
+                const form = new FormData();
+                form.append('assessment_id', String(assessmentId as number));
+                form.append('assessee_id', String(assesseeId as number));
+                form.append('assessor_id', String(Number(selectedAssessor)));
+                form.append('purpose', selectedAssessment || 'APL1');
+
+                combined.forEach(f => {
+                    if (f.field && f.file instanceof File) {
+                        form.append(f.field, f.file);
+                    }
+                });
+
+                console.debug('Uploading APL1 certificate FormData:', combined.map(f => ({ name: f.name, field: f.field })));
+                const res = await api.post('/assessments/apl-01/create-certificate-docs', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+                console.debug('Upload response:', res?.data);
+                if (res?.data?.success) {
+                    setMessage('Upload berhasil');
+                } else setError(res?.data?.message || 'Upload gagal');
+                    } catch (e) {
+                        const err = e as { response?: { data?: { message?: string } } };
+                        setError(err.response?.data?.message || 'Upload gagal');
+            } finally {
+                setUploading(false);
+            }
+        };
+
+    const FileUploadArea: React.FC<FileUploadAreaProps> = ({ title, files, onFileRemove, onFileAdd, type, uploading }) => (
         <div className="bg-white rounded-lg">
             <h3 className="text-gray-900 font-medium mb-4">{title}</h3>
 
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 mb-4 hover:cursor-pointer transition-colors hover:bg-gray-100">
+            <label className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 mb-4 hover:cursor-pointer transition-colors hover:bg-gray-100 block">
                 <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-800 text-xl mb-2">Choose a file or drag & drop it here</p>
-                <p className="text-gray-500 text-[12px] mb-4">JPEG, PNG, PDF, and MP4 formats, up to 50MB</p>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md border border-gray-300 hover:bg-gray-200 hover:cursor-pointer transition-colors">
-                    Browse File
-                </button>
-            </div>
+                <p className="text-gray-800 text-xl mb-2">Pilih file atau drag & drop</p>
+                <p className="text-gray-500 text-[12px] mb-4">PNG, JPG, PDF (max 10MB)</p>
+                <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md border border-gray-300 inline-block">Browse File</span>
+                <input type="file" className="hidden" onChange={e => onFileAdd(type, e.target.files)} />
+            </label>
 
             <div className="border border-gray-200 rounded-lg p-3 h-50 overflow-y-auto"> {/* Fixed height with scroll */}
                 {files.length > 0 ? (
@@ -130,23 +168,43 @@ export default function DataSertifikasiAsesor() {
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-gray-900 font-medium text-sm truncate">{file.name}</p>
-                                        <p className="text-gray-500 text-xs truncate">
-                                            File Format: {file.format} • File Size: {file.size}
-                                        </p>
+                                        <p className="text-gray-500 text-xs truncate">Format: {file.format} • Ukuran: {file.size}</p>
                                     </div>
                                 </div>
 
-                                {/* Kanan - Tombol */}
+                                {/* Kanan - Tombol + field selector */}
                                 <div className="flex items-center space-x-2">
+                                    <select
+                                        value={file.field || ''}
+                                        onChange={(e) => {
+                                            const f = e.target.value || undefined;
+                                            // update file.field in parent arrays
+                                            if (type === 'administrative') {
+                                                setAdministrativeFiles(prev => prev.map(p => p.id === file.id ? { ...p, field: f } : p));
+                                            } else {
+                                                setSupportingFiles(prev => prev.map(p => p.id === file.id ? { ...p, field: f } : p));
+                                            }
+                                        }}
+                                        className="px-2 py-1 border rounded text-sm mr-2"
+                                    >
+                                        <option value="">Pilih tipe dokumen</option>
+                                        <option value="school_report_card">Raport</option>
+                                        <option value="field_work_practice_certificate">SKP</option>
+                                        <option value="student_card">Kartu Pelajar</option>
+                                        <option value="family_card">Kartu Keluarga</option>
+                                        <option value="id_card">KTP</option>
+                                    </select>
                                     <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
                                         <Eye className="w-4 h-4 text-gray-600" />
                                     </button>
-                                    <button
-                                        onClick={() => onFileRemove(file.id, type)}
-                                        className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
-                                    >
-                                        <X className="w-4 h-4 text-gray-600" />
-                                    </button>
+                                                                        {!uploading && (
+                                                                            <button
+                                                                                    onClick={() => onFileRemove(file.id, type)}
+                                                                                    className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
+                                                                            >
+                                                                                    <X className="w-4 h-4 text-gray-600" />
+                                                                            </button>
+                                                                        )}
                                 </div>
                             </div>
 
@@ -168,7 +226,7 @@ export default function DataSertifikasiAsesor() {
                     <NavbarAsesor
                         title='Bukti Administratif'
                         icon={
-                            <Link to="/apl-01-asesor" className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesor.apl01} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -179,7 +237,7 @@ export default function DataSertifikasiAsesor() {
                     {/* Left Column */}
                     <div className="space-y-6 md:col-span-3 flex flex-col">
                         {/* Tujuan Assessment */}
-                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
                             <h3 className="text-gray-900 font-medium mb-4">Tujuan Assessment</h3>
                             <div className="space-y-3">
                                 {assessmentOptions.map((option) => (
@@ -196,18 +254,36 @@ export default function DataSertifikasiAsesor() {
                                     </label>
                                 ))}
                             </div>
-                            <h3 className="text-gray-900 font-medium mt-4 mb-2">Pilih Asesor</h3>
+                                                        <h3 className="text-gray-900 font-medium mt-4 mb-2">Pilih Assessment</h3>
+                                                        <div className="relative">
+                                                            <select
+                                                                value={assessmentId ?? ''}
+                                                                onChange={e => setAssessmentId(e.target.value ? Number(e.target.value) : null)}
+                                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none"
+                                                            >
+                                                                <option value="">Pilih assessment</option>
+                                                                {assessments.map(a => (
+                                                                    <option key={a.id} value={a.id}>{a.code}</option>
+                                                                ))}
+                                                            </select>
+                                                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                        <h3 className="text-gray-900 font-medium mt-4 mb-2">Pilih Asesor</h3>
                             <div className="relative">
-                                <select
-                                    value={selectedAssessor}
-                                    onChange={(e) => setSelectedAssessor(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none"
-                                >
-                                    <option value="">Pilih nama asesor</option>
-                                    <option value="asesor1">Asesor 1</option>
-                                    <option value="asesor2">Asesor 2</option>
-                                    <option value="asesor3">Asesor 3</option>
-                                </select>
+                                                                <select
+                                                                    value={selectedAssessor}
+                                                                    onChange={(e) => setSelectedAssessor(e.target.value)}
+                                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none"
+                                                                >
+                                                                    <option value="">Pilih nama asesor</option>
+                                                                    {assessors.map(a => (
+                                                                        <option key={a.id} value={a.id}>{a.user?.full_name || `Asesor ${a.id}`}</option>
+                                                                    ))}
+                                                                </select>
                                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -219,12 +295,14 @@ export default function DataSertifikasiAsesor() {
                         <div className="bg-white rounded-lg border border-gray-200 p-6">
                             <h3 className="text-gray-900 font-medium mb-4">Kelengkapan Bukti Administratif</h3>
                             <div className="space-y-3">
-                                <FileUploadArea
-                                    title=""
-                                    files={administrativeFiles}
-                                    onFileRemove={handleFileRemove}
-                                    type="administrative"
-                                />
+                                                                <FileUploadArea
+                                                                    title=""
+                                                                    files={administrativeFiles}
+                                                                    onFileRemove={handleFileRemove}
+                                                                    onFileAdd={handleFileAdd}
+                                                                    type="administrative"
+                                                                    uploading={uploading}
+                                                                />
                             </div>
                         </div>
                     </div>
@@ -234,12 +312,14 @@ export default function DataSertifikasiAsesor() {
                         <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col">
                             <h3 className="text-gray-900 font-medium mb-4">Kelengkapan Pemohon</h3>
                             <div className="space-y-3 flex-grow">
-                                <FileUploadArea
-                                    title=""
-                                    files={supportingFiles}
-                                    onFileRemove={handleFileRemove}
-                                    type="supporting"
-                                />
+                                                                <FileUploadArea
+                                                                    title=""
+                                                                    files={supportingFiles}
+                                                                    onFileRemove={handleFileRemove}
+                                                                    onFileAdd={handleFileAdd}
+                                                                    type="supporting"
+                                                                    uploading={uploading}
+                                                                />
                             </div>
                         </div>
                         <div className="bg-white rounded-lg border border-gray-200 p-4 sm:px-6 sm:py-4 flex flex-col h-full w-full mx-auto">
@@ -254,15 +334,22 @@ export default function DataSertifikasiAsesor() {
                        text-sm sm:text-base resize-none"
                                 />
                                 <hr className="border-gray-300" />
-                                <div className="w-full">
-                                    <Link
-                                        to="/asesmen-mandiri"
-                                        className="w-full block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 rounded-md 
-                           transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base"
-                                    >
-                                        Lanjut
-                                    </Link>
-                                </div>
+                                                                {error && <p className="text-sm text-red-600">{error}</p>}
+                                                                {message && <p className="text-sm text-green-600">{message}</p>}
+                                                                <div className="w-full space-y-2">
+                                                                    <button
+                                                                        onClick={submitUploads}
+                                                                        disabled={uploading}
+                                                                        className="w-full flex items-center justify-center gap-2 bg-[#E77D35] hover:bg-orange-600 disabled:opacity-60 text-white font-normal py-2 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base"
+                                                                    >
+                                                                        {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                                                        {uploading ? 'Mengupload...' : 'Upload & Lanjut'}
+                                                                    </button>
+                                                                    <Link
+                                                                        to={paths.asesor.asesmenMandiri}
+                                                                        className="block text-center text-sm text-gray-600 underline"
+                                                                    >Lewati</Link>
+                                                                </div>
                             </div>
                         </div>
                     </div>

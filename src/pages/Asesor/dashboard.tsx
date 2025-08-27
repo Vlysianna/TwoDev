@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Eye,
   ListFilter,
   Search,
   LayoutDashboard,
@@ -12,11 +11,12 @@ import {
 import { Link } from "react-router-dom";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavbarAsesor from "@/components/NavAsesor";
+import api from '@/helper/axios';
 
 const DashboardAsesor: React.FC = () => {
   const { user } = useAuth();
 
-  const okupasiData = [
+  const defaultOkupasi = [
     {
       id: 1,
       title: "Okupasi Junior Code",
@@ -89,6 +89,46 @@ const DashboardAsesor: React.FC = () => {
     },
   ];
 
+  interface ScheduleDetail { id: number; assessor?: { id: number; full_name?: string }; location?: string }
+  interface ScheduleItem { id: number; assessment: { id:number; code?:string; occupation?: { name?: string } }; start_date?: string | null; end_date?: string | null; schedule_details?: ScheduleDetail[] }
+  type DefaultOkupasiItem = (typeof defaultOkupasi)[number];
+  type RenderItem = ScheduleItem | DefaultOkupasiItem;
+  const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        setLoading(true);
+        // get assessor record
+        const assessorRes = await api.get(`/assessor/user/${user.id}`);
+        if (!assessorRes.data?.success) {
+          setError('Gagal mengambil data assessor');
+          return;
+        }
+        const assessor = assessorRes.data.data;
+        const assessorId = assessor?.id;
+
+        // get all schedules then filter those that include assessorId
+        const schedRes = await api.get('/schedules');
+        if (!schedRes.data?.success) {
+          setError('Gagal mengambil jadwal');
+          return;
+        }
+  const list: ScheduleItem[] = schedRes.data.data || [];
+  const mySchedules = list.filter(s => s.schedule_details?.some((d: ScheduleDetail) => d.assessor?.id === assessorId));
+  setSchedules(mySchedules);
+      } catch (e) {
+        console.error(e);
+        setError('Gagal memuat jadwal');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [user]);
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -153,73 +193,86 @@ const DashboardAsesor: React.FC = () => {
 
           {/* Grid Okupasi */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {okupasiData.map((okupasi) => (
-              <div
-                key={okupasi.id}
-                className={`bg-white rounded-lg shadow-sm border-b-4 ${okupasi.borderColor} hover:shadow-md transition-shadow`}
-              >
-                {/* Header */}
-                <div className="p-4 border-b border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">
-                      {okupasi.title}
-                    </h3>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">{okupasi.subtitle}</p>
-                  <div className="flex items-center space-x-1 text-xs text-gray-500">
-                    <Clock className="w-4 h-4" />
-                    <span>{okupasi.status}</span>
-                  </div>
-                </div>
+            {loading ? (
+              <div className="col-span-full text-center py-12">Memuat jadwal...</div>
+            ) : error ? (
+              <div className="col-span-full text-center py-12 text-red-600">{error}</div>
+            ) : (
+              ((schedules && schedules.length > 0) ? schedules : defaultOkupasi).map((item: RenderItem) => {
+                const isDefault = schedules.length === 0;
+                const key = item.id;
 
-                {/* Lokasi */}
-                <div className="flex items-center justify-center mt-3 text-sm">
-                  <MapPinned className="w-5 h-5 mr-1" />
-                  <span>{okupasi.location}</span>
-                </div>
+                const isSchedule = (it: RenderItem): it is ScheduleItem => {
+                  return (it as ScheduleItem).assessment !== undefined;
+                };
 
-                {/* Timeline */}
-                <div className="px-4 pt-3 pb-10">
-                  <div className="flex flex-col items-center">
-                    <div className="flex justify-between w-full text-sm text-gray-500 mb-2">
-                      <span>{okupasi.startDate}</span>
-                      <span>{okupasi.endDate}</span>
-                    </div>
-                    <div className="relative w-full h-4 flex items-center">
-                      <div className="absolute left-0 right-0 h-[2px] bg-gray-300" />
-                      <div className="w-4 h-4 bg-white border-4 border-gray-400 rounded-full z-2"></div>
-                      <div className="flex-1"></div>
-                      <div className="w-4 h-4 bg-white border-4 border-gray-400 rounded-full z-2"></div>
-                    </div>
-                  </div>
-                </div>
+                const title = isSchedule(item) ? (item.assessment?.occupation?.name || `Assessment ${item.assessment?.code || item.assessment?.id}`) : item.title;
+                const subtitle = isSchedule(item) ? (item.assessment?.code || '') : item.subtitle;
+                const location = isSchedule(item) ? (item.schedule_details?.[0]?.location || '-') : item.location;
+                const startDate = isSchedule(item) ? (item.start_date ? new Date(item.start_date).toLocaleString() : 'TBD') : item.startDate;
+                const endDate = isSchedule(item) ? (item.end_date ? new Date(item.end_date).toLocaleString() : 'TBD') : item.endDate;
+                const avatar = isSchedule(item) ? (item.schedule_details?.[0]?.assessor?.full_name?.split(' ').map((s:string)=>s[0]).slice(0,2).join('') || 'AS') : item.avatar;
+                const avatarBg = isSchedule(item) ? 'bg-[#60B5FF]' : item.avatarBg;
+                const borderColor = isSchedule(item) ? 'border-[#60B5FF]' : item.borderColor;
 
-                {/* Footer */}
-                <div className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-8 h-8 ${okupasi.avatarBg} rounded-full flex items-center justify-center text-white text-sm font-medium`}
-                      >
-                        {okupasi.avatar}
+                return (
+                  <div
+                    key={key}
+                    className={`bg-white rounded-lg shadow-sm border-b-4 ${borderColor} hover:shadow-md transition-shadow`}
+                  >
+                    {/* Header */}
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900">{title}</h3>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {okupasi.instructor}
-                        </p>
-                        <p className="text-xs text-gray-500">{okupasi.role}</p>
+                      <p className="text-sm text-gray-600 mb-2">{subtitle}</p>
+                      <div className="flex items-center space-x-1 text-xs text-gray-500">
+                        <Clock className="w-4 h-4" />
+                        <span>Jadwal</span>
                       </div>
                     </div>
-                    <Link
-                      to="/apl-01"
-                      className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
-                    >
-                      <ChevronRight className="w-4 h-4 text-white" />
-                    </Link>
+
+                    {/* Lokasi */}
+                    <div className="flex items-center justify-center mt-3 text-sm">
+                      <MapPinned className="w-5 h-5 mr-1" />
+                      <span>{location}</span>
+                    </div>
+
+                    {/* Timeline */}
+                    <div className="px-4 pt-3 pb-10">
+                      <div className="flex flex-col items-center">
+                        <div className="flex justify-between w-full text-sm text-gray-500 mb-2">
+                          <span>{startDate}</span>
+                          <span>{endDate}</span>
+                        </div>
+                        <div className="relative w-full h-4 flex items-center">
+                          <div className="absolute left-0 right-0 h-[2px] bg-gray-300" />
+                          <div className="w-4 h-4 bg-white border-4 border-gray-400 rounded-full z-2"></div>
+                          <div className="flex-1"></div>
+                          <div className="w-4 h-4 bg-white border-4 border-gray-400 rounded-full z-2"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-8 h-8 ${avatarBg} rounded-full flex items-center justify-center text-white text-sm font-medium`}>{avatar}</div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{isDefault ? (item as DefaultOkupasiItem).instructor : (item as ScheduleItem).schedule_details?.[0]?.assessor?.full_name || 'Asesor'}</p>
+                            <p className="text-xs text-gray-500">{isDefault ? (item as DefaultOkupasiItem).role : 'Asesor'}</p>
+                          </div>
+                        </div>
+                        <Link to="/asesor/apl-01" className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+                          <ChevronRight className="w-4 h-4 text-white" />
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                );
+              })
+            )}
           </div>
         </main>
       </div>

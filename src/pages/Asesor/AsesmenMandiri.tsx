@@ -2,24 +2,74 @@ import { Search, LayoutDashboard } from "lucide-react";
 import { Link } from 'react-router-dom';
 import SidebarAsesor from '@/components/SideAsesor';
 import NavAsesor from '@/components/NavAsesor';
+import { useEffect, useState } from 'react';
+import api from '@/helper/axios';
+
+interface Assessee {
+    id: number;
+    full_name?: string;
+    user?: { full_name?: string };
+}
+
+type RawAssessee = {
+    id: number;
+    user_id?: number;
+    user?: { full_name?: string };
+    full_name?: string;
+    [k: string]: unknown;
+};
 
 export default function TemplateAsesor() {
-    // Contoh data siswa
-    const siswaData = [
-        { id: 1, nama: "Adelia Tri Ramadhani" },
-        { id: 2, nama: "Ahmad Akmal Fauzan" },
-        { id: 3, nama: "Ahmad Zaqi" },
-        { id: 4, nama: "Aisha Sekar Arina Putri" },
-        { id: 5, nama: "Alfina Komarul Asih" },
-        { id: 6, nama: "Amelia" },
-        { id: 7, nama: "Ananda Keizha Oktavian" },
-        { id: 8, nama: "Andhika Dani Natawidjaja" },
-        { id: 9, nama: "Ari Reivansyah" },
-        { id: 10, nama: "Darin Fairuz Romli" },
-        { id: 11, nama: "Eru Nur Al Kafini" },
-        { id: 12, nama: "Fajri Darmawan" },
-        { id: 13, nama: "Iftikhar Azhar Chaudhry" },
-    ];
+    const [assessees, setAssessees] = useState<Assessee[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let mounted = true;
+        async function load() {
+            setLoading(true);
+            try {
+                const res = await api.get('/assessee');
+                if (!mounted) return;
+                console.log('API /assessee response:', res.data);
+                if (res.data && (res.data.success || res.data.data)) {
+                    const raw: RawAssessee[] = (res.data.data || []) as RawAssessee[];
+                    // find assessees missing user/full_name and fetch user by user_id when available
+                    const missing = raw.filter(a => !(a.user?.full_name) && !a.full_name && a.user_id);
+                    if (missing.length > 0) {
+                        // fetch users in parallel
+                        const userPromises = missing.map(m => api.get(`/users/${m.user_id}`).then(r => ({ id: m.id, user: r.data?.data || null })).catch(() => ({ id: m.id, user: null })));
+                        const users = await Promise.all(userPromises);
+                        const userMap = new Map(users.map(u => [u.id, u.user]));
+                        const merged = raw.map(ritem => ({ ...ritem, user: ritem.user || userMap.get(ritem.id) }));
+                        setAssessees(merged as Assessee[]);
+                    } else {
+                        setAssessees(raw as Assessee[]);
+                    }
+                } else {
+                    setAssessees([]);
+                }
+            } catch (err: unknown) {
+                let msg = String(err);
+                try {
+                    const parsed = JSON.parse(JSON.stringify(err || {}));
+                    if (parsed && parsed.response?.data?.message) {
+                        msg = parsed.response.data.message;
+                    } else if (parsed && parsed.message) {
+                        msg = parsed.message;
+                    }
+                } catch {
+                    // keep String(err)
+                }
+                setError(msg);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        }
+
+        load();
+        return () => { mounted = false };
+    }, []);
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -32,7 +82,7 @@ export default function TemplateAsesor() {
             <div className="flex-1">
                 {/* Navbar */}
                 <div className="sticky top-0 z-10 bg-white shadow-sm">
-                    <NavAsesor title="Overview" icon={<LayoutDashboard size={25} />}/>
+                    <NavAsesor title="Asesmen Mandiri" icon={<LayoutDashboard size={25} />}/>
                 </div>
 
                 {/* Content */}
@@ -71,31 +121,43 @@ export default function TemplateAsesor() {
 
                     {/* Tabel */}
                     <div className="overflow-x-auto bg-white rounded-md shadow">
-                        <table className="min-w-full border border-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-4 py-4 border-b text-left text-sm font-medium">No</th>
-                                    <th className="px-4 py-4 border-b text-left text-sm font-medium">Nama Siswa</th>
-                                    <th className="px-4 py-4 border-b text-center text-sm font-medium">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {siswaData.map((siswa, index) => (
-                                    <tr key={siswa.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-4 border-b text-sm text-gray-700">{index + 1}</td>
-                                        <td className="px-4 py-4 border-b text-sm text-gray-900">{siswa.nama}</td>
-                                        <td className="px-4 py-4 border-b text-center">
-                                            <Link
-                                                to={`/apl-02/${siswa.id}`}
-                                                className="text-orange-500 underline text-xs"
-                                            >
-                                                Cek APL 02 &rarr;
-                                            </Link>
-                                        </td>
+                        {loading ? (
+                            <div className="p-6 text-center">Loading...</div>
+                        ) : error ? (
+                            <div className="p-6 text-center text-red-500">{error}</div>
+                        ) : (
+                            <table className="min-w-full border border-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-4 py-4 border-b text-left text-sm font-medium">No</th>
+                                        <th className="px-4 py-4 border-b text-left text-sm font-medium">Nama Siswa</th>
+                                        <th className="px-4 py-4 border-b text-center text-sm font-medium">Action</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {assessees.length === 0 && (
+                                        <tr>
+                                            <td colSpan={3} className="px-4 py-6 text-center text-sm text-gray-500">Tidak ada data</td>
+                                        </tr>
+                                    )}
+                                    {assessees.map((siswa, index) => (
+                                        <tr key={siswa.id} className="hover:bg-gray-50">
+                                            <td className="px-4 py-4 border-b text-sm text-gray-700">{index + 1}</td>
+                                            <td className="px-4 py-4 border-b text-sm text-gray-900">
+                                                {siswa.user?.full_name
+                                                    || siswa.full_name
+                                                    || JSON.stringify(siswa)}
+                                            </td>
+                                            <td className="px-4 py-4 border-b text-center">
+                                                <Link to={`/apl-02/${siswa.id}`} className="text-orange-500 underline text-xs">
+                                                    Cek APL 02 &rarr;
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
             </div>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, AlertCircle, CheckCircle } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import paths from '@/routes/paths';
 import NavbarAsesor from '@/components/NavAsesor';
 import { useAuth } from '@/contexts/AuthContext';
-import api from '@/helper/axios';
+import { createOrUpdateAssesseeAPL1 } from '@/helper/apl1';
 
 export default function AplZeroOneAsesor() {
   const [formData, setFormData] = useState({
@@ -44,6 +45,77 @@ export default function AplZeroOneAsesor() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const submit = async () => {
+    if (!user) return setError('User belum login');
+    // client-side validation for required fields to avoid roundtrips
+    const required = [
+      'nama',
+      'noKTPNIK',
+      'tempatLahir',
+      'tanggalLahir',
+      'jenisKelamin',
+      'kewarganegaraan',
+      'noHP',
+      'alamat',
+      'kodePos',
+      'kualifikasiPendidikan'
+    ];
+    for (const key of required) {
+      if (!formData[key as keyof typeof formData]) {
+        return setError('Lengkapi semua field wajib sebelum melanjutkan: ' + key);
+      }
+    }
+
+    setSubmitting(true); setError(null); setSuccess(null);
+    try {
+      const payload = {
+        user_id: user.id,
+        full_name: formData.nama,
+        identity_number: formData.noKTPNIK,
+        birth_date: formData.tanggalLahir ? new Date(formData.tanggalLahir).toISOString() : new Date().toISOString(),
+        birth_location: formData.tempatLahir,
+        gender: formData.jenisKelamin,
+        nationality: formData.kewarganegaraan,
+        phone_no: formData.noHP,
+        house_phone_no: formData.noTelpRumah || undefined,
+        office_phone_no: formData.noTelpKantor || undefined,
+        address: formData.alamat,
+        postal_code: formData.kodePos,
+        educational_qualifications: formData.kualifikasiPendidikan,
+        jobs: formData.namaInstitusi ? [{
+          institution_name: formData.namaInstitusi,
+          address: formData.alamatKantor,
+          postal_code: formData.kodePosKantor,
+          position: formData.jabatan,
+          phone_no: formData.noTelpKantorPekerjaan,
+          job_email: formData.email
+        }] : []
+      } as const;
+      const res = await createOrUpdateAssesseeAPL1(payload);
+      console.debug('APL1 create response:', res);
+      if (res && res.success) {
+        setSuccess('Data tersimpan');
+        if (res.data?.id) {
+          localStorage.setItem('assessee_id', String(res.data.id));
+        }
+        setTimeout(() => navigate(paths.asesor.dataSertifikasi), 800);
+      } else {
+        setError(res?.message || 'Gagal menyimpan - server tidak memberikan pesan');
+      }
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } } };
+      const serverMsg = e.response?.data?.message;
+      console.error('Error creating assessee:', err);
+      setError(serverMsg || 'Gagal menyimpan (cek konsol untuk detail)');
+    } finally { setSubmitting(false); }
   };
 
 
@@ -414,13 +486,20 @@ export default function AplZeroOneAsesor() {
           <hr className='text-gray-300' />
 
           {/* Submit Button */}
-          <div className="flex justify-end mt-8">
-            <Link
-              to="/data-sertifikasi-asesor"
-              className="bg-[#E77D35] hover:bg-orange-600 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
+          {(error || success) && (
+            <div className="mt-4">
+              {error && <p className="text-sm text-red-600">{error}</p>}
+              {success && <p className="text-sm text-green-600">{success}</p>}
+            </div>
+          )}
+          <div className="flex justify-end mt-8 gap-3">
+            <button
+              disabled={submitting}
+              onClick={submit}
+              className="bg-[#E77D35] hover:bg-orange-600 disabled:opacity-60 text-white font-normal py-2 px-8 sm:px-16 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
             >
-              Lanjut
-            </Link>
+              {submitting ? 'Menyimpan...' : 'Simpan & Lanjut'}
+            </button>
           </div>
         </div>
       </div >

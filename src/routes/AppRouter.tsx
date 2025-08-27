@@ -74,6 +74,12 @@ const router = createBrowserRouter([
 		children: [
 			// Landing & Public Pages
 			{ index: true, element: <LandingPage /> },
+				// legacy path for older links to APL-02 (accepts id param)
+				{ path: "/apl-02/:id", element: <AplZeroTwo /> },
+			// legacy/alternate path for assesmen aktif (avoid 404 on older links)
+			{ path: "/asesmen-aktif-asesi", element: <AsessmentAktif /> },
+			// assessor legacy path (some links point here instead of the new /asesor/... path)
+			{ path: "/asesmen-aktif-asesor", element: <DashboardAsesor /> },
 			{ path: paths.dashboard.about, element: <TentangLSP /> },
 			{ path: paths.dashboard.struktur, element: <StrukturLSP /> },
 			{ path: paths.dashboard.skema, element: <Skema /> },

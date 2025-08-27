@@ -29,16 +29,22 @@ const SidebarAsesor: React.FC = () => {
 
     const menuItems: MenuItem[] = [
         {
-            name: "List Asesment Aktif",
+            name: "Asesmen Diikuti",
             icon: ClipboardList,
             section: "main",
-            path: "/dashboard-asesi",
+            path: paths.asesor.dashboardAsesor,
         },
         {
-            name: "Asesment Aktif",
+            name: "Asesmen Mandiri",
             icon: ListCheck,
             section: "main",
-            path: "/asesmen-aktif-asesi",
+            path: paths.asesor.asesmenMandiri,
+        },
+        {
+            name: "Penilaian",
+            icon: ListCheck,
+            section: "main",
+            path: paths.asesor.assesmentReport,
         },
     ];
 
