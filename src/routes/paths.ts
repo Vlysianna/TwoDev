@@ -106,9 +106,14 @@ const routes = {
 			) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-05`,
 			ia05Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-05",
+			ak01: (
+				id_assessment: string | number,
+				id_asesor: string | number
+			) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-01`,
+			ak01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-01",
 		},
 		asesmenDiikuti: "/asesi/asesmen/diikuti",
-		ak01: "/asesi/ak-01",
 		ak04: "/asesi/ak-04",
 		ak03: "/asesi/ak-03",
 		dataAsesi: "/asesi/data-asesi",
