@@ -1,11 +1,9 @@
 import {
-	useFieldArray,
 	type Control,
 	type FieldArrayWithId,
 	type UseFieldArrayRemove,
 	type UseFormRegister,
 } from "react-hook-form";
-import ElementField from "./ElementField";
 import {
 	Accordion,
 	AccordionContent,
@@ -24,7 +22,7 @@ export default function UnitField({
 }: {
 	unitFields: FieldArrayWithId<
 		SkemaType,
-		`groups_ia01.${number}.units`,
+		`groups_ia02.${number}.units`,
 		"id"
 	>[];
 	unitIndex: number;
@@ -35,21 +33,12 @@ export default function UnitField({
 	};
 	removeUnit: UseFieldArrayRemove;
 }) {
-	const { control, register } = useForm;
+	const { register } = useForm;
 	const field = unitFields[unitIndex];
 
 	const [openValueIA01, setOpenValueIA01] = useState<string | undefined>(
 		undefined
 	);
-
-	const {
-		fields: elementFields,
-		append: appendElement,
-		remove: removeElement,
-	} = useFieldArray({
-		control,
-		name: `groups_ia01.${groupIndex}.units.${unitIndex}.elements`,
-	});
 
 	return (
 		<div
@@ -92,7 +81,7 @@ export default function UnitField({
 										Kode Unit
 										<input
 											{...register(
-												`groups_ia01.${groupIndex}.units.${unitIndex}.unit_code`
+												`groups_ia02.${groupIndex}.units.${unitIndex}.unit_code`
 											)}
 											style={{
 												width: "100%",
@@ -108,7 +97,7 @@ export default function UnitField({
 										Judul Unit
 										<input
 											{...register(
-												`groups_ia01.${groupIndex}.units.${unitIndex}.title`
+												`groups_ia02.${groupIndex}.units.${unitIndex}.title`
 											)}
 											style={{
 												width: "100%",
@@ -120,38 +109,10 @@ export default function UnitField({
 									</label>
 								</div>
 							</div>
-
-							{elementFields.map((_elementField, elementIndex) => (
-								<div
-									key={_elementField.id}
-									style={{
-										marginBottom: "1em",
-									}}
-								>
-									<ElementField
-										key={_elementField.id}
-										elementFields={elementFields}
-										useForm={{ control, register }}
-										unitIndex={unitIndex}
-										elementIndex={elementIndex}
-										groupIndex={groupIndex}
-										removeElement={removeElement}
-									/>
-								</div>
-							))}
 						</>
 					</AccordionContent>
 				</AccordionItem>
 			</Accordion>
-			<div style={{ display: "flex", gap: "0.5em" }}>
-				<button
-					type="button"
-					onClick={() => appendElement({ id: "", title: "", details: [] })}
-					className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
-				>
-					Tambah Elemen
-				</button>
-			</div>
 		</div>
 	);
 }

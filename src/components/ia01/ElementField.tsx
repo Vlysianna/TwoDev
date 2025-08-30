@@ -17,7 +17,7 @@ export default function ElementField({
 }: {
 	elementFields: FieldArrayWithId<
 		SkemaType,
-		`groups_ia.${number}.units.${number}.elements`,
+		`groups_ia01.${number}.units.${number}.elements`,
 		"id"
 	>[];
 	unitIndex: number;
@@ -38,7 +38,7 @@ export default function ElementField({
 		remove: removeItem,
 	} = useFieldArray({
 		control,
-		name: `groups_ia.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details`,
+		name: `groups_ia01.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details`,
 	});
 
 	return (
@@ -70,7 +70,7 @@ export default function ElementField({
 					Deskripsi Elemen
 					<input
 						{...register(
-							`groups_ia.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.title`
+							`groups_ia01.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.title`
 						)}
 						style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 						className="w-full px-3 py-2 border rounded-md border-gray-300"
@@ -88,7 +88,7 @@ export default function ElementField({
 						<div style={{ display: "flex", flexDirection: "row", gap: "1em" }}>
 							<input
 								{...register(
-									`groups_ia.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.description`
+									`groups_ia01.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.description`
 								)}
 								style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 								className="w-full px-3 py-2 border rounded-md border-gray-300"
@@ -111,7 +111,7 @@ export default function ElementField({
 						Benchmark
 						<input
 							{...register(
-								`groups_ia.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.benchmark`
+								`groups_ia01.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.benchmark`
 							)}
 							style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 							className="w-full px-3 py-2 border rounded-md border-gray-300"

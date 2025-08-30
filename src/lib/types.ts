@@ -4,7 +4,9 @@ export type SkemaType = {
 	pilihOkupasi: string;
 	code: string;
 	uc_apl02s: UnitAPL02[];
-	groups_ia: IA01Group[];
+	groups_ia01: IA01Group[];
+	groups_ia02: IA02Group[];
+	ia05_questions: IA05Question[];
 };
 
 export type UnitAPL02 = {
@@ -26,9 +28,14 @@ export type ItemElementAPL02 = {
 
 export type IA01Group = {
 	name: string;
+	units: UnitIA01[];
+};
+
+export type IA02Group = {
+	name: string;
 	scenario: string;
 	duration: number;
-	units: UnitIA01[];
+	units: UnitIA02[];
 	tools: {
 		name: string;
 	}[];
@@ -53,6 +60,20 @@ export type ItemElementIA01 = {
 	benchmark: string;
 };
 
+export type UnitIA02 = {
+	unit_code: string;
+	title: string;
+};
+
+export type IA05Question = {
+	order: number;
+	question: string;
+	options: {
+		option: string;
+		is_answer: boolean;
+	}[];
+};
+
 type SkemaTypeRaw = {
 	occupation_id: number;
 	code: string;
@@ -66,10 +87,8 @@ type SkemaTypeRaw = {
 			}[];
 		}[];
 	}[];
-	groups_ia: {
+	groups_ia01: {
 		name: string;
-		scenario: string;
-		duration: number;
 		units: {
 			unit_code: string;
 			title: string;
@@ -81,6 +100,15 @@ type SkemaTypeRaw = {
 				}[];
 			}[];
 		}[];
+	}[];
+	groups_ia02: {
+		name: string;
+		scenario: string;
+		duration: number;
+		units: {
+			unit_code: string;
+			title: string;
+		}[];
 		tools: {
 			name: string;
 		}[];
@@ -88,14 +116,14 @@ type SkemaTypeRaw = {
 			question: string;
 		}[];
 	}[];
-	// ia05_questions: {
-	// 	order: number;
-	// 	question: string;
-	// 	options: {
-	// 		option: string;
-	// 		is_answer: boolean;
-	// 	}[];
-	// }[];
+	ia05_questions: {
+		order: number;
+		question: string;
+		options: {
+			option: string;
+			is_answer: boolean;
+		}[];
+	}[];
 	// ia07_questions: {
 	// 	question: string;
 	// 	answer_key: string;
@@ -119,10 +147,8 @@ export function convertSkemaToPostPayload(
 				})),
 			})),
 		})),
-		groups_ia: skema.groups_ia.map((group) => ({
+		groups_ia01: skema.groups_ia01.map((group) => ({
 			name: group.name,
-			scenario: group.scenario,
-			duration: group.duration,
 			units: group.units.map((unit) => ({
 				unit_code: unit.unit_code,
 				title: unit.title,
@@ -134,6 +160,15 @@ export function convertSkemaToPostPayload(
 					})),
 				})),
 			})),
+		})),
+		groups_ia02: skema.groups_ia02.map((group) => ({
+			name: group.name,
+			scenario: group.scenario,
+			duration: group.duration,
+			units: group.units.map((unit) => ({
+				unit_code: unit.unit_code,
+				title: unit.title,
+			})),
 			tools: group.tools.map((tool) => ({
 				name: "tool.name",
 			})),
@@ -141,13 +176,14 @@ export function convertSkemaToPostPayload(
 				question: "question.question",
 			})),
 		})),
-		// ia05_questions: skema.groups_ia
-		// 	.flatMap((group) => group.qa_ia03)
-		// 	.map((question, index) => ({
-		// 		order: index + 1,
-		// 		question: question.question,
-		// 		options: [{ option: "A", is_answer: true }, { option: "B", is_answer: false }],
-		// 	})),
+		ia05_questions: skema.ia05_questions.map((question) => ({
+			order: question.order,
+			question: question.question,
+			options: question.options.map((option) => ({
+				option: option.option,
+				is_answer: option.is_answer,
+			})),
+		})),
 		// ia07_questions: skema.groups_ia.flatMap((group) =>
 		// 	group.qa_ia03.map((question) => ({
 		// 		question: question.question,
