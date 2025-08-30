@@ -3,6 +3,7 @@ import { Search, LayoutDashboard } from "lucide-react";
 import SidebarAsesor from '@/components/SideAsesor';
 import NavAsesor from '@/components/NavAsesor';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '@/helper/axios';
 import BaseModal from '@/components/BaseModal';
 import Ia01Detail from './Ia-01-Detail';
@@ -48,8 +49,8 @@ export default function DashboardAsesmenMandiri() {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
-    const [selectedTab, setSelectedTab] = useState<'mandiri' | 'persetujuan' | 'lembar'>('mandiri');
-    const [approvals, setApprovals] = useState<Record<number, boolean>>({});
+    type Tab = 'apl-02' | 'ia-01' | 'ia-02' | 'ia-03' | 'ia-05' | 'ak-01' | 'ak-02';
+    const [selectedTab, setSelectedTab] = useState<Tab>('apl-02');
     const [modalOpen, setModalOpen] = useState<boolean>(false);
 
     useEffect(() => {
@@ -111,36 +112,39 @@ export default function DashboardAsesmenMandiri() {
         return name.includes(q);
     });
 
-    const handleToggleApproval = (id: number) => {
-        setApprovals(prev => ({ ...prev, [id]: !prev[id] }));
-    };
-
-    const handleApproveAll = () => {
-        const newMap: Record<number, boolean> = {};
-        visibleAssessees.forEach(a => { newMap[a.id] = true; });
-        setApprovals(newMap);
-    };
-
-    const handleDownload = (id: number) => {
-        // best-effort download URL; adjust backend path if you have a proper endpoint
-        const url = `/uploads/apl-01/${id}`;
-        window.open(url, '_blank');
-    };
-
     const handleGenerateAll = () => {
-        if (selectedTab === 'persetujuan') {
-            handleApproveAll();
+        if (selectedTab === 'ia-01') {
+            // open IA-01 modal for first item as best-effort
+            if (visibleAssessees.length > 0) openIa01Modal();
             return;
         }
 
-        if (selectedTab === 'lembar') {
-            // trigger download for visible items (best-effort)
-            visibleAssessees.forEach(a => handleDownload(a.id));
-            return;
-        }
-
-        // default: mandiri generation (no-op / placeholder)
-        console.log('Generate Asesmen Mandiri for', visibleAssessees.map(a => a.id));
+        // for other tabs, try to open each item's page in a new tab
+        visibleAssessees.forEach(a => {
+            const id = a.id;
+            let url = '';
+            switch (selectedTab) {
+                case 'apl-02':
+                    url = `/apl-02/${id}`;
+                    break;
+                case 'ia-02':
+                    url = `/asesor/ia-02/${id}`;
+                    break;
+                case 'ia-03':
+                    url = `/asesor/ia-03/${id}`;
+                    break;
+                case 'ia-05':
+                    url = `/asesor/ia-05/${id}`;
+                    break;
+                case 'ak-01':
+                    url = `/asesor/ak-01/${id}`;
+                    break;
+                case 'ak-02':
+                    url = `/asesor/ak-02/${id}`;
+                    break;
+            }
+            if (url) window.open(url, '_blank');
+        });
     };
 
     const openIa01Modal = () => {
@@ -165,26 +169,27 @@ export default function DashboardAsesmenMandiri() {
                     <NavAsesor title="Asesmen Mandiri" icon={<LayoutDashboard size={25} />}/>
                 </div>
 
-                {/* Content */}
+                {/* Breadcrumb + Content */}
                 <div className="p-6">
+                    <div className="text-sm text-gray-500 mb-4">
+                        <Link to="/asesor" className="hover:underline">Asesor</Link>
+                        <span className="mx-2">/</span>
+                        <span className="text-gray-700">Asesmen Mandiri</span>
+                    </div>
 
                     {/* Tab Buttons */}
                     <div className="flex items-center space-x-2 mb-6">
-                        <button onClick={() => setSelectedTab('mandiri')} className={`px-4 py-2 rounded-md ${selectedTab === 'mandiri' ? 'bg-[#E77D35] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            Asesmen Mandiri
-                        </button>
-                        <button onClick={() => setSelectedTab('persetujuan')} className={`px-4 py-2 rounded-md ${selectedTab === 'persetujuan' ? 'bg-[#E77D35] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            Persetujuan & Kerahasiaan
-                        </button>
-                        <button onClick={() => setSelectedTab('lembar')} className={`px-4 py-2 rounded-md ${selectedTab === 'lembar' ? 'bg-[#E77D35] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            Lembar Jawaban
-                        </button>
+                        {(['apl-02','ia-01','ia-02','ia-03','ia-05','ak-01','ak-02'] as Tab[]).map(tab => (
+                            <button key={tab} onClick={() => setSelectedTab(tab)} className={`px-4 py-2 rounded-md ${selectedTab === tab ? 'bg-[#E77D35] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                {tab.toUpperCase()}
+                            </button>
+                        ))}
                     </div>
 
                     {/* Search + Generate */}
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
                         {/* Search Bar */}
-                                <div className="relative flex-1 max-w-5xl mr-6">
+                                <div className="relative flex-1 mr-0 mb-3 sm:mr-6 sm:mb-0">
                                     <input
                                         type="text"
                                         value={searchTerm}
@@ -196,13 +201,59 @@ export default function DashboardAsesmenMandiri() {
                                 </div>
 
                         {/* Generate Button */}
-                        <button onClick={handleGenerateAll} className="px-6 py-2 bg-[#E77D35] text-white rounded-md hover:bg-orange-6000">
-                            {selectedTab === 'mandiri' ? 'Generate All' : selectedTab === 'persetujuan' ? 'Approve All' : 'Download All'}
+                        <button onClick={handleGenerateAll} className="w-full sm:w-auto px-6 py-2 bg-[#E77D35] text-white rounded-md hover:bg-orange-6000">
+                            {selectedTab === 'ia-01' ? 'Open IA-01' : 'Open All'}
                         </button>
                     </div>
 
                     {/* Tabel */}
-                    <div className="overflow-x-auto bg-white rounded-md shadow">
+                    {/* Mobile list (stacked) */}
+                    <div className="block md:hidden bg-white rounded-md shadow divide-y">
+                        {loading ? (
+                            <div className="p-4 text-center">Loading...</div>
+                        ) : error ? (
+                            <div className="p-4 text-center text-red-500">{error}</div>
+                        ) : (
+                            visibleAssessees.length === 0 ? (
+                                <div className="p-4 text-center text-sm text-gray-500">Tidak ada data</div>
+                            ) : (
+                                visibleAssessees.map((siswa, index) => (
+                                    <div key={siswa.id} className="p-3 flex items-center justify-between">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="text-sm text-gray-700 font-medium">{index + 1}.</div>
+                                            <div className="text-sm text-gray-900">{siswa.user?.full_name ?? siswa.full_name ?? '— tidak tersedia —'}</div>
+                                        </div>
+                                        <div className="text-right">
+                                            {selectedTab === 'apl-02' && (
+                                                <Link to={`/apl-02/${siswa.id}`} className="text-orange-500 underline text-xs">Buka APL-02 →</Link>
+                                            )}
+                                            {selectedTab === 'ia-01' && (
+                                                <button onClick={() => openIa01Modal()} className="text-orange-500 underline text-xs">Cek IA-01 →</button>
+                                            )}
+                                            {selectedTab === 'ia-02' && (
+                                                <button onClick={() => window.open(`/asesor/ia-02/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka IA-02 →</button>
+                                            )}
+                                            {selectedTab === 'ia-03' && (
+                                                <button onClick={() => window.open(`/asesor/ia-03/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka IA-03 →</button>
+                                            )}
+                                            {selectedTab === 'ia-05' && (
+                                                <button onClick={() => window.open(`/asesor/ia-05/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka IA-05 →</button>
+                                            )}
+                                            {selectedTab === 'ak-01' && (
+                                                <button onClick={() => window.open(`/asesor/ak-01/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-01 →</button>
+                                            )}
+                                            {selectedTab === 'ak-02' && (
+                                                <button onClick={() => window.open(`/asesor/ak-02/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-02 →</button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            )
+                        )}
+                    </div>
+
+                    {/* Desktop table (hidden on small screens) */}
+                    <div className="hidden md:block overflow-x-auto bg-white rounded-md shadow">
                         {loading ? (
                             <div className="p-6 text-center">Loading...</div>
                         ) : error ? (
@@ -216,46 +267,52 @@ export default function DashboardAsesmenMandiri() {
                                         <th className="px-4 py-4 border-b text-center text-sm font-medium">Action</th>
                                     </tr>
                                 </thead>
-                                                <tbody>
-                                                    {visibleAssessees.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan={3} className="px-4 py-6 text-center text-sm text-gray-500">Tidak ada data</td>
-                                                        </tr>
-                                                    )}
+                                <tbody>
+                                    {visibleAssessees.length === 0 && (
+                                        <tr>
+                                            <td colSpan={3} className="px-4 py-6 text-center text-sm text-gray-500">Tidak ada data</td>
+                                        </tr>
+                                    )}
 
-                                                    {visibleAssessees.map((siswa, index) => (
-                                                        <tr key={siswa.id} className="hover:bg-gray-50">
-                                                            <td className="px-4 py-4 border-b text-sm text-gray-700">{index + 1}</td>
-                                                            <td className="px-4 py-4 border-b text-sm text-gray-900">
-                                                                {selectedTab === 'mandiri'
-                                                                    ? ''
-                                                                    : (siswa.user?.full_name ?? siswa.full_name ?? '— tidak tersedia —')}
-                                                            </td>
-                                                            <td className="px-4 py-4 border-b text-center">
-                                                                {selectedTab === 'mandiri' && (
-                                                                    <button onClick={() => openIa01Modal()} className="text-orange-500 underline text-xs">
-                                                                        Cek IA 01 &rarr;
-                                                                    </button>
-                                                                )}
+                                    {visibleAssessees.map((siswa, index) => (
+                                        <tr key={siswa.id} className="hover:bg-gray-50">
+                                            <td className="px-4 py-4 border-b text-sm text-gray-700">{index + 1}</td>
+                                            <td className="px-4 py-4 border-b text-sm text-gray-900">
+                                                { (siswa.user?.full_name ?? siswa.full_name ?? '— tidak tersedia —')}
+                                            </td>
+                                            <td className="px-4 py-4 border-b text-center">
+                                                {/* Actions per tab */}
+                                                {selectedTab === 'apl-02' && (
+                                                    <Link to={`/apl-02/${siswa.id}`} className="text-orange-500 underline text-xs">Buka APL-02 →</Link>
+                                                )}
 
-                                                                {selectedTab === 'persetujuan' && (
-                                                                    <div className="flex items-center justify-center space-x-2">
-                                                                        <label className="flex items-center space-x-2">
-                                                                            <input type="checkbox" checked={!!approvals[siswa.id]} onChange={() => handleToggleApproval(siswa.id)} />
-                                                                            <span className="text-sm">Setuju</span>
-                                                                        </label>
-                                                                    </div>
-                                                                )}
+                                                {selectedTab === 'ia-01' && (
+                                                    <button onClick={() => openIa01Modal()} className="text-orange-500 underline text-xs">Cek IA-01 →</button>
+                                                )}
 
-                                                                {selectedTab === 'lembar' && (
-                                                                    <div className="flex items-center justify-center space-x-2">
-                                                                        <button onClick={() => handleDownload(siswa.id)} className="text-blue-600 underline text-xs">Download</button>
-                                                                    </div>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
+                                                {selectedTab === 'ia-02' && (
+                                                    <button onClick={() => window.open(`/asesor/ia-02/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka IA-02 →</button>
+                                                )}
+
+                                                {selectedTab === 'ia-03' && (
+                                                    <button onClick={() => window.open(`/asesor/ia-03/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka IA-03 →</button>
+                                                )}
+
+                                                {selectedTab === 'ia-05' && (
+                                                    <button onClick={() => window.open(`/asesor/ia-05/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka IA-05 →</button>
+                                                )}
+
+                                                {selectedTab === 'ak-01' && (
+                                                    <button onClick={() => window.open(`/asesor/ak-01/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-01 →</button>
+                                                )}
+
+                                                {selectedTab === 'ak-02' && (
+                                                    <button onClick={() => window.open(`/asesor/ak-02/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-02 →</button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
                             </table>
                         )}
                     </div>

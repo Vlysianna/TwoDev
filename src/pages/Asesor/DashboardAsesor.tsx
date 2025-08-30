@@ -10,6 +10,7 @@ import {
   MapPinned,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import paths from '@/routes/paths';
 import SidebarAsesor from "@/components/SideAsesor";
 import NavbarAsesor from "@/components/NavAsesor";
 
@@ -346,7 +347,7 @@ const DashboardAsesor: React.FC = () => {
                       </div>
                     </div>
                     <Link
-                      to="/apl-01"
+                      to={paths.asesor.dashboardAsesmenMandiri}
                       className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
                     >
                       <ChevronRight className="w-4 h-4 text-white" />
