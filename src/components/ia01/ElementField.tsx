@@ -11,16 +11,18 @@ export default function ElementField({
 	elementFields,
 	unitIndex,
 	elementIndex,
+	groupIndex,
 	useForm,
 	removeElement,
 }: {
 	elementFields: FieldArrayWithId<
 		SkemaType,
-		`groups_ia.units.${number}.elements`,
+		`groups_ia.${number}.units.${number}.elements`,
 		"id"
 	>[];
 	unitIndex: number;
 	elementIndex: number;
+	groupIndex: number;
 	useForm: {
 		control: Control<SkemaType>;
 		register: UseFormRegister<SkemaType>;
@@ -36,7 +38,7 @@ export default function ElementField({
 		remove: removeItem,
 	} = useFieldArray({
 		control,
-		name: `groups_ia.units.${unitIndex}.elements.${elementIndex}.details`,
+		name: `groups_ia.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details`,
 	});
 
 	return (
@@ -68,7 +70,7 @@ export default function ElementField({
 					Deskripsi Elemen
 					<input
 						{...register(
-							`groups_ia.units.${unitIndex}.elements.${elementIndex}.title`
+							`groups_ia.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.title`
 						)}
 						style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 						className="w-full px-3 py-2 border rounded-md border-gray-300"
@@ -86,7 +88,7 @@ export default function ElementField({
 						<div style={{ display: "flex", flexDirection: "row", gap: "1em" }}>
 							<input
 								{...register(
-									`groups_ia.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.description`
+									`groups_ia.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.description`
 								)}
 								style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 								className="w-full px-3 py-2 border rounded-md border-gray-300"
@@ -109,7 +111,7 @@ export default function ElementField({
 						Benchmark
 						<input
 							{...register(
-								`groups_ia.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.benchmark`
+								`groups_ia.${groupIndex}.units.${unitIndex}.elements.${elementIndex}.details.${itemIndex}.benchmark`
 							)}
 							style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 							className="w-full px-3 py-2 border rounded-md border-gray-300"

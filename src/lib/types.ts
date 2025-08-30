@@ -4,14 +4,7 @@ export type SkemaType = {
 	pilihOkupasi: string;
 	code: string;
 	uc_apl02s: UnitAPL02[];
-	groups_ia: {
-		name: string;
-		scenario: string;
-		duration: number;
-		units: UnitIA01[];
-		tools: [];
-		qa_ia03: [];
-	};
+	groups_ia: IA01Group[];
 };
 
 export type UnitAPL02 = {
@@ -29,6 +22,17 @@ export type ElementAPL02 = {
 export type ItemElementAPL02 = {
 	id: string;
 	description: string;
+};
+
+export type IA01Group = {
+	name: string;
+	scenario: string;
+	duration: number;
+	units: UnitIA01[];
+	tools: {
+		name: string;
+	}[];
+	qa_ia03: [];
 };
 
 export type UnitIA01 = {
@@ -52,16 +56,50 @@ export type ItemElementIA01 = {
 type SkemaTypeRaw = {
 	occupation_id: number;
 	code: string;
-	unit_competencies: {
+	uc_apl02s: {
 		unit_code: string;
 		title: string;
 		elements: {
 			title: string;
-			element_details: {
+			details: {
 				description: string;
 			}[];
 		}[];
 	}[];
+	groups_ia: {
+		name: string;
+		scenario: string;
+		duration: number;
+		units: {
+			unit_code: string;
+			title: string;
+			elements: {
+				title: string;
+				details: {
+					description: string;
+					benchmark: string;
+				}[];
+			}[];
+		}[];
+		tools: {
+			name: string;
+		}[];
+		qa_ia03: {
+			question: string;
+		}[];
+	}[];
+	// ia05_questions: {
+	// 	order: number;
+	// 	question: string;
+	// 	options: {
+	// 		option: string;
+	// 		is_answer: boolean;
+	// 	}[];
+	// }[];
+	// ia07_questions: {
+	// 	question: string;
+	// 	answer_key: string;
+	// }[];
 };
 
 export function convertSkemaToPostPayload(
@@ -71,15 +109,50 @@ export function convertSkemaToPostPayload(
 	return {
 		occupation_id,
 		code: skema.code,
-		unit_competencies: skema.uc_apl02s.map((unit) => ({
+		uc_apl02s: skema.uc_apl02s.map((unit) => ({
 			unit_code: unit.unit_code,
 			title: unit.title,
 			elements: unit.elements.map((elemen) => ({
 				title: elemen.title,
-				element_details: elemen.details.map((item) => ({
+				details: elemen.details.map((item) => ({
 					description: item.description,
 				})),
 			})),
 		})),
+		groups_ia: skema.groups_ia.map((group) => ({
+			name: group.name,
+			scenario: group.scenario,
+			duration: group.duration,
+			units: group.units.map((unit) => ({
+				unit_code: unit.unit_code,
+				title: unit.title,
+				elements: unit.elements.map((elemen) => ({
+					title: elemen.title,
+					details: elemen.details.map((item) => ({
+						description: item.description,
+						benchmark: item.benchmark,
+					})),
+				})),
+			})),
+			tools: group.tools.map((tool) => ({
+				name: "tool.name",
+			})),
+			qa_ia03: group.qa_ia03.map((question) => ({
+				question: "question.question",
+			})),
+		})),
+		// ia05_questions: skema.groups_ia
+		// 	.flatMap((group) => group.qa_ia03)
+		// 	.map((question, index) => ({
+		// 		order: index + 1,
+		// 		question: question.question,
+		// 		options: [{ option: "A", is_answer: true }, { option: "B", is_answer: false }],
+		// 	})),
+		// ia07_questions: skema.groups_ia.flatMap((group) =>
+		// 	group.qa_ia03.map((question) => ({
+		// 		question: question.question,
+		// 		answer_key: "",
+		// 	}))
+		// ),
 	};
 }
