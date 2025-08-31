@@ -28,7 +28,17 @@ export default function BiodataAsesor() {
   const { user } = useAuth();
   const [assessor, setAssessor] = useState<Record<string, unknown> | null>(null);
   const [assessorDetail, setAssessorDetail] = useState<Record<string, unknown> | null>(null);
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const safeGet = (obj: Record<string, unknown> | null, key: string) => {
+    if (!obj) return '';
+    const v = obj[key];
+    if (v === undefined || v === null) return '';
+    return String(v);
+  };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target as HTMLInputElement;
@@ -65,14 +75,39 @@ export default function BiodataAsesor() {
       } catch {
         // no assessor yet
       }
+      setInitialLoading(false);
     };
 
     load();
   }, [user]);
 
+  // populate form when assessor or assessorDetail loaded
+  useEffect(() => {
+    if (assessor) {
+      setFormData(prev => ({
+        ...prev,
+        nama: safeGet(assessor, 'full_name') || prev.nama || '',
+        email: safeGet(assessor, 'email') || prev.email || '',
+      }));
+    }
+
+    if (assessorDetail) {
+      setFormData(prev => ({
+        ...prev,
+        alamat: safeGet(assessorDetail, 'address') || prev.alamat || '',
+        tempatLahir: safeGet(assessorDetail, 'birth_place') || prev.tempatLahir || '',
+        tanggalLahir: safeGet(assessorDetail, 'birth_date') || prev.tanggalLahir || '',
+        noRegMET: safeGet(assessorDetail, 'tax_id_number') || prev.noRegMET || '',
+        noTelp: safeGet(assessorDetail, 'phone_no') || prev.noTelp || '',
+      }));
+    }
+  }, [assessor, assessorDetail]);
+
   const handleSubmit = async () => {
     if (!user) return;
   setSaving(true);
+  setSuccessMessage(null);
+  setErrorMessage(null);
   try {
       // 1) If files present, upload each and get paths
       const uploaded: Record<string, string> = {};
@@ -110,10 +145,18 @@ export default function BiodataAsesor() {
         });
       }
 
-      alert('Data berhasil disimpan');
+      // refresh local detail
+      try {
+        const det = await api.get(`/assessor-detail/${assessorId}`);
+        if (det.data?.success) setAssessorDetail(det.data.data);
+      } catch {
+        // ignore
+      }
+
+      setSuccessMessage('Data berhasil disimpan');
     } catch (error) {
       console.error(error);
-      alert('Gagal menyimpan data');
+      setErrorMessage('Gagal menyimpan data');
     } finally {
       setSaving(false);
     }
@@ -127,6 +170,15 @@ export default function BiodataAsesor() {
       />
       
       <div className="px-4 sm:px-6 lg:px-8 py-6">
+        {initialLoading && (
+          <div className="p-4 mb-4 bg-white rounded shadow-sm text-sm text-gray-600">Memuat data...</div>
+        )}
+        {successMessage && (
+          <div className="p-4 mb-4 bg-green-50 border border-green-200 text-green-800 rounded">{successMessage}</div>
+        )}
+        {errorMessage && (
+          <div className="p-4 mb-4 bg-red-50 border border-red-200 text-red-800 rounded">{errorMessage}</div>
+        )}
         {/* Biodata Asesor Card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div className="p-4 sm:p-6">
@@ -268,7 +320,10 @@ export default function BiodataAsesor() {
                     Browse File
                   </label>
                   <div className="text-xs text-gray-500 mt-2">
-                    {files.npwp ? files.npwp.name : assessorDetail?.['tax_id_number'] ? String(assessorDetail['tax_id_number']) : 'Belum ada file terpilih'}
+                    {files.npwp ? files.npwp.name : safeGet(assessorDetail, 'tax_id_number') ? safeGet(assessorDetail, 'tax_id_number') : 'Belum ada file terpilih'}
+                    {safeGet(assessorDetail, 'tax_id_number') && safeGet(assessorDetail, 'tax_id_number').startsWith('http') && (
+                      <div><a href={safeGet(assessorDetail, 'tax_id_number')} target="_blank" rel="noreferrer" className="text-blue-600 underline text-xs">Lihat file</a></div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -291,7 +346,10 @@ export default function BiodataAsesor() {
                     Browse File
                   </label>
                   <div className="text-xs text-gray-500 mt-2">
-                    {files.coverBuku ? files.coverBuku.name : assessorDetail?.['bank_book_cover'] ? String(assessorDetail['bank_book_cover']) : 'Belum ada file terpilih'}
+                    {files.coverBuku ? files.coverBuku.name : safeGet(assessorDetail, 'bank_book_cover') ? safeGet(assessorDetail, 'bank_book_cover') : 'Belum ada file terpilih'}
+                    {safeGet(assessorDetail, 'bank_book_cover') && safeGet(assessorDetail, 'bank_book_cover').startsWith('http') && (
+                      <div><a href={safeGet(assessorDetail, 'bank_book_cover')} target="_blank" rel="noreferrer" className="text-blue-600 underline text-xs">Lihat file</a></div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -314,7 +372,10 @@ export default function BiodataAsesor() {
                     Browse File
                   </label>
                   <div className="text-xs text-gray-500 mt-2">
-                    {files.sertifikatAsesor ? files.sertifikatAsesor.name : assessorDetail?.['certificate'] ? String(assessorDetail['certificate']) : 'Belum ada file terpilih'}
+                    {files.sertifikatAsesor ? files.sertifikatAsesor.name : safeGet(assessorDetail, 'certificate') ? safeGet(assessorDetail, 'certificate') : 'Belum ada file terpilih'}
+                    {safeGet(assessorDetail, 'certificate') && safeGet(assessorDetail, 'certificate').startsWith('http') && (
+                      <div><a href={safeGet(assessorDetail, 'certificate')} target="_blank" rel="noreferrer" className="text-blue-600 underline text-xs">Lihat file</a></div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -367,7 +428,10 @@ export default function BiodataAsesor() {
                     Browse File
                   </label>
                   <div className="text-xs text-gray-500 mt-2">
-                    {files.ktp ? files.ktp.name : assessorDetail?.['national_id'] ? String(assessorDetail['national_id']) : 'Belum ada file terpilih'}
+                    {files.ktp ? files.ktp.name : safeGet(assessorDetail, 'national_id') ? safeGet(assessorDetail, 'national_id') : 'Belum ada file terpilih'}
+                    {safeGet(assessorDetail, 'national_id') && safeGet(assessorDetail, 'national_id').startsWith('http') && (
+                      <div><a href={safeGet(assessorDetail, 'national_id')} target="_blank" rel="noreferrer" className="text-blue-600 underline text-xs">Lihat file</a></div>
+                    )}
                   </div>
                 </div>
               </div>

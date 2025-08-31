@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  FileCheck2,
-  ChevronLeft,
-  AlertCircle,
-} from "lucide-react";
+import { FileCheck2, ChevronLeft, AlertCircle } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -11,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { useAssessmentParams } from "@/components/IsApproveApl01";
 import type { ResultAK01 } from "@/model/ak01-model";
-import { getAssesseeUrl } from "@/lib/hashids";
+import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function Ak01() {
@@ -64,6 +60,7 @@ export default function Ak01() {
   const [selectedTUK, setSelectedTUK] = useState("");
   const [selectedEvidences, setSelectedEvidences] = useState<string[]>([]);
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
+  const [assessorQrValue, setAssessorQrValue] = useState("");
   const [selectedTime, setSelectedTime] = useState("07:00");
 
   useEffect(() => {
@@ -75,13 +72,26 @@ export default function Ak01() {
       setLoading(true);
       setError(null);
       const response = await api.get(`assessments/ak-01/data/${id_result}`);
-      if (response.data.success) {
-        setData(response.data.data);
+      const rawData = response.data;
+      if (rawData.success) {
+        setData(rawData.data);
 
-        if (response.data.data.ak01_header.approved_assessee) {
+        if (rawData.data.ak01_header.rows.length > 0) {
+          setSelectedEvidences(
+            rawData.data.ak01_header.rows.flatMap((row: any) => row.evidence)
+          );
+          setSelectedTUK(
+            rawData.data.locations[response.data.data.locations.length - 1] ||
+              ""
+          );
+        }
+
+        if (rawData.data.ak01_header.approved_assessor) {
+          setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+        }
+
+        if (rawData.data.ak01_header.approved_assessee) {
           setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
-          setSelectedEvidences(response.data.data.ak01_header.rows.flatMap((row: any) => row.evidence));
-          setSelectedTUK(response.data.data.locations[response.data.data.locations.length - 1] || "");
         }
       } else {
         setError(response?.data?.message || "Gagal memuat data");
@@ -118,6 +128,8 @@ export default function Ak01() {
       const response = await api.post(`/assessments/ak-01/`, requestData);
       if (response.data.success) {
         navigate(paths.asesi.assessment.ia02(id_assessment, id_asesor));
+      } else {
+        setError(response?.data?.message || "Gagal mengirim jawaban");
       }
     } catch (error) {
       console.log("Error fetching unit competencies:", error);
@@ -281,7 +293,8 @@ export default function Ak01() {
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm mt-4">
                     {evidenceOptions.map((option) => {
-                      const checked = selectedEvidences?.includes(option) || false;
+                      const checked =
+                        selectedEvidences?.includes(option) || false;
                       return (
                         <label
                           key={option}
@@ -374,7 +387,7 @@ export default function Ak01() {
                   </div>
 
                   {/* QR Code Section */}
-                  <div className="mb-6 flex justify-center">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
                       {assesseeQrValue && (
                         <QRCodeCanvas
@@ -385,19 +398,39 @@ export default function Ak01() {
                           {assesseeQrValue}
                         </QRCodeCanvas>
                       )}
-                      <button
-                        disabled={assesseeQrValue !== ""}
-                        onClick={() => {
-                          if (!assesseeQrValue) handleGenerateQRCode();
-                        }}
-                        className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-                          !assesseeQrValue
-                            ? "hover:bg-orange-600"
-                            : "cursor-not-allowed opacity-50"
-                        }`}
-                      >
-                        Generate QR Code
-                      </button>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {data.assessee.name}
+                      </span>
+                      {!assesseeQrValue && (
+                        <button
+                          disabled={assesseeQrValue !== ""}
+                          onClick={() => {
+                            if (!assesseeQrValue && assessorQrValue)
+                              handleGenerateQRCode();
+                          }}
+                          className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                            !assesseeQrValue && assessorQrValue
+                              ? "hover:bg-orange-600"
+                              : "cursor-not-allowed opacity-50"
+                          }`}
+                        >
+                          Setujui
+                        </button>
+                      )}
+                    </div>
+                    <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
+                      {assessorQrValue && (
+                        <QRCodeCanvas
+                          value={assessorQrValue}
+                          size={156}
+                          className="w-40 h-40 object-contain"
+                        >
+                          {assessorQrValue}
+                        </QRCodeCanvas>
+                      )}
+                      <span className="text-sm font-semibold text-gray-800">
+                        {data.assessor.name}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -407,7 +440,6 @@ export default function Ak01() {
                 <button
                   type="submit"
                   className={`w-full sm:w-auto bg-[#E77D35] text-white py-2 px-30 rounded transition-colors ${
-                    !assesseeQrValue ||
                     !selectedTUK ||
                     !selectedTime ||
                     !selectedEvidences ||
@@ -417,7 +449,6 @@ export default function Ak01() {
                   }`}
                   onClick={(e) => {
                     if (
-                      !assesseeQrValue ||
                       !selectedTUK ||
                       !selectedTime ||
                       !selectedEvidences ||
@@ -427,14 +458,13 @@ export default function Ak01() {
                     handleOnSubmit();
                   }}
                   disabled={
-                    !assesseeQrValue ||
                     !selectedTUK ||
                     !selectedTime ||
                     !selectedEvidences ||
                     selectedEvidences.length === 0
                   }
                 >
-                  Lanjut
+                  Simpan
                 </button>
               </div>
             </div>
