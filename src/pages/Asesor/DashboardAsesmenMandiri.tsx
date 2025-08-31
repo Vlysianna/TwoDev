@@ -49,7 +49,7 @@ export default function DashboardAsesmenMandiri() {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
-    type Tab = 'apl-02' | 'ia-01' | 'ia-02' | 'ia-03' | 'ia-05' | 'ak-01' | 'ak-02';
+    type Tab = 'apl-02' | 'ia-01' | 'ia-02' | 'ia-03' | 'ia-05' | 'ak-01' | 'ak-02' | 'ak-05';
     const [selectedTab, setSelectedTab] = useState<Tab>('apl-02');
     const [modalOpen, setModalOpen] = useState<boolean>(false);
 
@@ -142,6 +142,9 @@ export default function DashboardAsesmenMandiri() {
                 case 'ak-02':
                     url = `/asesor/ak-02/${id}`;
                     break;
+                case 'ak-05':
+                    url = `/asesor/ak-05/${id}`;
+                    break;    
             }
             if (url) window.open(url, '_blank');
         });
@@ -179,7 +182,7 @@ export default function DashboardAsesmenMandiri() {
 
                     {/* Tab Buttons */}
                     <div className="flex items-center space-x-2 mb-6">
-                        {(['apl-02','ia-01','ia-02','ia-03','ia-05','ak-01','ak-02'] as Tab[]).map(tab => (
+                        {(['apl-02','ia-01','ia-02','ia-03','ia-05','ak-01','ak-02', 'ak-05'] as Tab[]).map(tab => (
                             <button key={tab} onClick={() => setSelectedTab(tab)} className={`px-4 py-2 rounded-md ${selectedTab === tab ? 'bg-[#E77D35] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                                 {tab.toUpperCase()}
                             </button>
@@ -245,6 +248,9 @@ export default function DashboardAsesmenMandiri() {
                                             {selectedTab === 'ak-02' && (
                                                 <button onClick={() => window.open(`/asesor/ak-02/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-02 →</button>
                                             )}
+                                            {selectedTab === 'ak-05' && (
+                                                <button onClick={() => window.open(`/asesor/ak-05/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-05 →</button>
+                                            )}
                                         </div>
                                     </div>
                                 ))
@@ -307,6 +313,9 @@ export default function DashboardAsesmenMandiri() {
                                                 )}
 
                                                 {selectedTab === 'ak-02' && (
+                                                    <button onClick={() => window.open(`/asesor/ak-02/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-02 →</button>
+                                                )}
+                                                {selectedTab === 'ak-05' && (
                                                     <button onClick={() => window.open(`/asesor/ak-02/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-02 →</button>
                                                 )}
                                             </td>
