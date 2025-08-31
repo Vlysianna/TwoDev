@@ -7,25 +7,31 @@ import {
 	type UseFormRegister,
 	type UseFieldArrayRemove,
 	type Control,
+	Controller,
 } from "react-hook-form";
 import mammoth from "mammoth";
 import { ChevronDown, Filter } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
 import {
-	convertSkemaToPostPayload,
 	type ElementAPL02,
 	type ElementIA01,
+	type IA01Group,
 	type IA02Group,
+	type IA03Group,
+	type IA03Question,
 	type IA05Question,
 	type ItemElementAPL02,
 	type SkemaType,
 	type UnitAPL02,
 	type UnitIA01,
+	type UnitIA02,
+	type UnitIA03,
 } from "@/lib/types";
 import UnitFieldAPL02 from "@/components/apl02/UnitField";
 import UnitFieldIA01 from "@/components/ia01/UnitField";
 import UnitFieldIA02 from "@/components/ia02/UnitField";
+import UnitFieldIA03 from "@/components/ia03/UnitField";
 import {
 	Accordion,
 	AccordionContent,
@@ -36,29 +42,16 @@ import api from "@/helper/axios";
 import { useNavigate } from "react-router-dom";
 
 const defaultValues: SkemaType = {
-	jurusan: "",
-	pilihSkema: "",
-	pilihOkupasi: "",
+	occupation_id: 0,
 	code: "",
 	uc_apl02s: [],
-	groups_ia01: [
-		{
-			name: "",
-			units: [],
-		},
-	],
-	groups_ia02: [
-		{
-			name: "",
-			scenario: "",
-			duration: 0,
-			units: [],
-			tools: [],
-			qa_ia03: [],
-		},
-	],
+	groups_ia01: [],
+	groups_ia02: [],
+	groups_ia03: [],
 	ia05_questions: [],
 };
+
+let currentSchemaNumber: string | null = null;
 
 const TambahMUK: React.FC = () => {
 	const navigate = useNavigate();
@@ -73,10 +66,6 @@ const TambahMUK: React.FC = () => {
 		getValues,
 	} = useForm<SkemaType>({ defaultValues });
 
-	const [school, setSchool] = useState("LSPSMK24");
-	const [year, setYear] = useState(new Date().getFullYear());
-	const [valueOccupation, setValueOccupation] = useState("");
-
 	const [openValueAPL02, setOpenValueAPL02] = useState<string | undefined>(
 		undefined
 	);
@@ -84,6 +73,9 @@ const TambahMUK: React.FC = () => {
 		undefined
 	);
 	const [openValueIA02, setOpenValueIA02] = useState<string | undefined>(
+		undefined
+	);
+	const [openValueIA03, setOpenValueIA03] = useState<string | undefined>(
 		undefined
 	);
 	const [openValueIA05, setOpenValueIA05] = useState<string | undefined>(
@@ -130,6 +122,15 @@ const TambahMUK: React.FC = () => {
 	});
 
 	const {
+		fields: fieldsGroupIA03,
+		append: appendGruopIA03,
+		remove: removeGroupIA03,
+	} = useFieldArray({
+		control,
+		name: "groups_ia03",
+	});
+
+	const {
 		fields: questionFields,
 		append: appendQuestion,
 		remove: removeQuestion,
@@ -138,16 +139,26 @@ const TambahMUK: React.FC = () => {
 		name: "ia05_questions",
 	});
 
-	const pilihSkema = watch("pilihSkema");
+	// const ia = watch("groups_ia03");
+
+	// useEffect(() => {
+	// 	console.log(ia);
+	// }, [ia]);
+
+	// const pilihSkema = watch("pilihSkema");
 	// const pilihOkupasi = watch("pilihOkupasi");
 	// const currentNomorSKM = watch("code");
 
+	// useEffect(() => {
+	// 	const code = `SKM.${
+	// 		schemes.find((s) => s.id === Number(pilihSkema))?.code ?? ""
+	// 	}.${valueOccupation}/${school}/${year}`;
+	// 	setValue("code", code);
+	// }, [pilihSkema, valueOccupation, school, year, setValue]);
+
 	useEffect(() => {
-		const code = `SKM.${
-			schemes.find((s) => s.id === Number(pilihSkema))?.code ?? ""
-		}.${valueOccupation}/${school}/${year}`;
-		setValue("code", code);
-	}, [pilihSkema, valueOccupation, school, year, setValue]);
+		setValue("code", currentSchemaNumber ?? "");
+	}, [currentSchemaNumber]);
 
 	useEffect(() => {
 		// fetch occupations and schemes for selects
@@ -171,44 +182,32 @@ const TambahMUK: React.FC = () => {
 		}[]
 	>([]);
 
-	useEffect(() => {
-		if (pilihSkema) {
-			setFilteredOccupations(
-				occupations.filter(
-					(o) => o.scheme && Number(pilihSkema) === Number(o.scheme.id)
-				)
-			);
-		} else {
-			setFilteredOccupations(occupations);
-		}
-	}, [pilihSkema, occupations]);
+	// useEffect(() => {
+	// 	if (pilihSkema) {
+	// 		setFilteredOccupations(
+	// 			occupations.filter(
+	// 				(o) => o.scheme && Number(pilihSkema) === Number(o.scheme.id)
+	// 			)
+	// 		);
+	// 	} else {
+	// 		setFilteredOccupations(occupations);
+	// 	}
+	// }, [pilihSkema, occupations]);
 
 	async function handleUploadAPL02(e: React.ChangeEvent<HTMLInputElement>) {
 		const file = e.target.files?.[0];
 		if (!file) return;
 		try {
 			const html = await extractDocxText(file);
-			const {
-				uc_apl02s: parsedData,
-				year,
-				school,
-				occupation,
-			} = parseHTMLToAPL02(html);
+			const parsedData = parseHTMLToAPL02(html);
 			// console.log(parsedData);
-
-			setYear(Number(year));
-			setSchool(school);
-			// console.log(school);
-			setValueOccupation(occupation);
 
 			const currentValues = getValues();
 
 			// reset form tapi biarkan pilihSkema/pilihOkupasi kosong agar user pilih manual
 			reset({
 				...currentValues,
-				...parsedData,
-				pilihSkema: "",
-				pilihOkupasi: "",
+				uc_apl02s: parsedData,
 			});
 			setOpenValueAPL02("item-1");
 		} catch (err) {
@@ -233,7 +232,7 @@ const TambahMUK: React.FC = () => {
 
 			reset({
 				...currentValues,
-				groups_ia02: parsedData,
+				groups_ia01: parsedData,
 			});
 			setOpenValueIA01("item-1");
 		} catch (err) {
@@ -252,31 +251,45 @@ const TambahMUK: React.FC = () => {
 			const html = await extractDocxText(file);
 			const parsedData = parseHTMLToIA02(html);
 
-			console.log(parsedData);
+			// console.log(parsedData);
 
 			const currentValues = getValues();
 
-			const mergedGroups = currentValues.groups_ia02.map((group, idx) => {
-				const ia02Group = parsedData[idx];
-				if (!ia02Group) return group;
-
-				return {
-					...group,
-					scenario: ia02Group.scenario,
-					duration: ia02Group.duration,
-					tools: ia02Group.tools,
-				};
-			});
-
 			reset({
 				...currentValues,
-				groups_ia02: mergedGroups,
+				groups_ia02: parsedData,
 			});
 			setOpenValueIA02("item-1");
 		} catch (err) {
 			console.error("Gagal parse docx:", err);
 			alert(
 				"Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar."
+			);
+		}
+		e.target.value = "";
+	}
+
+	async function handleUploadIA03(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		try {
+			const html = await extractDocxText(file);
+			const parsedData = parseHTMLToIA03(html);
+
+			// console.log(parsedData);
+
+			const currentValues = getValues();
+
+			reset({
+				...currentValues,
+				groups_ia03: parsedData,
+			});
+			setOpenValueIA03("item-1");
+		} catch (err) {
+			console.error("Gagal parse docx:", err);
+			alert(
+				"Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar." +
+					err
 			);
 		}
 		e.target.value = "";
@@ -316,7 +329,7 @@ const TambahMUK: React.FC = () => {
 			const html = await extractDocxText(file);
 			const parsedData = parseHTMLToIA05B(html);
 
-			console.log(parsedData);
+			// console.log(parsedData);
 
 			const currentValues = getValues();
 
@@ -331,7 +344,7 @@ const TambahMUK: React.FC = () => {
 					return q;
 				});
 
-				console.log(mergedQuestions);
+				// console.log(mergedQuestions);
 
 				reset({
 					...currentValues,
@@ -358,18 +371,19 @@ const TambahMUK: React.FC = () => {
 
 	const onSubmit = async (data: SkemaType) => {
 		// prepare payload
-		const occupationId = Number(data.pilihOkupasi) || undefined;
+		const occupationId = Number(data.occupation_id) || undefined;
 		if (!occupationId) {
 			alert("Pilih Okupasi terlebih dahulu");
 			return;
 		}
 
-		const skema = convertSkemaToPostPayload(data, occupationId);
-
 		try {
 			setSubmitting(true);
 			// POST to /assessments/create (app mounts assessmentRoutes on /api/assessments)
-			const res = await api.post("/assessments/create", skema);
+			const res = await api.post("/assessments/create", {
+				...data,
+				occupation_id: occupationId,
+			});
 			if (res?.data?.success) {
 				alert("APL berhasil dibuat");
 				// navigate to assessments list or refresh
@@ -446,7 +460,7 @@ const TambahMUK: React.FC = () => {
 									</h2>
 
 									<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-										<div>
+										{/* <div>
 											<label className="block text-sm font-medium text-gray-700 mb-2">
 												Pilih Skema
 											</label>
@@ -479,7 +493,7 @@ const TambahMUK: React.FC = () => {
 													{errors.pilihSkema.message}
 												</p>
 											)}
-										</div>
+										</div> */}
 
 										<div>
 											<label className="block text-sm font-medium text-gray-700 mb-2">
@@ -487,11 +501,11 @@ const TambahMUK: React.FC = () => {
 											</label>
 											<div className="relative w-full">
 												<select
-													{...register("pilihOkupasi", {
+													{...register("occupation_id", {
 														required: "Pilih Okupasi wajib diisi",
 													})}
 													className={`w-full px-3 py-2 border rounded-md appearance-none ${
-														errors.pilihOkupasi
+														errors.occupation_id
 															? "border-red-500"
 															: "border-gray-300"
 													}`}
@@ -508,9 +522,9 @@ const TambahMUK: React.FC = () => {
 													className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
 												/>
 											</div>
-											{errors.pilihOkupasi && (
+											{errors.occupation_id && (
 												<p className="text-xs text-red-500 mt-1">
-													{errors.pilihOkupasi.message}
+													{errors.occupation_id.message}
 												</p>
 											)}
 										</div>
@@ -523,10 +537,7 @@ const TambahMUK: React.FC = () => {
 												{...register("code")}
 												type="text"
 												readOnly
-												placeholder={`SKM.${
-													schemes.find((s) => s.id === Number(pilihSkema))
-														?.code ?? ""
-												}.${valueOccupation}/${school}/${year}`}
+												placeholder="SKM.{okupasi}.{kode_skema}/LSPSMKN24/{tahun}"
 												className="w-full px-3 py-2 border rounded-md border-gray-300"
 											/>
 										</div>
@@ -645,35 +656,6 @@ const TambahMUK: React.FC = () => {
 								{/* full border line */}
 								<div className="border-b border-gray-200" />
 
-								{/* Upload File AK */}
-								<div className="mb-3">
-									<h2 className="text-lg font-semibold text-gray-900 mb-2">
-										Upload File AK
-									</h2>
-									<div className="space-y-4">
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											File AK
-										</label>
-										<div className="flex mb-4 items-stretch">
-											<label className="inline-flex items-center bg-[#E77D35] text-white px-6 py-2 rounded-md cursor-pointer z-10">
-												Pilih File
-												<input
-													type="file"
-													accept=".docx"
-													onChange={handleUploadAK}
-													className="hidden"
-												/>
-											</label>
-											<span className="flex-1 bg-gray-100 text-gray-500 text-sm rounded-md px-6 flex items-center -ml-4 pl-8">
-												Convert file unit dari word
-											</span>
-										</div>
-									</div>
-								</div>
-
-								{/* full border line */}
-								<div className="border-b border-gray-200" />
-
 								{/* Upload File IA */}
 								<div className="mb-3">
 									<h2 className="text-lg font-semibold text-gray-900 mb-2">
@@ -741,10 +723,12 @@ const TambahMUK: React.FC = () => {
 															<div className="mt-4">
 																<button
 																	type="button"
-																	onClick={() => appendGruopIA01([])}
+																	onClick={() =>
+																		appendGruopIA01([{ name: "", units: [] }])
+																	}
 																	className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
 																>
-																	Tambah Unit
+																	Tambah Kelompok Pekerjaan
 																</button>
 															</div>
 														</div>
@@ -810,7 +794,7 @@ const TambahMUK: React.FC = () => {
 														{/* Units */}
 														<div>
 															<div className="space-y-4">
-																{fieldsGroupIA01.map((_field, groupIndex) => (
+																{fieldsGroupIA02.map((_field, groupIndex) => (
 																	<div key={_field.id}>
 																		<GroupIA02
 																			groupFieldsIA02={fieldsGroupIA02}
@@ -825,10 +809,112 @@ const TambahMUK: React.FC = () => {
 															<div className="mt-4">
 																<button
 																	type="button"
-																	onClick={() => appendGruopIA02([])}
+																	onClick={() =>
+																		appendGruopIA02([
+																			{
+																				tools: [],
+																				units: [],
+																				duration: 0,
+																				name: "",
+																				scenario: "",
+																			},
+																		])
+																	}
 																	className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
 																>
-																	Tambah Unit
+																	Tambah Kelompok Pekerjaan
+																</button>
+															</div>
+														</div>
+													</div>
+												</AccordionContent>
+											</AccordionItem>
+										</Accordion>
+									</div>
+								</div>
+
+								{/* full border line */}
+								<div className="border-b border-gray-200" />
+
+								{/* Upload File IA */}
+								<div className="mb-3">
+									<h2 className="text-lg font-semibold text-gray-900 mb-2">
+										Upload File IA 03
+									</h2>
+									<div>
+										<label className="block text-sm font-medium text-gray-700 mb-2">
+											File IA 03
+										</label>
+										<div className="flex mb-4 items-stretch">
+											<label className="inline-flex items-center bg-[#E77D35] text-white px-6 py-2 rounded-md cursor-pointer z-10">
+												Pilih File
+												<input
+													type="file"
+													accept=".docx"
+													onChange={handleUploadIA03}
+													className="hidden"
+												/>
+											</label>
+											<span className="flex-1 bg-gray-100 text-gray-500 text-sm rounded-md px-6 flex items-center -ml-4 pl-8">
+												Convert file unit dari word
+											</span>
+										</div>
+										{/* Body */}
+										<Accordion
+											type="single"
+											collapsible
+											value={openValueIA03}
+											onValueChange={setOpenValueIA03}
+										>
+											<AccordionItem value="item-1">
+												<AccordionTrigger>
+													<div className="flex items-center justify-between">
+														<div>
+															<h2 className="text-lg font-semibold text-gray-900">
+																Form Units
+															</h2>
+
+															<p className="text-sm text-gray-500 mt-1">
+																Klik di sini untuk membuka/mentutup
+															</p>
+														</div>
+													</div>
+												</AccordionTrigger>
+												<AccordionContent>
+													<div
+														className="p-6 border border-gray-300 rounded-md space-y-6 overflow-auto flex-1"
+														style={{ maxHeight: "calc(100vh - 180px)" }}
+													>
+														{/* Units */}
+														<div>
+															<div className="space-y-4">
+																{fieldsGroupIA03.map((_field, groupIndex) => (
+																	<div key={_field.id}>
+																		<GroupIA03
+																			groupFieldsIA03={fieldsGroupIA03}
+																			groupIndex={groupIndex}
+																			useForm={{ control, register }}
+																			removeGroupIA03={removeGroupIA03}
+																		/>
+																	</div>
+																))}
+															</div>
+
+															<div className="mt-4">
+																<button
+																	type="button"
+																	onClick={() =>
+																		appendGruopIA03([
+																			{
+																				name: "",
+																				units: [],
+																				qa_ia03: [],
+																			},
+																		])
+																	}
+																	className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
+																>
+																	Tambah Kelompok Pekerjaan
 																</button>
 															</div>
 														</div>
@@ -997,14 +1083,60 @@ async function extractDocxText(file: File) {
 	return result.value;
 }
 
-function parseHTMLToAPL02(html: string): {
-	uc_apl02s: UnitAPL02[];
-	year: string;
-	school: string;
-	occupation: string;
-} {
+function extractSchemaNumber(doc: Document): string | null {
+	const tables = doc.querySelectorAll("table");
+	if (!tables) return null;
+
+	for (const table of tables) {
+		const rows = Array.from(table.querySelectorAll("tr"));
+		for (const row of rows) {
+			const cells = Array.from(row.querySelectorAll("td")).map(
+				(td) => td.textContent?.trim() ?? ""
+			);
+			const joined = cells.join(" ");
+			console.log(joined);
+			if (/Nomor/i.test(joined)) {
+				const nomor = cells.at(-1); // biasanya paling kanan
+				return nomor?.trim() || null;
+			}
+		}
+		continue;
+	}
+	return null;
+}
+
+function validateSchemaNumber(doc: Document): boolean {
+	const nomor = extractSchemaNumber(doc);
+	console.log(nomor);
+	if (!nomor) return false;
+
+	if (!currentSchemaNumber) {
+		currentSchemaNumber = nomor; // pertama kali diset
+		return true;
+	}
+
+	return currentSchemaNumber.includes(nomor);
+}
+
+function parseHTMLToAPL02(html: string): UnitAPL02[] {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, "text/html");
+
+	const units: UnitAPL02[] = [];
+
+	if (!validateSchemaNumber(doc)) {
+		throw new Error("Nomor skema berbeda dari file sebelumnya!");
+	}
+
+	// Cari node yang mengandung FR.APL.02.
+	const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
+		el.textContent?.includes("FR.APL.02.")
+	);
+
+	if (!anchorNode) {
+		console.warn("FR.APL.02. tidak ditemukan!");
+		return units;
+	}
 
 	// console.log(doc);
 	const tables = Array.from(doc.querySelectorAll("table"));
@@ -1014,10 +1146,9 @@ function parseHTMLToAPL02(html: string): {
 
 	// const jurusan = "";
 	// const judulSkema = "";
-	let year = "";
-	let school = "";
-	let occupation = "";
-	const units: UnitAPL02[] = [];
+	// let year = "";
+	// let school = "";
+	// let occupation = "";
 
 	let currentUnit: UnitAPL02 | null = null;
 	let currentElemen: ElementAPL02 | null = null;
@@ -1045,13 +1176,13 @@ function parseHTMLToAPL02(html: string): {
 			);
 			// console.log(text);
 
-			if (text.includes("Nomor")) {
-				year = cells[2].trim().split("/").at(-1) || "";
-				school = cells[2].trim().split("/").at(-2) || "";
-				console.log(cells[2].trim().split("/"));
-				occupation = cells[2].trim().split("/").at(0)?.split(".").at(-1) || "";
-				continue;
-			}
+			// if (text.includes("Nomor")) {
+			// 	year = cells[2].trim().split("/").at(-1) || "";
+			// 	school = cells[2].trim().split("/").at(-2) || "";
+			// 	console.log(cells[2].trim().split("/"));
+			// 	occupation = cells[2].trim().split("/").at(0)?.split(".").at(-1) || "";
+			// 	continue;
+			// }
 
 			if (text.includes("Kode Unit")) {
 				const kodeMatch = text.match(/Kode Unit\s*:?\s*(.+)/);
@@ -1105,8 +1236,8 @@ function parseHTMLToAPL02(html: string): {
 				if (list && (list.tagName === "OL" || list.tagName === "UL")) {
 					// ✅ normal case
 					Array.from(list.querySelectorAll("li")).forEach((li, i) => {
-						console.log(units[units.length - 1].title);
-						console.log(row);
+						// console.log(units[units.length - 1].title);
+						// console.log(row);
 						items.push({
 							id: `${elemenCounter}.${i + 1}`,
 							description: li.textContent?.trim() || "",
@@ -1119,8 +1250,8 @@ function parseHTMLToAPL02(html: string): {
 						if (next.tagName === "P") {
 							const text = next.textContent?.trim() || "";
 							if (/^\d+(\.\d+)*\.?\s/.test(text)) {
-								console.log(units[units.length - 1].title);
-								console.log(row);
+								// console.log(units[units.length - 1].title);
+								// console.log(row);
 								items.push({
 									id: text.split(" ")[0].replace(/\.$/, ""),
 									description: text.replace(/^\d+(\.\d+)*\.?\s*/, ""),
@@ -1148,24 +1279,34 @@ function parseHTMLToAPL02(html: string): {
 
 	const filteredUnits = units.filter((unit) => unit.elements.length > 0);
 
-	return {
-		uc_apl02s: filteredUnits,
-		year: year,
-		school: school,
-		occupation: occupation,
-	};
+	return filteredUnits;
 }
 
-function parseHTMLToIA01(html: string): IA02Group[] {
+function parseHTMLToIA01(html: string): IA01Group[] {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, "text/html");
+
+	if (!validateSchemaNumber(doc)) {
+		throw new Error("Nomor skema berbeda dari file sebelumnya!");
+	}
+
+	const groups_ia: IA01Group[] = [];
+
+	// Cari node yang mengandung FR.IA.01.
+	const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
+		el.textContent?.includes("FR.IA.01.")
+	);
+
+	if (!anchorNode) {
+		console.warn("FR.IA.01. tidak ditemukan!");
+		return groups_ia;
+	}
 
 	const tables = Array.from(doc.querySelectorAll("table"));
 	if (tables.length === 0)
 		throw new Error("Tidak ada tabel ditemukan dalam dokumen.");
 
-	const groups_ia: IA02Group[] = [];
-	let currentGroup: IA02Group | null = null;
+	let currentGroup: IA01Group | null = null;
 	let currentUnit: UnitIA01 | null = null;
 
 	let startParsing = false;
@@ -1183,15 +1324,12 @@ function parseHTMLToIA01(html: string): IA02Group[] {
 
 		// --- cek apakah ini tabel group baru (Kelompok Pekerjaan) ---
 		const firstCellText = rows[0]?.querySelector("td")?.innerText || "";
-		if (firstCellText.includes("Kelompok Pekerjaan")) {
+		if (firstCellText.match(/Kelompok Pekerjaan (\d+)/)) {
+			// console.log(firstCellText);
 			const groupName = firstCellText.trim();
 			currentGroup = {
 				name: groupName,
-				scenario: "",
-				duration: 0,
 				units: [],
-				tools: [],
-				qa_ia03: [],
 			};
 
 			// Ambil unit header di baris kedua
@@ -1238,7 +1376,8 @@ function parseHTMLToIA01(html: string): IA02Group[] {
 		) {
 			// console.log(curr)
 			if (!currentUnit)
-				throw new Error("Tabel elemen muncul sebelum tabel unit.");
+				// throw new Error("Tabel elemen muncul sebelum tabel unit.");
+				continue;
 			let currentElemen: ElementIA01 | null = null;
 			let benchmark = "";
 
@@ -1284,9 +1423,13 @@ function parseHTMLToIA01(html: string): IA02Group[] {
 	return groups_ia;
 }
 
-function parseHTMLToIA02(html: string) {
+function parseHTMLToIA02(html: string): IA02Group[] {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, "text/html");
+
+	if (!validateSchemaNumber(doc)) {
+		throw new Error("Nomor skema berbeda dari file sebelumnya!");
+	}
 
 	const groups: IA02Group[] = [];
 
@@ -1319,7 +1462,7 @@ function parseHTMLToIA02(html: string) {
 			const groupName = groupTitleCell.textContent.trim();
 
 			const rows = Array.from(table.querySelectorAll("tr")).slice(1); // skip header
-			const units: UnitIA01[] = [];
+			const units: UnitIA02[] = [];
 
 			rows.forEach((tr) => {
 				const cols = tr.querySelectorAll("td p");
@@ -1330,7 +1473,6 @@ function parseHTMLToIA02(html: string) {
 						units.push({
 							unit_code: code,
 							title,
-							elements: [],
 						});
 					}
 				}
@@ -1390,7 +1532,6 @@ function parseHTMLToIA02(html: string) {
 				duration,
 				units,
 				tools,
-				qa_ia03: [],
 			});
 		}
 	});
@@ -1398,13 +1539,114 @@ function parseHTMLToIA02(html: string) {
 	return groups;
 }
 
+function parseHTMLToIA03(html: string): IA03Group[] {
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(html, "text/html");
+
+	if (!validateSchemaNumber(doc)) {
+		throw new Error("Nomor skema berbeda dari file sebelumnya!");
+	}
+
+	const groups: IA03Group[] = [];
+
+	// console.log(doc);
+
+	// Cari node yang mengandung FR.IA.03.
+	const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
+		el.textContent?.includes("FR.IA.03.")
+	);
+
+	if (!anchorNode) {
+		console.warn("FR.IA.03. tidak ditemukan!");
+		return groups;
+	}
+
+	// Mulai dari node ini, cari semua table setelahnya
+	const tables: HTMLTableElement[] = [];
+	let next: Element | null = anchorNode;
+	while (next) {
+		if (next.tagName === "TABLE") {
+			tables.push(next as HTMLTableElement);
+		}
+		next = next.nextElementSibling;
+	}
+
+	for (let i = 0; i < tables.length; i++) {
+		const table = tables[i];
+		const firstCell = table.querySelector("td p strong")?.textContent?.trim();
+
+		if (firstCell && firstCell.startsWith("Kelompok Pekerjaan")) {
+			// --- Kelompok ditemukan ---
+			const groupName = firstCell;
+			const units: UnitIA03[] = [];
+
+			const rows = Array.from(table.querySelectorAll("tr"));
+			rows.slice(1).forEach((row) => {
+				const cells = Array.from(row.querySelectorAll("td"));
+				if (cells.length >= 3) {
+					const no = parseInt(
+						cells[0].textContent?.trim().replace(/\./, "") || "0",
+						10
+					);
+					const code = cells[1].textContent?.trim() || "";
+					const title = cells[2].textContent?.trim() || "";
+					if (no) {
+						units.push({ unit_code: code, title });
+					}
+				}
+			});
+
+			// --- Cari tabel pertanyaan setelah tabel kelompok ini ---
+			let qa_ia03: IA03Question[] = [];
+			const nextTable = tables[i + 1];
+			if (nextTable) {
+				const rowsQ = Array.from(nextTable.querySelectorAll("tr"));
+				qa_ia03 = rowsQ
+					.map((row) => {
+						const cells = Array.from(row.querySelectorAll("td"));
+						if (cells.length >= 2) {
+							const noText = cells[0].textContent?.trim();
+							const question = cells[1].textContent?.trim();
+							if (noText && /^\d+/.test(noText) && question) {
+								return { question };
+							}
+						}
+						return null;
+					})
+					.filter((q): q is IA03Question => q !== null);
+			}
+
+			groups.push({
+				name: groupName,
+				units,
+				qa_ia03,
+			});
+		}
+	}
+	return groups;
+}
+
 function parseHTMLToIA05A(html: string): IA05Question[] {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, "text/html");
 
+	if (!validateSchemaNumber(doc)) {
+		throw new Error("Nomor skema berbeda dari file sebelumnya!");
+	}
+
 	const questions: IA05Question[] = [];
 	let currentQuestion: IA05Question | null = null;
 	let order = 1;
+
+	// Cari node yang mengandung FR.IA.05.
+	const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
+		el.textContent?.includes("FR.IA.05")
+	);
+
+	if (!anchorNode) {
+		console.warn("FR.IA.05 tidak ditemukan!");
+		return questions;
+	}
 
 	// ambil semua elemen yang mungkin berisi soal/opsi
 	const elements = Array.from(doc.querySelectorAll("p, ol"));
@@ -1481,7 +1723,22 @@ function parseHTMLToIA05A(html: string): IA05Question[] {
 function parseHTMLToIA05B(html: string): Record<number, string> {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, "text/html");
+
+	if (!validateSchemaNumber(doc)) {
+		throw new Error("Nomor skema berbeda dari file sebelumnya!");
+	}
+
 	const keyMap: Record<number, string> = {};
+
+	// Cari node yang mengandung FR.IA.05.
+	const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
+		el.textContent?.includes("FR.IA.05")
+	);
+
+	if (!anchorNode) {
+		console.warn("FR.IA.05 tidak ditemukan!");
+		return keyMap;
+	}
 
 	const tables = Array.from(doc.querySelectorAll("table"));
 
@@ -1552,13 +1809,15 @@ function GroupIA01({
 		<div className="space-y-6 border p-4 rounded-md">
 			{/* Header Group */}
 			<div className="flex items-center justify-between">
-				<h2 className="text-2xl font-semibold">Group {groupIndex + 1}</h2>
+				<h2 className="text-2xl font-semibold">
+					Kelompok Pekerjaan {groupIndex + 1}
+				</h2>
 				<button
 					type="button"
 					onClick={() => removeGroupIA01(groupIndex)}
 					className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
 				>
-					Hapus Group
+					Hapus Kelompok Pekerjaan
 				</button>
 			</div>
 
@@ -1577,7 +1836,9 @@ function GroupIA01({
 				))}
 				<button
 					type="button"
-					onClick={() => appendIA01([])}
+					onClick={() =>
+						appendIA01([{ unit_code: "", title: "", elements: [] }])
+					}
 					className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50"
 				>
 					Tambah Unit
@@ -1626,13 +1887,15 @@ function GroupIA02({
 		<div className="space-y-6 border p-4 rounded-md">
 			{/* Header Group */}
 			<div className="flex items-center justify-between">
-				<h2 className="text-2xl font-semibold">Group {groupIndex + 1}</h2>
+				<h2 className="text-2xl font-semibold">
+					Kelompok Pekerjaan {groupIndex + 1}
+				</h2>
 				<button
 					type="button"
 					onClick={() => removeGroupIA02(groupIndex)}
 					className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
 				>
-					Hapus Group
+					Hapus Kelompok Pekerjaan
 				</button>
 			</div>
 
@@ -1705,7 +1968,114 @@ function GroupIA02({
 				))}
 				<button
 					type="button"
-					onClick={() => appendIA02([])}
+					onClick={() => appendIA02([{ unit_code: "", title: "" }])}
+					className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50"
+				>
+					Tambah Unit
+				</button>
+			</div>
+		</div>
+	);
+}
+
+function GroupIA03({
+	groupIndex,
+	useForm,
+	removeGroupIA03,
+}: {
+	groupFieldsIA03: FieldArrayWithId<SkemaType, "groups_ia03", "id">[];
+	groupIndex: number;
+	useForm: {
+		control: Control<SkemaType>;
+		register: UseFormRegister<SkemaType>;
+	};
+	removeGroupIA03: UseFieldArrayRemove;
+}) {
+	const { control, register } = useForm;
+
+	// field array untuk units
+	const {
+		fields: fieldsIA03,
+		append: appendIA03,
+		remove: removeIA03,
+	} = useFieldArray({
+		control,
+		name: `groups_ia03.${groupIndex}.units`,
+	});
+
+	// field array untuk questions
+	const {
+		fields: fieldsQuestion,
+		append: appendQuestion,
+		remove: removeQuestion,
+	} = useFieldArray({
+		control,
+		name: `groups_ia03.${groupIndex}.qa_ia03`,
+	});
+
+	return (
+		<div className="space-y-6 border p-4 rounded-md">
+			{/* Header Group */}
+			<div className="flex items-center justify-between">
+				<h2 className="text-2xl font-semibold">
+					Kelompok Pekerjaan {groupIndex + 1}
+				</h2>
+				<button
+					type="button"
+					onClick={() => removeGroupIA03(groupIndex)}
+					className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+				>
+					Hapus Kelompok Pekerjaan
+				</button>
+			</div>
+
+			{/* Question */}
+			<div className="space-y-2">
+				<label className="block text-sm font-medium text-gray-700">
+					Question
+				</label>
+				{fieldsQuestion.map((question, questionIndex) => (
+					<div key={question.id} className="flex items-center space-x-2">
+						<input
+							{...register(
+								`groups_ia03.${groupIndex}.qa_ia03.${questionIndex}.question`
+							)}
+							className="flex-1 border border-gray-300 rounded-md p-2"
+							placeholder={`Question ${questionIndex + 1}`}
+						/>
+						<button
+							type="button"
+							onClick={() => removeQuestion(questionIndex)}
+							className="px-2 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50"
+						>
+							Hapus
+						</button>
+					</div>
+				))}
+				<button
+					type="button"
+					onClick={() => appendQuestion({ question: "" })}
+					className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50"
+				>
+					Tambah Tool
+				</button>
+			</div>
+			{/* Units */}
+			<div className="space-y-4">
+				<h3 className="text-lg font-semibold">Units</h3>
+				{fieldsIA03.map((_units, unitIndex) => (
+					<UnitFieldIA03
+						unitFields={fieldsIA03}
+						useForm={{ control, register }}
+						removeUnit={removeIA03}
+						unitIndex={unitIndex}
+						groupIndex={groupIndex}
+						key={_units.id}
+					/>
+				))}
+				<button
+					type="button"
+					onClick={() => appendIA03([{ unit_code: "", title: "" }])}
 					className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50"
 				>
 					Tambah Unit
@@ -1738,14 +2108,17 @@ function OptionsFieldArray({
 						className="flex-1 border border-gray-300 rounded-md px-3 py-1"
 						placeholder={`Opsi ${oIndex + 1}`}
 					/>
-					<input
-						type="radio"
-						{...control.register(
-							`ia05_questions.${qIndex}.options.${oIndex}.is_answer`
+					<Controller
+						name={`ia05_questions.${qIndex}.options.${oIndex}.is_answer`}
+						control={control}
+						render={({ field: { onChange, value } }) => (
+							<input
+								type="radio"
+								className="h-4 w-4"
+								checked={value}
+								onChange={(e) => onChange(e.target.checked)}
+							/>
 						)}
-						value={oIndex}
-						defaultChecked={field.is_answer}
-						className="h-4 w-4"
 					/>
 					<button
 						type="button"
@@ -1762,7 +2135,7 @@ function OptionsFieldArray({
 				onClick={() => append({ option: "", is_answer: false })}
 				className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
 			>
-				+ Tambah Opsi
+				Tambah Opsi
 			</button>
 		</div>
 	);

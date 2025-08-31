@@ -1,11 +1,10 @@
 export type SkemaType = {
-	jurusan: string;
-	pilihSkema: string;
-	pilihOkupasi: string;
+	occupation_id: number;
 	code: string;
 	uc_apl02s: UnitAPL02[];
 	groups_ia01: IA01Group[];
 	groups_ia02: IA02Group[];
+	groups_ia03: IA03Group[];
 	ia05_questions: IA05Question[];
 };
 
@@ -39,7 +38,6 @@ export type IA02Group = {
 	tools: {
 		name: string;
 	}[];
-	qa_ia03: [];
 };
 
 export type UnitIA01 = {
@@ -65,6 +63,21 @@ export type UnitIA02 = {
 	title: string;
 };
 
+export type IA03Group = {
+	name: string;
+	units: UnitIA03[];
+	qa_ia03: IA03Question[];
+};
+
+export type UnitIA03 = {
+	unit_code: string;
+	title: string;
+};
+
+export type IA03Question = {
+	question: string;
+};
+
 export type IA05Question = {
 	order: number;
 	question: string;
@@ -73,122 +86,3 @@ export type IA05Question = {
 		is_answer: boolean;
 	}[];
 };
-
-type SkemaTypeRaw = {
-	occupation_id: number;
-	code: string;
-	uc_apl02s: {
-		unit_code: string;
-		title: string;
-		elements: {
-			title: string;
-			details: {
-				description: string;
-			}[];
-		}[];
-	}[];
-	groups_ia01: {
-		name: string;
-		units: {
-			unit_code: string;
-			title: string;
-			elements: {
-				title: string;
-				details: {
-					description: string;
-					benchmark: string;
-				}[];
-			}[];
-		}[];
-	}[];
-	groups_ia02: {
-		name: string;
-		scenario: string;
-		duration: number;
-		units: {
-			unit_code: string;
-			title: string;
-		}[];
-		tools: {
-			name: string;
-		}[];
-		qa_ia03: {
-			question: string;
-		}[];
-	}[];
-	ia05_questions: {
-		order: number;
-		question: string;
-		options: {
-			option: string;
-			is_answer: boolean;
-		}[];
-	}[];
-	// ia07_questions: {
-	// 	question: string;
-	// 	answer_key: string;
-	// }[];
-};
-
-export function convertSkemaToPostPayload(
-	skema: SkemaType,
-	occupation_id: number
-): SkemaTypeRaw {
-	return {
-		occupation_id,
-		code: skema.code,
-		uc_apl02s: skema.uc_apl02s.map((unit) => ({
-			unit_code: unit.unit_code,
-			title: unit.title,
-			elements: unit.elements.map((elemen) => ({
-				title: elemen.title,
-				details: elemen.details.map((item) => ({
-					description: item.description,
-				})),
-			})),
-		})),
-		groups_ia01: skema.groups_ia01.map((group) => ({
-			name: group.name,
-			units: group.units.map((unit) => ({
-				unit_code: unit.unit_code,
-				title: unit.title,
-				elements: unit.elements.map((elemen) => ({
-					title: elemen.title,
-					details: elemen.details.map((item) => ({
-						description: item.description,
-						benchmark: item.benchmark,
-					})),
-				})),
-			})),
-		})),
-		groups_ia02: skema.groups_ia02.map((group) => ({
-			name: group.name,
-			scenario: group.scenario,
-			duration: group.duration,
-			units: group.units.map((unit) => ({
-				unit_code: unit.unit_code,
-				title: unit.title,
-			})),
-			tools: group.tools.map((tool) => ({
-				name: "tool.name",
-			})),
-			qa_ia03: group.qa_ia03.map((question) => ({
-				question: "question.question",
-			})),
-		})),
-		ia05_questions: skema.ia05_questions.map((question) => ({
-			order: question.order,
-			question: question.question,
-			options: question.options.map((option) => ({
-				option: option.option,
-				is_answer: option.is_answer,
-			})),
-		})),
-		// ia07_questions: skema.groups_ia.flatMap((group) =>
-		// 	group.qa_ia03.map((question) => ({
-		// 		question: question.question,
-		// 		answer_key: "",
-		// 	}))
-		// ),
-	};
-}
