@@ -7,4 +7,9 @@ export const getAssesseeUrl = (id: number) => {
 	return `${import.meta.env.VITE_API_URL}/public/assessee/${encodedId}`;
 };
 
+export const getAssessorUrl = (id: number) => {
+	const encodedId = hashids.encode(id);
+	return `${import.meta.env.VITE_API_URL}/public/assessor/${encodedId}`;
+};
+
 export const decodeId = (id: string) => hashids.decode(id)[0];
