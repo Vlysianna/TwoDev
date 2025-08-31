@@ -57,7 +57,8 @@ export default function Ia02() {
   const [groups, setGroups] = useState<GroupIA[]>([]);
 
   const [selectedGroup, setSelectedGroup] = useState(0);
-  const [qrValue, setQrValue] = useState("");
+  const [assesseeQrValue, setQrValue] = useState("");
+  const [assessorQrValue, setAssessorQrValue] = useState("");
 
   useEffect(() => {
     if (id_result && id_assessment) {
@@ -74,6 +75,10 @@ export default function Ia02() {
 
         if (response.data.data.ia02_header.approved_assessee) {
           setQrValue(getAssesseeUrl(Number(id_asesi)));
+        }
+
+        if (response.data.data.ia02_header.approved_assessor) {
+          setAssessorQrValue(getAssesseeUrl(Number(id_asesor)));
         }
       }
     } catch (error: any) {
@@ -99,13 +104,13 @@ export default function Ia02() {
     }
   };
 
-  const handleGenerateQRCode = async (id_asesi: number) => {
+  const handleGenerateQRCode = async () => {
     try {
       const response = await api.put(
         `/assessments/ia-02/result/assessee/${id_result}/approve`
       );
       if (response.data.success) {
-        setQrValue(getAssesseeUrl(id_asesi));
+        setQrValue(getAssesseeUrl(Number(id_asesi)));
       }
     } catch (error) {
       console.log("Error fetching unit competencies:", error);
@@ -296,7 +301,7 @@ export default function Ia02() {
           <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 items-start">
               {/* Bagian kiri (2 kolom) */}
-              <div className="lg:col-span-5 space-y-4">
+              <div className="lg:col-span-4 space-y-4">
                 {/* Asesi */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -314,7 +319,7 @@ export default function Ia02() {
                       type="date"
                       placeholder="Tanggal"
                       className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={new Date().toISOString().split("T")[0]}
+                      value={result.ia02_header.updated_at.split("T")[0]}
                       disabled
                     />
                   </div>
@@ -337,7 +342,7 @@ export default function Ia02() {
                       type="date"
                       placeholder="Tanggal"
                       className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={new Date().toISOString().split("T")[0]}
+                      value={result.ia02_header.updated_at.split("T")[0]}
                       disabled
                     />
                   </div>
@@ -356,49 +361,52 @@ export default function Ia02() {
               </div>
 
               {/* QR Code Section */}
-              <div className="mb-6 flex justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:col-span-2">
                 <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                  {qrValue && (
+                  {assesseeQrValue && (
                     <QRCodeCanvas
-                      value={qrValue}
+                      value={assesseeQrValue}
                       size={156}
                       className="w-40 h-40 object-contain"
                     >
-                      {qrValue}
+                      {assesseeQrValue}
                     </QRCodeCanvas>
                   )}
-                  <button
-                    disabled={qrValue !== ""}
-                    onClick={() => {
-                      if (!qrValue) handleGenerateQRCode(Number(id_asesi));
-                    }}
-                    className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-                      !qrValue
-                        ? "hover:bg-orange-600"
-                        : "cursor-not-allowed opacity-50"
-                    }`}
-                  >
-                    Generate QR Code
-                  </button>
+                  <span className="text-sm font-semibold text-gray-800">
+                    {result.assessee.name}
+                  </span>
+                  {!assesseeQrValue && (
+                    <button
+                      disabled={assesseeQrValue !== ""}
+                      onClick={() => {
+                        if (!assesseeQrValue && assessorQrValue)
+                          handleGenerateQRCode();
+                      }}
+                      className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                        !assesseeQrValue && assessorQrValue
+                          ? "hover:bg-orange-600"
+                          : "cursor-not-allowed opacity-50"
+                      }`}
+                    >
+                      Setujui
+                    </button>
+                  )}
+                </div>
+                <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
+                  {assessorQrValue && (
+                    <QRCodeCanvas
+                      value={assessorQrValue}
+                      size={156}
+                      className="w-40 h-40 object-contain"
+                    >
+                      {assessorQrValue}
+                    </QRCodeCanvas>
+                  )}
+                  <span className="text-sm font-semibold text-gray-800">
+                    {result.assessor.name}
+                  </span>
                 </div>
               </div>
-            </div>
-
-            {/* Tombol */}
-            <div className="flex justify-center sm:justify-end mt-6 border-t border-gray-200 pt-4">
-              <Link
-                to={paths.asesi.assessment.ia05(id_assessment, id_asesor)}
-                className={`bg-[#E77D35] text-white font-medium rounded px-6 sm:px-30 py-2 w-full sm:w-auto ${
-                  qrValue
-                    ? "hover:bg-orange-600"
-                    : "cursor-not-allowed opacity-50"
-                }`}
-                onClick={(e) => {
-                  if (!qrValue) e.preventDefault();
-                }}
-              >
-                Lanjut
-              </Link>
             </div>
           </div>
         </div>
