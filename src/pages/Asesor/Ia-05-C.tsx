@@ -88,7 +88,7 @@ export default function Ia05C() {
 
       {/* Content */}
       <div className="max-w-[1450px] mx-auto py-2 md:py-6 px-2 md:px-0">
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden px-3 md:px-5">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden px-3 md:px-5 pb-3 md:pb-5">
 
           {/* Header Info & Progress */}
           <div className="py-4 md:py-6 border-gray-200">
