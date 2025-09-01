@@ -6,7 +6,7 @@ import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { Controller, useForm } from "react-hook-form";
-import { useAssessmentParams } from "@/components/IsApproveApl01";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 
 // Types
 interface AssesseeJobRequest {

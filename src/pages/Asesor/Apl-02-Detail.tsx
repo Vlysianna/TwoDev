@@ -96,7 +96,7 @@ export default function CekApl02Detail() {
                     <NavbarAsesor
                         title='Detail'
                         icon={
-                            <Link to={paths.asesor.cekApl02} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesor.assessment.cekApl02Pattern} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }

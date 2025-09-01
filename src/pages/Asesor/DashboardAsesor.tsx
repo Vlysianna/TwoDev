@@ -347,7 +347,9 @@ const DashboardAsesor: React.FC = () => {
                       </div>
                     </div>
                     <Link
-                      to={paths.asesor.dashboardAsesmenMandiri}
+											to={paths.asesor.assessment.dashboardAsesmenMandiri(
+													okupasi.id
+												)}
                       className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
                     >
                       <ChevronRight className="w-4 h-4 text-white" />

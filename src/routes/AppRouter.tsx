@@ -12,7 +12,7 @@ import Prosedur from "@/pages/LandingPage/Prosedur";
 import Berita from "@/pages/LandingPage/Berita";
 import Galeri from "@/pages/LandingPage/Galeri";
 import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
-import KelolaMUK from "@/pages/admin/KelolaSkema";
+import KelolaMUK from "@/pages/admin/KelolaMuk";
 import EditAsesor from "@/pages/admin/EditAsesor";
 import KelolaAkunAsesor from "@/pages/admin/AkunAsesor";
 import VerifikasiPage from "@/pages/admin/verifikasi";
@@ -24,7 +24,7 @@ import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
 import DashboardAdmin from "@/pages/admin/DashboardAdmin";
 import AsessmentAktif from "@/pages/asesi/AsesmentAktif";
 import Test from "@/pages/LandingPage/Test";
-import TambahSkema from "@/pages/admin/TambahMUK";
+import TambahMUK from "@/pages/admin/TambahMUK";
 import KelolaJurusan from "@/pages/admin/kelolaJur";
 import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
@@ -44,7 +44,7 @@ import CekApl02 from "@/pages/Asesor/Apl-02";
 import CekAk01 from "@/pages/Asesor/Ak-01";
 import FaktaIntegritas from "@/pages/Asesor/FaktaIntegritas";
 import Ia03 from "@/pages/Asesor/Ia-03";
-import IsApproveApl01 from "@/components/IsApproveApl01";
+import AssessmentAsesiProvider from "@/components/AssessmentAsesiProvider";
 import BiodataAsesor from "@/pages/Asesor/BiodataAsesor";
 import Apl02 from "@/pages/asesi/Apl-02";
 import Apl02Detail from "@/pages/asesi/Apl-02-Detail";
@@ -59,7 +59,7 @@ import DashboardPenilaian from "@/pages/Asesor/DashboardPenilaian";
 import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
-
+import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
 
 const router = createBrowserRouter([
 	{
@@ -68,8 +68,8 @@ const router = createBrowserRouter([
 		children: [
 			// Landing & Public Pages
 			{ index: true, element: <LandingPage /> },
-				// legacy path for older links to APL-02 (accepts id param)
-				{ path: "/apl-02/:id", element: <Apl02 /> },
+			// legacy path for older links to APL-02 (accepts id param)
+			{ path: "/apl-02/:id", element: <Apl02 /> },
 			// legacy/alternate path for assesmen aktif (avoid 404 on older links)
 			{ path: "/asesmen-aktif-asesi", element: <AsessmentAktif /> },
 			// assessor legacy path (some links point here instead of the new /asesor/... path)
@@ -130,7 +130,7 @@ const router = createBrowserRouter([
 					{ path: paths.admin.kelolaAkunAsesor, element: <KelolaAkunAsesor /> },
 					{ path: paths.admin.editAsesi, element: <EditAsesi /> },
 					{ path: paths.admin.verifikasi, element: <VerifikasiPage /> },
-					{ path: paths.admin.tambahSkema, element: <TambahSkema /> },
+					{ path: paths.admin.tambahMuk, element: <TambahMUK /> },
 					{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
 					{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
 					{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
@@ -158,11 +158,9 @@ const router = createBrowserRouter([
 					{
 						path: paths.asesi.assessment.root,
 						element: (
-							<ProtectedRoute allowedRoles={[3]}>
-								<IsApproveApl01>
-									<Outlet />
-								</IsApproveApl01>
-							</ProtectedRoute>
+							<AssessmentAsesiProvider>
+								<Outlet />
+							</AssessmentAsesiProvider>
 						),
 						children: [
 							{
@@ -182,8 +180,8 @@ const router = createBrowserRouter([
 								element: <Apl02Detail />,
 							},
 							{
-							 	path: paths.asesi.assessment.ia02Pattern,
-								element: <Ia02 /> 
+								path: paths.asesi.assessment.ia02Pattern,
+								element: <Ia02 />,
 							},
 							{
 								path: paths.asesi.assessment.ia05Pattern,
@@ -192,7 +190,7 @@ const router = createBrowserRouter([
 							{
 								path: paths.asesi.assessment.ak01Pattern,
 								element: <Ak01 />,
-							}
+							},
 						],
 					},
 					{ path: paths.asesi.asesmenDiikuti, element: <AsessmentAktif /> },
@@ -211,31 +209,61 @@ const router = createBrowserRouter([
 					</ProtectedRoute>
 				),
 				children: [
+					{
+						path: paths.asesor.assessment.root,
+						element: (
+							<AssessmentAsesorProvider>
+								<Outlet />
+							</AssessmentAsesorProvider>
+						),
+						children: [
+							{
+								path: paths.asesor.assessment.dashboardAsesmenMandiriPattern,
+								element: <DashboardAsesmenMandiri />,
+							},
+							{
+								path: paths.asesor.assessment.faktaIntegritasPattern,
+								element: <FaktaIntegritas />,
+							},
+							{
+								path: paths.asesor.assessment.cekApl02Pattern,
+								element: <CekApl02 />,
+							},
+							{
+								path: paths.asesor.assessment.cekApl02DetailPattern,
+								element: <CekApl02Detail />,
+							},
+							{ path: paths.asesor.assessment.ia01Pattern, element: <Ia01 /> },
+							{
+								path: paths.asesor.assessment.ia01DetailPattern,
+								element: <Ia01Detail />,
+							},
+							{ path: paths.asesor.assessment.ia03Pattern, element: <Ia03 /> },
+							{
+								path: paths.asesor.assessment.cekAk01Pattern,
+								element: <CekAk01 />,
+							},
+							{ path: paths.asesor.assessment.ak02Pattern, element: <Ak02 /> },
+							{ path: paths.asesor.assessment.ak05Pattern, element: <Ak05 /> },
+							{
+								path: paths.asesor.assessment.hasilAsesmenPattern,
+								element: <HasilAsesmen />,
+							},
+							{
+								path: paths.asesor.assessment.lembarJawabanPattern,
+								element: <LembarJawaban />,
+							},
+						],
+					},
 					{ index: true, element: <DashboardAsesor /> },
 					{ path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
-					{ path: paths.asesor.dashboardAsesmenMandiri, element: <DashboardAsesmenMandiri /> },
-					{ path: paths.asesor.dashboardPenilaian, element: <DashboardPenilaian /> },
+
+					{
+						path: paths.asesor.dashboardPenilaian,
+						element: <DashboardPenilaian />,
+					},
 					{ path: paths.asesor.biodata, element: <BiodataAsesor /> },
-					{ path: paths.asesor.faktaIntegritas, element: <FaktaIntegritas /> },
-					{
-						path: paths.asesor.cekApl02,
-						element: <CekApl02 />,
-					},
-					{
-						path: paths.asesor.cekApl02Detail,
-						element: <CekApl02Detail />,
-					},
-					{ path: paths.asesor.ia01, element: <Ia01 /> },
-					{ path: paths.asesor.ia01Detail, element: <Ia01Detail /> },
-					{ path: paths.asesor.ia03, element: <Ia03 /> },
-					{
-						path: paths.asesor.cekAk01,
-						element: <CekAk01 />,
-					},
-					{ path: paths.asesor.ak02, element: <Ak02 /> },
-					{ path: paths.asesor.ak05, element: <Ak05 /> },
-					{ path: paths.asesor.hasilAsesmen, element: <HasilAsesmen /> },
-					{ path: paths.asesor.lembarJawaban, element: <LembarJawaban /> },
+
 					{ path: paths.asesor.dataAsesor, element: <DataAsesor /> },
 				],
 			},

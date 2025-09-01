@@ -7,7 +7,7 @@ import api from "@/helper/axios";
 import { motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import useSWR from "swr";
-import { useAssessmentParams } from "@/components/IsApproveApl01";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 
 type FormValues = {
 	purpose: string;
@@ -137,10 +137,7 @@ export default function DataSertifikasi() {
 			// setModalStep(null);
 			localStorage.removeItem("asesiId");
 			navigate(
-				paths.asesi.assessment.apl02(
-					id_assessment ?? 0,
-					id_asesor ?? 0
-				)
+				paths.asesi.assessment.apl02(id_assessment ?? 0, id_asesor ?? 0)
 			);
 		}
 	};

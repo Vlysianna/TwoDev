@@ -1,4 +1,3 @@
-import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import routes from "@/routes/paths";
 import {
@@ -28,7 +27,7 @@ export function useAssessmentParams() {
 	return ctx;
 }
 
-export default function IsApproveApl01({
+export default function AssessmentAsesiProvider({
 	children,
 }: {
 	children: JSX.Element | JSX.Element[];
@@ -103,10 +102,7 @@ export default function IsApproveApl01({
 					) {
 						return null;
 					}
-					return routes.asesi.assessment.apl02(
-						id_assessment,
-						id_asesor
-					);
+					return routes.asesi.assessment.apl02(id_assessment, id_asesor);
 				} else {
 					return routes.asesi.assessment.dataSertifikasi(
 						id_assessment,

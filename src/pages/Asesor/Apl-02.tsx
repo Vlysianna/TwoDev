@@ -216,7 +216,7 @@ export default function CekApl02() {
                                                         )}
 
                                                         <Link
-                                                            to={paths.asesor.cekApl02Detail}
+                                                            to={paths.asesor.assessment.cekApl02DetailPattern}
                                                             className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
                                                         >
                                                             Lihat detail

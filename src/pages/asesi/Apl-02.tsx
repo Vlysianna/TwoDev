@@ -5,7 +5,7 @@ import NavbarAsesi from "@/components/NavbarAsesi";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
-import { useAssessmentParams } from "@/components/IsApproveApl01";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl } from "@/lib/hashids";
 
@@ -243,10 +243,7 @@ export default function Apl02() {
 									{/* Submit Button */}
 									<div className="w-full">
 										<Link
-											to={paths.asesi.assessment.ia02(
-												id_assessment,
-												id_asesor
-											)} // arahkan ke route yang kamu mau
+											to={paths.asesi.assessment.ia02(id_assessment, id_asesor)} // arahkan ke route yang kamu mau
 											className={`w-full block text-center bg-[#E77D35] hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`}
 										>
 											Lanjut

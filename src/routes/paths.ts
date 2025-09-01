@@ -30,7 +30,7 @@ const routes = {
 		kelolaAkunAsesor: "/admin/kelola-akun-asesor",
 		editAsesi: "/admin/edit-asesi",
 		verifikasi: "/admin/verifikasi",
-		tambahSkema: "/admin/tambahskema",
+		tambahMuk: "/admin/tambah-muk",
 		kelolaJurusan: "/admin/kelola-jurusan",
 		okupasi: {
 			root: "/admin/okupasi",
@@ -47,20 +47,65 @@ const routes = {
 		root: "/asesor",
 		biodata: "/asesor/biodata",
 		dashboardAsesor: "/asesor/dashboard-asesor",
-		dashboardAsesmenMandiri: "/asesor/dashboard-asesmen-mandiri",
 		dashboardPenilaian: "/asesor/dashboard-penilaian",
-		faktaIntegritas: "/asesor/fakta-integritas",
-		cekApl02: "/asesor/cek-apl-02",
-		cekApl02Detail: "/asesor/cek-apl-02-detail",
-		ia01: "/asesor/ia-01",
-		ia01Detail: "/asesor/ia-01-detail",
-		ia03: "/asesor/ia-03",
-		cekAk01: "/asesor/cek-ak-01",
-		ak02: "/asesor/ak-02",
-		ak05: "/asesor/ak-05",
-		dataSertifikasi: "/asesor/data-sertifikasi",
-		hasilAsesmen: "/asesor/hasil-asesmen",
-		lembarJawaban: "/asesor/lembar-jawaban",
+		assessment: {
+			root: "/asesor/assessment",
+			dashboardAsesmenMandiri: (id_assessment: string | number) =>
+				`/asesor/assessment/${id_assessment}`,
+			dashboardAsesmenMandiriPattern: "/asesor/assessment/:id_assessment",
+			faktaIntegritas: (
+				id_assessment: string | number,
+				id_asesi: string | number
+			) => `/asesor/assessment/${id_assessment}/${id_asesi}/fakta-integritas`,
+			faktaIntegritasPattern:
+				"/asesor/assessment/:id_assessment/:id_asesi/fakta-integritas",
+			cekApl02: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/cek-apl-02`,
+			cekApl02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/cek-apl-02",
+			cekApl02Detail: (
+				id_assessment: string | number,
+				id_asesi: string | number
+			) => `/asesor/assessment/${id_assessment}/${id_asesi}/cek-apl-02-detail`,
+			cekApl02DetailPattern:
+				"/asesor/assessment/:id_assessment/:id_asesi/cek-apl-02-detail",
+			ia01: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-01`,
+			ia01Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-01",
+			ia01Detail: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-01-detail`,
+			ia01DetailPattern:
+				"/asesor/assessment/:id_assessment/:id_asesi/ia-01-detail",
+			ia03: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-03`,
+			ia03Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-03",
+			cekAk01: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/cek-ak-01`,
+			cekAk01Pattern: "/asesor/assessment/:id_assessment/:id_asesi/cek-ak-01",
+			ak02: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/ak-02`,
+			ak02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ak-02",
+			ak05: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/ak-05`,
+			ak05Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ak-05",
+			dataSertifikasi: (
+				id_assessment: string | number,
+				id_asesi: string | number
+			) => `/asesor/assessment/${id_assessment}/${id_asesi}/data-sertifikasi`,
+			dataSertifikasiPattern:
+				"/asesor/assessment/:id_assessment/:id_asesi/data-sertifikasi",
+			hasilAsesmen: (
+				id_assessment: string | number,
+				id_asesi: string | number
+			) => `/asesor/assessment/${id_assessment}/${id_asesi}/hasil-asesmen`,
+			hasilAsesmenPattern:
+				"/asesor/assessment/:id_assessment/:id_asesi/hasil-asesmen",
+			lembarJawaban: (
+				id_assessment: string | number,
+				id_asesi: string | number
+			) => `/asesor/assessment/${id_assessment}/${id_asesi}/lembar-jawaban`,
+			lembarJawabanPattern:
+				"/asesor/assessment/:id_assessment/:id_asesi/lembar-jawaban",
+		},
 		dataAsesor: "/asesor/data-asesor",
 	},
 	asesi: {
@@ -77,12 +122,9 @@ const routes = {
 			) => `/asesi/assessment/${id_assessment}/${id_asesor}/data-sertifikasi`,
 			dataSertifikasiPattern:
 				"/asesi/assessment/:id_assessment/:id_asesor/data-sertifikasi",
-			apl02: (
-				id_assessment: string | number,
-				id_asesor: string | number
-			) => `/asesi/assessment/${id_assessment}/${id_asesor}/apl-02`,
-			apl02Pattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/apl-02",
+			apl02: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-02`,
+			apl02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/apl-02",
 			apl02_detail: (
 				id_assessment: string | number,
 				id_asesor: string | number,
@@ -94,22 +136,13 @@ const routes = {
 			frak03: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/fr.ak.03`,
 			frak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/fr.ak.03",
-			ia02: (
-				id_assessment: string | number,
-				id_asesor: string | number
-			) =>
+			ia02: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-02`,
 			ia02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-02",
-			ia05: (
-				id_assessment: string | number,
-				id_asesor: string | number
-			) =>
+			ia05: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-05`,
 			ia05Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-05",
-			ak01: (
-				id_assessment: string | number,
-				id_asesor: string | number
-			) =>
+			ak01: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-01`,
 			ak01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-01",
 		},

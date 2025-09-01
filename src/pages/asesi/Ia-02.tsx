@@ -4,7 +4,7 @@ import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAssessmentParams } from "@/components/IsApproveApl01";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import type { GroupIA, ResultIA02 } from "@/model/ia02-model";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";

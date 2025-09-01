@@ -6,7 +6,7 @@ import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import routes from "@/routes/paths";
-import { useAssessmentParams } from "@/components/IsApproveApl01";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import { motion } from "framer-motion";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -83,9 +83,7 @@ export default function Apl02Detail() {
 
 	useEffect(() => {
 		if (elements.length < 0) {
-			navigate(
-				routes.asesi.assessment.apl02(id_assessment, id_asesor)
-			);
+			navigate(routes.asesi.assessment.apl02(id_assessment, id_asesor));
 		}
 	}, [elements]);
 
@@ -103,7 +101,6 @@ export default function Apl02Detail() {
 		}));
 	};
 
-
 	const handleFilterChange = (value: string) => {
 		setFilterKompeten(value);
 
@@ -118,7 +115,6 @@ export default function Apl02Detail() {
 			setPencapaian(newPencapaian);
 		}
 	};
-
 
 	const handleGlobalProofChange = (value: string) => {
 		setGlobalProof(value);
@@ -189,10 +185,7 @@ export default function Apl02Detail() {
 							title="Detail"
 							icon={
 								<Link
-									to={paths.asesi.assessment.apl02(
-										id_assessment,
-										id_asesor
-									)}
+									to={paths.asesi.assessment.apl02(id_assessment, id_asesor)}
 									className="text-gray-500 hover:text-gray-600"
 								>
 									<ChevronLeft size={20} />
@@ -234,8 +227,9 @@ export default function Apl02Detail() {
 									].map((opt) => (
 										<label
 											key={opt.value}
-											className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition ${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
-												}`}
+											className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition ${
+												filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
+											}`}
 										>
 											<input
 												type="radio"
@@ -246,10 +240,11 @@ export default function Apl02Detail() {
 												className="hidden"
 											/>
 											<span
-												className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${filterKompeten === opt.value
+												className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
+													filterKompeten === opt.value
 														? "bg-[#E77D35] border-[#E77D35]"
 														: "border-[#E77D35]"
-													}`}
+												}`}
 											>
 												{filterKompeten === opt.value && (
 													<svg
@@ -354,8 +349,9 @@ export default function Apl02Detail() {
 																<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
 																	{/* Kompeten */}
 																	<label
-																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${selected === true ? "bg-[#E77D3533]" : ""
-																			}`}
+																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${
+																			selected === true ? "bg-[#E77D3533]" : ""
+																		}`}
 																	>
 																		<input
 																			type="radio"
@@ -365,10 +361,11 @@ export default function Apl02Detail() {
 																			className="hidden"
 																		/>
 																		<span
-																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${selected === true
+																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
+																				selected === true
 																					? "bg-[#E77D35] border-[#E77D35]"
 																					: "border-[#E77D35]"
-																				}`}
+																			}`}
 																		>
 																			{selected === true && (
 																				<svg
@@ -395,8 +392,9 @@ export default function Apl02Detail() {
 
 																	{/* Belum Kompeten */}
 																	<label
-																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${selected === false ? "bg-[#E77D3533]" : ""
-																			}`}
+																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${
+																			selected === false ? "bg-[#E77D3533]" : ""
+																		}`}
 																	>
 																		<input
 																			type="radio"
@@ -406,10 +404,11 @@ export default function Apl02Detail() {
 																			className="hidden"
 																		/>
 																		<span
-																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${selected === false
+																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
+																				selected === false
 																					? "bg-[#E77D35] border-[#E77D35]"
 																					: "border-[#E77D35]"
-																				}`}
+																			}`}
 																		>
 																			{selected === false && (
 																				<svg
