@@ -1,3 +1,5 @@
+import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
+
 const routes = {
 	root: "/",
 	dashboard: {
@@ -142,7 +144,16 @@ const routes = {
 			ia05: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-05`,
 			ia05Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-05",
-			ak01: (id_assessment: string | number, id_asesor: string | number) =>
+			Ia05CAssessee: (
+				id_assessment: string | number,
+				id_asesor: string | number
+			) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-05-c`,
+			ia05CAssesseePattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-05-c",
+			ak01: (
+				id_assessment: string | number,
+				id_asesor: string | number
+			) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-01`,
 			ak01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-01",
 		},

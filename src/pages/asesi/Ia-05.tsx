@@ -1,12 +1,16 @@
 import { ChevronLeft, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 import NavbarAsesi from '@/components/NavbarAsesi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAssessmentParams } from '@/components/AssessmentAsesiProvider';
 
 export default function Ia05() {
+    const { id_asesi, id_asesor, id_result, id_assessment } = useAssessmentParams();
+
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -166,9 +170,7 @@ export default function Ia05() {
             console.log("Jawaban tersimpan:", answers);
 
             setSuccess('Jawaban berhasil disimpan!');
-            setTimeout(() => {
-                window.history.back();
-            }, 2000);
+            navigate(paths.asesi.assessment.Ia05CAssessee(id_assessment, id_asesor));
         } catch (error: any) {
             setError('Gagal menyimpan jawaban. Silakan coba lagi.');
         } finally {

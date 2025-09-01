@@ -60,6 +60,8 @@ import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
+import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
+
 
 const router = createBrowserRouter([
 	{
@@ -186,6 +188,10 @@ const router = createBrowserRouter([
 							{
 								path: paths.asesi.assessment.ia05Pattern,
 								element: <Ia05 />,
+							},
+							{
+								path: paths.asesi.assessment.ia05CAssesseePattern,
+								element: <Ia05CAssessee />,
 							},
 							{
 								path: paths.asesi.assessment.ak01Pattern,
