@@ -12,9 +12,16 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 type AssessmentParams = {
 	id_assessment: string;
 	id_asesi?: string | null;
+	id_asesor?: string | null;
+	id_result?: string | null;
 };
 
-const AssessmentContext = createContext<AssessmentParams | null>(null);
+type AssessmentContextType = {
+	params: AssessmentParams;
+	setParams: React.Dispatch<React.SetStateAction<AssessmentParams>>;
+}
+
+const AssessmentContext = createContext<AssessmentContextType | null>(null);
 
 export function useAssessmentParams() {
 	const ctx = useContext(AssessmentContext);
@@ -31,6 +38,10 @@ export default function AssessmentAsesorProvider({
 	children: JSX.Element | JSX.Element[];
 }) {
 	const { id_assessment, id_asesi } = useParams();
+	const [params, setParams] = useState<AssessmentParams>({
+		id_assessment: id_assessment!,
+		id_asesi: id_asesi,
+	})
 
 	// const { user } = useAuth();
 	const navigate = useNavigate();
@@ -57,8 +68,8 @@ export default function AssessmentAsesorProvider({
 			) : (
 				<AssessmentContext.Provider
 					value={{
-						id_assessment: id_assessment!,
-						id_asesi: id_asesi,
+						params,
+						setParams
 					}}
 				>
 					{children}

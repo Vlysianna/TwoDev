@@ -246,7 +246,7 @@ const router = createBrowserRouter([
 							},
 							{ path: paths.asesor.assessment.ia03Pattern, element: <Ia03 /> },
 							{
-								path: paths.asesor.assessment.cekAk01Pattern,
+								path: paths.asesor.assessment.ak01Pattern,
 								element: <CekAk01 />,
 							},
 							{ path: paths.asesor.assessment.ak02Pattern, element: <Ak02 /> },

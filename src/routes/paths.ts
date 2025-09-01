@@ -80,9 +80,9 @@ const routes = {
 			ia03: (id_assessment: string | number, id_asesi: string | number) =>
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-03`,
 			ia03Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-03",
-			cekAk01: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/cek-ak-01`,
-			cekAk01Pattern: "/asesor/assessment/:id_assessment/:id_asesi/cek-ak-01",
+			ak01: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/ak-01`,
+			ak01Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ak-01",
 			ak02: (id_assessment: string | number, id_asesi: string | number) =>
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ak-02`,
 			ak02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ak-02",

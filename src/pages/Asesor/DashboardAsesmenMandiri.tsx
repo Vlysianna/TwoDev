@@ -3,10 +3,12 @@ import { Search, LayoutDashboard } from "lucide-react";
 import SidebarAsesor from '@/components/SideAsesor';
 import NavAsesor from '@/components/NavAsesor';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '@/helper/axios';
 import BaseModal from '@/components/BaseModal';
 import Ia01Detail from './Ia-01-Detail';
+import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
+import paths from '@/routes/paths';
 
 interface Assessee {
     id: number;
@@ -44,6 +46,8 @@ const siswaData = [
 
 export default function DashboardAsesmenMandiri() {
     // component state
+    const { params, setParams } = useAssessmentParams();
+    const navigate = useNavigate();
 
     const [assessees, setAssessees] = useState<Assessee[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -111,6 +115,16 @@ export default function DashboardAsesmenMandiri() {
         const name = (a.user?.full_name || a.full_name || '').toString().toLowerCase();
         return name.includes(q);
     });
+
+    const handleAPL02 = (assesseeId: number) => {
+        setParams({ ...params, id_asesi: String(assesseeId) });
+        navigate(paths.asesor.assessment.cekApl02(params.id_assessment, assesseeId));
+    }
+
+    const handleAK01 = (assesseeId: number) => {
+        setParams({ ...params, id_asesi: String(assesseeId) });
+        navigate(paths.asesor.assessment.ak01(params.id_assessment, assesseeId));
+    }
 
     const handleGenerateAll = () => {
         if (selectedTab === 'ia-01') {
@@ -228,7 +242,7 @@ export default function DashboardAsesmenMandiri() {
                                         </div>
                                         <div className="text-right">
                                             {selectedTab === 'apl-02' && (
-                                                <Link to={`/apl-02/${siswa.id}`} className="text-orange-500 underline text-xs">Buka APL-02 →</Link>
+                                                <button onClick={() => handleAPL02(siswa.id)} className="text-orange-500 underline text-xs">Buka APL-02 →</button>
                                             )}
                                             {selectedTab === 'ia-01' && (
                                                 <button onClick={() => openIa01Modal()} className="text-orange-500 underline text-xs">Cek IA-01 →</button>
@@ -243,7 +257,7 @@ export default function DashboardAsesmenMandiri() {
                                                 <button onClick={() => window.open(`/asesor/ia-05/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka IA-05 →</button>
                                             )}
                                             {selectedTab === 'ak-01' && (
-                                                <button onClick={() => window.open(`/asesor/ak-01/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-01 →</button>
+                                                <button onClick={() => handleAK01(siswa.id)} className="text-orange-500 underline text-xs">Buka AK-01 →</button>
                                             )}
                                             {selectedTab === 'ak-02' && (
                                                 <button onClick={() => window.open(`/asesor/ak-02/${siswa.id}`, '_self')} className="text-orange-500 underline text-xs">Buka AK-02 →</button>
