@@ -56,11 +56,11 @@ import Ak03 from "@/pages/asesi/Ak-03";
 import CekApl02Detail from "@/pages/Asesor/Apl-02-Detail";
 import DashboardAsesor from "@/pages/Asesor/DashboardAsesor";
 import DashboardPenilaian from "@/pages/Asesor/DashboardPenilaian";
-import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
 import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
+import DashboardAsesmenMandiri from "@/pages/asesor/DashboardAsesmenMandiri";
 
 
 const router = createBrowserRouter([
