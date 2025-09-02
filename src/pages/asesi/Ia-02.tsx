@@ -8,7 +8,7 @@ import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import type { GroupIA, ResultIA02 } from "@/model/ia02-model";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
-import { getAssesseeUrl } from "@/lib/hashids";
+import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 
 export default function Ia02() {
   const { id_result, id_assessment, id_asesi, id_asesor } =
@@ -57,7 +57,7 @@ export default function Ia02() {
   const [groups, setGroups] = useState<GroupIA[]>([]);
 
   const [selectedGroup, setSelectedGroup] = useState(0);
-  const [assesseeQrValue, setQrValue] = useState("");
+  const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
 
   useEffect(() => {
@@ -74,11 +74,11 @@ export default function Ia02() {
         setResult(response.data.data);
 
         if (response.data.data.ia02_header.approved_assessee) {
-          setQrValue(getAssesseeUrl(Number(id_asesi)));
+          setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
         }
 
         if (response.data.data.ia02_header.approved_assessor) {
-          setAssessorQrValue(getAssesseeUrl(Number(id_asesor)));
+          setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
         }
       }
     } catch (error: any) {
@@ -110,7 +110,7 @@ export default function Ia02() {
         `/assessments/ia-02/result/assessee/${id_result}/approve`
       );
       if (response.data.success) {
-        setQrValue(getAssesseeUrl(Number(id_asesi)));
+        setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
       }
     } catch (error) {
       console.log("Error fetching unit competencies:", error);

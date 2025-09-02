@@ -110,7 +110,7 @@ export default function CekAk01() {
         `/assessments/ak-01/result/assessor/${id_result}/approve`
       );
       if (response.data.success) {
-        setAssessorQrValue(getAssesseeUrl(Number(id_asesi)));
+        setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
       }
     } catch (error) {
       console.log("Error fetching unit competencies:", error);
