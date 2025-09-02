@@ -61,6 +61,7 @@ import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
 import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
 import Ia05C from "@/pages/Asesor/Ia-05-C";
 import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
+import Ia02Assessor from "@/pages/Asesor/Ia-02";
 
 
 const router = createBrowserRouter([
@@ -244,7 +245,7 @@ const router = createBrowserRouter([
 								path: paths.asesor.assessment.ia01DetailPattern,
 								element: <Ia01Detail />,
 							},
-							{ path: paths.asesor.assessment.ia02Pattern, element: <Ia02 /> },
+							{ path: paths.asesor.assessment.ia02Pattern, element: <Ia02Assessor /> },
 							{ path: paths.asesor.assessment.ia03Pattern, element: <Ia03 /> },
 							{
 								path: paths.asesor.assessment.ak01Pattern,
