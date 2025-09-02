@@ -77,6 +77,9 @@ const routes = {
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-01-detail`,
 			ia01DetailPattern:
 				"/asesor/assessment/:id_assessment/:id_asesi/ia-01-detail",
+			ia02: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-02`,
+			ia02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-02",
 			ia03: (id_assessment: string | number, id_asesi: string | number) =>
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-03`,
 			ia03Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-03",
@@ -95,12 +98,12 @@ const routes = {
 			) => `/asesor/assessment/${id_assessment}/${id_asesi}/data-sertifikasi`,
 			dataSertifikasiPattern:
 				"/asesor/assessment/:id_assessment/:id_asesi/data-sertifikasi",
-			hasilAsesmen: (
+			ia05c: (
 				id_assessment: string | number,
 				id_asesi: string | number
-			) => `/asesor/assessment/${id_assessment}/${id_asesi}/hasil-asesmen`,
-			hasilAsesmenPattern:
-				"/asesor/assessment/:id_assessment/:id_asesi/hasil-asesmen",
+			) => `/asesor/assessment/${id_assessment}/${id_asesi}/ia-05-c`,
+			ia05cPattern:
+				"/asesor/assessment/:id_assessment/:id_asesi/ia-05-c",
 			lembarJawaban: (
 				id_assessment: string | number,
 				id_asesi: string | number

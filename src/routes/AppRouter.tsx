@@ -32,7 +32,6 @@ import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
 import Ia01Detail from "@/pages/Asesor/Ia-01-Detail";
 import Ia01 from "@/pages/Asesor/Ia-01";
-import HasilAsesmen from "@/pages/Asesor/HasilAsesmen";
 import Ak02 from "@/pages/Asesor/Ak-02";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
@@ -60,7 +59,8 @@ import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
 import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
-import DashboardAsesmenMandiri from "@/pages/asesor/DashboardAsesmenMandiri";
+import Ia05C from "@/pages/Asesor/Ia-05-C";
+import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
 
 
 const router = createBrowserRouter([
@@ -244,6 +244,7 @@ const router = createBrowserRouter([
 								path: paths.asesor.assessment.ia01DetailPattern,
 								element: <Ia01Detail />,
 							},
+							{ path: paths.asesor.assessment.ia02Pattern, element: <Ia02 /> },
 							{ path: paths.asesor.assessment.ia03Pattern, element: <Ia03 /> },
 							{
 								path: paths.asesor.assessment.ak01Pattern,
@@ -252,8 +253,8 @@ const router = createBrowserRouter([
 							{ path: paths.asesor.assessment.ak02Pattern, element: <Ak02 /> },
 							{ path: paths.asesor.assessment.ak05Pattern, element: <Ak05 /> },
 							{
-								path: paths.asesor.assessment.hasilAsesmenPattern,
-								element: <HasilAsesmen />,
+								path: paths.asesor.assessment.ia05cPattern,
+								element: <Ia05C />,
 							},
 							{
 								path: paths.asesor.assessment.lembarJawabanPattern,
