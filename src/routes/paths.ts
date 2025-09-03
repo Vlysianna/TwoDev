@@ -2,6 +2,11 @@ import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
 
 const routes = {
 	root: "/",
+	public: {
+		root: "/public",
+		dataAsesi: "/public/data-asesi/:encodedId",
+		dataAsesor: "/public/data-asesor/:encodedId",
+	},
 	dashboard: {
 		about: "/about",
 		struktur: "/struktur",

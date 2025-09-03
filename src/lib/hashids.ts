@@ -1,15 +1,15 @@
 import Hashids from "hashids";
 
-const hashids = new Hashids(import.meta.env.HASH_SALT, 8);
+export const hashids = new Hashids(import.meta.env.HASH_SALT, 8);
 
 export const getAssesseeUrl = (id: number) => {
 	const encodedId = hashids.encode(id);
-	return `${import.meta.env.VITE_API_URL}/public/assessee/${encodedId}`;
+	return `${import.meta.env.VITE_APP_URL}/public/data-asesi/${encodedId}`;
 };
 
 export const getAssessorUrl = (id: number) => {
 	const encodedId = hashids.encode(id);
-	return `${import.meta.env.VITE_API_URL}/public/assessor/${encodedId}`;
+	return `${import.meta.env.VITE_APP_URL}/public/data-asesor/${encodedId}`;
 };
 
 export const decodeId = (id: string) => hashids.decode(id)[0];

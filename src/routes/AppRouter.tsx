@@ -88,6 +88,10 @@ const router = createBrowserRouter([
 			{ path: paths.dashboard.contact, element: <Contact /> },
 			{ path: paths.dashboard.test, element: <Test /> },
 
+			// Public route
+			{ path: paths.public.dataAsesor, element: <DataAsesor /> },
+			{ path: paths.public.dataAsesi, element: <DataAssesi /> },
+
 			// Dashboard route for authenticated users
 			{
 				path: "/dashboard",
