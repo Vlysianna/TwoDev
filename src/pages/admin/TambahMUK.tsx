@@ -22,7 +22,7 @@ import {
 	type IA03Question,
 	type IA05Question,
 	type ItemElementAPL02,
-	type SkemaType,
+	type MukTypeInput,
 	type UnitAPL02,
 	type UnitIA01,
 	type UnitIA02,
@@ -40,9 +40,11 @@ import {
 } from "@/components/ui/accordion";
 import api from "@/helper/axios";
 import { useNavigate } from "react-router-dom";
+import routes from "@/routes/paths";
 
-const defaultValues: SkemaType = {
-	occupation_id: 0,
+const defaultValues: MukTypeInput = {
+	scheme_id: 0,
+	occupation_name: "",
 	code: "",
 	uc_apl02s: [],
 	groups_ia01: [],
@@ -51,7 +53,8 @@ const defaultValues: SkemaType = {
 	ia05_questions: [],
 };
 
-let currentSchemaNumber: string | null = null;
+let currentCode: string | null = null;
+let currentTitle: string | null = null;
 
 const TambahMUK: React.FC = () => {
 	const navigate = useNavigate();
@@ -64,7 +67,7 @@ const TambahMUK: React.FC = () => {
 		reset,
 		formState: { errors },
 		getValues,
-	} = useForm<SkemaType>({ defaultValues });
+	} = useForm<MukTypeInput>({ defaultValues });
 
 	const [openValueAPL02, setOpenValueAPL02] = useState<string | undefined>(
 		undefined
@@ -157,8 +160,10 @@ const TambahMUK: React.FC = () => {
 	// }, [pilihSkema, valueOccupation, school, year, setValue]);
 
 	useEffect(() => {
-		setValue("code", currentSchemaNumber ?? "");
-	}, [currentSchemaNumber]);
+		setValue("code", currentCode ?? "");
+		console.log(currentTitle);
+		setValue("occupation_name", currentTitle ?? "");
+	}, [currentCode, currentTitle]);
 
 	useEffect(() => {
 		// fetch occupations and schemes for selects
@@ -367,27 +372,18 @@ const TambahMUK: React.FC = () => {
 	// 	console.log(groups);
 	// }, [groups]);
 
-	async function handleUploadAK() {}
-
-	const onSubmit = async (data: SkemaType) => {
-		// prepare payload
-		const occupationId = Number(data.occupation_id) || undefined;
-		if (!occupationId) {
-			alert("Pilih Okupasi terlebih dahulu");
-			return;
-		}
-
+	const onSubmit = async (data: MukTypeInput) => {
 		try {
 			setSubmitting(true);
 			// POST to /assessments/create (app mounts assessmentRoutes on /api/assessments)
 			const res = await api.post("/assessments/create", {
 				...data,
-				occupation_id: occupationId,
+				scheme_id: Number(data.scheme_id),
 			});
 			if (res?.data?.success) {
-				alert("APL berhasil dibuat");
+				alert("MUK berhasil diupload");
 				// navigate to assessments list or refresh
-				navigate("/admin");
+				navigate(routes.admin.kelolaMUK);
 			} else {
 				alert("Gagal membuat APL");
 			}
@@ -460,18 +456,18 @@ const TambahMUK: React.FC = () => {
 									</h2>
 
 									<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-										{/* <div>
+										<div>
 											<label className="block text-sm font-medium text-gray-700 mb-2">
 												Pilih Skema
 											</label>
 
 											<div className="relative w-full">
 												<select
-													{...register("pilihSkema", {
+													{...register("scheme_id", {
 														required: "Pilih Skema wajib diisi",
 													})}
 													className={`w-full px-3 py-2 border rounded-md appearance-none ${
-														errors.pilihSkema
+														errors.scheme_id
 															? "border-red-500"
 															: "border-gray-300"
 													}`}
@@ -488,43 +484,32 @@ const TambahMUK: React.FC = () => {
 													className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
 												/>
 											</div>
-											{errors.pilihSkema && (
+											{errors.scheme_id && (
 												<p className="text-xs text-red-500 mt-1">
-													{errors.pilihSkema.message}
+													{errors.scheme_id.message}
 												</p>
 											)}
-										</div> */}
+										</div>
 
 										<div>
 											<label className="block text-sm font-medium text-gray-700 mb-2">
-												Pilih Okupasi
+												Judul Okupasi
 											</label>
 											<div className="relative w-full">
-												<select
-													{...register("occupation_id", {
+												<input
+													{...register("occupation_name", {
 														required: "Pilih Okupasi wajib diisi",
 													})}
 													className={`w-full px-3 py-2 border rounded-md appearance-none ${
-														errors.occupation_id
+														errors.occupation_name
 															? "border-red-500"
 															: "border-gray-300"
 													}`}
-												>
-													<option value="">Pilih Okupasi</option>
-													{filteredOccupations.map((o) => (
-														<option key={o.id} value={o.id}>
-															{o.name}
-														</option>
-													))}
-												</select>
-												<ChevronDown
-													size={18}
-													className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
 												/>
 											</div>
-											{errors.occupation_id && (
+											{errors.occupation_name && (
 												<p className="text-xs text-red-500 mt-1">
-													{errors.occupation_id.message}
+													{errors.occupation_name.message}
 												</p>
 											)}
 										</div>
@@ -1083,39 +1068,52 @@ async function extractDocxText(file: File) {
 	return result.value;
 }
 
-function extractSchemaNumber(doc: Document): string | null {
+function extractCodeAndTitle(
+	doc: Document
+): { code: string; title: string } | null {
 	const tables = doc.querySelectorAll("table");
 	if (!tables) return null;
 
 	for (const table of tables) {
 		const rows = Array.from(table.querySelectorAll("tr"));
+		let nomor: string | undefined = "";
+		let judul: string | undefined = "";
+
 		for (const row of rows) {
 			const cells = Array.from(row.querySelectorAll("td")).map(
 				(td) => td.textContent?.trim() ?? ""
 			);
 			const joined = cells.join(" ");
-			console.log(joined);
+			// console.log(joined);
+
 			if (/Nomor/i.test(joined)) {
-				const nomor = cells.at(-1); // biasanya paling kanan
-				return nomor?.trim() || null;
+				nomor = cells.at(-1)?.trim();
+			}
+			if (/Judul/i.test(joined)) {
+				judul = cells.at(-1)?.trim();
 			}
 		}
+
+		if (nomor && judul) return { code: nomor, title: judul };
 		continue;
 	}
 	return null;
 }
 
 function validateSchemaNumber(doc: Document): boolean {
-	const nomor = extractSchemaNumber(doc);
-	console.log(nomor);
-	if (!nomor) return false;
+	const extracted = extractCodeAndTitle(doc);
+	console.log(extracted);
+	if (!extracted) return false;
 
-	if (!currentSchemaNumber) {
-		currentSchemaNumber = nomor; // pertama kali diset
+	const { code, title } = extracted;
+
+	if (!currentCode || !currentTitle) {
+		currentCode = code; // pertama kali diset
+		currentTitle = title;
 		return true;
 	}
 
-	return currentSchemaNumber.includes(nomor);
+	return currentCode.includes(code);
 }
 
 function parseHTMLToAPL02(html: string): UnitAPL02[] {
@@ -1785,11 +1783,11 @@ function GroupIA01({
 	useForm,
 	removeGroupIA01,
 }: {
-	groupFieldsIA01: FieldArrayWithId<SkemaType, "groups_ia01", "id">[];
+	groupFieldsIA01: FieldArrayWithId<MukTypeInput, "groups_ia01", "id">[];
 	groupIndex: number;
 	useForm: {
-		control: Control<SkemaType>;
-		register: UseFormRegister<SkemaType>;
+		control: Control<MukTypeInput>;
+		register: UseFormRegister<MukTypeInput>;
 	};
 	removeGroupIA01: UseFieldArrayRemove;
 }) {
@@ -1853,11 +1851,11 @@ function GroupIA02({
 	useForm,
 	removeGroupIA02,
 }: {
-	groupFieldsIA02: FieldArrayWithId<SkemaType, "groups_ia02", "id">[];
+	groupFieldsIA02: FieldArrayWithId<MukTypeInput, "groups_ia02", "id">[];
 	groupIndex: number;
 	useForm: {
-		control: Control<SkemaType>;
-		register: UseFormRegister<SkemaType>;
+		control: Control<MukTypeInput>;
+		register: UseFormRegister<MukTypeInput>;
 	};
 	removeGroupIA02: UseFieldArrayRemove;
 }) {
@@ -1983,11 +1981,11 @@ function GroupIA03({
 	useForm,
 	removeGroupIA03,
 }: {
-	groupFieldsIA03: FieldArrayWithId<SkemaType, "groups_ia03", "id">[];
+	groupFieldsIA03: FieldArrayWithId<MukTypeInput, "groups_ia03", "id">[];
 	groupIndex: number;
 	useForm: {
-		control: Control<SkemaType>;
-		register: UseFormRegister<SkemaType>;
+		control: Control<MukTypeInput>;
+		register: UseFormRegister<MukTypeInput>;
 	};
 	removeGroupIA03: UseFieldArrayRemove;
 }) {
@@ -2089,7 +2087,7 @@ function OptionsFieldArray({
 	control,
 	qIndex,
 }: {
-	control: Control<SkemaType, any, SkemaType>;
+	control: Control<MukTypeInput, any, MukTypeInput>;
 	qIndex: number;
 }) {
 	const { fields, append, remove } = useFieldArray({

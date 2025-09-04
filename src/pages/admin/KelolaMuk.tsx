@@ -1,93 +1,58 @@
 import React, { useState, useEffect } from "react";
-import {
-	Search,
-	Filter,
-	Edit3,
-	Eye,
-	Trash2,
-	AlertCircle,
-} from "lucide-react";
+import { Search, Filter, Edit3, Eye, Trash2, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
 import paths from "@/routes/paths";
 import axiosInstance from "@/helper/axios";
 import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
-
-interface Occupation {
-	id: number;
-	name: string;
-	scheme: {
-		id: number;
-		code: string;
-		name: string;
-	};
-}
-
-interface Scheme {
-	id: number;
-	name: string;
-	code: string;
-}
+import type { MukType } from "@/lib/types";
 
 const KelolaMUK: React.FC = () => {
 	const [searchQuery, setSearchQuery] = useState<string>("");
-	const [schemes, setSchemes] = useState<Scheme[]>([]);
-	const [filteredSchemes, setFilteredSchemes] = useState<Scheme[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [exportLoading, setExportLoading] = useState<boolean>(false);
-	const [occupations, setOccupations] = useState<Occupation[]>([]);
-	const [occupationModalOpen, setOccupationModalOpen] = useState(false);
-	const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
+	const [muks, setMuks] = useState<MukType[]>([]);
+	const [filteredMuks, setFilteredMuks] = useState<MukType[]>([]);
 
 	useEffect(() => {
-		fetchSchemes();
-		fetchOccupations();
+		fetchMuk();
 	}, []);
 
-	const fetchOccupations = async () => {
-		try {
-			const response = await axiosInstance.get("/occupations");
-			if (response.data.success) {
-				setOccupations(response.data.data);
-			} else {
-				setError("Gagal memuat data okupasi");
-			}
-		} catch (error) {
-			setError("Gagal memuat data okupasi");
-		}
-	};
-	useEffect(() => {
-		const filtered = schemes.filter(
-			(scheme) =>
-				scheme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				scheme.code.toLowerCase().includes(searchQuery.toLowerCase())
-		);
-		setFilteredSchemes(filtered);
-	}, [schemes, searchQuery]);
-
-	const fetchSchemes = async () => {
+	const fetchMuk = async () => {
 		try {
 			setLoading(true);
 			setError(null);
-			const response = await axiosInstance.get("/schemes");
 
+			const response = await axiosInstance.get("/assessments");
 			if (response.data.success) {
-				setSchemes(response.data.data);
+				setMuks(response.data.data);
 			} else {
-				setError("Gagal memuat data skema");
+				setError("Gagal memuat data muk");
 			}
-		} catch (error: unknown) {
-			console.error("Error fetching schemes:", error);
-			setError("Gagal memuat data skema");
+		} catch (error) {
+			setError("Gagal memuat data muk");
 		} finally {
 			setLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		const filtered = muks.filter(
+			(muk) =>
+				muk.occupation.scheme.code
+					.toLowerCase()
+					.includes(searchQuery.toLowerCase()) ||
+				muk.occupation.scheme.name
+					.toLowerCase()
+					.includes(searchQuery.toLowerCase())
+		);
+		setFilteredMuks(filtered);
+	}, [muks, searchQuery]);
 
 	const handleEdit = (id: number) => console.log("Edit user:", id);
 	const handleView = (id: number) => console.log("View user:", id);
@@ -100,10 +65,9 @@ const KelolaMUK: React.FC = () => {
 		if (!deletingId) return;
 		try {
 			setDeleteLoading(true);
-			await axiosInstance.delete(`/schemes/${deletingId}`);
+			await axiosInstance.delete(`/assessments/${deletingId}`);
 			// optimistic update
-			setSchemes((prev) => prev.filter((s) => s.id !== deletingId));
-			setFilteredSchemes((prev) => prev.filter((s) => s.id !== deletingId));
+			setFilteredMuks((prev) => prev.filter((muk) => muk.id !== deletingId));
 			setDeleteModalOpen(false);
 			setDeletingId(null);
 		} catch (error: unknown) {
@@ -115,24 +79,24 @@ const KelolaMUK: React.FC = () => {
 	};
 	const handleFilter = () => console.log("Filter clicked");
 	const handleExport = async () => {
-		setExportLoading(true);
-		setError(null);
-		try {
-			const response = await axiosInstance.get("/schemes/export/excel", {
-				responseType: "blob",
-			});
-			const url = window.URL.createObjectURL(new Blob([response.data]));
-			const link = document.createElement("a");
-			link.href = url;
-			link.setAttribute("download", "schemes.xlsx");
-			document.body.appendChild(link);
-			link.click();
-			link.parentNode?.removeChild(link);
-		} catch (error) {
-			setError("Gagal mengekspor data ke Excel");
-		} finally {
-			setExportLoading(false);
-		}
+		// setExportLoading(true);
+		// setError(null);
+		// try {
+		// 	const response = await axiosInstance.get("/schemes/export/excel", {
+		// 		responseType: "blob",
+		// 	});
+		// 	const url = window.URL.createObjectURL(new Blob([response.data]));
+		// 	const link = document.createElement("a");
+		// 	link.href = url;
+		// 	link.setAttribute("download", "schemes.xlsx");
+		// 	document.body.appendChild(link);
+		// 	link.click();
+		// 	link.parentNode?.removeChild(link);
+		// } catch (error) {
+		// 	setError("Gagal mengekspor data ke Excel");
+		// } finally {
+		// 	setExportLoading(false);
+		// }
 	};
 
 	if (loading) {
@@ -268,10 +232,13 @@ const KelolaMUK: React.FC = () => {
 									<thead>
 										<tr className="bg-[#E77D35] text-white">
 											<th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-												Judul Skema
+												Kode MUK
 											</th>
 											<th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-												Nomor Skema
+												Nama Okupasi
+											</th>
+											<th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+												Skema
 											</th>
 											<th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
 												Aksi
@@ -279,30 +246,33 @@ const KelolaMUK: React.FC = () => {
 										</tr>
 									</thead>
 									<tbody className="bg-white divide-y divide-gray-200">
-										{filteredSchemes.map((scheme, index) => (
+										{filteredMuks.map((muk, index) => (
 											<tr
-												key={scheme.id}
+												key={muk.id}
 												className={`${
 													index % 2 === 0 ? "bg-white" : "bg-gray-50"
 												} hover:bg-gray-100 transition-colors`}
 											>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-													{scheme.name}
+													{muk.code}
 												</td>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-													{scheme.code}
+													{muk.occupation.name}
+												</td>
+												<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+													{muk.occupation.scheme.code}
 												</td>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-center">
 													<div className="flex items-center justify-center space-x-2">
 														<button
-															onClick={() => handleEdit(scheme.id)}
+															onClick={() => handleEdit(muk.id)}
 															className="p-2 text-orange-500 hover:bg-orange-50 rounded-md transition-colors"
 															title="Edit"
 														>
 															<Edit3 size={16} />
 														</button>
 														<button
-															onClick={() => handleView(scheme.id)}
+															onClick={() => handleView(muk.id)}
 															className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
 															title="View"
 														>
@@ -310,7 +280,7 @@ const KelolaMUK: React.FC = () => {
 														</button>
 														<button
 															onClick={() => {
-																setDeletingId(scheme.id);
+																setDeletingId(muk.id);
 																setDeleteModalOpen(true);
 															}}
 															className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
@@ -318,59 +288,8 @@ const KelolaMUK: React.FC = () => {
 														>
 															<Trash2 size={16} />
 														</button>
-														<button
-															onClick={() => {
-																setSelectedScheme(scheme);
-																setOccupationModalOpen(true);
-															}}
-															className="p-2 text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
-															title="Lihat Okupasi"
-														>
-															Okupasi
-														</button>
 													</div>
 												</td>
-												{/* Occupation Modal */}
-												{occupationModalOpen && selectedScheme && (
-													<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-														<div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-															<h3 className="text-lg font-semibold mb-4">
-																Daftar Okupasi untuk Skema:{" "}
-																<span className="text-orange-600">
-																	{selectedScheme.name}
-																</span>
-															</h3>
-															<ul className="mb-4 max-h-60 overflow-y-auto">
-																{occupations.filter(
-																	(o) => o.scheme.id === selectedScheme.id
-																).length === 0 ? (
-																	<li className="text-gray-500">
-																		Belum ada okupasi untuk skema ini.
-																	</li>
-																) : (
-																	occupations
-																		.filter(
-																			(o) => o.scheme.id === selectedScheme.id
-																		)
-																		.map((o) => (
-																			<li
-																				key={o.id}
-																				className="py-1 border-b last:border-b-0"
-																			>
-																				{o.name}
-																			</li>
-																		))
-																)}
-															</ul>
-															<button
-																className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
-																onClick={() => setOccupationModalOpen(false)}
-															>
-																Tutup
-															</button>
-														</div>
-													</div>
-												)}
 											</tr>
 										))}
 									</tbody>

@@ -1,4 +1,4 @@
-import type { SkemaType } from "@/lib/types";
+import type { MukTypeInput } from "@/lib/types";
 import {
 	useFieldArray,
 	type Control,
@@ -16,7 +16,7 @@ export default function ElementField({
 	removeElement,
 }: {
 	elementFields: FieldArrayWithId<
-		SkemaType,
+		MukTypeInput,
 		`groups_ia01.${number}.units.${number}.elements`,
 		"id"
 	>[];
@@ -24,8 +24,8 @@ export default function ElementField({
 	elementIndex: number;
 	groupIndex: number;
 	useForm: {
-		control: Control<SkemaType>;
-		register: UseFormRegister<SkemaType>;
+		control: Control<MukTypeInput>;
+		register: UseFormRegister<MukTypeInput>;
 	};
 	removeElement: UseFieldArrayRemove;
 }) {

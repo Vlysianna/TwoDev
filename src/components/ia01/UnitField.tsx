@@ -12,7 +12,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "../ui/accordion";
-import type { SkemaType } from "@/lib/types";
+import type { MukTypeInput } from "@/lib/types";
 import { useState } from "react";
 
 export default function UnitField({
@@ -23,15 +23,15 @@ export default function UnitField({
 	removeUnit,
 }: {
 	unitFields: FieldArrayWithId<
-		SkemaType,
+		MukTypeInput,
 		`groups_ia01.${number}.units`,
 		"id"
 	>[];
 	unitIndex: number;
 	groupIndex: number;
 	useForm: {
-		control: Control<SkemaType>;
-		register: UseFormRegister<SkemaType>;
+		control: Control<MukTypeInput>;
+		register: UseFormRegister<MukTypeInput>;
 	};
 	removeUnit: UseFieldArrayRemove;
 }) {

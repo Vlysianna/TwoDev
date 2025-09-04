@@ -6,7 +6,7 @@ import {
 	type UseFormRegister,
 } from "react-hook-form";
 import ElementField from "./ElementField";
-import type { SkemaType } from "@/lib/types";
+import type { MukTypeInput } from "@/lib/types";
 
 export default function UnitField({
 	unitFields,
@@ -14,11 +14,11 @@ export default function UnitField({
 	useForm,
 	removeUnit,
 }: {
-	unitFields: FieldArrayWithId<SkemaType, "uc_apl02s", "id">[];
+	unitFields: FieldArrayWithId<MukTypeInput, "uc_apl02s", "id">[];
 	unitIndex: number;
 	useForm: {
-		control: Control<SkemaType>;
-		register: UseFormRegister<SkemaType>;
+		control: Control<MukTypeInput>;
+		register: UseFormRegister<MukTypeInput>;
 	};
 	removeUnit: UseFieldArrayRemove;
 }) {

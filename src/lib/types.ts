@@ -1,11 +1,36 @@
-export type SkemaType = {
-	occupation_id: number;
+export type MukTypeInput = {
+	scheme_id: number;
+	occupation_name: string;
 	code: string;
 	uc_apl02s: UnitAPL02[];
 	groups_ia01: IA01Group[];
 	groups_ia02: IA02Group[];
 	groups_ia03: IA03Group[];
 	ia05_questions: IA05Question[];
+};
+
+export type MukType = {
+	id: number;
+	code: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
+	occupation: {
+		id: number;
+		scheme_id: number;
+		name: string;
+		created_at: string;
+		updated_at: string;
+		scheme: Scheme;
+	};
+};
+
+export type Scheme = {
+	id: number;
+	code: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
 };
 
 export type UnitAPL02 = {

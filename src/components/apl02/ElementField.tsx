@@ -1,4 +1,4 @@
-import type { SkemaType } from "@/lib/types";
+import type { MukTypeInput } from "@/lib/types";
 import {
 	useFieldArray,
 	type Control,
@@ -14,12 +14,16 @@ export default function ElementField({
 	useForm,
 	removeElement,
 }: {
-	elementFields: FieldArrayWithId<SkemaType, `uc_apl02s.${number}.elements`, "id">[];
+	elementFields: FieldArrayWithId<
+		MukTypeInput,
+		`uc_apl02s.${number}.elements`,
+		"id"
+	>[];
 	unitIndex: number;
 	elementIndex: number;
 	useForm: {
-		control: Control<SkemaType>;
-		register: UseFormRegister<SkemaType>;
+		control: Control<MukTypeInput>;
+		register: UseFormRegister<MukTypeInput>;
 	};
 	removeElement: UseFieldArrayRemove;
 }) {
@@ -63,7 +67,9 @@ export default function ElementField({
 				<label>
 					Deskripsi Elemen
 					<input
-						{...register(`uc_apl02s.${unitIndex}.elements.${elementIndex}.title`)}
+						{...register(
+							`uc_apl02s.${unitIndex}.elements.${elementIndex}.title`
+						)}
 						style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 						className="w-full px-3 py-2 border rounded-md border-gray-300"
 					/>
