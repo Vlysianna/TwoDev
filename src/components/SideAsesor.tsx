@@ -142,9 +142,7 @@ const SidebarAsesor: React.FC = () => {
 
             {/* SidebarAsesor - Always visible on desktop, slide on mobile */}
             <div className={`
-  fixed inset-y-0 left-0 z-40
-  w-64 h-screen bg-[#E77D35] text-white flex flex-col
-  transform transition-transform duration-300 ease-in-out lg:transform-none
+  fixed top-0 left-0 h-full w-64 bg-[#E77D35] text-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out
   ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
 `}>
                 <SidebarAsesorContent />
