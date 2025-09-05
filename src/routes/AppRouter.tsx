@@ -60,6 +60,7 @@ import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
 import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
 import Ia05C from "@/pages/Asesor/Ia-05-C";
+import IA05Assessor from "@/pages/Asesor/ia-05";
 import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
 import Ia02Assessor from "@/pages/Asesor/Ia-02";
 
@@ -251,6 +252,7 @@ const router = createBrowserRouter([
 							},
 							{ path: paths.asesor.assessment.ia02Pattern, element: <Ia02Assessor /> },
 							{ path: paths.asesor.assessment.ia03Pattern, element: <Ia03 /> },
+							{ path: paths.asesor.assessment.ia05Pattern, element: <IA05Assessor /> },
 							{
 								path: paths.asesor.assessment.ak01Pattern,
 								element: <CekAk01 />,

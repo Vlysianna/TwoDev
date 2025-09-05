@@ -154,9 +154,9 @@ export default function DashboardAsesmenMandiri() {
         )
         break;
       case "ia-05":
-        // navigate(
-        //   paths.asesor.assessment.ia05(id_assessment, assesseeId)
-        // )
+        navigate(
+          paths.asesor.assessment.ia05(id_assessment, assesseeId)
+        )
         break;
       case "ak-01":
         navigate(
