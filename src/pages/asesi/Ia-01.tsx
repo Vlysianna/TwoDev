@@ -19,23 +19,30 @@ export default function Ia01Asesi() {
     const [completedUnits, setCompletedUnits] = useState<number>(0);
     const [valueQr, setValueQr] = useState('');
     const [resultData, setResultData] = useState<any>(null);
-    const [saving, setSaving] = useState(false);
+    const [generating, setGenerating] = useState(false);
 
-    const handleSimpan = async () => {
+    const handleGenerateQRCode = async () => {
         if (!id_result) return;
-        setSaving(true);
+
+        setGenerating(true);
         try {
+            // Langsung kirim persetujuan ke server
             const response = await api.put(
                 `/assessments/ia-01/result/assessee/${id_result}/approve`
             );
 
             console.log("Response approve:", response.data);
 
-            fetchResultData(); // refresh data setelah approve
+            // Set QR code value setelah berhasil
+            setValueQr(getAssesseeUrl(Number(id_asesi)));
+
+            // Refresh data
+            fetchResultData();
         } catch (e) {
-            console.error("Gagal simpan:", e);
+            console.error("Gagal generate QR:", e);
+            setError('Gagal generate QR Code');
         } finally {
-            setSaving(false);
+            setGenerating(false);
         }
     };
 
@@ -113,23 +120,14 @@ export default function Ia01Asesi() {
             if (response.data.success) {
                 setResultData(response.data.data);
 
+                // Otomatis set QR code jika asesi sudah menyetujui
                 if (response.data.data.ia01_header?.approved_assessee && id_asesi) {
                     setValueQr(getAssesseeUrl(Number(id_asesi)));
                 }
             }
-            
+
         } catch (error) {
             console.error("fetchResultData error asesi:", error);
-        }
-    };
-
-    // Generate QR khusus asesi
-    const handleGenerateQRCode = async () => {
-        try {
-            setValueQr(getAssesseeUrl(Number(id_asesi)));
-        } catch (error) {
-            setError('Gagal generate QR Code');
-            console.error('handleGenerateQRCode error:', error);
         }
     };
 
@@ -480,26 +478,19 @@ export default function Ia01Asesi() {
                                 onClick={handleGenerateQRCode}
                                 disabled={!id_asesi || !!valueQr || resultData?.ia01_header?.approved_assessee || !resultData?.ia01_header?.approved_assessor}
                                 className={`w-full text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 ${!id_asesi || valueQr || resultData?.ia01_header?.approved_assessee || !resultData?.ia01_header?.approved_assessor
-                                        ? "cursor-not-allowed opacity-50"
-                                        : "hover:bg-orange-600 cursor-pointer"
+                                    ? "cursor-not-allowed opacity-50"
+                                    : "hover:bg-orange-600 cursor-pointer"
                                     }`}
                             >
-                                {valueQr || resultData?.ia01_header?.approved_assessee
-                                    ? "QR Code Telah Digenerate"
-                                    : "Generate QR Code Saya"
+                                {generating
+                                    ? "Menggenerate..."
+                                    : valueQr || resultData?.ia01_header?.approved_assessee
+                                        ? "QR Code Telah Digenerate"
+                                        : "Generate QR Code Saya"
                                 }
                             </button>
                         </div>
                     </div>
-                </div>
-                <div className="mt-8 flex justify-end">
-                    <button
-                        className="bg-[#E77D35] text-white px-40 py-3 rounded-lg font-medium hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
-                        onClick={handleSimpan}
-                        disabled={saving}
-                    >
-                        {saving ? 'Menyimpan...' : 'Simpan'}
-                    </button>
                 </div>
             </div>
         </div>
