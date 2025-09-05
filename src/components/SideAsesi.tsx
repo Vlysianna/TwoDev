@@ -129,36 +129,36 @@ const SidebarAsesi: React.FC = () => {
     );
 
     return (
-        <>
-            {/* Mobile Menu Button - Hidden on desktop */}
-            <button
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-orange-500 text-white rounded-md shadow-lg"
-                onClick={toggleMobileMenu}
-            >
-                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+      <>
+        {/* Mobile Menu Button - Hidden on desktop */}
+        <button
+          className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-orange-500 text-white rounded-md shadow-lg"
+          onClick={toggleMobileMenu}
+        >
+          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
 
-            {/* Overlay for mobile */}
-            {isMobileMenuOpen && (
-                <div
-                    className="lg:hidden fixed inset-0 z-30"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                />
-            )}
+        {/* Overlay for mobile */}
+        {isMobileMenuOpen && (
+          <div
+            className="lg:hidden fixed inset-0 z-30"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
 
-            {/* SidebarAsesi - Always visible on desktop, slide on mobile */}
-            <div className={`
-  fixed inset-y-0 left-0 z-40
-  w-64 h-screen bg-[#E77D35] text-white flex flex-col
-  transform transition-transform duration-300 ease-in-out lg:transform-none
-  ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-`}>
-                <SidebarAsesiContent />
-            </div>
+        {/* SidebarAsesi - Always visible on desktop, slide on mobile */}
+        <div
+          className={`
+  fixed top-0 left-0 h-full w-64 bg-[#E77D35] text-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out
+  ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+`}
+        >
+          <SidebarAsesiContent />
+        </div>
 
-            {/* Spacer for desktop layout */}
-            <div className="hidden lg:block w-64 flex-shrink-0" />
-        </>
+        {/* Spacer for desktop layout */}
+        <div className="hidden lg:block w-64 flex-shrink-0" />
+      </>
     );
 };
 
