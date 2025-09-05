@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { NotepadText, ChevronLeft, AlertCircle } from "lucide-react";
-import NavbarAsesor from "@/components/NavbarAsesor";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,7 +8,7 @@ import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssessorUrl } from "@/lib/hashids";
 import type { AK05ApiResponse, AK05ResponseData } from "@/model/ak05-model";
-import { Description } from "@radix-ui/react-dialog";
+import NavbarAsesi from "@/components/NavbarAsesi";
 
 export default function CekAk05() {
   const { id_assessment, id_result, id_asesor } = useAssessmentParams();
@@ -66,59 +65,6 @@ export default function CekAk05() {
     }
   };
 
-  const handleSave = async () => {
-    try {
-      setLoading(true);
-
-      const payload = {
-        result_id: Number(id_result),
-        items: [
-          {
-            is_competent: isCompetent,
-            description: deskripsi,
-            negative_positive_aspects: negatifPositif,
-            rejection_notes: penolakan || null,
-            improvement_suggestions: saran,
-            notes: catatan,
-          },
-        ],
-      };
-
-      const response = await api.post("/assessments/ak-05", payload);
-
-      if (response.data.success) {
-        console.log("Data saved successfully:", response.data);
-        // Bisa tambahkan toast/alert sukses
-      } else {
-        setError("Gagal menyimpan data");
-      }
-    } catch (err) {
-      console.error("Error saving data:", err);      
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  const handleGenerateQRCode = async () => {
-    try {            
-
-      // Then generate QR code
-      const response = await api.put(
-        `/assessments/ak-05/result/assessor/${id_result}/approve`
-      );
-      if (response.data.success) {
-        setQrValue(getAssessorUrl(Number(id_asesor)));
-      }
-    } catch (err) {
-      console.error("Error generating QR:", err);
-    }
-  };
-
-  const handleSelesai = async () => {
-    await handleSave();
-    // Navigate back or show success message
-  };
 
   if (loading) {
     return (
@@ -149,11 +95,10 @@ export default function CekAk05() {
   if (!data) {
     return null;
   }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <NavbarAsesor
+      <NavbarAsesi
         title="Laporan Asesmen - FR.AK.05"
         icon={
           <Link
@@ -187,19 +132,17 @@ export default function CekAk05() {
                       <circle cx="12" cy="12" r="10" strokeWidth="2" />
                       <polyline points="12,6 12,12 16,14" strokeWidth="2" />
                     </svg>
-                    <span className="text-sm text-gray-600">
-                      {data.result.tuk || "Sewaktu"}
-                    </span>
+                    <span className="text-sm text-gray-600">Sewaktu</span>
                   </div>
                 </div>
 
                 {/* Kanan */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
                   <span className="text-sm text-gray-700">
-                    {data.result.assessment.occupation.name}
+                    Pemrogram Junior (Junior Coder)
                   </span>
                   <span className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] sm:ml-5">
-                    {data.result.assessment.code}
+                    SMK.RPL.PJ/LSPSMK24/2023
                   </span>
                 </div>
               </div>
@@ -237,42 +180,15 @@ export default function CekAk05() {
               <tr>
                 <td className="p-3 border text-center">1</td>
                 <td className="p-3 border text-center">
+                  {" "}
                   {data.result.assessee.name || "N/A"}
                 </td>
                 <td className="p-3 border">
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="rekom"
-                        value="true"
-                        checked={isCompetent === true}
-                        onChange={() => setIsCompetent(true)}
-                      />
-                      Kompeten
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="rekom"
-                        value="false"
-                        checked={isCompetent === false}
-                        onChange={() => setIsCompetent(false)}
-                      />
-                      Belum Kompeten
-                    </label>
-                  </div>
+                  {data.result.result_ak05.is_competent
+                    ? "Kompeten"
+                    : "Belum Kompeten"}
                 </td>
-                <td className="p-3 border text-center">
-                  <textarea
-                    value={deskripsi}
-                    onChange={(e) => setDeskripsi(e.target.value)}
-                    className="w-full text-center border-none focus:ring-0 focus:outline-none resize-none"
-                    rows={1}
-                    placeholder="Masukkan keterangan"
-                    style={{ minHeight: "1.5rem" }}
-                  />
-                </td>
+                <td className="p-3 border text-center">{deskripsi || "-"}</td>
               </tr>
             </tbody>
           </table>
@@ -282,43 +198,29 @@ export default function CekAk05() {
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Kiri: Form Catatan */}
           <div className="bg-white border rounded-xl p-6 shadow-sm space-y-4">
-            <h2 className="text-sm font-medium">
-              Aspek Negatif dan Positif dalam Asesemen
-            </h2>
             <textarea
               className="w-full border rounded-lg p-2"
               rows={2}
               placeholder="Aspek negatif dan positif"
               value={negatifPositif}
-              onChange={(e) => setNegatifPositif(e.target.value)}
             />
-            <h2 className="text-sm font-medium">
-              Pencatatan Penolakan Hasil Asesmen
-            </h2>
             <textarea
               className="w-full border rounded-lg p-2"
               rows={2}
               placeholder="Pencatatan penolakan"
               value={penolakan}
-              onChange={(e) => setPenolakan(e.target.value)}
             />
-            <h2 className="text-sm font-medium">
-              Saran Perbaikan: (Asesor/Personil Terkait)
-            </h2>
             <textarea
               className="w-full border rounded-lg p-2"
               rows={2}
               placeholder="Saran perbaikan"
               value={saran}
-              onChange={(e) => setSaran(e.target.value)}
             />
-            <h2 className="text-sm font-medium">Catatan</h2>
             <textarea
               className="w-full border rounded-lg p-2"
               rows={3}
               placeholder="Catatan..."
               value={catatan}
-              onChange={(e) => setCatatan(e.target.value)}
             />
           </div>
 
@@ -346,11 +248,7 @@ export default function CekAk05() {
               <h2 className="text-sm font-medium mb-3">Tanggal</h2>
               <input
                 type="text"
-                value={
-                  new Date(
-                    data.result.result_ak05.updated_at
-                  ).toLocaleDateString("id-ID") || "N/A"
-                }
+                value={data.result.result_ak05.updated_at || "N/A"}
                 disabled
                 className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
               />
@@ -366,28 +264,12 @@ export default function CekAk05() {
                 <p className="text-xs text-gray-400 mt-2">{qrValue}</p>
               )}
             </div>
-
-            <button
-              onClick={handleGenerateQRCode}
-              disabled={isCompetent === null}
-              className={`w-full text-white py-2 rounded-lg ${
-                isCompetent === null
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-orange-500 hover:bg-orange-600"
-              }`}
-            >
-              Generate QR
-            </button>
+            
           </div>
         </section>
-
         <hr className="border border-gray-200" />
-
         <div className="flex justify-end">
-          <button
-            onClick={handleSelesai}
-            className="w-full sm:w-100 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 mt-4"
-          >
+          <button className="w-full sm:w-100 bg-orange-500 text-white py-2  rounded-lg hover:bg-orange-600 mt-4 ">
             Selesai
           </button>
         </div>
