@@ -63,7 +63,7 @@ import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
 import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
-
+import IA05Assessor from "@/pages/Asesor/ia-05";
 
 const router = createBrowserRouter([
 	{
@@ -260,6 +260,7 @@ const router = createBrowserRouter([
 							},
 							{ path: paths.asesor.assessment.ia02Pattern, element: <Ia02Assessor /> },
 							{ path: paths.asesor.assessment.ia03Pattern, element: <Ia03 /> },
+							{ path: paths.asesor.assessment.ia05Pattern, element: <IA05Assessor /> },
 							{
 								path: paths.asesor.assessment.ak01Pattern,
 								element: <CekAk01 />,
