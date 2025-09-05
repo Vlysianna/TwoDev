@@ -4,10 +4,8 @@ import {
   LayoutDashboard,
   FileText,
   Users,
-  GraduationCap,
   User,
   UserCheck,
-  UserPlus,
   LogOut,
   Menu,
   X,
@@ -66,6 +64,12 @@ const Sidebar: React.FC = () => {
       icon: Album,
       section: 'admin',
       path: paths.admin.kelolaJurusan,
+    },
+    {
+      name: 'Result Assessment',
+      icon: FileText,
+      section: 'admin',
+      path: paths.admin.resultAssessment,
     },
   ];
 

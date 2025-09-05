@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
-import { Monitor, ChevronLeft, Search, X, ChevronUp, ChevronDown, Calendar, Replace } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Monitor, ChevronLeft, Search, X, ChevronUp, ChevronDown, Calendar, Replace, AlertCircle } from 'lucide-react';
 import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
+import { useAssessmentParams } from '@/components/AssessmentAsesiProvider';
+import api from '@/helper/axios';
+import { QRCodeCanvas } from 'qrcode.react';
+import { getAssesseeUrl } from '@/lib/hashids';
 
 export default function Ak04() {
-    const [selectedCertificates, setSelectedCertificates] = useState([
-        'J.620100.004.02',
-        'J.620100.009.01',
-        'J.620100.010.01'
-    ]);
-    const [showDropdown, setShowDropdown] = useState(false);
+    // Menggunakan default empty object jika useAssessmentParams undefined
+    const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams ? useAssessmentParams() : {};
+    const [resultData, setResultData] = useState<any>(null);
+    const [valueQr, setValueQr] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [reason, setReason] = useState('');
     type QuestionKey = `question${number}`;
     const [answers, setAnswers] = useState<Record<QuestionKey, string>>({
@@ -19,44 +25,203 @@ export default function Ak04() {
         question3: ''
     });
 
-    const availableRoles = [
-        { id: 'J.620100.004.02', selected: true },
-        { id: 'J.620100.009.01', selected: true },
-        { id: 'J.620100.010.01', selected: true },
-        { id: 'J.620100.016.01', selected: false },
-        { id: 'J.620100.023.02', selected: false },
-        { id: 'J.620100.025.02', selected: false },
-        { id: 'J.620100.029.02', selected: false },
-        { id: 'J.620100.033.02', selected: false }
-    ];
-
     const questions = [
         'Apakah Proses banding telah dijelaskan kepada anda?',
         'Apakah Anda telah mendiskusikan Banding dengan asesor?',
         'Apakah Anda mau melibatkan "orang lain" membantu Anda dalam Proses Banding?'
     ];
 
-    const removeCertificate = (certId: string) => {
-        setSelectedCertificates(prev => prev.filter(id => id !== certId));
-    };
+    const fetchResultData = async () => {
+        // Jika id_result tidak tersedia, set error
+        if (!id_result) {
+            setError('ID hasil asesmen tidak tersedia');
+            setLoading(false);
+            return;
+        }
 
-    const toggleRole = (roleId: string) => {
-        const role = availableRoles.find(r => r.id === roleId);
-        if (!role) return;
-        if (selectedCertificates.includes(roleId)) {
-            setSelectedCertificates(prev => prev.filter(id => id !== roleId));
-        } else {
-            setSelectedCertificates(prev => [...prev, roleId]);
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await api.get(`/assessments/ak-04/${id_result}`);
+            console.log('fetchResultData response:', response.data);
+
+            if (response.data.success) {
+                setResultData(response.data.data);
+
+                // Pastikan path yang benar untuk mengakses data
+                const ak04Data = response.data.data.result_ak04 || response.data.data.ak04_assessee;
+
+                if (ak04Data) {
+                    const { q1_yes, q2_yes, q3_yes, reason, approved_assessee } = ak04Data;
+
+                    setReason(reason || '');
+
+                    // Jika reason kosong, biarkan radio kosong
+                    if (!reason) {
+                        setAnswers({
+                            question1: '',
+                            question2: '',
+                            question3: ''
+                        });
+                    } else {
+                        setAnswers({
+                            question1: q1_yes === true || q1_yes === 1 ? 'ya' : q1_yes === false || q1_yes === 0 ? 'tidak' : '',
+                            question2: q2_yes === true || q2_yes === 1 ? 'ya' : q2_yes === false || q2_yes === 0 ? 'tidak' : '',
+                            question3: q3_yes === true || q3_yes === 1 ? 'ya' : q3_yes === false || q3_yes === 0 ? 'tidak' : ''
+                        });
+                    }
+
+                    if (approved_assessee) {
+                        setValueQr(getAssesseeUrl(Number(id_asesi)));
+                    }
+                } else {
+                    setAnswers({
+                        question1: '',
+                        question2: '',
+                        question3: ''
+                    });
+                }
+            } else {
+                setError('Gagal mengambil data hasil asesmen: ' + response.data.message);
+            }
+        } catch (error: any) {
+            console.error("fetchResultData error:", error);
+            setError('Terjadi kesalahan saat mengambil data: ' + (error.message || 'Unknown error'));
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleAnswerChange = (questionKey: QuestionKey, value: string) => {
         setAnswers(prev => ({ ...prev, [questionKey]: value }));
+        // Hapus error untuk pertanyaan ini jika diisi
+        if (formErrors[questionKey]) {
+            setFormErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[questionKey];
+                return newErrors;
+            });
+        }
     };
 
-    const handleSubmit = () => {
-        console.log('Form submitted with:', { selectedCertificates, reason, answers });
+    const validateForm = () => {
+        const errors: Record<string, string> = {};
+
+        // Validasi pertanyaan
+        questions.forEach((_, index) => {
+            const questionKey = `question${index + 1}` as QuestionKey;
+            if (!answers[questionKey]) {
+                errors[questionKey] = 'Pertanyaan ini harus diisi';
+            }
+        });
+
+        // Validasi catatan
+        if (!reason.trim()) {
+            errors.reason = 'Alasan banding harus diisi';
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
     };
+
+    const handleSubmit = async () => {
+        if (!validateForm()) {
+            setError('Harap isi semua pertanyaan dan alasan banding terlebih dahulu');
+            return;
+        }
+        if (!id_result) return;
+
+        setSubmitting(true);
+        setError(null);
+
+        try {
+            // 1. Simpan jawaban
+            const payload = {
+                result_id: Number(id_result),
+                q1_yes: answers.question1 === 'ya',
+                q2_yes: answers.question2 === 'ya',
+                q3_yes: answers.question3 === 'ya',
+                reason: reason
+            };
+
+            const saveResponse = await api.post('/assessments/ak-04', payload);
+
+            if (!saveResponse.data.success) {
+                throw new Error(saveResponse.data.message || 'Gagal menyimpan jawaban');
+            }
+
+            // 2. Approve jawaban
+            const approveResponse = await api.put(
+                `/assessments/ak-04/result/assessee/${id_result}/approve`,
+                { approved_assessee: true }
+            );
+
+            if (!approveResponse.data.success) {
+                throw new Error(approveResponse.data.message || 'Gagal approve data');
+            }
+
+            // 3. Refresh data
+            fetchResultData();
+            alert('Data berhasil disimpan dan QR Code telah digenerate!');
+
+        } catch (e: any) {
+            console.error("Error submit:", e);
+            setError('Gagal menyimpan data: ' + (e.response?.data?.message || e.message));
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchResultData();
+    }, [id_result]);
+
+    // Cek apakah semua pertanyaan sudah dijawab dan alasan sudah diisi
+    const isFormComplete = Object.values(answers).every(answer => answer !== '') && reason.trim() !== '';
+
+    // Tampilkan loading indicator saat data sedang dimuat
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Memuat data asesmen...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Tampilkan pesan error jika terjadi kesalahan
+    if (error && !formErrors) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="bg-white rounded-lg shadow-sm mb-5">
+                    <NavbarAsesi
+                        title='Umpan balik dan catatan asesmen'
+                        icon={
+                            <Link to={paths.asesi.dashboard} className="text-gray-500 hover:text-gray-600">
+                                <ChevronLeft size={20} />
+                            </Link>
+                        }
+                    />
+                </div>
+                <div className="m-5">
+                    <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col items-center justify-center">
+                        <AlertCircle className="text-red-500 w-16 h-16 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Terjadi Kesalahan</h3>
+                        <p className="text-gray-600 mb-4 text-center">{error}</p>
+                        <button
+                            onClick={fetchResultData}
+                            className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+                        >
+                            Coba Lagi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -72,6 +237,13 @@ export default function Ak04() {
                     />
                 </div>
                 <div className="m-5">
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
+                            <AlertCircle size={20} className="mr-2" />
+                            {error}
+                        </div>
+                    )}
+
                     {/* MAIN CONTENT */}
                     <div className="bg-white rounded-lg shadow-sm p-4 mb-4 space-y-4">
                         {/* Baris 1 */}
@@ -85,21 +257,37 @@ export default function Ak04() {
                         {/* Baris 2 */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3">
                             <div className="flex flex-col">
-                                <select className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <option>Pilih Asesi</option>
-                                </select>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <select className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <option>Pilih Asesor</option>
-                                </select>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    value={resultData?.assessee?.name || 'Pilih Asesi'}
+                                    readOnly
+                                />
                             </div>
 
                             <div className="flex flex-col">
                                 <input
-                                    type="date"
+                                    type="text"
                                     className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    value={resultData?.assessor?.name || 'Pilih Asesor'}
+                                    readOnly
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    value={
+                                        resultData?.created_at
+                                            ? new Date(resultData.created_at).toLocaleDateString('id-ID', {
+                                                day: '2-digit',
+                                                month: 'long',
+                                                year: 'numeric',
+                                            })
+                                            : ''
+                                    }
+                                    readOnly
                                 />
                             </div>
                         </div>
@@ -113,107 +301,119 @@ export default function Ak04() {
                             </h3>
 
                             <div className="space-y-6">
-                                {questions.map((question, index) => (
-                                    <div key={index} className="flex items-center justify-between gap-6">
-                                        {/* Pertanyaan */}
-                                        <p className="text-gray-700 text-sm leading-relaxed flex-1">
-                                            {question}
-                                        </p>
+                                {questions.map((question, index) => {
+                                    const questionKey = `question${index + 1}` as QuestionKey;
+                                    const hasError = !!formErrors[questionKey];
 
-                                        {/* Pilihan Ya / Tidak */}
-                                        <div className="flex gap-4">
-                                            {/* YA */}
-                                            <label
-                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-xs sm:text-sm
-            ${answers[`question${index + 1}`] === 'ya' ? "bg-[#E77D3533]" : ""}`}
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    name={`question-${index}`}
-                                                    value="ya"
-                                                    checked={answers[`question${index + 1}`] === 'ya'}
-                                                    onChange={() => handleAnswerChange(`question${index + 1}`, 'ya')}
-                                                    className="hidden"
-                                                />
-                                                <span
-                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-              ${answers[`question${index + 1}`] === 'ya'
-                                                            ? "bg-[#E77D35] border-[#E77D35]"
-                                                            : "border-[#E77D35]"}`}
-                                                >
-                                                    {answers[`question${index + 1}`] === 'ya' && (
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 20 20"
-                                                            fill="white"
-                                                            className="w-3 h-3"
-                                                        >
-                                                            <path
-                                                                fillRule="evenodd"
-                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                clipRule="evenodd"
-                                                            />
-                                                        </svg>
-                                                    )}
-                                                </span>
-                                                <span
-                                                    className={
-                                                        answers[`question${index + 1}`] === 'ya'
-                                                            ? "text-gray-900"
-                                                            : "text-gray-500"
-                                                    }
-                                                >
-                                                    Ya
-                                                </span>
-                                            </label>
+                                    return (
+                                        <div key={index} className="flex items-center justify-between gap-6">
+                                            {/* Pertanyaan */}
+                                            <p className="text-gray-700 text-sm leading-relaxed flex-1">
+                                                {question}
+                                                {hasError && (
+                                                    <span className="text-red-500 text-xs block mt-1">
+                                                        {formErrors[questionKey]}
+                                                    </span>
+                                                )}
+                                            </p>
 
-                                            {/* TIDAK */}
-                                            <label
-                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-xs sm:text-sm
-            ${answers[`question${index + 1}`] === 'tidak' ? "bg-[#E77D3533]" : ""}`}
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    name={`question-${index}`}
-                                                    value="tidak"
-                                                    checked={answers[`question${index + 1}`] === 'tidak'}
-                                                    onChange={() => handleAnswerChange(`question${index + 1}`, 'tidak')}
-                                                    className="hidden"
-                                                />
-                                                <span
-                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-              ${answers[`question${index + 1}`] === 'tidak'
-                                                            ? "bg-[#E77D35] border-[#E77D35]"
-                                                            : "border-[#E77D35]"}`}
+                                            {/* Pilihan Ya / Tidak */}
+                                            <div className="flex gap-4">
+                                                {/* YA */}
+                                                <label
+                                                    className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-xs sm:text-sm
+                                                        ${answers[questionKey] === 'ya' ? "bg-[#E77D3533]" : ""}
+                                                        ${hasError ? "border border-red-500" : ""}`}
                                                 >
-                                                    {answers[`question${index + 1}`] === 'tidak' && (
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 20 20"
-                                                            fill="white"
-                                                            className="w-3 h-3"
-                                                        >
-                                                            <path
-                                                                fillRule="evenodd"
-                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                clipRule="evenodd"
-                                                            />
-                                                        </svg>
-                                                    )}
-                                                </span>
-                                                <span
-                                                    className={
-                                                        answers[`question${index + 1}`] === 'tidak'
-                                                            ? "text-gray-900"
-                                                            : "text-gray-500"
-                                                    }
+                                                    <input
+                                                        type="radio"
+                                                        name={`question-${index}`}
+                                                        value="ya"
+                                                        checked={answers[questionKey] === 'ya'}
+                                                        onChange={() => handleAnswerChange(questionKey, 'ya')}
+                                                        className="hidden"
+                                                    />
+                                                    <span
+                                                        className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                                            ${answers[questionKey] === 'ya'
+                                                                ? "bg-[#E77D35] border-[#E77D35]"
+                                                                : "border-gray-300"}`}
+                                                    >
+                                                        {answers[questionKey] === 'ya' && (
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 20 20"
+                                                                fill="white"
+                                                                className="w-3 h-3"
+                                                            >
+                                                                <path
+                                                                    fillRule="evenodd"
+                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                    clipRule="evenodd"
+                                                                />
+                                                            </svg>
+                                                        )}
+                                                    </span>
+                                                    <span
+                                                        className={
+                                                            answers[questionKey] === 'ya'
+                                                                ? "text-gray-900"
+                                                                : "text-gray-500"
+                                                        }
+                                                    >
+                                                        Ya
+                                                    </span>
+                                                </label>
+
+                                                {/* TIDAK */}
+                                                <label
+                                                    className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-xs sm:text-sm
+                                                        ${answers[questionKey] === 'tidak' ? "bg-[#E77D3533]" : ""}
+                                                        ${hasError ? "border border-red-500" : ""}`}
                                                 >
-                                                    Tidak
-                                                </span>
-                                            </label>
+                                                    <input
+                                                        type="radio"
+                                                        name={`question-${index}`}
+                                                        value="tidak"
+                                                        checked={answers[questionKey] === 'tidak'}
+                                                        onChange={() => handleAnswerChange(questionKey, 'tidak')}
+                                                        className="hidden"
+                                                    />
+                                                    <span
+                                                        className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                                            ${answers[questionKey] === 'tidak'
+                                                                ? "bg-[#E77D35] border-[#E77D35]"
+                                                                : "border-gray-300"}`}
+                                                    >
+                                                        {answers[questionKey] === 'tidak' && (
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 20 20"
+                                                                fill="white"
+                                                                className="w-3 h-3"
+                                                            >
+                                                                <path
+                                                                    fillRule="evenodd"
+                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                    clipRule="evenodd"
+                                                                />
+                                                            </svg>
+                                                        )}
+                                                    </span>
+                                                    <span
+                                                        className={
+                                                            answers[questionKey] === 'tidak'
+                                                                ? "text-gray-900"
+                                                                : "text-gray-500"
+                                                        }
+                                                    >
+                                                        Tidak
+                                                    </span>
+                                                </label>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -224,69 +424,16 @@ export default function Ak04() {
                             </h3>
 
                             <div className="mb-4">
-                                <p className="text-sm text-gray-600 mb-3">
-                                    <span className="font-medium">Skema Sertifikasi :</span> Pemrogram Junior (Junior Coder)
-                                </p>
+                                <div className="flex text-sm text-gray-600 mb-3">
+                                    <span className="font-medium w-48">Skema Sertifikasi</span>
+                                    <span>: {resultData?.assessment?.occupation?.scheme?.name || '-'}</span>
+                                </div>
                             </div>
 
                             <div className="mb-4">
-                                <p className="text-sm text-gray-600 mb-3">No. Skema Sertifikasi</p>
-
-                                <div className="relative">
-                                    {/* Area klik utama */}
-                                    <div
-                                        onClick={() => setShowDropdown(!showDropdown)}
-                                        className="border border-[#E77D35] rounded p-3 min-h-[100px] bg-white cursor-pointer"
-                                    >
-                                        <div className="flex flex-wrap gap-2">
-                                            {selectedCertificates.map((cert) => (
-                                                <span
-                                                    key={cert}
-                                                    className="inline-flex items-center gap-2 bg-[#E77D3533] text-black-600 px-3 py-1 rounded-sm text-sm"
-                                                >
-                                                    {cert}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation(); // biar klik X tidak ikut toggle dropdown
-                                                            removeCertificate(cert);
-                                                        }}
-                                                        className="text-[#E77D35] hover:text-orange-600 ml-1 cursor-pointer"
-                                                    >
-                                                        <X size={14} />
-                                                    </button>
-                                                </span>
-                                            ))}
-                                        </div>
-
-                                        {/* Icon toggle di kanan */}
-                                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600">
-                                            {showDropdown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                                        </div>
-                                    </div>
-
-                                    {/* Dropdown */}
-                                    {showDropdown && (
-                                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                            <div className="p-2">
-                                                <h4 className="font-medium text-gray-700 mb-2 text-sm">Available roles</h4>
-                                                {availableRoles.map((role) => (
-                                                    <label
-                                                        key={role.id}
-                                                        className="flex items-center gap-2 p-2 hover:bg-gray-50 cursor-pointer rounded"
-                                                        onClick={(e) => e.stopPropagation()} // biar klik di dalam dropdown tidak menutup
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedCertificates.includes(role.id)}
-                                                            onChange={() => toggleRole(role.id)}
-                                                            className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                                                        />
-                                                        <span className="text-sm text-gray-700">{role.id}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+                                <div className="flex text-sm text-gray-600 mb-3">
+                                    <span className="font-medium w-48">No Skema Sertifikasi</span>
+                                    <span>: {resultData?.assessment?.code || '-'}</span>
                                 </div>
                             </div>
                         </div>
@@ -305,23 +452,57 @@ export default function Ak04() {
                             <div className="md:col-span-2">
                                 <textarea
                                     value={reason}
-                                    onChange={(e) => setReason(e.target.value)}
+                                    onChange={(e) => {
+                                        setReason(e.target.value);
+                                        // Hapus error untuk reason jika diisi
+                                        if (formErrors.reason) {
+                                            setFormErrors(prev => {
+                                                const newErrors = { ...prev };
+                                                delete newErrors.reason;
+                                                return newErrors;
+                                            });
+                                        }
+                                    }}
                                     placeholder="Catatan"
-                                    className="w-full h-full p-3 border border-gray-300 rounded-md resize-none 
-                 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm min-h-[150px]"
+                                    className={`w-full h-full p-3 border rounded-md resize-none 
+                                        focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm min-h-[150px]
+                                        ${formErrors.reason ? 'border-red-500' : 'border-gray-300'}`}
                                     rows={6}
                                 />
+                                {formErrors.reason && (
+                                    <p className="text-red-500 text-xs mt-1">{formErrors.reason}</p>
+                                )}
                             </div>
 
-                            {/* QR Code */}
-                            <div className="flex items-center justify-center">
-                                <div className="w-full h-full border border-gray-300 rounded-md flex items-center justify-center p-4">
-                                    <img
-                                        src="/img/cthbarkod.svg"
-                                        alt="QR Code"
-                                        className="w-28 h-28 sm:w-32 sm:h-32 object-contain"
-                                    />
-                                </div>
+                            {/* QR Code Section */}
+                            <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
+                                {valueQr ? (
+                                    <>
+                                        <QRCodeCanvas
+                                            value={valueQr}
+                                            size={100}
+                                            className="w-40 h-40 object-contain"
+                                        />
+                                        <span className="text-sm font-semibold text-gray-800">
+                                            {resultData?.assessee?.name || '-'}
+                                        </span>
+                                        <span className="text-green-600 font-semibold text-sm mt-2">
+                                            Data telah tersimpan dan QR Code telah digenerate
+                                        </span>
+                                    </>
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center">
+                                        <div className="w-40 h-40 bg-gray-100 flex items-center justify-center mb-4">
+                                            <span className="text-gray-400 text-sm">QR Code akan muncul di sini setelah disimpan</span>
+                                        </div>
+                                        <span className="text-sm font-semibold text-gray-800">
+                                            {resultData?.assessee?.name || '-'}
+                                        </span>
+                                        <span className="text-gray-500 text-xs mt-2 text-center">
+                                            Klik tombol Simpan untuk generate QR Code
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -337,17 +518,20 @@ export default function Ak04() {
                         <div className="flex justify-end">
                             <button
                                 onClick={handleSubmit}
-                                className="w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-white rounded-md 
-               hover:bg-orange-600 focus:outline-none focus:ring-2 
-               focus:ring-[#E77D35] focus:ring-offset-2 font-medium cursor-pointer"
+                                disabled={submitting || !!valueQr}
+                                className={`w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-white rounded-md 
+                                    hover:bg-orange-600 focus:outline-none focus:ring-2 
+                                    focus:ring-[#E77D35] focus:ring-offset-2 font-medium
+                                    ${submitting || valueQr ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                             >
-                                Lanjut
+                                {submitting ? "Menyimpan..." : valueQr ? "Tersimpan" : "Simpan"}
                             </button>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+
+

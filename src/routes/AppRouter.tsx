@@ -63,6 +63,7 @@ import Ia05C from "@/pages/Asesor/Ia-05-C";
 import IA05Assessor from "@/pages/Asesor/ia-05";
 import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
 import Ia02Assessor from "@/pages/Asesor/Ia-02";
+import ResultAssessment from '@/pages/admin/ResultAssessment';
 
 
 const router = createBrowserRouter([
@@ -130,6 +131,7 @@ const router = createBrowserRouter([
 					{ index: true, element: <DashboardAdmin /> },
 					{ path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
 					{ path: paths.admin.kelolaMUK, element: <KelolaMUK /> },
+					{ path: paths.admin.resultAssessment, element: <ResultAssessment /> },
 					{ path: paths.admin.editAsesor, element: <EditAsesor /> },
 					{ path: paths.admin.createAsesor, element: <EditAsesor /> },
 					{ path: paths.admin.editAsesorPattern, element: <EditAsesor /> },
