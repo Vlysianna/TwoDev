@@ -1,22 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Monitor, ChevronLeft, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import NavbarAsesor from '@/components/NavAsesor';
+import paths from "@/routes/paths";
+import api from '@/helper/axios';
+import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
 
-interface Criteria {
-  id: string;
-  text: string;
-}
 
-interface AssessmentItem {
+interface ElementDetail {
   id: number;
-  elemen: string;
-  criteria: Criteria[];
+  description: string;
+  benchmark: string;
+  result: any;
+}
+interface ElementIA01 {
+  id: number;
+  uc_id: number;
+  title: string;
+  details: ElementDetail[];
 }
 
-const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: string) => void }> = ({ 
-  initialValue = '', 
-  onChange 
+const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: string) => void }> = ({
+  initialValue = '',
+  onChange
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue);
@@ -58,60 +64,133 @@ const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: strin
 };
 
 export default function Ia01Detail() {
+
+  const { id_unit } = useParams();
+  const { id_assessment, id_result, id_asesi } = useAssessmentParams();
+  const navigate = useNavigate();
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  // Handle Save button
+  const handleSave = async () => {
+    if (!id_result) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      // Payload per detail (kriteria kerja)
+      const payload = {
+        result_id: Number(id_result),
+        elements: elements.flatMap(el =>
+          el.details.map(det => ({
+            element_detail_id: det.id,
+            is_competent: pencapaian[det.id] === 'kompeten',
+            evaluation: penilaianLanjut[det.id] || ''
+          }))
+        )
+      };
+      await api.post('/assessments/ia-01/result/send', payload);
+      navigate(paths.asesor.assessment.ia01(
+        id_assessment ?? '-',
+        id_asesi ?? '-'
+      ));
+    } catch (e: any) {
+      setSaveError('Gagal menyimpan data: ' + e.message);
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+  const [elements, setElements] = useState<ElementIA01[]>([]);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterKompeten, setFilterKompeten] = useState<'all' | 'kompeten' | 'belum'>('all');
+  // key: detail.id
   const [pencapaian, setPencapaian] = useState<Record<number, string>>({});
   const [penilaianLanjut, setPenilaianLanjut] = useState<Record<number, string>>({});
+  const finishedRef = useRef(false);
 
-  const assessmentData: AssessmentItem[] = [
-    {
-      id: 1,
-      elemen: 'Menggunakan metode pengembangan program',
-      criteria: [
-        { id: '1.1', text: 'Mendefinisikan Metode pengembangan aplikasi (software development)' },
-        { id: '1.2', text: 'Memilih Metode pengembangan aplikasi (software development) sesuai kebutuhan' }
-      ]
-    },
-    {
-      id: 2,
-      elemen: 'Menggunakan diagram program dan deskripsi program',
-      criteria: [
-        { id: '2.1', text: 'Mendefinisikan Diagram program dengan metodologi pengembangan sistem' },
-        { id: '2.2', text: 'Menggunakan Metode pemodelan, diagram objek dan diagram komponen digunakan pada implementasi program sesuai dengan spesifikasi' }
-      ]
-    },
-    {
-      id: 3,
-      elemen: 'Menerapkan hasil pemodelan ke dalam pengembangan program pengembangan program',
-      criteria: [
-        { id: '3.1', text: 'Memilih Hasil pemodelan yang mendukung kemampuan metodologi sesuai spesifikasi.' },
-        { id: '3.2', text: 'Memilih Hasil pemrograman (Integrated Development Environment-IDE) yang mendukung kemampuan metodologi bahasa pemrograman sesuai spesifikasi' }
-      ]
+  useEffect(() => {
+    if (id_result && id_unit) fetchElements();
+    // eslint-disable-next-line
+  }, [id_result, id_unit]);
+
+  const fetchElements = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get(
+        `/assessments/ia-01/units/${id_result}/elements/${id_unit}`
+      );
+      if (response.data.success) {
+        setElements(response.data.data);
+        // Auto-populate pencapaian dan penilaianLanjut dari data result (per detail)
+        const pencapaianInit: Record<number, string> = {};
+        const penilaianLanjutInit: Record<number, string> = {};
+        response.data.data.forEach((el: any) => {
+          if (el.details && el.details.length > 0) {
+            el.details.forEach((det: any) => {
+              if (det.result) {
+                pencapaianInit[det.id] = det.result.is_competent ? 'kompeten' : 'belum';
+                penilaianLanjutInit[det.id] = det.result.evaluation || '';
+              }
+            });
+          }
+        });
+        setPencapaian(pencapaianInit);
+        setPenilaianLanjut(penilaianLanjutInit);
+      }
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  const handlePencapaianChange = (id: number, value: string) => {
-    setPencapaian(prev => ({ ...prev, [id]: value }));
   };
 
+
+  // id = detail.id
+  const handlePencapaianChange = (id: number, value: string) => {
+    setPencapaian(prev => {
+      const updated = { ...prev, [id]: value };
+      checkAndFinishUnit(updated);
+      return updated;
+    });
+  };
+
+  // Cek jika semua elemen sudah diisi (kompeten/belum), lalu update status unit ke finished
+  // Cek jika semua detail sudah diisi (kompeten/belum), lalu update status unit ke finished
+  const checkAndFinishUnit = async (updatedPencapaian: Record<number, string>) => {
+    if (!elements.length || finishedRef.current) return;
+    // Ambil semua id detail dari unit ini
+    const allDetailIds: number[] = elements.flatMap(el => el.details.map(det => det.id));
+    const allChecked = allDetailIds.every(id => updatedPencapaian[id] === 'kompeten' || updatedPencapaian[id] === 'belum');
+    if (allChecked) {
+      finishedRef.current = true;
+      try {
+        await api.put(`/assessments/ia-01/units/${id_result}/unit/${id_unit}/finish`);
+      } catch (e) {
+        // Optional: handle error
+      }
+    }
+  };
+
+  // id = detail.id
   const handlePenilaianLanjutChange = (id: number, value: string) => {
     setPenilaianLanjut(prev => ({ ...prev, [id]: value }));
   };
+
 
   const handleFilterChange = (value: 'all' | 'kompeten' | 'belum') => {
     setFilterKompeten(value);
     if (value === 'kompeten' || value === 'belum') {
       const newPencapaian: Record<number, string> = {};
-      assessmentData.forEach(item => {
-        newPencapaian[item.id] = value;
+      elements.forEach(item => {
+        item.details.forEach(det => {
+          newPencapaian[det.id] = value;
+        });
       });
       setPencapaian(newPencapaian);
     }
   };
 
-  const filteredData = assessmentData.filter(item =>
-    item.elemen.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.criteria.some(criteria => criteria.text.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredData = elements.filter(item =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.details.some(det => det.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -120,7 +199,11 @@ export default function Ia01Detail() {
         <NavbarAsesor
           title="Detail"
           icon={
-            <Link to="/asesmen-mandiri" className="text-gray-500 hover:text-gray-600">
+            <Link to={paths.asesor.assessment.ia01(
+              id_assessment ?? '-',
+              id_asesi ?? '-'
+            )}
+              className="text-gray-500 hover:text-gray-600">
               <ChevronLeft size={20} />
             </Link>
           }
@@ -132,7 +215,7 @@ export default function Ia01Detail() {
         <div className="pb-7 flex flex-wrap items-center gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-[#00809D]">
             <Monitor size={20} />
-            <span className="font-medium">Unit kompetensi 2</span>
+            <span className="font-medium">Unit kompetensi {id_unit}</span>
           </div>
 
           {/* Search */}
@@ -151,8 +234,8 @@ export default function Ia01Detail() {
           </div>
 
           {/* Filter Kompeten */}
-          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">            
-            
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">
+
             <label
               className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
                 ${filterKompeten === 'kompeten' ? "bg-[#E77D3533]" : ""}`}
@@ -241,143 +324,137 @@ export default function Ia01Detail() {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map(item => (
+              {filteredData.map((item, i) => (
                 <React.Fragment key={item.id}>
-                  {item.criteria.map((criteria, idx) => (
-                    <tr key={criteria.id} className="border-t border-gray-200">
+                  {item.details.map((det, idx) => (
+                    <tr key={det.id} className="border-t border-gray-200">
                       {idx === 0 && (
-                        <td rowSpan={item.criteria.length} className="px-4 py-3 text-sm text-gray-900 align-top">
-                          {item.id}
+                        <td rowSpan={item.details.length} className="px-4 py-3 text-sm text-gray-900 align-top">
+                          {i + 1}
                         </td>
                       )}
                       {idx === 0 && (
-                        <td rowSpan={item.criteria.length} className="px-4 py-3 text-sm text-gray-900 align-top">
-                          {item.elemen}
+                        <td rowSpan={item.details.length} className="px-4 py-3 text-sm text-gray-900 align-top">
+                          {item.title}
                         </td>
                       )}
                       <td className="px-4 py-3 text-sm text-gray-900">
                         <div className="flex items-start gap-2">
-                          <span className="font-medium text-blue-600 min-w-8">{criteria.id}</span>
-                          <span>{criteria.text}</span>
+                          <span className="font-medium text-blue-600 min-w-8">{det.id}</span>
+                          <span>{det.description}</span>
                         </div>
                       </td>
-                      {idx === 0 && (
-                        <td rowSpan={item.criteria.length} className="px-4 py-3 text-sm text-gray-900">
-                          SKKNI
-                        </td>
-                      )}
-                      {idx === 0 && (
-                        <td
-                          className="px-2 sm:px-4 py-2 sm:py-3"
-                          rowSpan={item.criteria.length}
-                        >
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
-                            {/* Kompeten */}
-                            <label
-                              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                ${pencapaian[item.id] === "kompeten" ? "bg-[#E77D3533]" : ""}`}
+                      <td className="px-4 py-3 text-sm text-gray-900">{det.benchmark}</td>
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+                          {/* Kompeten */}
+                          <label
+                            className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+                              ${pencapaian[det.id] === "kompeten" ? "bg-[#E77D3533]" : ""}`}
+                          >
+                            <input
+                              type="radio"
+                              name={`pencapaian-${det.id}`}
+                              value="kompeten"
+                              checked={pencapaian[det.id] === "kompeten"}
+                              onChange={(e) => handlePencapaianChange(det.id, e.target.value)}
+                              className="hidden"
+                            />
+                            <span
+                              className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                ${pencapaian[det.id] === "kompeten"
+                                  ? "bg-[#E77D35] border-[#E77D35]"
+                                  : "border-[#E77D35]"
+                                }`}
                             >
-                              <input
-                                type="radio"
-                                name={`pencapaian-${item.id}`}
-                                value="kompeten"
-                                checked={pencapaian[item.id] === "kompeten"}
-                                onChange={(e) =>
-                                  handlePencapaianChange(item.id, e.target.value)
-                                }
-                                className="hidden"
-                              />
-                              <span
-                                className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                  ${pencapaian[item.id] === "kompeten"
-                                    ? "bg-[#E77D35] border-[#E77D35]"
-                                    : "border-[#E77D35]"
-                                  }`}
-                              >
-                                {pencapaian[item.id] === "kompeten" && (
-                                  <svg
-                                    className="w-3 h-3 text-white"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="3"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path d="M5 13l4 4L19 7" />
-                                  </svg>
-                                )}
-                              </span>
-                              <span
-                                className={
-                                  pencapaian[item.id] === "kompeten"
-                                    ? "text-gray-900"
-                                    : "text-gray-500"
-                                }
-                              >
-                                Ya
-                              </span>
-                            </label>
-
-                            {/* Belum Kompeten */}
-                            <label
-                              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                ${pencapaian[item.id] === "belum" ? "bg-[#E77D3533]" : ""}`}
+                              {pencapaian[det.id] === "kompeten" && (
+                                <svg
+                                  className="w-3 h-3 text-white"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="3"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </span>
+                            <span
+                              className={
+                                pencapaian[det.id] === "kompeten"
+                                  ? "text-gray-900"
+                                  : "text-gray-500"
+                              }
                             >
-                              <input
-                                type="radio"
-                                name={`pencapaian-${item.id}`}
-                                value="belum"
-                                checked={pencapaian[item.id] === "belum"}
-                                onChange={(e) =>
-                                  handlePencapaianChange(item.id, e.target.value)
-                                }
-                                className="hidden"
-                              />
-                              <span
-                                className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                  ${pencapaian[item.id] === "belum"
-                                    ? "bg-[#E77D35] border-[#E77D35]"
-                                    : "border-[#E77D35]"
-                                  }`}
-                              >
-                                {pencapaian[item.id] === "belum" && (
-                                  <svg
-                                    className="w-3 h-3 text-white"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="3"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path d="M5 13l4 4L19 7" />
-                                  </svg>
-                                )}
-                              </span>
-                              <span
-                                className={
-                                  pencapaian[item.id] === "belum"
-                                    ? "text-gray-900"
-                                    : "text-gray-500"
-                                }
-                              >
-                                Tidak
-                              </span>
-                            </label>
-                          </div>
-                        </td>
-                      )}
-                      {idx === 0 && (
-                        <td rowSpan={item.criteria.length} className="px-4 py-3 text-center">
-                          <PenilaianLanjut 
-                            initialValue={penilaianLanjut[item.id] || ''}
-                            onChange={(value) => handlePenilaianLanjutChange(item.id, value)}
-                          />
-                        </td>
-                      )}
+                              Ya
+                            </span>
+                          </label>
+                          {/* Belum Kompeten */}
+                          <label
+                            className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+                              ${pencapaian[det.id] === "belum" ? "bg-[#E77D3533]" : ""}`}
+                          >
+                            <input
+                              type="radio"
+                              name={`pencapaian-${det.id}`}
+                              value="belum"
+                              checked={pencapaian[det.id] === "belum"}
+                              onChange={(e) => handlePencapaianChange(det.id, e.target.value)}
+                              className="hidden"
+                            />
+                            <span
+                              className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                ${pencapaian[det.id] === "belum"
+                                  ? "bg-[#E77D35] border-[#E77D35]"
+                                  : "border-[#E77D35]"
+                                }`}
+                            >
+                              {pencapaian[det.id] === "belum" && (
+                                <svg
+                                  className="w-3 h-3 text-white"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="3"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </span>
+                            <span
+                              className={
+                                pencapaian[det.id] === "belum"
+                                  ? "text-gray-900"
+                                  : "text-gray-500"
+                              }
+                            >
+                              Tidak
+                            </span>
+                          </label>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <PenilaianLanjut
+                          initialValue={penilaianLanjut[det.id] || ''}
+                          onChange={(value) => handlePenilaianLanjutChange(det.id, value)}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </React.Fragment>
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="flex justify-end items-center gap-4 mt-6">
+          {saveError && <span className="text-red-500 text-sm mr-4">{saveError}</span>}
+          <button
+            className="bg-[#E77D35] px-12 text-white lg:px-20 py-2 rounded-lg font-medium hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? 'Menyimpan...' : 'Save'}
+          </button>
         </div>
       </div>
     </div>

@@ -30,21 +30,11 @@ import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
-import Ia01Detail from "@/pages/Asesor/Ia-01-Detail";
-import Ia01 from "@/pages/Asesor/Ia-01";
-import Ak02 from "@/pages/Asesor/Ak-02";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
 import Contact from "@/pages/LandingPage/Contact";
-import Ak05 from "@/pages/Asesor/Ak-05";
-import LembarJawaban from "@/pages/Asesor/LembarJawaban";
-import CekApl02 from "@/pages/Asesor/Apl-02";
-import CekAk01 from "@/pages/Asesor/Ak-01";
-import FaktaIntegritas from "@/pages/Asesor/FaktaIntegritas";
-import Ia03 from "@/pages/Asesor/Ia-03";
 import AssessmentAsesiProvider from "@/components/AssessmentAsesiProvider";
-import BiodataAsesor from "@/pages/Asesor/BiodataAsesor";
 import Apl02 from "@/pages/asesi/Apl-02";
 import Apl02Detail from "@/pages/asesi/Apl-02-Detail";
 import Ak04 from "@/pages/asesi/Ak-04";
@@ -52,16 +42,27 @@ import Ia05 from "@/pages/asesi/Ia-05";
 import Ia02 from "@/pages/asesi/Ia-02";
 import Ak01 from "@/pages/asesi/Ak-01";
 import Ak03 from "@/pages/asesi/Ak-03";
-import CekApl02Detail from "@/pages/Asesor/Apl-02-Detail";
-import DashboardAsesor from "@/pages/Asesor/DashboardAsesor";
-import DashboardPenilaian from "@/pages/Asesor/DashboardPenilaian";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
 import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
-import Ia05C from "@/pages/Asesor/Ia-05-C";
-import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
-import Ia02Assessor from "@/pages/Asesor/Ia-02";
+import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
+import DashboardAsesmenMandiri from "@/pages/asesor/DashboardAsesmenMandiri";
+import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
+import CekApl02 from "@/pages/asesor/Apl-02";
+import CekApl02Detail from "@/pages/asesor/Apl-02-Detail";
+import Ia01 from "@/pages/asesor/Ia-01";
+import Ia01Detail from "@/pages/asesor/Ia-01-Detail";
+import Ia02Assessor from "@/pages/asesor/Ia-02";
+import Ia03 from "@/pages/asesor/Ia-03";
+import CekAk01 from "@/pages/asesor/Ak-01";
+import Ak02 from "@/pages/asesor/Ak-02";
+import Ak05 from "@/pages/asesor/Ak-05";
+import Ia05C from "@/pages/asesor/Ia-05-C";
+import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
+import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
+import Ia01Asesi from "@/pages/asesi/Ia-01";
+import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
 
 
 const router = createBrowserRouter([
@@ -183,6 +184,14 @@ const router = createBrowserRouter([
 								element: <Apl02Detail />,
 							},
 							{
+								path: paths.asesi.assessment.ia01Pattern,
+								element: <Ia01Asesi />,
+							},
+							{
+								path: paths.asesi.assessment.ia01AsesiDetailPattern,
+								element: <Ia01AsesiDetail />,
+							},
+							{
 								path: paths.asesi.assessment.ia02Pattern,
 								element: <Ia02 />,
 							},
@@ -259,7 +268,7 @@ const router = createBrowserRouter([
 							},
 							{
 								path: paths.asesor.assessment.lembarJawabanPattern,
-								element: <LembarJawaban />,
+								// element: <LembarJawaban />,
 							},
 						],
 					},

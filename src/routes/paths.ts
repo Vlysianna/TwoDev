@@ -73,10 +73,9 @@ const routes = {
 			ia01: (id_assessment: string | number, id_asesi: string | number) =>
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-01`,
 			ia01Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-01",
-			ia01Detail: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-01-detail`,
-			ia01DetailPattern:
-				"/asesor/assessment/:id_assessment/:id_asesi/ia-01-detail",
+			ia01Detail: (id_assessment: string | number, id_result: string | number, id_asesi: string | number, id_unit: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_result}/${id_asesi}/ia-01-detail/${id_unit}`,
+			ia01DetailPattern: "/asesor/assessment/:id_assessment/:id_result/:id_asesi/ia-01-detail/:id_unit",
 			ia02: (id_assessment: string | number, id_asesi: string | number) =>
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-02`,
 			ia02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-02",
@@ -141,6 +140,12 @@ const routes = {
 			frak03: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/fr.ak.03`,
 			frak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/fr.ak.03",
+			ia01Asesi: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-01`,
+			ia01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-01",
+			ia01AsesiDetail: (id_assessment: string | number, id_result: string | number, id_asesor: string | number, id_unit: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_result}/${id_asesor}/ia-01-detail/${id_unit}`,
+			ia01AsesiDetailPattern: "/asesi/assessment/:id_assessment/:id_result/:id_asesor/ia-01-detail/:id_unit",
 			ia02: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-02`,
 			ia02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-02",
