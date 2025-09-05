@@ -205,16 +205,6 @@ export default function Ia01() {
     fetchResultData();
   }, [id_result]);
 
-  // useEffect(() => {
-  //   if (id_result) {
-  //     const interval = setInterval(fetchResultData, 10000);
-  //     return () => clearInterval(interval);
-  //   }
-  // }, [id_result]);
-
-  // Sync IA-01 header fields to local state when resultData changes
-  // Sync IA-01 header fields to local state when resultData changes
-  // Sync IA-01 header fields to local state when resultData changes
   useEffect(() => {
     if (resultData?.ia01_header) {
       setGroupField(resultData.ia01_header.group || '');
@@ -240,13 +230,37 @@ export default function Ia01() {
 
   useEffect(() => {
     if (recommendation === 'kompeten') {
-      // Reset ke nilai awal dari API, bukan ke empty string
+      // Isi dengan "-" ketika memilih kompeten
+      setGroupField('-');
+      setUnitField('-');
+      setElementField('-');
+      setKukField('-');
+    } else if (recommendation === 'belum') {
+      // Kembalikan ke nilai awal dari API ketika memilih belum kompeten
       setGroupField(initialHeader.group);
       setUnitField(initialHeader.unit);
       setElementField(initialHeader.element);
       setKukField(initialHeader.kuk);
     }
   }, [recommendation, initialHeader]);
+
+  const handleRecommendationChange = (value: 'kompeten' | 'belum') => {
+    setRecommendation(value);
+
+    if (value === 'kompeten') {
+      // Langsung isi dengan "-" ketika memilih kompeten
+      setGroupField('-');
+      setUnitField('-');
+      setElementField('-');
+      setKukField('-');
+    } else {
+      // Kembalikan ke nilai awal ketika memilih belum kompeten
+      setGroupField(initialHeader.group);
+      setUnitField(initialHeader.unit);
+      setElementField(initialHeader.element);
+      setKukField(initialHeader.kuk);
+    }
+  };
 
   // misalnya assesmentDate = "2025-10-24"
   const formattedDate = assesmentDate
@@ -395,7 +409,7 @@ export default function Ia01() {
                       type="radio"
                       name="recommendation"
                       checked={recommendation === 'kompeten'}
-                      onChange={() => setRecommendation('kompeten')}
+                      onChange={() => handleRecommendationChange('kompeten')}
                       className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
                     />
                     <span className={`text-sm text-gray-700 leading-relaxed transition-all duration-300 ${recommendation === 'belum' ? 'line-through opacity-50' : ''
@@ -408,7 +422,7 @@ export default function Ia01() {
                       type="radio"
                       name="recommendation"
                       checked={recommendation === 'belum'}
-                      onChange={() => setRecommendation('belum')}
+                      onChange={() => handleRecommendationChange('belum')}
                       className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
                     />
                     <span className={`text-sm text-gray-700 leading-relaxed transition-all duration-300 ${recommendation === 'kompeten' ? 'line-through opacity-50' : ''

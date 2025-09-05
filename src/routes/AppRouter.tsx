@@ -211,6 +211,10 @@ const router = createBrowserRouter([
 								path: paths.asesi.assessment.ak01Pattern,
 								element: <Ak01 />,
 							},
+							{
+								path: paths.asesi.assessment.ak04Pattern,
+								element: <Ak04 />,
+							}
 						],
 					},
 					{ path: paths.asesi.asesmenDiikuti, element: <AsessmentAktif /> },

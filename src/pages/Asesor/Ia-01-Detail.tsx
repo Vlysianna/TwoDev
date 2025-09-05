@@ -6,7 +6,6 @@ import paths from "@/routes/paths";
 import api from '@/helper/axios';
 import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
 
-
 interface ElementDetail {
   id: number;
   description: string;
@@ -64,18 +63,49 @@ const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: strin
 };
 
 export default function Ia01Detail() {
-
   const { id_unit } = useParams();
   const { id_assessment, id_result, id_asesi } = useAssessmentParams();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [elements, setElements] = useState<ElementIA01[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterKompeten, setFilterKompeten] = useState<'all' | 'kompeten' | 'belum'>('all');
+  const [pencapaian, setPencapaian] = useState<Record<number, string>>({});
+  const [penilaianLanjut, setPenilaianLanjut] = useState<Record<number, string>>({});
+  const finishedRef = useRef(false);
+  const [unassessedCriteria, setUnassessedCriteria] = useState<number[]>([]);
+
   // Handle Save button
   const handleSave = async () => {
+    // Validasi apakah semua kriteria sudah dinilai
+    const unassessed = getUnassessedCriteria();
+    if (unassessed.length > 0) {
+      setUnassessedCriteria(unassessed);
+      setSaveError('Harap isi penilaian untuk semua kriteria kerja');
+      return;
+    }
+
     if (!id_result) return;
     setSaving(true);
     setSaveError(null);
     try {
+      // Pastikan semua penilaian lanjut memiliki nilai, gunakan "-" jika kosong
+      const processedPenilaianLanjut = { ...penilaianLanjut };
+
+      // Iterasi melalui semua elemen dan detail untuk memastikan semua memiliki nilai
+      elements.forEach(el => {
+        el.details.forEach(det => {
+          if (!processedPenilaianLanjut[det.id] || processedPenilaianLanjut[det.id].trim() === '') {
+            processedPenilaianLanjut[det.id] = '-';
+          }
+        });
+      });
+
+      // Update state dengan nilai yang telah diproses
+      setPenilaianLanjut(processedPenilaianLanjut);
+
       // Payload per detail (kriteria kerja)
       const payload = {
         result_id: Number(id_result),
@@ -83,10 +113,11 @@ export default function Ia01Detail() {
           el.details.map(det => ({
             element_detail_id: det.id,
             is_competent: pencapaian[det.id] === 'kompeten',
-            evaluation: penilaianLanjut[det.id] || ''
+            evaluation: processedPenilaianLanjut[det.id] // Gunakan nilai yang sudah diproses
           }))
         )
       };
+
       await api.post('/assessments/ia-01/result/send', payload);
       navigate(paths.asesor.assessment.ia01(
         id_assessment ?? '-',
@@ -99,14 +130,6 @@ export default function Ia01Detail() {
       setSaving(false);
     }
   };
-  const [elements, setElements] = useState<ElementIA01[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterKompeten, setFilterKompeten] = useState<'all' | 'kompeten' | 'belum'>('all');
-  // key: detail.id
-  const [pencapaian, setPencapaian] = useState<Record<number, string>>({});
-  const [penilaianLanjut, setPenilaianLanjut] = useState<Record<number, string>>({});
-  const finishedRef = useRef(false);
 
   useEffect(() => {
     if (id_result && id_unit) fetchElements();
@@ -142,18 +165,22 @@ export default function Ia01Detail() {
     }
   };
 
-
   // id = detail.id
   const handlePencapaianChange = (id: number, value: string) => {
     setPencapaian(prev => {
       const updated = { ...prev, [id]: value };
       checkAndFinishUnit(updated);
+
+      // Hapus kriteria dari daftar unassessed jika sudah dinilai
+      if (unassessedCriteria.includes(id)) {
+        setUnassessedCriteria(prev => prev.filter(item => item !== id));
+      }
+
       return updated;
     });
   };
 
   // Cek jika semua elemen sudah diisi (kompeten/belum), lalu update status unit ke finished
-  // Cek jika semua detail sudah diisi (kompeten/belum), lalu update status unit ke finished
   const checkAndFinishUnit = async (updatedPencapaian: Record<number, string>) => {
     if (!elements.length || finishedRef.current) return;
     // Ambil semua id detail dari unit ini
@@ -174,7 +201,6 @@ export default function Ia01Detail() {
     setPenilaianLanjut(prev => ({ ...prev, [id]: value }));
   };
 
-
   const handleFilterChange = (value: 'all' | 'kompeten' | 'belum') => {
     setFilterKompeten(value);
     if (value === 'kompeten' || value === 'belum') {
@@ -185,13 +211,32 @@ export default function Ia01Detail() {
         });
       });
       setPencapaian(newPencapaian);
+
+      // Hapus semua kriteria dari daftar unassessed karena sudah dinilai semua
+      setUnassessedCriteria([]);
     }
+  };
+
+  // Fungsi untuk mendapatkan daftar kriteria yang belum dinilai
+  const getUnassessedCriteria = () => {
+    const unassessed: number[] = [];
+    elements.forEach(el => {
+      el.details.forEach(det => {
+        if (!pencapaian[det.id] || (pencapaian[det.id] !== 'kompeten' && pencapaian[det.id] !== 'belum')) {
+          unassessed.push(det.id);
+        }
+      });
+    });
+    return unassessed;
   };
 
   const filteredData = elements.filter(item =>
     item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.details.some(det => det.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  // Hitung jumlah kriteria yang belum dinilai
+  const unassessedCount = getUnassessedCriteria().length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -310,6 +355,15 @@ export default function Ia01Detail() {
           </div>
         </div>
 
+        {/* Status info */}
+        {unassessedCount > 0 && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600 text-sm">
+              <strong>{unassessedCount} kriteria</strong> belum dinilai. Harap beri penilaian Ya/Tidak untuk semua kriteria sebelum menyimpan.
+            </p>
+          </div>
+        )}
+
         {/* Table */}
         <div className="overflow-x-auto border border-gray-200 rounded-sm">
           <table className="w-full min-w-[800px]">
@@ -326,121 +380,129 @@ export default function Ia01Detail() {
             <tbody>
               {filteredData.map((item, i) => (
                 <React.Fragment key={item.id}>
-                  {item.details.map((det, idx) => (
-                    <tr key={det.id} className="border-t border-gray-200">
-                      {idx === 0 && (
-                        <td rowSpan={item.details.length} className="px-4 py-3 text-sm text-gray-900 align-top">
-                          {i + 1}
+                  {item.details.map((det, idx) => {
+                    const isUnassessed = !pencapaian[det.id] ||
+                      (pencapaian[det.id] !== 'kompeten' && pencapaian[det.id] !== 'belum');
+
+                    return (
+                      <tr
+                        key={det.id}
+                        className={`border-t border-gray-200`}
+                      >
+                        {idx === 0 && (
+                          <td rowSpan={item.details.length} className="px-4 py-3 text-sm text-gray-900 align-top">
+                            {i + 1}
+                          </td>
+                        )}
+                        {idx === 0 && (
+                          <td rowSpan={item.details.length} className="px-4 py-3 text-sm text-gray-900 align-top">
+                            {item.title}
+                          </td>
+                        )}
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          <div className="flex items-start gap-2">
+                            <span className="font-medium text-blue-600 min-w-8">{det.id}</span>
+                            <span>{det.description}</span>
+                          </div>
                         </td>
-                      )}
-                      {idx === 0 && (
-                        <td rowSpan={item.details.length} className="px-4 py-3 text-sm text-gray-900 align-top">
-                          {item.title}
+                        <td className="px-4 py-3 text-sm text-gray-900">{det.benchmark}</td>
+                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+                            {/* Kompeten */}
+                            <label
+                              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+                                ${pencapaian[det.id] === "kompeten" ? "bg-[#E77D3533]" : ""}`}
+                            >
+                              <input
+                                type="radio"
+                                name={`pencapaian-${det.id}`}
+                                value="kompeten"
+                                checked={pencapaian[det.id] === "kompeten"}
+                                onChange={(e) => handlePencapaianChange(det.id, e.target.value)}
+                                className="hidden"
+                              />
+                              <span
+                                className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                  ${pencapaian[det.id] === "kompeten"
+                                    ? "bg-[#E77D35] border-[#E77D35]"
+                                    : "border-[#E77D35]"
+                                  }`}
+                              >
+                                {pencapaian[det.id] === "kompeten" && (
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span
+                                className={
+                                  pencapaian[det.id] === "kompeten"
+                                    ? "text-gray-900"
+                                    : "text-gray-500"
+                                }
+                              >
+                                Ya
+                              </span>
+                            </label>
+                            {/* Belum Kompeten */}
+                            <label
+                              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+                                ${pencapaian[det.id] === "belum" ? "bg-[#E77D3533]" : ""}`}
+                            >
+                              <input
+                                type="radio"
+                                name={`pencapaian-${det.id}`}
+                                value="belum"
+                                checked={pencapaian[det.id] === "belum"}
+                                onChange={(e) => handlePencapaianChange(det.id, e.target.value)}
+                                className="hidden"
+                              />
+                              <span
+                                className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                  ${pencapaian[det.id] === "belum"
+                                    ? "bg-[#E77D35] border-[#E77D35]"
+                                    : "border-[#E77D35]"
+                                  }`}
+                              >
+                                {pencapaian[det.id] === "belum" && (
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span
+                                className={
+                                  pencapaian[det.id] === "belum"
+                                    ? "text-gray-900"
+                                    : "text-gray-500"
+                                }
+                              >
+                                Tidak
+                              </span>
+                            </label>
+                          </div>
                         </td>
-                      )}
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        <div className="flex items-start gap-2">
-                          <span className="font-medium text-blue-600 min-w-8">{det.id}</span>
-                          <span>{det.description}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{det.benchmark}</td>
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
-                          {/* Kompeten */}
-                          <label
-                            className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                              ${pencapaian[det.id] === "kompeten" ? "bg-[#E77D3533]" : ""}`}
-                          >
-                            <input
-                              type="radio"
-                              name={`pencapaian-${det.id}`}
-                              value="kompeten"
-                              checked={pencapaian[det.id] === "kompeten"}
-                              onChange={(e) => handlePencapaianChange(det.id, e.target.value)}
-                              className="hidden"
-                            />
-                            <span
-                              className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                ${pencapaian[det.id] === "kompeten"
-                                  ? "bg-[#E77D35] border-[#E77D35]"
-                                  : "border-[#E77D35]"
-                                }`}
-                            >
-                              {pencapaian[det.id] === "kompeten" && (
-                                <svg
-                                  className="w-3 h-3 text-white"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </span>
-                            <span
-                              className={
-                                pencapaian[det.id] === "kompeten"
-                                  ? "text-gray-900"
-                                  : "text-gray-500"
-                              }
-                            >
-                              Ya
-                            </span>
-                          </label>
-                          {/* Belum Kompeten */}
-                          <label
-                            className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                              ${pencapaian[det.id] === "belum" ? "bg-[#E77D3533]" : ""}`}
-                          >
-                            <input
-                              type="radio"
-                              name={`pencapaian-${det.id}`}
-                              value="belum"
-                              checked={pencapaian[det.id] === "belum"}
-                              onChange={(e) => handlePencapaianChange(det.id, e.target.value)}
-                              className="hidden"
-                            />
-                            <span
-                              className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                ${pencapaian[det.id] === "belum"
-                                  ? "bg-[#E77D35] border-[#E77D35]"
-                                  : "border-[#E77D35]"
-                                }`}
-                            >
-                              {pencapaian[det.id] === "belum" && (
-                                <svg
-                                  className="w-3 h-3 text-white"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="3"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </span>
-                            <span
-                              className={
-                                pencapaian[det.id] === "belum"
-                                  ? "text-gray-900"
-                                  : "text-gray-500"
-                              }
-                            >
-                              Tidak
-                            </span>
-                          </label>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <PenilaianLanjut
-                          initialValue={penilaianLanjut[det.id] || ''}
-                          onChange={(value) => handlePenilaianLanjutChange(det.id, value)}
-                        />
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="px-4 py-3 text-center">
+                          <PenilaianLanjut
+                            initialValue={penilaianLanjut[det.id] || ''}
+                            onChange={(value) => handlePenilaianLanjutChange(det.id, value)}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </React.Fragment>
               ))}
             </tbody>
@@ -451,7 +513,7 @@ export default function Ia01Detail() {
           <button
             className="bg-[#E77D35] px-12 text-white lg:px-20 py-2 rounded-lg font-medium hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || unassessedCount > 0}
           >
             {saving ? 'Menyimpan...' : 'Save'}
           </button>
