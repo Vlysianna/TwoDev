@@ -21,6 +21,12 @@ interface AssesseeData {
   status: boolean;
 }
 
+interface TabResponse {
+  assessment_id: number;
+  assessment_code: string;
+  tabs: string[];
+}
+
 export default function DashboardAsesmenMandiri() {
   const { user } = useAuth();
   const { id_assessment, id_asesor } = useAssessmentParams();
@@ -33,20 +39,12 @@ export default function DashboardAsesmenMandiri() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  type Tab =
-    | "apl-02"
-    | "ia-01"
-    | "ia-02"
-    | "ia-03"
-    | "ia-05"
-    | "ak-01"
-    | "ak-02"
-    | "ak-05";
-  const [selectedTab, setSelectedTab] = useState<Tab>("apl-02");
+  const [tabData, setTabData] = useState<TabResponse | null>();
+  const [selectedTab, setSelectedTab] = useState<string>("apl-01");
   const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
 
   useEffect(() => {
-    fetchAssesseeData(selectedTab);
+    fetchAssesseeData(selectedTab.toLowerCase());
   }, [selectedTab]);
 
   useEffect(() => {
@@ -56,6 +54,29 @@ export default function DashboardAsesmenMandiri() {
         .includes(searchTerm.toLowerCase());    
     })
   }, [searchTerm])
+
+  useEffect(() => {
+    fetchTabs();
+  }, [user]);
+
+  const fetchTabs = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(
+        `/assessments/navigation/assessor/${id_assessment}`
+      );
+      if (response.data.success) {
+        setTabData(response.data.data);
+      } else {
+        setError(response.data.message);
+      }
+    } catch (error) {
+      console.error("Failed to fetch tabs:", error);
+      setError("Gagal memuat data tab");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const fetchAssesseeData = async (tab: string) => {
     try {
@@ -109,7 +130,11 @@ export default function DashboardAsesmenMandiri() {
   };
 
   const getActionText = () => {
-    switch (selectedTab) {
+    switch (selectedTab.toLowerCase()) {
+      case "apl-01":
+        return "Cek APL-01 >";
+      case "data-sertifikasi":
+        return "Cek Data Sertifikasi >";
       case "apl-02":
         return "Cek APL-02 >";
       case "ia-01":
@@ -120,10 +145,16 @@ export default function DashboardAsesmenMandiri() {
         return "Cek IA-03 >";
       case "ia-05":
         return "Cek IA-05 >";
+      case "ia-07":
+        return "Cek IA-07 >";
       case "ak-01":
         return "Cek AK-01 >";
       case "ak-02":
         return "Cek AK-02 >";
+      case "ak-03":
+        return "Cek AK-03 >";
+      case "ak-04":
+        return "Cek AK-04 >";
       case "ak-05":
         return "Cek AK-05 >";
       default:
@@ -132,7 +163,7 @@ export default function DashboardAsesmenMandiri() {
   };
 
   const handleActionClick = (assesseeId: number) => {
-    switch (selectedTab) {
+    switch (selectedTab.toLowerCase()) {
       case "apl-02":
         navigate(
           paths.asesor.assessment.cekApl02(id_assessment, assesseeId)
@@ -230,18 +261,7 @@ export default function DashboardAsesmenMandiri() {
               className="flex overflow-x-auto scrollbar-hide space-x-2 pb-2"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              {(
-                [
-                  "apl-02",
-                  "ia-01",
-                  "ia-02",
-                  "ia-03",
-                  "ia-05",
-                  "ak-01",
-                  "ak-02",
-                  "ak-05",
-                ] as Tab[]
-              ).map((tab) => (
+              {tabData && tabData.tabs.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setSelectedTab(tab)}
@@ -251,7 +271,7 @@ export default function DashboardAsesmenMandiri() {
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  {tab.toUpperCase()}
+                  {tab}
                 </button>
               ))}
             </div>

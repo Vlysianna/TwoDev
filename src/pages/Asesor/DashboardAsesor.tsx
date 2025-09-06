@@ -80,7 +80,7 @@ const DashboardAsesor: React.FC = () => {
         const assessor = assessorResp.data?.data;
 
   // Fetch schedules (unprotected endpoint) and filter locally for assessor
-  const schedulesResp = await api.get('/schedules');
+  const schedulesResp = await api.get('/schedules/active-assessor');
   const schedules: Schedule[] = schedulesResp.data?.data || [];
 
         // Flatten schedule details assigned to this assessor
