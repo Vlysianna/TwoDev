@@ -105,14 +105,15 @@ export default function DataSertifikasi() {
 			formData.append("assessee_id", String(asesiId));
 			formData.append("assessment_id", String(id_assessment));
 
+			Object.entries(data).forEach(([key, value]) => {
+				if (value) {
+					formData.append(key, value);
+				}
+			});
+
 			await api.post(
 				`/assessments/apl-01/create-certificate-docs`,
-				{
-					...data,
-					assessor_id: id_asesor,
-					assessee_id: asesiId,
-					assessment_id: id_assessment,
-				},
+				formData,
 				{
 					headers: {
 						"Content-Type": "multipart/form-data",
