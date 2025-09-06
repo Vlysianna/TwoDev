@@ -29,6 +29,7 @@ const routes = {
 		root: "/admin",
 		kelolaAkunAsesi: "/admin/kelola-akun-asesi",
 		kelolaMUK: "/admin/kelola-muk",
+		resultAssessment: "/admin/result-assessment",
 		editAsesor: "/admin/edit-asesor",
 		createAsesor: "/admin/asesor/create",
 		editAsesorById: (id: string | number) => `/admin/asesor/edit/${id}`,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, Clock, Loader2, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Clock, Loader2, AlertCircle, KeyRound } from 'lucide-react';
 import NavbarAsesor from '@/components/NavAsesor';
 import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
 import api from '@/helper/axios';
@@ -9,12 +9,14 @@ import paths from '@/routes/paths';
 interface IA05Option { id: number; option: string }
 interface IA05Question { id: number; order: number; question: string; options: IA05Option[] }
 interface IA05AssesseeAnswerRow { id: number; answers: { id: number; option: string } }
+interface IA05AnswerKeyRow { id: number; answer: { id: number; option: string } }
 
 export default function IA05Assessor() {
   const { id_assessment, id_result, id_asesi } = useAssessmentParams();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<IA05Question[]>([]);
   const [answersMap, setAnswersMap] = useState<Record<number, number>>({});
+  const [answerKeys, setAnswerKeys] = useState<Record<number, IA05AnswerKeyRow['answer']>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,17 +27,22 @@ export default function IA05Assessor() {
       try {
         setLoading(true);
         setError(null);
-        const [qRes, aRes] = await Promise.all([
+        const [qRes, aRes, kRes] = await Promise.all([
           api.get(`/assessments/ia-05/questions/${id_assessment}`),
-          api.get(`/assessments/ia-05/result/answers/${id_result}`)
+          api.get(`/assessments/ia-05/result/answers/${id_result}`),
+          api.get(`/assessments/ia-05/result/answers/keys/${id_assessment}`)
         ]);
         if (cancelled) return;
         const qData: IA05Question[] = qRes.data?.data || [];
         const aData: IA05AssesseeAnswerRow[] = aRes.data?.data || [];
+        const kData: IA05AnswerKeyRow[] = kRes.data?.data || [];
         const map: Record<number, number> = {};
         aData.forEach(r => { map[r.id] = r.answers.id; });
+        const keyMap: Record<number, IA05AnswerKeyRow['answer']> = {};
+        kData.forEach(k => { keyMap[k.id] = k.answer; });
         setQuestions(qData);
         setAnswersMap(map);
+        setAnswerKeys(keyMap);
       } catch (e: unknown) {
         if (!cancelled) {
           let message = 'Gagal memuat data';
@@ -95,26 +102,35 @@ export default function IA05Assessor() {
             {!loading && questions.length === 0 && !error && (
               <div className="text-sm text-gray-500">Tidak ada soal.</div>
             )}
-            {!loading && questions.map(q => (
-              <div key={q.id} className="border-b border-gray-100 pb-6 last:border-b-0">
-                <h3 className="font-semibold text-gray-800">Soal {q.order}</h3>
-                <p className="text-gray-700 mb-4 whitespace-pre-line">{q.question}</p>
-                <div className="border border-gray-200 rounded-lg p-4 w-full md:w-[40rem]">
-                  <div className="space-y-3">
-                    {q.options.map((opt, idx) => {
-                      const selected = answersMap[q.id] === opt.id;
-                      const letter = String.fromCharCode(65 + idx);
-                      return (
-                        <div key={opt.id} className="flex items-center">
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selected ? 'border-orange-500 bg-orange-500' : 'border-gray-300'}`}>{selected && <div className="w-2 h-2 rounded-full bg-white" />}</div>
-                          <span className={`ml-3 text-sm px-3 py-2 rounded flex-1 ${selected ? 'bg-orange-100 text-orange-800' : 'bg-gray-50 text-gray-700'}`}><span className="font-semibold mr-2">{letter}.</span> {opt.option}</span>
-                        </div>
-                      );
-                    })}
+            {!loading && questions.map(q => {
+              const key = answerKeys[q.id];
+              return (
+                <div key={q.id} className="border-b border-gray-100 pb-6 last:border-b-0">
+                  <h3 className="font-semibold text-gray-800">Soal {q.order}</h3>
+                  <p className="text-gray-700 mb-4 whitespace-pre-line">{q.question}</p>
+                  <div className="border border-gray-200 rounded-lg p-4 w-full md:w-[40rem]">
+                    <div className="space-y-3">
+                      {q.options.map((opt, idx) => {
+                        const selected = answersMap[q.id] === opt.id;
+                        const isKey = key && key.id === opt.id;
+                        const letter = String.fromCharCode(65 + idx);
+                        return (
+                          <div key={opt.id} className="flex items-center">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selected ? 'border-orange-500 bg-orange-500' : 'border-gray-300'}`}>{selected && <div className="w-2 h-2 rounded-full bg-white" />}</div>
+                            <span className={`ml-3 text-sm px-3 py-2 rounded flex-1 ${selected ? 'bg-orange-100 text-orange-800' : isKey ? 'bg-green-100 text-green-800' : 'bg-gray-50 text-gray-700'}`}>
+                              <span className="font-semibold mr-2">{letter}.</span> {opt.option}
+                              {isKey && (
+                                <span className="ml-2 inline-flex items-center gap-1 text-xs font-semibold text-green-700"><KeyRound size={14}/> Kunci Jawaban</span>
+                              )}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="flex justify-end mt-8">
             <button
