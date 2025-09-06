@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, Filter, Edit3, Eye, Trash2, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
 import paths from "@/routes/paths";
@@ -18,6 +18,8 @@ const KelolaMUK: React.FC = () => {
 	const [exportLoading, setExportLoading] = useState<boolean>(false);
 	const [muks, setMuks] = useState<MukType[]>([]);
 	const [filteredMuks, setFilteredMuks] = useState<MukType[]>([]);
+
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		fetchMuk();
@@ -54,7 +56,10 @@ const KelolaMUK: React.FC = () => {
 		setFilteredMuks(filtered);
 	}, [muks, searchQuery]);
 
-	const handleEdit = (id: number) => console.log("Edit user:", id);
+	const handleEdit = (id: number) => {
+		console.log("Edit user:", id);
+		navigate(paths.admin.muk.edit(id));
+	};
 	const handleView = (id: number) => console.log("View user:", id);
 	const handleDelete = (id: number) => {
 		setDeletingId(id);
@@ -162,7 +167,7 @@ const KelolaMUK: React.FC = () => {
 
 						{/* Buttons */}
 						<div className="flex space-x-3">
-							<Link to={paths.admin.tambahMuk}>
+							<Link to={paths.admin.muk.tambah}>
 								<button className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors">
 									Tambah MUK
 								</button>

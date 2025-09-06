@@ -49,7 +49,7 @@ const Sidebar: React.FC = () => {
       name: "Kelola Skema",
       icon: Users,
       section: "main",
-      path: paths.admin.kelolaMUK,
+      path: paths.admin.muk.root,
     },
     {
       name: "Kelola Jurusan",

@@ -64,7 +64,8 @@ import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
 import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
 import IA05Assessor from "@/pages/Asesor/ia-05";
-import ResultAssessment from '@/pages/admin/ResultAssessment';
+import ResultAssessment from "@/pages/admin/ResultAssessment";
+import EditMUK from "@/pages/admin/EditMuk";
 
 const router = createBrowserRouter([
 	{
@@ -130,7 +131,6 @@ const router = createBrowserRouter([
 				children: [
 					{ index: true, element: <DashboardAdmin /> },
 					{ path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
-					{ path: paths.admin.kelolaMUK, element: <KelolaMUK /> },
 					{ path: paths.admin.resultAssessment, element: <ResultAssessment /> },
 					{ path: paths.admin.editAsesor, element: <EditAsesor /> },
 					{ path: paths.admin.createAsesor, element: <EditAsesor /> },
@@ -140,7 +140,17 @@ const router = createBrowserRouter([
 					{ path: paths.admin.kelolaAkunAsesor, element: <KelolaAkunAsesor /> },
 					{ path: paths.admin.editAsesi, element: <EditAsesi /> },
 					{ path: paths.admin.verifikasi, element: <VerifikasiPage /> },
-					{ path: paths.admin.tambahMuk, element: <TambahMUK /> },
+					{
+						path: paths.admin.muk.root,
+						children: [
+							{
+								path: paths.admin.muk.root,
+								element: <KelolaMUK />,
+							},
+							{ path: paths.admin.muk.tambah, element: <TambahMUK /> },
+							{ path: paths.admin.muk.editPattern, element: <EditMUK /> },
+						],
+					},
 					{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
 					{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
 					{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
@@ -216,7 +226,7 @@ const router = createBrowserRouter([
 							{
 								path: paths.asesi.assessment.ak04Pattern,
 								element: <Ak04 />,
-							}
+							},
 						],
 					},
 					{ path: paths.asesi.asesmenDiikuti, element: <AsessmentAktif /> },
@@ -264,9 +274,15 @@ const router = createBrowserRouter([
 								path: paths.asesor.assessment.ia01DetailPattern,
 								element: <Ia01Detail />,
 							},
-							{ path: paths.asesor.assessment.ia02Pattern, element: <Ia02Assessor /> },
+							{
+								path: paths.asesor.assessment.ia02Pattern,
+								element: <Ia02Assessor />,
+							},
 							{ path: paths.asesor.assessment.ia03Pattern, element: <Ia03 /> },
-							{ path: paths.asesor.assessment.ia05Pattern, element: <IA05Assessor /> },
+							{
+								path: paths.asesor.assessment.ia05Pattern,
+								element: <IA05Assessor />,
+							},
 							{
 								path: paths.asesor.assessment.ak01Pattern,
 								element: <CekAk01 />,

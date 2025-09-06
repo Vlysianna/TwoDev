@@ -6,7 +6,8 @@ export type MukTypeInput = {
 	groups_ia01: IA01Group[];
 	groups_ia02: IA02Group[];
 	groups_ia03: IA03Group[];
-	ia05_questions: IA05Question[];
+	ia05_questions?: IA05Question[] | null;
+	ia07_questions?: IA07Question[] | null;
 };
 
 export type MukType = {
@@ -23,6 +24,27 @@ export type MukType = {
 		updated_at: string;
 		scheme: Scheme;
 	};
+};
+
+export type MukDetailType = {
+	id: number;
+	occupation: Occupation;
+	code: string;
+	uc_apl02s: UnitAPL02[];
+	groups_ia01: IA01Group[];
+	groups_ia02: IA02Group[];
+	groups_ia03: IA03Group[];
+	ia05_questions?: IA05Question[] | null;
+	ia07_questions?: IA07Question[] | null;
+};
+
+export type Occupation = {
+	id: number;
+	scheme_id: number;
+	name: string;
+	created_at: string;
+	updated_at: string;
+	scheme: Scheme;
 };
 
 export type Scheme = {
@@ -110,4 +132,9 @@ export type IA05Question = {
 		option: string;
 		is_answer: boolean;
 	}[];
+};
+
+export type IA07Question = {
+	question: string;
+	answer_key: string;
 };

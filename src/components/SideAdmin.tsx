@@ -51,7 +51,7 @@ const Sidebar: React.FC = () => {
       name: 'Kelengkapan MUK',
       icon: File,
       section: 'admin',
-      path: paths.admin.kelolaMUK,
+      path: paths.admin.muk.root,
     },
     {
       name: 'Kelola Okupasi',

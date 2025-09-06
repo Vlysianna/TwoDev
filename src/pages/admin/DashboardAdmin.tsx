@@ -342,7 +342,7 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
                         <hr className="my-4" />
-                        <button onClick={() => navigate(paths.admin.kelolaMUK)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                        <button onClick={() => navigate(paths.admin.muk.root)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
                             Lihat Detail
                             <span>→</span>
                         </button>

@@ -1,4 +1,3 @@
-
 const routes = {
 	root: "/",
 	public: {
@@ -28,7 +27,6 @@ const routes = {
 	admin: {
 		root: "/admin",
 		kelolaAkunAsesi: "/admin/kelola-akun-asesi",
-		kelolaMUK: "/admin/kelola-muk",
 		resultAssessment: "/admin/result-assessment",
 		editAsesor: "/admin/edit-asesor",
 		createAsesor: "/admin/asesor/create",
@@ -37,7 +35,13 @@ const routes = {
 		kelolaAkunAsesor: "/admin/kelola-akun-asesor",
 		editAsesi: "/admin/edit-asesi",
 		verifikasi: "/admin/verifikasi",
-		tambahMuk: "/admin/tambah-muk",
+		muk: {
+			root: "/admin/muk",
+			tambah: "/admin/muk/tambah",
+			editPattern: "/admin/muk/edit/:id_assessment",
+			edit: (id_assessment: string | number) =>
+				`/admin/muk/edit/${id_assessment}`,
+		},
 		kelolaJurusan: "/admin/kelola-jurusan",
 		okupasi: {
 			root: "/admin/okupasi",
@@ -78,9 +82,15 @@ const routes = {
 			ia01: (id_assessment: string | number, id_asesi: string | number) =>
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-01`,
 			ia01Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-01",
-			ia01Detail: (id_assessment: string | number, id_result: string | number, id_asesi: string | number, id_unit: string | number) =>
+			ia01Detail: (
+				id_assessment: string | number,
+				id_result: string | number,
+				id_asesi: string | number,
+				id_unit: string | number
+			) =>
 				`/asesor/assessment/${id_assessment}/${id_result}/${id_asesi}/ia-01-detail/${id_unit}`,
-			ia01DetailPattern: "/asesor/assessment/:id_assessment/:id_result/:id_asesi/ia-01-detail/:id_unit",
+			ia01DetailPattern:
+				"/asesor/assessment/:id_assessment/:id_result/:id_asesi/ia-01-detail/:id_unit",
 			ia02: (id_assessment: string | number, id_asesi: string | number) =>
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-02`,
 			ia02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-02",
@@ -105,12 +115,9 @@ const routes = {
 			) => `/asesor/assessment/${id_assessment}/${id_asesi}/data-sertifikasi`,
 			dataSertifikasiPattern:
 				"/asesor/assessment/:id_assessment/:id_asesi/data-sertifikasi",
-			ia05c: (
-				id_assessment: string | number,
-				id_asesi: string | number
-			) => `/asesor/assessment/${id_assessment}/${id_asesi}/ia-05-c`,
-			ia05cPattern:
-				"/asesor/assessment/:id_assessment/:id_asesi/ia-05-c",
+			ia05c: (id_assessment: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-05-c`,
+			ia05cPattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-05-c",
 			lembarJawaban: (
 				id_assessment: string | number,
 				id_asesi: string | number
@@ -151,9 +158,15 @@ const routes = {
 			ia01Asesi: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-01`,
 			ia01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-01",
-			ia01AsesiDetail: (id_assessment: string | number, id_result: string | number, id_asesor: string | number, id_unit: string | number) =>
+			ia01AsesiDetail: (
+				id_assessment: string | number,
+				id_result: string | number,
+				id_asesor: string | number,
+				id_unit: string | number
+			) =>
 				`/asesi/assessment/${id_assessment}/${id_result}/${id_asesor}/ia-01-detail/${id_unit}`,
-			ia01AsesiDetailPattern: "/asesi/assessment/:id_assessment/:id_result/:id_asesor/ia-01-detail/:id_unit",
+			ia01AsesiDetailPattern:
+				"/asesi/assessment/:id_assessment/:id_result/:id_asesor/ia-01-detail/:id_unit",
 			ia02: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-02`,
 			ia02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-02",
@@ -163,19 +176,14 @@ const routes = {
 			Ia05CAssessee: (
 				id_assessment: string | number,
 				id_asesor: string | number
-			) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-05-c`,
-			ia05CAssesseePattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-05-c",
-			ak01: (
-				id_assessment: string | number,
-				id_asesor: string | number
-			) =>
+			) => `/asesi/assessment/${id_assessment}/${id_asesor}/ia-05-c`,
+			ia05CAssesseePattern:
+				"/asesi/assessment/:id_assessment/:id_asesor/ia-05-c",
+			ak01: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-01`,
 			ak01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-01",
-			ak04: (
-				id_assessment: string | number,
-				id_asesor: string | number
-			) => `/asesi/assessment/${id_assessment}/${id_asesor}/ak-04`,
+			ak04: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-04`,
 			ak04Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-04",
 		},
 		asesmenDiikuti: "/asesi/asesmen/diikuti",

@@ -4,9 +4,13 @@ import { useForm } from "react-hook-form";
 import { Filter } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
-import { type MukTypeInput, type Scheme } from "@/lib/types";
+import {
+	type MukDetailType,
+	type MukTypeInput,
+	type Scheme,
+} from "@/lib/types";
 import api from "@/helper/axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import routes from "@/routes/paths";
 import FormMuk from "@/components/section/FormMuk";
 
@@ -20,47 +24,54 @@ const defaultValues: MukTypeInput = {
 	groups_ia03: [],
 };
 
-const TambahMUK: React.FC = () => {
+const EditMUK: React.FC = () => {
+	const { id_assessment } = useParams();
 	const navigate = useNavigate();
-	const form = useForm<MukTypeInput>({ defaultValues });
-	const { handleSubmit } = form;
 
 	const [schemes, setSchemes] = useState<Scheme[]>([]);
-	const [submitting, setSubmitting] = useState(false);
+	const [dataMuk, setDataMuk] = useState<MukDetailType>();
+	const [loading, setLoading] = useState(true);
 
-	const [idAssessment, setIdAssessment] = useState<number | null>(null);
+	const form = useForm<MukTypeInput>({ defaultValues });
 
 	useEffect(() => {
-		api
-			.get("/schemes")
-			.then((res) => setSchemes(res.data.data || []))
-			.catch(() => setSchemes([]));
-	}, []);
+		if (typeof id_assessment !== "string") return;
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				const [resSchemes, resMuk] = await Promise.all([
+					api.get("/schemes"),
+					api.get(`/assessments/${id_assessment}`),
+				]);
 
-	const onSubmit = async (data: MukTypeInput) => {
-		try {
-			setSubmitting(true);
-			// POST to /assessments/create (app mounts assessmentRoutes on /api/assessments)
-			const res = await api.post("/assessments/create", {
-				...data,
-				scheme_id: Number(data.scheme_id),
-			});
-			if (res?.data?.success) {
-				alert("MUK berhasil diupload");
-				setIdAssessment(res.data.data.id);
-			} else {
-				alert("Gagal membuat APL");
+				setSchemes(resSchemes.data.data || []);
+				setDataMuk(resMuk.data.data);
+			} catch (err) {
+				setSchemes([]);
+				setDataMuk(undefined);
+			} finally {
+				setLoading(false);
 			}
-		} catch (err: unknown) {
-			console.error(err);
-			// try to read axios response message if present
-			// @ts-expect-error - err may come from axios with response structure
-			const message = err?.response?.data?.message || "Terjadi kesalahan";
-			alert(message);
-		} finally {
-			setSubmitting(false);
+		};
+
+		fetchData();
+	}, [id_assessment]);
+
+	useEffect(() => {
+		if (loading) {
+			return;
 		}
-	};
+		console.log(dataMuk);
+		if (dataMuk === undefined) {
+			navigate(routes.admin.muk.root);
+		} else {
+			form.reset({
+				scheme_id: dataMuk?.occupation.scheme_id,
+				occupation_name: dataMuk?.occupation.name,
+				...dataMuk,
+			});
+		}
+	}, [dataMuk]);
 
 	return (
 		<div className="min-h-screen bg-[#F7FAFC] flex">
@@ -75,7 +86,7 @@ const TambahMUK: React.FC = () => {
 					</div>
 
 					{/* Card container mirip contoh KelolaMUK */}
-					<form onSubmit={handleSubmit(onSubmit)}>
+					<form>
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6 space-y-6">
 							{/* Header */}
 							<div>
@@ -115,8 +126,9 @@ const TambahMUK: React.FC = () => {
 							<FormMuk
 								schemes={schemes}
 								form={form}
-								submitting={submitting}
-								id_assessment={idAssessment ?? ""}
+								submitting={false}
+								disabled={true}
+								id_assessment={id_assessment ?? ""}
 							/>
 						</div>
 					</form>
@@ -126,4 +138,4 @@ const TambahMUK: React.FC = () => {
 	);
 };
 
-export default TambahMUK;
+export default EditMUK;

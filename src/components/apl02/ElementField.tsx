@@ -13,6 +13,7 @@ export default function ElementField({
 	elementIndex,
 	useForm,
 	removeElement,
+	disabled = false,
 }: {
 	elementFields: FieldArrayWithId<
 		MukTypeInput,
@@ -26,6 +27,7 @@ export default function ElementField({
 		register: UseFormRegister<MukTypeInput>;
 	};
 	removeElement: UseFieldArrayRemove;
+	disabled?: boolean;
 }) {
 	const { control, register } = useForm;
 	const elementField = elementFields[elementIndex];
@@ -58,6 +60,7 @@ export default function ElementField({
 					type="button"
 					onClick={() => removeElement(elementIndex)}
 					className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+					disabled={disabled}
 				>
 					Hapus Elemen
 				</button>
@@ -72,6 +75,7 @@ export default function ElementField({
 						)}
 						style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 						className="w-full px-3 py-2 border rounded-md border-gray-300"
+						disabled={disabled}
 					/>
 				</label>
 			</div>
@@ -90,6 +94,7 @@ export default function ElementField({
 								)}
 								style={{ width: "100%", padding: "0.5em", marginTop: "0.25em" }}
 								className="w-full px-3 py-2 border rounded-md border-gray-300"
+								disabled={disabled}
 							/>
 							<button
 								type="button"
@@ -100,6 +105,7 @@ export default function ElementField({
 								}}
 								className="px-3 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
 								onClick={() => removeItem(itemIndex)}
+								disabled={disabled}
 							>
 								Hapus Item
 							</button>
@@ -113,6 +119,7 @@ export default function ElementField({
 					type="button"
 					onClick={() => appendItem({ id: "", description: "" })}
 					className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
+					disabled={disabled}
 				>
 					Tambah Item
 				</button>

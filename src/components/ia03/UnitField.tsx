@@ -19,6 +19,7 @@ export default function UnitField({
 	groupIndex,
 	useForm,
 	removeUnit,
+	disabled = false,
 }: {
 	unitFields: FieldArrayWithId<
 		MukTypeInput,
@@ -32,6 +33,7 @@ export default function UnitField({
 		register: UseFormRegister<MukTypeInput>;
 	};
 	removeUnit: UseFieldArrayRemove;
+	disabled?: boolean;
 }) {
 	const { register } = useForm;
 	const field = unitFields[unitIndex];
@@ -69,6 +71,7 @@ export default function UnitField({
 							type="button"
 							onClick={() => removeUnit(unitIndex)}
 							className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+							disabled={disabled}
 						>
 							Hapus Unit
 						</button>
@@ -89,6 +92,7 @@ export default function UnitField({
 												marginTop: "0.25em",
 											}}
 											className="w-full px-3 py-2 border rounded-md border-gray-300"
+											disabled={disabled}
 										/>
 									</label>
 								</div>
@@ -105,6 +109,7 @@ export default function UnitField({
 												marginTop: "0.25em",
 											}}
 											className="w-full px-3 py-2 border rounded-md border-gray-300"
+											disabled={disabled}
 										/>
 									</label>
 								</div>
