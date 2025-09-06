@@ -144,6 +144,7 @@ export default function DataSertifikasi() {
 
 	useEffect(() => {
 		if (approveData == undefined) return;
+		console.log(approveData);
 		setFilterApproveData(
 			approveData.find((data: any) => data.result.assessor_id == id_asesor)
 		);
@@ -151,9 +152,9 @@ export default function DataSertifikasi() {
 	}, [approveData]);
 
 	useEffect(() => {
-		console.log(filterApproveData);
-		if (filterApproveData && filterApproveData.length > 0) {
-			const approved = filterApproveData.some((item: any) => item.approved);
+		// console.log(filterApproveData);
+		if (filterApproveData) {
+			const approved = filterApproveData.approved;
 			setModalStep(approved ? 3 : 1);
 		}
 	}, [filterApproveData]);
