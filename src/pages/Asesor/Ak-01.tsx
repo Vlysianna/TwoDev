@@ -9,6 +9,7 @@ import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
 import type { ResultAK01 } from "@/model/ak01-model";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
+import NavbarAsesor from "@/components/NavAsesor";
 
 export default function CekAk01() {
   const { id_assessment, id_result, id_asesi, id_asesor } =
@@ -113,7 +114,7 @@ export default function CekAk01() {
         setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
       }
     } catch (error) {
-      console.log("Error fetching unit competencies:", error);
+      console.log("Error Generating QR Code:", error);
     }
   };
 
@@ -168,7 +169,7 @@ export default function CekAk01() {
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto">
         <div className="bg-white rounded-lg shadow-sm mb-8">
-          <NavbarAsesi
+          <NavbarAsesor
             title="Persetujuan Asesmen dan Kerahasiaan"
             icon={
               <Link
