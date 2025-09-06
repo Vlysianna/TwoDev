@@ -81,7 +81,7 @@ export default function Ak01() {
             rawData.data.ak01_header.rows.flatMap((row: any) => row.evidence)
           );
           setSelectedTUK(
-            rawData.data.locations[response.data.data.locations.length - 1] ||
+            rawData.data.locations[rawData.data.locations.length - 1] ||
               ""
           );
         }
