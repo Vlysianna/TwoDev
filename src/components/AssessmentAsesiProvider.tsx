@@ -158,6 +158,15 @@ export default function AssessmentAsesiProvider({
 			),
 		},
 		{
+			value: routes.asesi.assessment.apl02(
+				id_assessment ?? "",
+				id_asesor ?? ""
+			),
+			label: "APL 02",
+			disabled: false,
+			to: routes.asesi.assessment.apl02(id_assessment ?? "", id_asesor ?? ""),
+		},
+		{
 			value: routes.asesi.assessment.ak04(id_assessment ?? "", id_asesor ?? ""),
 			label: "AK 04",
 			disabled: false,
