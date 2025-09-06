@@ -105,11 +105,21 @@ export default function DataSertifikasi() {
 			formData.append("assessee_id", String(asesiId));
 			formData.append("assessment_id", String(id_assessment));
 
-			Object.entries(data).forEach(([key, value]) => {
-				if (value) {
-					formData.append(key, value);
-				}
-			});
+			if (data.school_report_card) {
+				formData.append("school_report_card", data.school_report_card);
+			}
+			if (data.field_work_practice_certificate) {
+				formData.append("field_work_practice_certificate", data.field_work_practice_certificate);
+			}
+			if (data.student_card) {
+				formData.append("student_card", data.student_card);
+			}
+			if (data.family_card) {
+				formData.append("family_card", data.family_card);
+			}
+			if (data.id_card) {
+				formData.append("id_card", data.id_card);
+			}
 
 			await api.post(
 				`/assessments/apl-01/create-certificate-docs`,
