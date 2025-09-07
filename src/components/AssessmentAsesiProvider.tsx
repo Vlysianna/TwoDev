@@ -103,13 +103,13 @@ export default function AssessmentAsesiProvider({
 	}, [id_assessment, id_asesor]);
 
 	useEffect(() => {
-		console.log(approveData);
-		if (approveData == undefined) return;
+		// console.log(approveData);
+		if (approveData == undefined || !result) return;
 		setFilterApproveData(
-			approveData.find((data) => data.result.assessor_id == id_asesor)
+			approveData.find((data) => data.result.result_id == result?.id)
 		);
 		setLoading(false);
-	}, [approveData]);
+	}, [approveData, result]);
 
 	useEffect(() => {
 		if (!id_assessment || !id_asesor) {
