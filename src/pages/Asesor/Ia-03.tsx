@@ -1,9 +1,12 @@
 import { ChevronLeft, Clock, AlertCircle, CheckCircle, Monitor, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 import NavbarAsesor from '@/components/NavAsesor';
+import api from "@/helper/axios";
+import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
+import type { GroupIA03, ResultIA03, QuestionIA03 } from "@/model/ia03-model";
 
 interface Question {
   id: number;
@@ -14,12 +17,64 @@ interface Question {
 
 export default function Ia03() {
     const { user } = useAuth();
+    const { id_result, id_assessment, id_asesi, id_asesor } = useAssessmentParams();
+    
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [questions, setQuestions] = useState<Question[]>([
-      { id: 1, text: '', pencapaian: '', tanggapan: '' },
-    ]);
+    const [loading, setLoading] = useState(false);
+    const [groups, setGroups] = useState<GroupIA03[]>([]);
+    const [selectedGroup, setSelectedGroup] = useState(0);
+    const [assesseeQrValue, setAssesseeQrValue] = useState("");
+    const [assessorQrValue, setAssessorQrValue] = useState("");
+    
+    const [questions, setQuestions] = useState<Question[]>([]);
 
+    const [result, setResult] = useState<ResultIA03>({
+        id: 0,
+        assessment: {
+            id: 0,
+            code: "N/A",
+            occupation: {
+                id: 0,
+                name: "N/A",
+                scheme: {
+                    id: 0,
+                    code: "N/A",
+                    name: "N/A",
+                    created_at: "0000-00-00T00:00:00.000Z",
+                    updated_at: "0000-00-00T00:00:00.000Z",
+                },
+                created_at: "0000-00-00T00:00:00.000Z",
+                updated_at: "0000-00-00T00:00:00.000Z",
+            },
+            created_at: "0000-00-00T00:00:00.000Z",
+            updated_at: "0000-00-00T00:00:00.000Z",
+        },
+        assessee: {
+            id: 0,
+            name: "N/A",
+            email: "N/A",
+        },
+        assessor: {
+            id: 0,
+            name: "N/A",
+            email: "N/A",
+            no_reg_met: "N/A",
+        },
+        tuk: "N/A",
+        is_competent: false,
+        created_at: "0000-00-00T00:00:00.000Z",
+        ia03_header: {
+            id: 0,
+            result_id: 0,
+            approved_assessee: false,
+            approved_assessor: false,
+            created_at: "0000-00-00T00:00:00.000Z",
+            updated_at: "0000-00-00T00:00:00.000Z",
+        },
+    });
+
+    // Static data
     const header = {
         asesi: "Ananda Keizha Oktavian",
         asesor: "Eva Yeprilianti, S.Kom",
@@ -40,90 +95,285 @@ export default function Ia03() {
         "Tanggapan asesi ditulis pada kolom tanggapan."
     ];
 
-    const tabs = [
-        { id: 'all', label: 'All unit ( 8 )', active: true },
-        { id: 'k1', label: 'K.Pekerjaan 1', active: false },
-        { id: 'k2', label: 'K.Pekerjaan 2', active: false },
-        { id: 'k3', label: 'K.Pekerjaan 3', active: false },
-    ];
+    // Generate tabs from groups
+    const tabs = groups.length > 0 
+        ? groups.map((group, index) => ({
+            id: group.id.toString(),
+            label: `${group.name} (${group.units.length} unit)`,
+            active: index === selectedGroup
+        }))
+        : [];
 
-    const unitKompetensi = [
-        {
-            id: 1,
-            title: "Menggunakan Struktur Data",
-            code: "J.620100.004.02",
-            status: "finished"
-        },
-        {
-            id: 2,
-            title: "Menggunakan Spesifikasi Program",
-            code: "J.620100.009.01",
-            status: null
-        },
-        {
-            id: 3,
-            title: "Menerapkan Perintah Eksekusi Bahasa Pemrograman Berbasis Teks, Grafik, dan Multimedia",
-            code: "J.620100.010.01",
-            status: null
-        },
-        {
-            id: 4,
-            title: "Menulis Kode Dengan Prinsip Sesuai Guidelines dan Best Practices",
-            code: "J.620100.016.01",
-            status: null
-        },
-        {
-            id: 5,
-            title: "Mengimplementasikan Pemrograman Terstruktur",
-            code: "J.620100.026.02",
-            status: null
-        },
-        {
-            id: 6,
-            title: "Membuat Dokumen Kode Program",
-            code: "J.620100.025.02",
-            status: null
-        },
-        {
-            id: 7,
-            title: "Melakukan Debugging",
-            code: "J.620100.025.02",
-            status: null
-        },
-        {
-            id: 8,
-            title: "Melaksanakan Pengujian Unit Program",
-            code: "J.620100.053.02",
-            status: null
+    // Generate unit kompetensi from groups
+    const unitKompetensi = groups.length > 0 && selectedGroup < groups.length 
+        ? groups[selectedGroup].units.map((unit, index) => ({
+            id: unit.id,
+            title: unit.title,
+            code: unit.unit_code,
+            status: index === 0 ? "finished" : null
+        }))
+        : [];
+
+    // Effect untuk fetch data saat komponen dimount
+    useEffect(() => {
+        console.log('Component mounted, fetching data...');
+        console.log('id_result:', id_result, 'id_assessment:', id_assessment);
+        
+        if (id_result && id_assessment) {
+            fetchResult(id_result);
+            fetchUnits(id_result); // PERBAIKAN: Ganti fetchGroups dengan fetchUnits
+        } else {
+            console.log('Missing required IDs');
         }
-    ];
+    }, [id_result, id_assessment]);
 
-    // Add new question
+    // Fetch Result IA03 (data utama assessment)
+    const fetchResult = async (id_result: string) => {
+        try {
+            setLoading(true);
+            const response = await api.get(`/assessments/ia-03/result/${id_result}`);
+            if (response.data.success) {
+                setResult(response.data.data);
+                
+                // Set QR values jika sudah approved
+                if (response.data.data.ia03_header.approved_assessee) {
+                    setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+                }
+                
+                if (response.data.data.ia03_header.approved_assessor) {
+                    setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+                }
+            }
+        } catch (error: any) {
+            console.log("Error fetching IA03 result:", error);
+            setError("Gagal memuat data hasil asesmen");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // PERBAIKAN: Ganti fetchGroups dengan fetchUnits
+    const fetchUnits = async (id_result: string) => {
+        try {
+            setLoading(true);
+            const response = await api.get(`/assessments/ia-03/units/${id_result}`);
+            console.log('Units API response:', response.data); // DEBUG
+            
+            if (response.data.success) {
+                setGroups(response.data.data);
+                console.log('Groups data set:', response.data.data); // DEBUG
+                
+                // Set pertanyaan dari group pertama jika ada
+                if (response.data.data.length > 0) {
+                    setSelectedGroup(0);
+                    loadQuestionsForGroup(response.data.data[0]);
+                }
+            }
+        } catch (error: any) {
+            console.log("Error fetching IA03 units:", error);
+            setError("Gagal memuat data unit kompetensi");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // PERBAIKAN: Fungsi untuk load questions berdasarkan group
+    const loadQuestionsForGroup = (group: GroupIA03) => {
+        console.log('Loading questions for group:', group); // DEBUG
+        
+        if (group.questions && group.questions.length > 0) {
+            const groupQuestions = group.questions.map((q: QuestionIA03) => ({
+                id: q.id,
+                text: q.question, // PERBAIKAN: Ambil dari q.question
+                pencapaian: q.result?.approved ? 'kompeten' : (q.result ? 'belum' : ''), // PERBAIKAN: Logika approved
+                tanggapan: q.result?.answer || '' // PERBAIKAN: Ambil dari q.result.answer
+            }));
+            setQuestions(groupQuestions);
+            console.log('Questions loaded:', groupQuestions); // DEBUG
+        } else {
+            // Jika tidak ada questions dari API, set default
+            setQuestions([{ id: 1, text: '', pencapaian: '', tanggapan: '' }]);
+            console.log('No questions from API, setting default'); // DEBUG
+        }
+    };
+
+    // Simpan jawaban pertanyaan ke API
+    const saveQuestionAnswer = async (questionId: number, answer: string, approved: boolean) => {
+        try {
+            const payload = {
+                header_id: result.ia03_header.id,
+                question_id: questionId,
+                answer: answer,
+                approved: approved
+            };
+            
+            const response = await api.post(`/assessments/ia-03/question-result`, payload);
+            if (response.data.success) {
+                setSuccess("Jawaban berhasil disimpan");
+                return response.data.data;
+            }
+        } catch (error: any) {
+            console.log("Error saving question answer:", error);
+            setError("Gagal menyimpan jawaban");
+            return null;
+        }
+    };
+
+    // Update jawaban pertanyaan (jika sudah ada)
+    const updateQuestionAnswer = async (resultId: number, answer: string, approved: boolean) => {
+        try {
+            const payload = {
+                answer: answer,
+                approved: approved
+            };
+            
+            const response = await api.put(`/assessments/ia-03/question-result/${resultId}`, payload);
+            if (response.data.success) {
+                setSuccess("Jawaban berhasil diperbarui");
+                return response.data.data;
+            }
+        } catch (error: any) {
+            console.log("Error updating question answer:", error);
+            setError("Gagal memperbarui jawaban");
+            return null;
+        }
+    };
+
+    // Generate QR Code untuk Assessor
+    const handleGenerateQRCode = async () => {
+        try {
+            const response = await api.put(`/assessments/ia-03/result/assessor/${id_result}/approve`);
+            if (response.data.success) {
+                setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+                setSuccess("QR Code berhasil dibuat");
+                
+                // Refresh result untuk update approval status
+                if (id_result) {
+                    fetchResult(id_result);
+                }
+            }
+        } catch (error: any) {
+            console.log("Error generating QR code:", error);
+            setError("Gagal membuat QR Code");
+        }
+    };
+
+    // Approve hasil oleh Asesi
+    const approveByAssessee = async () => {
+        try {
+            const response = await api.put(`/assessments/ia-03/result/assessee/${id_result}/approve`);
+            if (response.data.success) {
+                setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+                setSuccess("Hasil berhasil disetujui asesi");
+                
+                // Refresh result untuk update approval status
+                if (id_result) {
+                    fetchResult(id_result);
+                }
+            }
+        } catch (error: any) {
+            console.log("Error approving by assessee:", error);
+            setError("Gagal menyetujui hasil");
+        }
+    };
+
+    // Approve hasil oleh Asesor
+    const approveByAssessor = async () => {
+        try {
+            const response = await api.put(`/assessments/ia-03/result/assessor/${id_result}/approve`);
+            if (response.data.success) {
+                setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+                setSuccess("Hasil berhasil disetujui asesor");
+                
+                // Refresh result untuk update approval status
+                if (id_result) {
+                    fetchResult(id_result);
+                }
+            }
+        } catch (error: any) {
+            console.log("Error approving by assessor:", error);
+            setError("Gagal menyetujui hasil");
+        }
+    };
+
+    // Simpan semua perubahan pertanyaan
+    const handleSaveAllQuestions = async () => {
+        try {
+            setLoading(true);
+            const promises = questions.map(async (question) => {
+                const approved = question.pencapaian === 'kompeten';
+                
+                // Cari apakah sudah ada result untuk pertanyaan ini
+                const existingResult = groups[selectedGroup]?.questions.find(
+                    q => q.id === question.id
+                )?.result;
+                
+                if (existingResult) {
+                    // Update existing result
+                    return updateQuestionAnswer(existingResult.id, question.tanggapan, approved);
+                } else {
+                    // Create new result
+                    return saveQuestionAnswer(question.id, question.tanggapan, approved);
+                }
+            });
+            
+            await Promise.all(promises);
+            setSuccess("Semua jawaban berhasil disimpan");
+            
+            // Refresh data
+            if (id_result) {
+                fetchUnits(id_result);
+            }
+        } catch (error: any) {
+            console.log("Error saving all questions:", error);
+            setError("Gagal menyimpan semua jawaban");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Question management functions
     const addQuestion = () => {
-      const newId = questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1;
-      setQuestions([...questions, { id: newId, text: '', pencapaian: '', tanggapan: '' }]);
+        const newId = questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1;
+        setQuestions([...questions, { id: newId, text: '', pencapaian: '', tanggapan: '' }]);
     };
 
-    // Remove question
     const removeQuestion = (id: number) => {
-      if (questions.length > 1) {
-        setQuestions(questions.filter(q => q.id !== id));
-      }
+        if (questions.length > 1) {
+            setQuestions(questions.filter(q => q.id !== id));
+        }
     };
 
-    // Update question text
     const updateQuestionText = (id: number, text: string) => {
-      setQuestions(questions.map(q => q.id === id ? { ...q, text } : q));
+        setQuestions(questions.map(q => q.id === id ? { ...q, text } : q));
     };
 
-    // Update pencapaian
     const updatePencapaian = (id: number, pencapaian: string) => {
-      setQuestions(questions.map(q => q.id === id ? { ...q, pencapaian } : q));
+        setQuestions(questions.map(q => q.id === id ? { ...q, pencapaian } : q));
     };
 
-    // Update tanggapan
     const updateTanggapan = (id: number, tanggapan: string) => {
-      setQuestions(questions.map(q => q.id === id ? { ...q, tanggapan } : q));
+        setQuestions(questions.map(q => q.id === id ? { ...q, tanggapan } : q));
+    };
+
+    // PERBAIKAN: Update handleTabClick
+    const handleTabClick = (index: number) => {
+        console.log('Tab clicked:', index);
+        setSelectedGroup(index);
+        
+        // Load questions untuk group yang dipilih
+        if (groups.length > 0 && groups[index]) {
+            loadQuestionsForGroup(groups[index]);
+        }
+    };
+
+    // Utility functions
+    const getAssesseeUrl = (id_asesi: number) => {
+        return `${window.location.origin}/assessee/assessment/${id_asesi}`;
+    };
+
+    const getAssessorUrl = (id_asesor: number) => {
+        return `${window.location.origin}/assessor/assessment/${id_asesor}`;
     };
 
     return (
@@ -176,8 +426,8 @@ export default function Ia03() {
 
                                     {/* Asesi & Asesor */}
                                     <div className="text-sm text-gray-500 mt-1">
-                                        Asesi: <span className="text-gray-800">{header.asesi}</span> &nbsp;|&nbsp;
-                                        Asesor: <span className="text-gray-800">{header.asesor}</span>
+                                        Asesi: <span className="text-gray-800">{result.assessee.name !== "N/A" ? result.assessee.name : header.asesi}</span> &nbsp;|&nbsp;
+                                        Asesor: <span className="text-gray-800">{result.assessor.name !== "N/A" ? result.assessor.name : header.asesor}</span>
                                     </div>
                                 </div>
 
@@ -186,16 +436,13 @@ export default function Ia03() {
                                     <div className="flex flex-col sm:items-end gap-1">
                                         {/* Skema + kode */}
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
-                                            <p className="text-sm text-gray-800 font-medium">{header.skema}</p>
+                                            <p className="text-sm text-gray-800 font-medium">
+                                                {result.assessment.occupation.name !== "N/A" ? result.assessment.occupation.name : header.skema}
+                                            </p>
                                             <p className="text-xs text-[#E77D35] bg-[#E77D3533] px-2 py-0.5 rounded w-fit">
-                                                {header.kodeSkema}
+                                                {result.assessment.code !== "N/A" ? result.assessment.code : header.kodeSkema}
                                             </p>
                                         </div>
-
-                                        {/* Tanggal */}
-                                        <p className="text-sm text-gray-500">
-                                            {header.tanggalMulai} | {header.waktuMulai} - {header.tanggalSelesai} | {header.waktuSelesai}
-                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -215,103 +462,220 @@ export default function Ia03() {
                     {/* Skenario Tugas Praktik Demonstrasi */}
                     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
                         {/* Tabs */}
-                        <div className="flex gap-2 mb-6 overflow-x-auto">
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer whitespace-nowrap ${tab.active
-                                        ? 'bg-[#E77D35] text-white'
-                                        : 'text-gray-600 hover:text-gray-800'
-                                        }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
+                        {loading ? (
+                            <div className="flex gap-2 mb-6">
+                                <div className="px-4 py-2 rounded-sm text-sm bg-gray-200 animate-pulse">Loading...</div>
+                            </div>
+                        ) : (
+                            <div className="flex gap-2 mb-6 overflow-x-auto">
+                                {tabs.map((tab, index) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => handleTabClick(index)}
+                                        className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer whitespace-nowrap ${tab.active
+                                            ? 'bg-[#E77D35] text-white'
+                                            : 'text-gray-600 hover:text-gray-800'
+                                            }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Unit Cards Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {unitKompetensi.map((unit, index) => (
-                                <div
-                                    key={unit.id}
-                                    className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
-                                >
-                                    <div className="flex items-center mb-3">
-                                        <div className="rounded-lg mr-3 flex-shrink-0">
-                                            <Monitor size={16} className="text-[#E77D35]" />
+                        {groups.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">
+                                {loading ? 'Memuat unit kompetensi...' : 'Tidak ada unit kompetensi'}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {unitKompetensi.map((unit, index) => (
+                                    <div
+                                        key={unit.id}
+                                        className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
+                                    >
+                                        <div className="flex items-center mb-3">
+                                            <div className="rounded-lg mr-3 flex-shrink-0">
+                                                <Monitor size={16} className="text-[#E77D35]" />
+                                            </div>
+                                            <h4 className="font-medium text-[#E77D35] text-sm">
+                                                Unit kompetensi {index + 1}
+                                            </h4>
                                         </div>
-                                        <h4 className="font-medium text-[#E77D35] text-sm">
-                                            Unit kompetensi {unit.id}
-                                        </h4>
+
+                                        <h5 className="font-medium text-gray-800 mb-2 text-sm leading-tight">
+                                            {unit.title}
+                                        </h5>
+
+                                        <p className="text-xs text-gray-500 mb-4">{unit.code}</p>
+
                                     </div>
-
-                                    <h5 className="font-medium text-gray-800 mb-2 text-sm leading-tight">
-                                        {unit.title}
-                                    </h5>
-
-                                    <p className="text-xs text-gray-500 mb-4">{unit.code}</p>
-
-                                    <div className="flex items-center justify-between">
-                                        {unit.status === "finished" ? (
-                                            <span className="px-3 py-1 bg-[#E77D3533] text-[#E77D35] text-xs rounded">
-                                                Finished
-                                            </span>
-                                        ) : (
-                                            <div></div>
-                                        )}
-
-                                        <Link
-                                            to={"#"}
-                                            className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
-                                        >
-                                            Lihat detail
-                                            <ChevronRight size={14} className="ml-1" />
-                                        </Link>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Pertanyaan */}
                     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                             <h3 className="text-lg font-medium text-gray-800">Pertanyaan Observasi</h3>
-                            <button 
-                                onClick={addQuestion}
-                                className="flex items-center gap-1 bg-[#E77D35] hover:bg-orange-600 text-white px-3 py-1.5 rounded text-sm hover:cursor-pointer transition-colors"
-                            >
-                                <Plus size={16} />
-                                Tambah Pertanyaan
-                            </button>
+                            <div className="flex gap-2 w-full sm:w-auto">
+                                <button 
+                                    onClick={handleSaveAllQuestions}
+                                    disabled={loading}
+                                    className="flex items-center justify-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
+                                >
+                                    <CheckCircle size={16} />
+                                    {loading ? 'Menyimpan...' : 'Simpan Semua'}
+                                </button>
+                            </div>
                         </div>
                         
-                        <div className="border border-gray-200 mb-4 rounded-sm overflow-x-auto">
-                            <table className="w-full min-w-[600px]">
-                                <thead>
-                                    <tr className="border-b">
-                                        <th className="w-[5%] text-center text-gray-700 font-medium py-2 px-4">No</th>
-                                        <th className="w-[40%] text-center text-gray-700 font-medium py-2 px-4">Pertanyaan</th>
-                                        <th className="w-[30%] text-center text-gray-700 font-medium py-2 px-4">Pencapaian</th>
-                                        <th className="w-[25%] text-center text-gray-700 font-medium py-2 px-4">Tanggapan</th>
-                                        <th className="w-[5%] text-center text-gray-700 font-medium py-2 px-4"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                        {/* PERBAIKAN: Tampilkan pesan jika tidak ada pertanyaan */}
+                        {questions.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">
+                                Tidak ada pertanyaan untuk group ini
+                            </div>
+                        ) : (
+                            <div className="border border-gray-200 mb-4 rounded-sm overflow-x-auto">
+                                {/* Desktop View (Table) */}
+                                <div className="hidden md:block">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="border-b">
+                                                <th className="w-[5%] text-center text-gray-700 font-medium py-2 px-4">No</th>
+                                                <th className="w-[40%] text-center text-gray-700 font-medium py-2 px-4">Pertanyaan</th>
+                                                <th className="w-[30%] text-center text-gray-700 font-medium py-2 px-4">Pencapaian</th>
+                                                <th className="w-[25%] text-center text-gray-700 font-medium py-2 px-4">Tanggapan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {questions.map((question, index) => (
+                                                <tr key={question.id} className="border-b">
+                                                    <td className="w-[5%] py-3 px-4 text-center">{index + 1}</td>
+                                                    <td className="w-[40%] py-3 px-4">
+                                                        <p className="text-sm text-gray-800">
+                                                            {question.text || "Tidak ada pertanyaan"}
+                                                        </p>
+                                                    </td>
+                                                    <td className="w-[30%] py-3 px-4">
+                                                        <div className="flex justify-center items-center gap-4">
+                                                            {/* Kompeten */}
+                                                            <label
+                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+                                                                    ${question.pencapaian === "kompeten" ? "bg-[#E77D3533]" : ""}`}
+                                                            >
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`pencapaian-${question.id}`}
+                                                                    value="kompeten"
+                                                                    checked={question.pencapaian === "kompeten"}
+                                                                    onChange={(e) => updatePencapaian(question.id, e.target.value)}
+                                                                    className="hidden"
+                                                                />
+                                                                <span
+                                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                                                        ${question.pencapaian === "kompeten"
+                                                                            ? "bg-[#E77D35] border-[#E77D35]"
+                                                                            : "border-[#E77D35]"
+                                                                        }`}
+                                                                >
+                                                                    {question.pencapaian === "kompeten" && (
+                                                                        <svg
+                                                                            className="w-3 h-3 text-white"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            strokeWidth="3"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path d="M5 13l4 4L19 7" />
+                                                                        </svg>
+                                                                    )}
+                                                                </span>
+                                                                <span
+                                                                    className={
+                                                                        question.pencapaian === "kompeten" ? "text-gray-900" : "text-gray-500"
+                                                                    }
+                                                                >
+                                                                    Kompeten
+                                                                </span>
+                                                            </label>
+
+                                                            {/* Belum Kompeten */}
+                                                            <label
+                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
+                                                                    ${question.pencapaian === "belum" ? "bg-[#E77D3533]" : ""}`}
+                                                            >
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`pencapaian-${question.id}`}
+                                                                    value="belum"
+                                                                    checked={question.pencapaian === "belum"}
+                                                                    onChange={(e) => updatePencapaian(question.id, e.target.value)}
+                                                                    className="hidden"
+                                                                />
+                                                                <span
+                                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                                                                        ${question.pencapaian === "belum"
+                                                                            ? "bg-[#E77D35] border-[#E77D35]"
+                                                                            : "border-[#E77D35]"
+                                                                        }`}
+                                                                >
+                                                                    {question.pencapaian === "belum" && (
+                                                                        <svg
+                                                                            className="w-3 h-3 text-white"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            strokeWidth="3"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path d="M5 13l4 4L19 7" />
+                                                                        </svg>
+                                                                    )}
+                                                                </span>
+                                                                <span
+                                                                    className={
+                                                                        question.pencapaian === "belum" ? "text-gray-900" : "text-gray-500"
+                                                                    }
+                                                                >
+                                                                    Belum Kompeten
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                    <td className="w-[25%] py-3 px-4">
+                                                        <textarea
+                                                            value={question.tanggapan}
+                                                            onChange={(e) => updateTanggapan(question.id, e.target.value)}
+                                                            placeholder="Tanggapan"
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                {/* Mobile View (Cards) */}
+                                <div className="md:hidden">
                                     {questions.map((question, index) => (
-                                        <tr key={question.id} className="border-b">
-                                            <td className="w-[5%] py-3 px-4 text-center">{index + 1}</td>
-                                            <td className="w-[40%] py-3 px-4">
-                                                <input
-                                                    type="text"
-                                                    value={question.text}
-                                                    onChange={(e) => updateQuestionText(question.id, e.target.value)}
-                                                    placeholder="Masukkan pertanyaan"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
-                                                />
-                                            </td>
-                                            <td className="w-[30%] py-3 px-4">
-                                                <div className="flex justify-center items-center gap-4">
+                                        <div key={question.id} className="border-b p-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="font-medium text-gray-700">No. {index + 1}</div>
+                                            </div>
+                                            
+                                            <div className="mb-3">
+                                                <div className="text-sm text-gray-600 mb-1">Pertanyaan:</div>
+                                                <p className="text-gray-800">
+                                                    {question.text || "Tidak ada pertanyaan"}
+                                                </p>
+                                            </div>
+                                            
+                                            <div className="mb-3">
+                                                <div className="text-sm text-gray-600 mb-2">Pencapaian:</div>
+                                                <div className="flex gap-4">
                                                     {/* Kompeten */}
                                                     <label
                                                         className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
@@ -319,7 +683,7 @@ export default function Ia03() {
                                                     >
                                                         <input
                                                             type="radio"
-                                                            name={`pencapaian-${question.id}`}
+                                                            name={`pencapaian-mobile-${question.id}`}
                                                             value="kompeten"
                                                             checked={question.pencapaian === "kompeten"}
                                                             onChange={(e) => updatePencapaian(question.id, e.target.value)}
@@ -360,7 +724,7 @@ export default function Ia03() {
                                                     >
                                                         <input
                                                             type="radio"
-                                                            name={`pencapaian-${question.id}`}
+                                                            name={`pencapaian-mobile-${question.id}`}
                                                             value="belum"
                                                             checked={question.pencapaian === "belum"}
                                                             onChange={(e) => updatePencapaian(question.id, e.target.value)}
@@ -390,124 +754,130 @@ export default function Ia03() {
                                                                 question.pencapaian === "belum" ? "text-gray-900" : "text-gray-500"
                                                             }
                                                         >
-                                                            Belum Kompeten
+                                                            Belum
                                                         </span>
                                                     </label>
                                                 </div>
-                                            </td>
-                                            <td className="w-[25%] py-3 px-4">
+                                            </div>
+                                            
+                                            <div>
+                                                <div className="text-sm text-gray-600 mb-1">Tanggapan:</div>
                                                 <textarea
                                                     value={question.tanggapan}
                                                     onChange={(e) => updateTanggapan(question.id, e.target.value)}
                                                     placeholder="Tanggapan"
                                                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                                                    rows={3}
                                                 />
-                                            </td>
-                                            <td className="w-[5%] py-3 px-4 text-center">
-                                                {questions.length > 1 && (
-                                                    <button 
-                                                        onClick={() => removeQuestion(question.id)}
-                                                        className="text-red-500 hover:text-red-700 transition hover:cursor-pointer"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                )}
-                                            </td>
-                                        </tr>
+                                            </div>
+                                        </div>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Umpan Balik untuk asesi sigma */}
+                    {/* Umpan Balik untuk asesi */}
                     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 items-stretch">
-                            {/* Kolom 1 */}
-                            <div className="lg:col-span-3 flex flex-col h-full">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Umpan Balik Untuk Asesi
-                                </label>
-                                <textarea
-                                    name="umpanBalik"
-                                    placeholder='Catatan'
-                                    className="flex-1 w-full min-h-[100px] px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                />
-                            </div>
-
-                            {/* Kolom 2 */}
-                            <div className="lg:col-span-2 space-y-4 h-full flex flex-col">
+                        <div className="flex flex-col lg:flex-row gap-8">
+                            {/* Kolom Form Input */}
+                            <div className="flex-1 space-y-6">
                                 {/* Asesi */}
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Asesi
                                     </label>
-                                    <div className="flex flex-col gap-3">
+                                    <div className="space-y-3">
                                         <input
                                             type="text"
+                                            value={result.assessee.name !== "N/A" ? result.assessee.name : ""}
+                                            readOnly
                                             placeholder="Nama Asesi"
-                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-4 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                         <input
                                             type="date"
-                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            value={
+                                                result.ia03_header?.updated_at && 
+                                                !isNaN(new Date(result.ia03_header.updated_at).getTime())
+                                                    ? new Date(result.ia03_header.updated_at).toISOString().split('T')[0]
+                                                    : ""
+                                            }
+                                            className="w-full px-4 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
                                 </div>
 
                                 {/* Asesor */}
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Asesor
                                     </label>
-                                    <div className="flex flex-col gap-3">
+                                    <div className="space-y-3">
                                         <input
                                             type="text"
+                                            value={result.assessor.name !== "N/A" ? result.assessor.name : ""}
+                                            readOnly
                                             placeholder="Nama Asesor"
-                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-4 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                         <input
                                             type="text"
+                                            value={result.assessor.no_reg_met !== "N/A" ? result.assessor.no_reg_met : ""}
+                                            readOnly
                                             placeholder="Kode"
-                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-4 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                         <input
                                             type="date"
-                                            placeholder="Tanggal"
-                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            value={
+                                                result.ia03_header?.updated_at && 
+                                                !isNaN(new Date(result.ia03_header.updated_at).getTime())
+                                                    ? new Date(result.ia03_header.updated_at).toISOString().split('T')[0]
+                                                    : ""
+                                            }
+                                            className="w-full px-4 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Kolom 3 */}
-                            <div className="lg:col-span-1 h-full flex flex-col space-y-4">
-                                <div className="border border-gray-200 rounded-lg w-full h-30 flex items-center justify-center">
-                                    <img
-                                        src="/img/cthbarkod.svg"
-                                        alt="QR Code"
-                                        className="w-20 h-20 bject-contain"
-                                    />
+                            {/* Kolom QR Code */}
+                            <div className="lg:w-1/3 flex flex-col items-center space-y-4">
+                                {/* QR Code Asesi */}
+                                <div className="border border-gray-200 rounded-lg w-full h-32 flex items-center justify-center">
+                                    {assesseeQrValue ? (
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(assesseeQrValue)}`}
+                                            alt="QR Code Asesi"
+                                            className="w-20 h-20 object-contain"
+                                        />
+                                    ) : (
+                                        <span className="text-gray-400 text-sm">QR Asesi</span>
+                                    )}
                                 </div>
-                                <div className="border border-gray-200 rounded-lg w-full h-30 flex items-center justify-center">
-                                    {/* <img
-                                        src="/img/cthbarkod.svg"
-                                        alt="QR Code"
-                                        className="w-32 h-32 object-contain"
-                                    /> */}
+                                
+                                {/* QR Code Asesor */}
+                                <div className="border border-gray-200 rounded-lg w-full h-32 flex items-center justify-center">
+                                    {assessorQrValue ? (
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(assessorQrValue)}`}
+                                            alt="QR Code Asesor"
+                                            className="w-20 h-20 object-contain"
+                                        />
+                                    ) : (
+                                        <span className="text-gray-400 text-sm">QR Asesor</span>
+                                    )}
                                 </div>
-                                <button className="bg-[#E77D35] hover:bg-orange-600 text-white font-medium rounded py-2 w-full sm:w-auto">
-                                    Generate QR
+                                
+                                <button 
+                                    onClick={handleGenerateQRCode}
+                                    disabled={loading}
+                                    className="bg-[#E77D35] hover:bg-orange-600 text-white font-medium rounded py-2 px-6 w-full disabled:opacity-50 transition-colors"
+                                >
+                                    {loading ? 'Generating...' : 'Generate QR'}
                                 </button>
                             </div>
-                        </div>
-
-
-                        {/* Tombol */}
-                        <div className="flex justify-center sm:justify-end mt-6 border-t border-gray-200 pt-4">
-                            <button className="bg-[#E77D35] hover:bg-orange-600 text-white font-medium rounded px-6 sm:px-30 py-2 w-full sm:w-auto">
-                                Lanjut
-                            </button>
                         </div>
                     </div>
                 </div>
