@@ -1,102 +1,118 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Monitor, ChevronLeft, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import paths from '@/routes/paths';
 import NavbarAsesor from '@/components/NavAsesor';
+import api from '@/helper/axios';
+import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
+import { motion } from 'framer-motion';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+} from '@/components/ui/command';
+import { cn } from '@/lib/utils';
+
+type AssessmentElement = {
+    id: number;
+    uc_id: number;
+    title: string;
+    details: {
+        id: number;
+        element_id: number;
+        description: string;
+    }[];
+    result?: {
+        is_competent: boolean;
+        evidences: {
+            evidence: string;
+        }[];
+    };
+};
+
+type EvidenceOptionType =
+    | "Fotocopy Ijazah Terakhir"
+    | "Pas foto 3x4 latar belakang merah"
+    | "Kartu Tanda Penduduk ( KTP ) / KK"
+    | "Raport semester 1 s.d. 5";
+
+const evidenceOptions: EvidenceOptionType[] = [
+    "Fotocopy Ijazah Terakhir",
+    "Pas foto 3x4 latar belakang merah",
+    "Kartu Tanda Penduduk ( KTP ) / KK",
+    "Raport semester 1 s.d. 5",
+];
 
 export default function CekApl02Detail() {
+    const { id_unit } = useParams();
+    const { id_assessment, id_result, id_asesi } = useAssessmentParams();
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterKompeten, setFilterKompeten] = useState<'all' | 'kompeten' | 'belum'>("kompeten"); // Ini aku defaultin jadi kompeten smua y
-    const [globalProof, setGlobalProof] = useState("dokumen1"); // Ini aku default in dokumen 1 smua y
-    
-    const assessmentData = [
-        {
-            id: 1,
-            elemen: "Menggunakan metode pengembangan program",
-            criteria: [
-                { id: "1.1", text: "Mendefinisikan Metode pengembangan aplikasi (software development)" },
-                { id: "1.2", text: "Memilih Metode pengembangan aplikasi (software development) sesuai kebutuhan" }
-            ]
-        },
-        {
-            id: 2,
-            elemen: "Menggunakan diagram program dan deskripsi program",
-            criteria: [
-                { id: "2.1", text: "Mendefinisikan Diagram program dengan metodologi pengembangan sistem" },
-                { id: "2.2", text: "Menggunakan Metode pemodelan, diagram objek dan diagram komponen digunakan pada implementasi program sesuai dengan spesifikasi" }
-            ]
-        },
-        {
-            id: 3,
-            elemen: "Menerapkan hasil pemodelan ke dalam pengembangan program pengembangan program",
-            criteria: [
-                { id: "3.1", text: "Memilih Hasil pemodelan yang mendukung kemampuan metodologi sesuai spesifikasi." },
-                { id: "3.2", text: "Memilih Hasil pemrograman (Integrated Development Environment-IDE) yang mendukung kemampuan metodologi bahasa pemrograman sesuai spesifikasi" }
-            ]
-        }
-    ];
+    const [filterKompeten, setFilterKompeten] = useState("all");
+    const [elements, setElements] = useState<AssessmentElement[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const [pencapaian, setPencapaian] = useState<{ [key: number]: string }>(
-        Object.fromEntries(assessmentData.map(item => [item.id, "kompeten"])) // Ini aku defaultin jadi kompeten smua y
-    );
+    useEffect(() => {
+        fetchElements();
+    }, []);
 
-    const [selectedProof, setSelectedProof] = useState<{ [key: number]: string }>(
-        Object.fromEntries(assessmentData.map(item => [item.id, "dokumen1"]))  // Ini aku default in dokumen 1 smua y
-    );
-    
-    const handleProofSelection = (criteriaId: number, value: string) => {
-        setSelectedProof(prev => ({
-            ...prev,
-            [criteriaId]: value
-        }));
-    };
+    const fetchElements = async () => {
+        setLoading(true);
+        try {
+            const response = await api.get(
+                `/assessments/apl-02/units/${id_result}/elements/${id_unit}`
+            );
 
-    const handlePencapaianChange = (id: number, value: string) => {
-        setPencapaian(prev => ({
-            ...prev,
-            [id]: value
-        }));
-    };
-
-
-    const handleFilterChange = (value: 'all' | 'kompeten' | 'belum') => {
-        setFilterKompeten(value);
-
-        if (value === 'kompeten' || value === 'belum') {
-            const newPencapaian: { [key: number]: string } = {};
-            assessmentData.forEach(item => {
-                newPencapaian[item.id] = value;
-            });
-            setPencapaian(newPencapaian);
+            if (response.data.success) {
+                setElements(response.data.data);
+            }
+        } catch (error: any) {
+            console.log("Error fetching elements:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-
-    const handleGlobalProofChange = (value: string) => {
-        setGlobalProof(value);
-
-        const newProof: { [key: number]: string } = {};
-        assessmentData.forEach(item => {
-            newProof[item.id] = value;
-        });
-
-        setSelectedProof(newProof);
-    };
-
-    const filteredData = assessmentData.filter(item => {
-        const matchesSearch = item.elemen.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.criteria.some(criteria => criteria.text.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredData = elements.filter((item) => {
+        const matchesSearch =
+            item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.details.some((detail) =>
+                detail.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
         return matchesSearch;
     });
+
+    // Fungsi untuk mendapatkan status pencapaian
+    const getPencapaianStatus = (element: AssessmentElement) => {
+        if (!element.result) return null;
+        return element.result.is_competent ? "kompeten" : "belum";
+    };
+
+    // Fungsi untuk mendapatkan bukti yang dipilih
+    const getSelectedProofs = (element: AssessmentElement) => {
+        if (!element.result || !element.result.evidences) return [];
+        return element.result.evidences.map(evidence => evidence.evidence);
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="mx-auto">
                 <div className="bg-white rounded-lg shadow-sm mb-8">
                     <NavbarAsesor
-                        title='Detail'
+                        title='Detail APL-02 (View Only)'
                         icon={
-                            <Link to={paths.asesor.assessment.cekApl02Pattern} className="text-gray-500 hover:text-gray-600">
+                            <Link to={
+                                paths.asesor.assessment.cekApl02(
+                                    id_assessment || '',
+                                    id_asesi || '')
+                            }
+                                className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -110,7 +126,7 @@ export default function CekApl02Detail() {
                             {/* Unit Kompetensi */}
                             <div className="flex items-center gap-2 text-[#00809D] flex-none">
                                 <Monitor size={20} />
-                                <span className="font-medium">Unit kompetensi 1</span>
+                                <span className="font-medium">Unit kompetensi</span>
                             </div>
 
                             {/* Search */}
@@ -128,28 +144,31 @@ export default function CekApl02Detail() {
                                 />
                             </div>
 
-                            {/* Filter Kompeten */}
+                            {/* Filter Kompeten (Disabled) */}
                             <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">
                                 {[
                                     { value: "kompeten", label: "Semua Kompeten" },
-                                    { value: "belum", label: "Belum Kompeten" }
-                                ].map(opt => (
+                                    { value: "belum", label: "Semua Belum Kompeten" },
+                                ].map((opt) => (
                                     <label
                                         key={opt.value}
-                                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-        ${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""}`}
+                                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition ${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
+                                            }`}
                                     >
                                         <input
                                             type="radio"
                                             name="filter"
                                             value={opt.value}
                                             checked={filterKompeten === opt.value}
-                                            onChange={(e) => handleFilterChange(e.target.value as 'all' | 'kompeten' | 'belum')}
+                                            onChange={(e) => setFilterKompeten(e.target.value)}
                                             className="hidden"
+                                            disabled
                                         />
                                         <span
-                                            className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-          ${filterKompeten === opt.value ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+                                            className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${filterKompeten === opt.value
+                                                ? "bg-[#E77D35] border-[#E77D35]"
+                                                : "border-[#E77D35]"
+                                                }`}
                                         >
                                             {filterKompeten === opt.value && (
                                                 <svg
@@ -166,19 +185,25 @@ export default function CekApl02Detail() {
                                                 </svg>
                                             )}
                                         </span>
-                                        <span className={filterKompeten === opt.value ? "text-gray-900" : "text-gray-500"}>
+                                        <span
+                                            className={
+                                                filterKompeten === opt.value
+                                                    ? "text-gray-900"
+                                                    : "text-gray-500"
+                                            }
+                                        >
                                             {opt.label}
                                         </span>
                                     </label>
                                 ))}
                             </div>
 
-                            {/* Global Bukti Relevan */}
+                            {/* Global Bukti Relevan (Disabled) */}
                             <div className="flex items-center gap-2 flex-none w-full md:w-80">
                                 <select
-                                    className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500 hover:cursor-pointer"
-                                    value={globalProof}
-                                    onChange={(e) => handleGlobalProofChange(e.target.value)}
+                                    className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500 cursor-not-allowed"
+                                    value=""
+                                    disabled
                                 >
                                     <option value="">Bukti Relevan</option>
                                     <option value="dokumen1">Dokumen 1</option>
@@ -189,85 +214,78 @@ export default function CekApl02Detail() {
                         </div>
                     </div>
 
-                    {/* Table */}
-                    <div className="overflow-x-auto border border-gray-200 rounded-sm">
-                        <table className="w-full min-w-[900px] table-auto">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="p-3 sm:p-5 text-left text-sm font-medium text-gray-700 w-64">
-                                        Elemen
-                                    </th>
-                                    <th className="p-3 sm:p-5 text-left text-sm font-medium text-gray-700 w-64">
-                                        Kriteria Untuk Kerja
-                                    </th>
-                                    <th className="p-3 sm:p-5 text-center text-sm font-medium text-gray-700 w-40">
-                                        Pencapaian
-                                    </th>
-                                    <th className="p-3 sm:p-5 text-center text-sm font-medium text-gray-700 w-40">
-                                        Bukti yang relevan
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredData.map((item) => (
-                                    <React.Fragment key={item.id}>
-                                        {item.criteria.map((criteria, criteriaIndex) => (
-                                            <tr
-                                                key={criteria.id}
-                                                className={`${criteriaIndex === 0 ? "border-t border-gray-300" : ""}`}
-                                            >
-                                                {criteriaIndex === 0 && (
-                                                    <td
-                                                        className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-900 align-top"
-                                                        rowSpan={item.criteria.length}
-                                                    >
+                    {loading ? (
+                        <div className="text-center py-10">
+                            <p>Memuat data...</p>
+                        </div>
+                    ) : (
+                        /* Table */
+                        <div className="overflow-x-auto border border-gray-200 rounded-sm">
+                            <table className="w-full min-w-[900px] table-auto">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="p-3 sm:p-5 text-left text-sm font-medium text-gray-700 w-64">
+                                            Elemen
+                                        </th>
+                                        <th className="p-3 sm:p-5 text-left text-sm font-medium text-gray-700 w-64">
+                                            Kriteria Untuk Kerja
+                                        </th>
+                                        <th className="p-3 sm:p-5 text-center text-sm font-medium text-gray-700 w-40">
+                                            Pencapaian
+                                        </th>
+                                        <th className="p-3 sm:p-5 text-center text-sm font-medium text-gray-700 w-40">
+                                            Bukti yang relevan
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredData.map((item) => {
+                                        const pencapaianStatus = getPencapaianStatus(item);
+                                        const selectedProofs = getSelectedProofs(item);
+
+                                        return (
+                                            <React.Fragment key={item.id}>
+                                                <tr className="border-t border-gray-300">
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-900 align-top">
                                                         <div className="flex items-start gap-2">
                                                             <span className="font-medium">{item.id}</span>
-                                                            <span>{item.elemen}</span>
+                                                            <span>{item.title}</span>
                                                         </div>
                                                     </td>
-                                                )}
 
-                                                {/* Kriteria */}
-                                                <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-900">
-                                                    <div className="flex items-start gap-2">
-                                                        <span className="font-medium text-[#00809D] min-w-8">
-                                                            {criteria.id}
-                                                        </span>
-                                                        <span>{criteria.text}</span>
-                                                    </div>
-                                                </td>
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-900">
+                                                        {item.details.map((criteria) => (
+                                                            <div key={criteria.id} className="flex items-start gap-2 mb-2">
+                                                                <span className="font-medium text-[#00809D] min-w-8">
+                                                                    {criteria.id}
+                                                                </span>
+                                                                <span>{criteria.description}</span>
+                                                            </div>
+                                                        ))}
+                                                    </td>
 
-                                                {/* Pencapaian */}
-                                                {criteriaIndex === 0 && (
-                                                    <td
-                                                        className="px-2 sm:px-4 py-2 sm:py-3"
-                                                        rowSpan={item.criteria.length}
-                                                    >
+                                                    {/* Pencapaian (Readonly) */}
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3">
                                                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
                                                             {/* Kompeten */}
                                                             <label
-                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-          ${pencapaian[item.id] === "kompeten" ? "bg-[#E77D3533]" : ""}`}
+                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm ${pencapaianStatus === "kompeten" ? "bg-[#E77D3533]" : ""
+                                                                    }`}
                                                             >
                                                                 <input
                                                                     type="radio"
-                                                                    name={`pencapaian-${item.id}`}
-                                                                    value="kompeten"
-                                                                    checked={pencapaian[item.id] === "kompeten"}
-                                                                    onChange={(e) =>
-                                                                        handlePencapaianChange(item.id, e.target.value)
-                                                                    }
+                                                                    value="true"
+                                                                    checked={pencapaianStatus === "kompeten"}
                                                                     className="hidden"
+                                                                    disabled
                                                                 />
                                                                 <span
-                                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-            ${pencapaian[item.id] === "kompeten"
-                                                                            ? "bg-[#E77D35] border-[#E77D35]"
-                                                                            : "border-[#E77D35]"
+                                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${pencapaianStatus === "kompeten"
+                                                                        ? "bg-[#E77D35] border-[#E77D35]"
+                                                                        : "border-[#E77D35]"
                                                                         }`}
                                                                 >
-                                                                    {pencapaian[item.id] === "kompeten" && (
+                                                                    {pencapaianStatus === "kompeten" && (
                                                                         <svg
                                                                             className="w-3 h-3 text-white"
                                                                             fill="none"
@@ -281,7 +299,7 @@ export default function CekApl02Detail() {
                                                                 </span>
                                                                 <span
                                                                     className={
-                                                                        pencapaian[item.id] === "kompeten"
+                                                                        pencapaianStatus === "kompeten"
                                                                             ? "text-gray-900"
                                                                             : "text-gray-500"
                                                                     }
@@ -292,27 +310,23 @@ export default function CekApl02Detail() {
 
                                                             {/* Belum Kompeten */}
                                                             <label
-                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-          ${pencapaian[item.id] === "belum" ? "bg-[#E77D3533]" : ""}`}
+                                                                className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm ${pencapaianStatus === "belum" ? "bg-[#E77D3533]" : ""
+                                                                    }`}
                                                             >
                                                                 <input
                                                                     type="radio"
-                                                                    name={`pencapaian-${item.id}`}
-                                                                    value="belum"
-                                                                    checked={pencapaian[item.id] === "belum"}
-                                                                    onChange={(e) =>
-                                                                        handlePencapaianChange(item.id, e.target.value)
-                                                                    }
+                                                                    value="false"
+                                                                    checked={pencapaianStatus === "belum"}
                                                                     className="hidden"
+                                                                    disabled
                                                                 />
                                                                 <span
-                                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-            ${pencapaian[item.id] === "belum"
-                                                                            ? "bg-[#E77D35] border-[#E77D35]"
-                                                                            : "border-[#E77D35]"
+                                                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${pencapaianStatus === "belum"
+                                                                        ? "bg-[#E77D35] border-[#E77D35]"
+                                                                        : "border-[#E77D35]"
                                                                         }`}
                                                                 >
-                                                                    {pencapaian[item.id] === "belum" && (
+                                                                    {pencapaianStatus === "belum" && (
                                                                         <svg
                                                                             className="w-3 h-3 text-white"
                                                                             fill="none"
@@ -326,7 +340,7 @@ export default function CekApl02Detail() {
                                                                 </span>
                                                                 <span
                                                                     className={
-                                                                        pencapaian[item.id] === "belum"
+                                                                        pencapaianStatus === "belum"
                                                                             ? "text-gray-900"
                                                                             : "text-gray-500"
                                                                     }
@@ -336,33 +350,65 @@ export default function CekApl02Detail() {
                                                             </label>
                                                         </div>
                                                     </td>
-                                                )}
 
-                                                {/* Bukti relevan */}
-                                                {criteriaIndex === 0 && (
-                                                    <td
-                                                        className="px-2 sm:px-4 py-2 sm:py-3 text-center"
-                                                        rowSpan={item.criteria.length}
-                                                    >
-                                                        <select
-                                                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-                                                            value={selectedProof[item.id] || ""}
-                                                            onChange={(e) => handleProofSelection(item.id, e.target.value)}
-                                                        >
-                                                            <option value="">Bukti relevan</option>
-                                                            <option value="dokumen1">Dokumen 1</option>
-                                                            <option value="dokumen2">Dokumen 2</option>
-                                                            <option value="dokumen3">Dokumen 3</option>
-                                                        </select>
+                                                    {/* Bukti relevan (Readonly) */}
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                                                        <Popover>
+                                                            <PopoverTrigger asChild>
+                                                                <button
+                                                                    type="button"
+                                                                    role="combobox"
+                                                                    className="w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left cursor-not-allowed bg-gray-100"
+                                                                    disabled
+                                                                >
+                                                                    {selectedProofs.length > 0
+                                                                        ? `${selectedProofs.length} selected`
+                                                                        : "Select evidences..."}
+                                                                </button>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-[200px] p-0">
+                                                                <Command>
+                                                                    <CommandInput placeholder="Search..." disabled />
+                                                                    <CommandEmpty>
+                                                                        No evidence found.
+                                                                    </CommandEmpty>
+                                                                    <CommandGroup>
+                                                                        {evidenceOptions.map((opt) => {
+                                                                            const selected = selectedProofs.some((v) => {
+                                                                                return v === opt;
+                                                                            });
+                                                                            return (
+                                                                                <CommandItem
+                                                                                    key={opt}
+                                                                                    className="cursor-not-allowed"
+                                                                                >
+                                                                                    <span
+                                                                                        className={cn(
+                                                                                            "mr-2 h-4 w-4",
+                                                                                            selected
+                                                                                                ? "opacity-100"
+                                                                                                : "opacity-0"
+                                                                                        )}
+                                                                                    >
+                                                                                        ✓
+                                                                                    </span>
+                                                                                    {opt}
+                                                                                </CommandItem>
+                                                                            );
+                                                                        })}
+                                                                    </CommandGroup>
+                                                                </Command>
+                                                            </PopoverContent>
+                                                        </Popover>
                                                     </td>
-                                                )}
-                                            </tr>
-                                        ))}
-                                    </React.Fragment>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                                </tr>
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
