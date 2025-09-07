@@ -66,10 +66,12 @@ const routes = {
 			cekApl02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/cek-apl-02",
 			cekApl02Detail: (
 				id_assessment: string | number,
-				id_asesi: string | number
-			) => `/asesor/assessment/${id_assessment}/${id_asesi}/cek-apl-02-detail`,
+				id_result: string | number,
+				id_asesi: string | number,
+				id_unit: string | number
+			) => `/asesor/assessment/${id_assessment}/${id_result}/${id_asesi}/cek-apl-02-detail/${id_unit}`,
 			cekApl02DetailPattern:
-				"/asesor/assessment/:id_assessment/:id_asesi/cek-apl-02-detail",
+				"/asesor/assessment/:id_assessment/:id_result/:id_asesi/cek-apl-02-detail/:id_unit",
 			ia01: (id_assessment: string | number, id_asesi: string | number) =>
 				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-01`,
 			ia01Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-01",
