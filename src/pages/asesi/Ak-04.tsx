@@ -411,22 +411,24 @@ export default function Ak04() {
                         </div>
 
                         {/* Right Column - Certificate Selection */}
-                        <div className='bg-white rounded-lg shadow-sm py-6 px-10'>
-                            <h3 className="font-medium text-gray-900 mb-4">
+                        <div className="bg-white rounded-lg shadow-sm py-6 px-4 sm:px-10">
+                            <h3 className="font-medium text-gray-900 mb-4 text-sm sm:text-base">
                                 Banding ini diajukan atas keputusan asesmen yang dibuat terhadap Skema Sertifikasi ( Kualifikasi / Klaster / Okupasi ) berikut :
                             </h3>
 
-                            <div className="mb-4">
-                                <div className="flex text-sm text-gray-600 mb-3">
-                                    <span className="font-medium w-48">Skema Sertifikasi</span>
-                                    <span>: {resultData?.assessment?.occupation?.scheme?.name || '-'}</span>
+                            <div className="space-y-3">
+                                {/* Skema Sertifikasi */}
+                                <div className="grid grid-cols-1 sm:grid-cols-[auto_min-content_1fr] text-sm text-gray-600 gap-x-2 gap-y-1">
+                                    <span className="font-medium sm:w-36">Skema Sertifikasi</span>
+                                    <span className="hidden sm:block text-right">:</span>
+                                    <span>{resultData?.assessment?.occupation?.scheme?.name || '-'}</span>
                                 </div>
-                            </div>
 
-                            <div className="mb-4">
-                                <div className="flex text-sm text-gray-600 mb-3">
-                                    <span className="font-medium w-48">No Skema Sertifikasi</span>
-                                    <span>: {resultData?.assessment?.code || '-'}</span>
+                                {/* No Skema Sertifikasi */}
+                                <div className="grid grid-cols-1 sm:grid-cols-[auto_min-content_1fr] text-sm text-gray-600 gap-x-2 gap-y-1">
+                                    <span className="font-medium sm:w-36">No Skema Sertifikasi</span>
+                                    <span className="hidden sm:block text-right">:</span>
+                                    <span>{resultData?.assessment?.code || '-'}</span>
                                 </div>
                             </div>
                         </div>
