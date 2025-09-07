@@ -139,7 +139,18 @@ export default function AssessmentAsesiProvider({
 					) {
 						return null;
 					}
-					return routes.asesi.assessment.apl02(id_assessment, id_asesor);
+					console.log(
+						location.pathname ===
+							routes.asesi.assessment.dataSertifikasi(id_assessment, id_asesor)
+					);
+					if (
+						location.pathname ===
+							routes.asesi.assessment.apl01(id_assessment, id_asesor) ||
+						location.pathname ===
+							routes.asesi.assessment.dataSertifikasi(id_assessment, id_asesor)
+					)
+						return routes.asesi.assessment.apl02(id_assessment, id_asesor);
+					return location.pathname;
 				} else {
 					return routes.asesi.assessment.dataSertifikasi(
 						id_assessment,
@@ -218,12 +229,12 @@ export default function AssessmentAsesiProvider({
 			disabled: false,
 			to: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
 		},
-		// {
-		// 	value: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
-		// 	label: "IA 03",
-		// 	disabled: false,
-		// 	to: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
-		// },
+		{
+			value: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
+			label: "IA 03",
+			disabled: false,
+			to: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
+		},
 		{
 			value: routes.asesi.assessment.ia05(id_assessment ?? "", id_asesor ?? ""),
 			label: "IA 05",

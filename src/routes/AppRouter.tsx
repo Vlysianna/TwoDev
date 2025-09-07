@@ -39,6 +39,7 @@ import Apl02 from "@/pages/asesi/Apl-02";
 import Apl02Detail from "@/pages/asesi/Apl-02-Detail";
 import Ak04 from "@/pages/asesi/Ak-04";
 import Ia05 from "@/pages/asesi/Ia-05";
+import Ia03Assessee from "@/pages/asesi/Ia-03";
 import Ia02 from "@/pages/asesi/Ia-02";
 import Ak02Asesi from "@/pages/asesi/Ak-02";
 import Ak01 from "@/pages/asesi/Ak-01";
@@ -64,7 +65,7 @@ import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
 import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
-import IA05Assessor from "@/pages/Asesor/ia-05";
+import IA05Assessor from "@/pages/asesor/ia-05";
 import ResultAssessment from "@/pages/admin/ResultAssessment";
 import EditMUK from "@/pages/admin/EditMuk";
 
@@ -211,6 +212,10 @@ const router = createBrowserRouter([
 							{
 								path: paths.asesi.assessment.ia02Pattern,
 								element: <Ia02 />,
+							},
+							{
+								path: paths.asesi.assessment.ia03Pattern,
+								element: <Ia03Assessee />,
 							},
 							{
 								path: paths.asesi.assessment.ia05Pattern,

@@ -173,6 +173,9 @@ const routes = {
 			ia02: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-02`,
 			ia02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-02",
+			ia03: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-03`,
+			ia03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-03",
 			ia05: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-05`,
 			ia05Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-05",

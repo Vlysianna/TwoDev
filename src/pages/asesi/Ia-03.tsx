@@ -1,11 +1,11 @@
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import NavbarAsesi from "@/components/NavbarAsesi";
-import AK02 from "@/components/section/AK-02";
 import routes from "@/routes/paths";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import IA03 from "@/components/section/IA-03";
 
-export default function Ak02() {
+export default function Ia03() {
 	const { id_assessment, id_asesor, id_result, id_asesi } =
 		useAssessmentParams();
 
@@ -25,7 +25,7 @@ export default function Ak02() {
 						}
 					/>
 				</div>
-				<AK02
+				<IA03
 					isAssessee={true}
 					id_assessment={id_assessment}
 					id_result={id_result}
