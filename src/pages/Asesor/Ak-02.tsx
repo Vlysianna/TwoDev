@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FileText, ChevronLeft, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import NavbarAsesor from "@/components/NavAsesor";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ import type { ResultAK02, UnitCompetensi } from "@/model/ak02-model";
 export default function Ak02() {
   const { id_assessment, id_result, id_asesi, id_asesor } = useAssessmentParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Loading and error states
   const [loading, setLoading] = useState(true);
@@ -71,6 +72,7 @@ export default function Ak02() {
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
 
+  // Evidence types
   const evidenceTypes = [
     "Observasi Demonstrasi",
     "Portofolio",
@@ -93,8 +95,8 @@ export default function Ak02() {
       setLoading(true);
       setError(null);
 
-      // Load AK02 data and units
-      await Promise.all([loadAK02Data(), loadUnits()]);
+      await loadUnits();
+      await loadAK02Data();
     } catch (error) {
       setError("Terjadi kesalahan saat memuat data");
       console.error("Error fetching data:", error);
@@ -103,7 +105,34 @@ export default function Ak02() {
     }
   };
 
-  const loadAK02Data = async () => {
+  const loadUnits = async () => {
+    try {
+      console.log('Loading units for assessment ID:', id_assessment);
+      const response = await api.get(`/assessments/ak-02/units/${id_assessment}`);
+      console.log('Units API response:', response.data);
+      
+      if (response.data.success) {
+        const apiUnits = response.data.data.units;
+        console.log('API units:', apiUnits);
+        
+        const mappedUnits = apiUnits.map((unit: any) => ({
+          id: unit.id,
+          code: unit.code,
+          title: unit.title,
+        }));
+        console.log('Mapped units:', mappedUnits);
+        
+        setUnits(mappedUnits);
+        return mappedUnits;
+      }
+      return [];
+    } catch (error) {
+      console.error("Failed to load units:", error);
+      throw error;
+    }
+  };
+
+  const loadAK02Data = async (preserveFormState = false) => {
     try {
       const response = await api.get(`/assessments/ak-02/result/${id_result}`);
       const rawData = response.data;
@@ -111,38 +140,23 @@ export default function Ak02() {
       if (rawData.success) {
         setData(rawData.data);
 
-        // Populate form fields if data exists
-        const ak02Headers = rawData.data.ak02_headers;
-        if (ak02Headers.is_competent !== null) {
-          setAssessmentResult(ak02Headers.is_competent ? "kompeten" : "belum-kompeten");
+        if (!preserveFormState) {
+          const ak02Headers = rawData.data.ak02_headers;
+          if (ak02Headers.is_competent !== null) {
+            setAssessmentResult(ak02Headers.is_competent ? "kompeten" : "belum-kompeten");
+          }
+          setFollowUp(ak02Headers.follow_up || "");
+          setAssessorComments(ak02Headers.comment || "");
         }
-        setFollowUp(ak02Headers.follow_up || "");
-        setAssessorComments(ak02Headers.comment || "");
 
         // Generate QR codes if already approved
-        if (ak02Headers.approved_assessor) {
+        if (rawData.data.ak02_headers.approved_assessor) {
           setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
         }
 
-        if (ak02Headers.approved_assessee) {
+        if (rawData.data.ak02_headers.approved_assessee) {
           setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
         }
-
-        // Populate evidence selections
-        const newSelectedOptions: Record<string, boolean> = {};
-        ak02Headers.rows.forEach((row: any) => {
-          const unitIndex = units.findIndex(u => u.id === row.unit_id);
-          if (unitIndex !== -1) {
-            row.evidences.forEach((evidence: any) => {
-              const evidenceIndex = evidenceTypes.indexOf(evidence.evidence);
-              if (evidenceIndex !== -1) {
-                const key = `${unitIndex}-${evidenceIndex}`;
-                newSelectedOptions[key] = true;
-              }
-            });
-          }
-        });
-        setSelectedOptions(newSelectedOptions);
       } else {
         setError(rawData?.message || "Gagal memuat data AK02");
       }
@@ -152,17 +166,28 @@ export default function Ak02() {
     }
   };
 
-  const loadUnits = async () => {
-    try {
-      const response = await api.get(`/assessments/ak-02/units/${id_assessment}`);
-      if (response.data.success) {
-        setUnits(response.data.data.units);
-      }
-    } catch (error) {
-      console.error("Failed to load units:", error);
-      throw error;
+  useEffect(() => {
+    if (units.length > 0 && data.ak02_headers.rows.length > 0) {
+      const newSelectedOptions: Record<string, boolean> = {};
+      
+      data.ak02_headers.rows.forEach((row: any) => {
+        // Find unit index by matching unit ID
+        const unitIndex = units.findIndex(unit => unit.id === row.unit_id);
+        if (unitIndex !== -1) {
+          // For each evidence in this row
+          row.evidences.forEach((evidence: any) => {
+            // Find evidence type index
+            const evidenceIndex = evidenceTypes.indexOf(evidence.evidence);
+            if (evidenceIndex !== -1) {
+              const key = `${unitIndex}-${evidenceIndex}`;
+              newSelectedOptions[key] = true;
+            }
+          });
+        }
+      });
+      setSelectedOptions(newSelectedOptions);
     }
-  };
+  }, [units, data.ak02_headers.rows]);
 
   const handleCheckboxChange = (unitIndex: number, evidenceIndex: number) => {
     const key = `${unitIndex}-${evidenceIndex}`;
@@ -203,6 +228,15 @@ export default function Ak02() {
       alert('Tindak lanjut wajib diisi untuk hasil "Belum Kompeten"');
       return false;
     }
+
+    // Only check for evidence if units exist
+    if (units.length > 0) {
+      const hasSelectedEvidence = Object.values(selectedOptions).some(Boolean);
+      if (!hasSelectedEvidence) {
+        alert('Pilih minimal satu bukti untuk unit kompetensi');
+        return false;
+      }
+    }
     
     return true;
   };
@@ -226,22 +260,28 @@ export default function Ak02() {
           const unitIndex = parseInt(unitIndexStr);
           const evidenceIndex = parseInt(evidenceIndexStr);
           
-          const unitId = units[unitIndex]?.id;
+          // Use units from API
+          const unit = units[unitIndex];
           const evidenceType = evidenceTypes[evidenceIndex];
           
-          if (unitId && evidenceType) {
-            const existingRow = rows.find(row => row.uc_id === unitId);
+          if (unit && evidenceType) {
+            const existingRow = rows.find(row => row.uc_id === unit.id);
             if (existingRow) {
               existingRow.evidences.push(evidenceType);
             } else {
               rows.push({
-                uc_id: unitId,
+                uc_id: unit.id,
                 evidences: [evidenceType]
               });
             }
           }
         }
       });
+
+      if (rows.length === 0) {
+        alert('Pilih minimal satu bukti untuk unit kompetensi.');
+        return;
+      }
 
       const submitData = {
         result_id: Number(id_result),
@@ -251,17 +291,28 @@ export default function Ak02() {
         rows: rows
       };
 
+      console.log('Submit data:', submitData);
+
       const response = await api.post('/assessments/ak-02/result/send', submitData);
       
       if (response.data.success) {
         alert('Data asesmen berhasil disimpan!');
-        await loadAK02Data();
+        // Navigate to AK-05 page after successful submission
+        navigate(paths.asesor.assessment.ak05(id_assessment, id_result, id_asesi, id_asesor));
       } else {
         alert(`Gagal menyimpan data asesmen: ${response.data.message || 'Terjadi kesalahan'}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Submit error:', error);
-      alert('Terjadi kesalahan saat menyimpan data');
+      
+      // Show detailed error message
+      if (error.response?.data?.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else if (error.response?.data?.error) {
+        alert(`Error: ${error.response.data.error}`);
+      } else {
+        alert('Terjadi kesalahan saat menyimpan data');
+      }
     }
   };
 
@@ -270,6 +321,8 @@ export default function Ak02() {
       const response = await api.put(`/assessments/ak-02/result/assessor/${id_result}/approve`);
       if (response.data.success) {
         setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+        // Reload data but preserve form state
+        await loadAK02Data(true);
       }
     } catch (error) {
       console.log("Error Generating QR Code:", error);
@@ -281,6 +334,8 @@ export default function Ak02() {
       const response = await api.put(`/assessments/ak-02/result/assessee/${id_result}/approve`);
       if (response.data.success) {
         setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+        // Reload data but preserve form state
+        await loadAK02Data(true);
       }
     } catch (error) {
       console.log("Error approving assessee:", error);
@@ -313,8 +368,8 @@ export default function Ak02() {
     );
   }
 
-  // Check if user is assessee (role_id 3)
   const isAssessee = user?.role_id === 3;
+  // const isAssessee = true;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -375,8 +430,8 @@ export default function Ak02() {
             </div>
           </div>
 
-          {/* Unit Kompetensi Table - Only show for assessor */}
-          {!isAssessee && (
+          {/* Unit Kompetensi Table - Only show for assessor, using API units */}
+          {!isAssessee && units.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
               <div className="p-6 border-b border-gray-200">
                 <p className="text-gray-700">
@@ -406,11 +461,12 @@ export default function Ak02() {
                   <tbody>
                     {units.map((unit, unitIndex) => (
                       <tr
-                        key={unitIndex}
+                        key={unit.id}
                         className="border-b border-gray-100 hover:bg-gray-50"
                       >
                         <td className="py-4 px-4 text-gray-800 font-medium">
-                          {unit.title}
+                          <div className="text-sm text-gray-500 mb-1">{unit.code}</div>
+                          <div>{unit.title}</div>
                         </td>
                         {evidenceTypes.map((_, evidenceIndex) => (
                           <td
@@ -604,15 +660,10 @@ export default function Ak02() {
                       <span className="text-sm font-semibold text-gray-800">
                         {data.assessor.name}
                       </span>
-                      {!isAssessee && !assessorQrValue && (
+                      {!isAssessee && !data.ak02_headers.approved_assessor && (
                         <button 
                           onClick={handleGenerateQRCode}
-                          disabled={!!assessorQrValue}
-                          className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-                            !assessorQrValue
-                              ? "hover:bg-orange-600"
-                              : "cursor-not-allowed opacity-50"
-                          }`}
+                          className="block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600"
                         >
                           Setujui
                         </button>
@@ -631,8 +682,7 @@ export default function Ak02() {
                       <span className="text-sm font-semibold text-gray-800">
                         {data.assessee.name}
                       </span>
-                      {/* Assessee can approve only after assessor approval */}
-                      {isAssessee && data.ak02_headers.approved_assessor && !assesseeQrValue && (
+                      {isAssessee && data.ak02_headers.approved_assessor && !data.ak02_headers.approved_assessee && (
                         <button 
                           onClick={handleAssesseeApproval}
                           className="block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600"
@@ -645,12 +695,12 @@ export default function Ak02() {
 
                   {/* Approval Status */}
                   <div className="flex flex-col items-center space-y-2 text-xs">
-                    <div className={`flex items-center space-x-2 ${data.ak02_headers.approved_assessor ? 'text-green-600' : 'text-gray-400'}`}>
-                      <div className={`w-2 h-2 rounded-full ${data.ak02_headers.approved_assessor ? 'bg-green-600' : 'bg-gray-300'}`}></div>
+                    <div className={`flex items-center space-x-2 ${(data.ak02_headers.approved_assessor === true || data.ak02_headers.approved_assessor === 1) ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${(data.ak02_headers.approved_assessor === true || data.ak02_headers.approved_assessor === 1) ? 'bg-green-600' : 'bg-gray-300'}`}></div>
                       <span>Assessor Approved</span>
                     </div>
-                    <div className={`flex items-center space-x-2 ${data.ak02_headers.approved_assessee ? 'text-green-600' : 'text-gray-400'}`}>
-                      <div className={`w-2 h-2 rounded-full ${data.ak02_headers.approved_assessee ? 'bg-green-600' : 'bg-gray-300'}`}></div>
+                    <div className={`flex items-center space-x-2 ${(data.ak02_headers.approved_assessee === true || data.ak02_headers.approved_assessee === 1) ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${(data.ak02_headers.approved_assessee === true || data.ak02_headers.approved_assessee === 1) ? 'bg-green-600' : 'bg-gray-300'}`}></div>
                       <span>Assessee Approved</span>
                     </div>
                   </div>
