@@ -51,6 +51,8 @@ export default function AssessmentAsesiProvider({
 	const [error, setError] = useState<string | null>(null);
 	const [filterApproveData, setFilterApproveData] = useState<any>(undefined);
 
+	const [result, setResult] = useState<any>(null);
+
 	useEffect(() => {
 		const fetchApprove = async () => {
 			setLoading(true);
@@ -74,6 +76,31 @@ export default function AssessmentAsesiProvider({
 
 		fetchApprove();
 	}, []);
+
+	useEffect(() => {
+		const fetchResult = async () => {
+			setLoading(true);
+			await api
+				.get(
+					`assessments/result/${id_assessment}/${id_asesor}/${result?.assessee.id}`
+				)
+				.then((res) => {
+					if (res.data.success) {
+						setResult(res.data.data[0]);
+					}
+				})
+				.catch((err) => {
+					console.error("Failed to fetch result:", err);
+				})
+				.finally(() => {
+					setLoading(false);
+				});
+		};
+
+		if (id_assessment && id_asesor) {
+			fetchResult();
+		}
+	}, [id_assessment, id_asesor]);
 
 	useEffect(() => {
 		console.log(approveData);
@@ -233,8 +260,8 @@ export default function AssessmentAsesiProvider({
 					value={{
 						id_assessment: id_assessment!,
 						id_asesor: id_asesor!,
-						id_result: filterApproveData?.result_id,
-						id_asesi: filterApproveData?.result.assessee_id,
+						id_result: result?.id,
+						id_asesi: result?.assessee.id,
 					}}
 				>
 					<div className="relative w-full min-h-screen">
@@ -326,6 +353,11 @@ export default function AssessmentAsesiProvider({
 													<p className="text-xs text-slate-500">
 														Assessment ID: {id_assessment}
 													</p>
+													{result?.id && (
+														<p className="text-xs text-slate-500">
+															Result ID: {result.id}
+														</p>
+													)}
 												</div>
 											</div>
 										</div>
