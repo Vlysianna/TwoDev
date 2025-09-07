@@ -423,7 +423,7 @@ export default function Apl02() {
 														className="w-32 h-32 object-contain"
 													/>
 													<div className="text-green-600 font-semibold text-xs">
-														✅ Telah disetujui
+														Sudah disetujui Asesor
 													</div>
 												</>
 											) : (
@@ -435,16 +435,6 @@ export default function Apl02() {
 											)}
 										</div>
 									</div>
-{/* 
-									{process.env.NODE_ENV === 'development' && (
-										<div className="mb-4 p-3 bg-gray-100 rounded-lg">
-											<h4 className="text-sm font-medium text-gray-700 mb-2">Debug Info:</h4>
-											<p className="text-xs text-gray-600">ID Asesi: {id_asesi}</p>
-											<p className="text-xs text-gray-600">ID Result: {id_result}</p>
-											<p className="text-xs text-gray-600">approved_assessee: {resultData?.approved_assessee ? 'true' : 'false'}</p>
-											<p className="text-xs text-gray-600">QR Value: {assesseeQrValue}</p>
-										</div>
-									)} */}
 
 									{/* Submit Button - Hanya aktif jika asesor sudah approve */}
 									<div className="w-full">

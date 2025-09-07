@@ -377,12 +377,6 @@ export default function CekApl02() {
                                                             Assessment <strong>tidak dapat dilanjutkan</strong>
                                                         </span>
                                                     </label>
-
-                                                    {isQrGenerated && (
-                                                        <p className="text-xs text-gray-500 mt-2">
-                                                            Rekomendasi dapat diubah sebelum disimpan.
-                                                        </p>
-                                                    )}
                                                 </>
                                             )}
                                         </div>
@@ -424,10 +418,7 @@ export default function CekApl02() {
                                                         className="w-32 h-32 object-contain"
                                                     />
                                                     <div className="text-green-600 font-semibold text-xs">
-                                                        ✅ Telah digenerate
-                                                    </div>
-                                                    <div className="text-xs text-gray-600">
-                                                        Rekomendasi: {resultData?.apl02_header?.is_continue ? 'Lanjutkan' : 'Hentikan'}
+                                                        Sebagai Asesor, Anda sudah setuju
                                                     </div>
                                                 </>
                                             ) : (
