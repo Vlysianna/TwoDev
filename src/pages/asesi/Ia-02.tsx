@@ -1,11 +1,15 @@
-import { ChevronLeft, Clock, AlertCircle, Monitor, Download } from "lucide-react";
+import {
+  ChevronLeft,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
-import type { GroupIA, ResultIA02 } from "@/model/ia02-model";
+import type { ResultIA02 } from "@/model/ia02-model";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
@@ -16,7 +20,6 @@ export default function Ia02() {
 
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ResultIA02>({
     id: 0,
     assessment: {
@@ -54,9 +57,6 @@ export default function Ia02() {
       updated_at: "0000-00-00T00:00:00.000Z",
     },
   });
-  const [groups, setGroups] = useState<GroupIA[]>([]);
-
-  const [selectedGroup, setSelectedGroup] = useState(0);
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
   const [generatingPdf, setGeneratingPdf] = useState(false);
@@ -64,7 +64,6 @@ export default function Ia02() {
   useEffect(() => {
     if (id_result && id_assessment) {
       fetchResult(id_result);
-      fetchGroup(id_assessment);
     }
   }, [user]);
 
@@ -88,55 +87,6 @@ export default function Ia02() {
     }
   };
 
-  const fetchGroup = async (id_assessment: string) => {
-    try {
-      setLoading(true);
-      const response = await api.get(
-        `/assessments/ia-02/units/${id_assessment}`
-      );
-      if (response.data.success) {
-        setGroups(response.data.data);
-      }
-    } catch (error: any) {
-      console.log("Error fetching group:", error);
-      setError("Gagal memuat data asesmen");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDownloadPDF = async () => {
-    try {
-      setGeneratingPdf(true);
-      const response = await api.get(
-        `/assessments/ia-02/pdf/${id_assessment}`,
-        {
-          responseType: "blob",
-        }
-      );
-      
-      // Create blob and download
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `FR.IA.02-${result.assessment.code}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      
-      // Clean up
-      if (link.parentNode) {
-        link.parentNode.removeChild(link);
-      }
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error downloading PDF:", error);
-      setError("Gagal mengunduh PDF");
-    } finally {
-      setGeneratingPdf(false);
-    }
-  };
-
   const handleViewPDF = async () => {
     try {
       setGeneratingPdf(true);
@@ -146,12 +96,12 @@ export default function Ia02() {
           responseType: "blob",
         }
       );
-      
+
       // Create blob and open in new tab
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      
+      window.open(url, "_blank");
+
       // Clean up after a delay
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
@@ -251,25 +201,6 @@ export default function Ia02() {
                         {result.assessment.code}
                       </p>
                     </div>
-                    
-                    {/* PDF Options */}
-                    <div className="mt-3 flex flex-col sm:flex-row gap-2">
-                      <button
-                        onClick={handleDownloadPDF}
-                        disabled={generatingPdf}
-                        className="flex items-center justify-center gap-2 bg-[#E77D35] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Download size={16} />
-                        {generatingPdf ? "Memproses..." : "Unduh PDF"}
-                      </button>
-                      <button
-                        onClick={handleViewPDF}
-                        disabled={generatingPdf}
-                        className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Lihat PDF
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -285,6 +216,16 @@ export default function Ia02() {
                   <li key={index}>{item}</li>
                 ))}
               </ol>
+              {/* PDF Options */}
+              <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={handleViewPDF}
+                  disabled={generatingPdf}
+                  className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Lihat PDF
+                </button>
+              </div>
             </div>
           </div>
 
