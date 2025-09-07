@@ -305,7 +305,7 @@ export default function AssessmentAsesiProvider({
 
 											{/* Tab Items */}
 											<div
-												className="max-h-[40vh] overflow-y-auto space-y-2
+												className="overflow-y-auto space-y-2
 													pr-2
 													[scrollbar-width:thin] 
 													[scrollbar-color:#f97316_transparent] 

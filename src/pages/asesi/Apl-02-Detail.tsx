@@ -302,7 +302,7 @@ export default function Apl02Detail() {
             />
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm m-10 px-5 py-7">
+          <div className="bg-white rounded-lg shadow-sm m-4 px-5 py-7">
             {/* Header */}
             <div className="pb-7">
               <div className="flex flex-wrap items-center w-full gap-4 md:gap-6">
@@ -642,7 +642,7 @@ export default function Apl02Detail() {
             {saveError && <span className="text-red-500 text-sm">{saveError}</span>}
             <motion.button
               type="submit"
-              className="bg-[#E77D35] hover:bg-[#E77D35] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-60"
+              className="bg-[#E77D35] hover:bg-[#E77D35] text-white font-bold py-2 mb-6 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-60"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}

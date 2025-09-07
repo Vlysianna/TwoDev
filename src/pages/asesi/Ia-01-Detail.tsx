@@ -104,7 +104,7 @@ export default function Ia01AsesiDetail() {
                 />
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm m-10 px-5 py-7">
+            <div className="bg-white rounded-lg shadow-sm m-4 px-4 py-7">
                 {/* Header */}
                 <div className="pb-7 flex flex-wrap items-center gap-4 md:gap-6">
                     <div className="flex items-center gap-2 text-[#00809D]">

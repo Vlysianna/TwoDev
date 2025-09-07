@@ -245,8 +245,8 @@ export default function Ia05C() {
       </div>
 
       {/* Content */}
-      <div className="max-w-[1450px] mx-auto py-2 md:py-6 px-2 md:px-0">
-        <div className="bg-white mx-4 lg:mx-6 mt-4 lg:mt-6 mb-6 rounded-lg shadow-sm border p-4 lg:p-6">
+      <div className="mx-4 py-2 md:py-6">
+        <div className="bg-white lg:mx-6 mt-4 lg:mt-6 mb-6 rounded-lg shadow-sm border p-4 lg:p-6">
           {/* Header Info & Progress */}
           <div className="py-4 md:py-6 border-gray-200">
             {/* Top Row */}
@@ -455,7 +455,7 @@ export default function Ia05C() {
         </div>
 
         {/* Umpan Balik Section - Updated to match IA01 style */}
-        <div className="bg-white mx-4 lg:mx-6 mt-4 lg:mt-6 mb-6 rounded-lg shadow-sm border p-4 lg:p-6">
+        <div className="bg-white lg:mx-6 mt-4 lg:mt-6 mb-6 rounded-lg shadow-sm border p-4 lg:p-6">
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_0.8fr] gap-6 lg:gap-8 items-start">
             {/* Left Section: Umpan Balik */}
             <div className="lg:col-span-1 h-full flex flex-col">

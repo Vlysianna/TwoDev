@@ -174,7 +174,7 @@ export default function Apl02() {
 					/>
 				</div>
 
-				<div className="grid grid-cols-1 lg:grid-cols-5 gap-6 px-6 pb-7 items-stretch">
+				<div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mx-4 pb-7 items-stretch">
 					{/* Error notification */}
 					{error && (
 						<div className="lg:col-span-5 mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">

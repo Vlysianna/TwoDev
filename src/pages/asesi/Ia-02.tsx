@@ -1,4 +1,4 @@
-import { ChevronLeft, Clock, AlertCircle, Monitor } from "lucide-react";
+import { ChevronLeft, Clock, AlertCircle, Monitor, Download } from "lucide-react";
 import { useEffect, useState } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link } from "react-router-dom";
@@ -59,6 +59,7 @@ export default function Ia02() {
   const [selectedGroup, setSelectedGroup] = useState(0);
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   useEffect(() => {
     if (id_result && id_assessment) {
@@ -104,6 +105,65 @@ export default function Ia02() {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      setGeneratingPdf(true);
+      const response = await api.get(
+        `/assessments/ia-02/pdf/${id_assessment}`,
+        {
+          responseType: "blob",
+        }
+      );
+      
+      // Create blob and download
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `FR.IA.02-${result.assessment.code}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      setError("Gagal mengunduh PDF");
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
+  const handleViewPDF = async () => {
+    try {
+      setGeneratingPdf(true);
+      const response = await api.get(
+        `/assessments/ia-02/pdf/${id_assessment}`,
+        {
+          responseType: "blob",
+        }
+      );
+      
+      // Create blob and open in new tab
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      // Clean up after a delay
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error("Error viewing PDF:", error);
+      setError("Gagal membuka PDF");
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
   const handleGenerateQRCode = async () => {
     try {
       const response = await api.put(
@@ -143,7 +203,7 @@ export default function Ia02() {
         </div>
 
         {/* Content */}
-        <div className="px-4 sm:px-6 pb-7">
+        <div className="mx-4 sm:mx-6 pb-7">
           {/* Error State */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
@@ -191,6 +251,25 @@ export default function Ia02() {
                         {result.assessment.code}
                       </p>
                     </div>
+                    
+                    {/* PDF Options */}
+                    <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                      <button
+                        onClick={handleDownloadPDF}
+                        disabled={generatingPdf}
+                        className="flex items-center justify-center gap-2 bg-[#E77D35] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Download size={16} />
+                        {generatingPdf ? "Memproses..." : "Unduh PDF"}
+                      </button>
+                      <button
+                        onClick={handleViewPDF}
+                        disabled={generatingPdf}
+                        className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Lihat PDF
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -209,95 +288,7 @@ export default function Ia02() {
             </div>
           </div>
 
-          {/* Skenario Tugas Praktik Demonstrasi */}
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-            <h3 className="text-sm font-medium text-gray-800 mb-6">
-              B. Skenario Tugas Praktik Demonstrasi
-            </h3>
-
-            {loading ? (
-              <div className="flex items-center justify-center h-40">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-              </div>
-            ) : (
-              <>
-                {/* Tabs */}
-                <div className="flex gap-2 mb-6 overflow-x-auto">
-                  {groups.map((group, index) => (
-                    <button
-                      key={index}
-                      className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer whitespace-nowrap ${
-                        index === selectedGroup
-                          ? "bg-[#E77D35] text-white"
-                          : "text-gray-600 hover:text-gray-800"
-                      }`}
-                      onClick={() => setSelectedGroup(index)}
-                    >
-                      {group.name}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Unit Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {groups[selectedGroup]?.units?.map((unit, index) => (
-                    <div
-                      key={unit.id}
-                      className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
-                    >
-                      <div className="flex items-center mb-3">
-                        <div className="rounded-lg mr-3 flex-shrink-0">
-                          <Monitor size={16} className="text-[#E77D35]" />
-                        </div>
-                        <h4 className="font-medium text-[#E77D35] text-sm">
-                          Unit kompetensi {1 + index}
-                        </h4>
-                      </div>
-
-                      <h5 className="font-medium text-gray-800 mb-2 text-sm leading-tight">
-                        {unit.title}
-                      </h5>
-
-                      <p className="text-xs text-gray-500">{unit.unit_code}</p>
-                    </div>
-                  )) ?? (
-                    <div className="col-span-full text-center py-8 text-gray-500">
-                      Tidak ada unit kompetensi tersedia untuk kelompok
-                      pekerjaan ini.
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Keterangan */}
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-            <div className="pt-4">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Skenario Tugas Praktik Demonstrasi
-              </h3>
-              <p className="text-sm text-gray-700">
-                {groups[selectedGroup]?.scenario ??
-                  "Tidak ada skenario tugas praktik demonstrasi tersedia untuk kelompok pekerjaan ini."}
-              </p>
-              <ol className="list-disc list-inside text-sm text-gray-700 space-y-1 my-2">
-                {groups[selectedGroup]?.tools?.map((tool, index) => (
-                  <li key={index}>{tool.name}</li>
-                )) ?? (
-                  <li>
-                    Tidak ada alat dan perlengkapan yang tersedia untuk kelompok
-                    pekerjaan ini.
-                  </li>
-                )}
-              </ol>
-              <h3 className="text-xl font-semibold text-gray-800 my-3">
-                Waktu : {groups[selectedGroup]?.duration ?? "0"} Menit
-              </h3>
-            </div>
-          </div>
-
-          {/* Validasi anjay */}
+          {/* Validasi */}
           <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 items-start">
               {/* Bagian kiri (2 kolom) */}
@@ -307,7 +298,7 @@ export default function Ia02() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asesi
                   </label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <input
                       type="text"
                       placeholder="Nama Asesi"
@@ -318,7 +309,7 @@ export default function Ia02() {
                     <input
                       type="date"
                       placeholder="Tanggal"
-                      className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full sm:w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-2 sm:mt-0"
                       value={result.ia02_header.updated_at.split("T")[0]}
                       disabled
                     />
@@ -330,7 +321,7 @@ export default function Ia02() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asesor
                   </label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <input
                       type="text"
                       placeholder="Nama Asesor"
@@ -341,7 +332,7 @@ export default function Ia02() {
                     <input
                       type="date"
                       placeholder="Tanggal"
-                      className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full sm:w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-2 sm:mt-0"
                       value={result.ia02_header.updated_at.split("T")[0]}
                       disabled
                     />
