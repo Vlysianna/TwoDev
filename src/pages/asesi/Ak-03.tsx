@@ -1,61 +1,106 @@
-import React, { useState } from 'react';
-import { Monitor, ChevronLeft, Search, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { ChevronLeft, Search, X, CheckCircle, AlertCircle } from 'lucide-react';
 import NavbarAsesi from '@/components/NavbarAsesi';
 import { Link } from 'react-router-dom';
-import paths from '@/routes/paths';
+import api from "@/helper/axios";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
+import type { AK03Question, AssessmentData } from "@/model/ak03-model";
+
+const defaultQuestions = [
+    {
+        id: 1,
+        questions: "Saya mendapatkan penjelasan yang cukup memadai mengenai proses asesmen/uji kompetensi",
+    },
+    {
+        id: 2,
+        questions: "Saya diberikan kesempatan untuk mempelajari standar kompetensi yang akan diuji dan menilai diri sendiri terhadap pencapaiannya",
+    },
+    {
+        id: 3,
+        questions: "Asesor memberikan kesempatan untuk mendiskusikan/menegosiasikan metoda, instrumen dan sumber asesmen serta jadwal asesmen",
+    },
+    {
+        id: 4,
+        questions: "Asesor berusaha menggali seluruh bukti pendukung yang sesuai dengan latar belakang pelatihan dan pengalaman yang saya miliki",
+    },
+    {
+        id: 5,
+        questions: "Saya sepenuhnya diberikan kesempatan untuk mendemonstrasikan kompetensi yang saya miliki selama asesmen",
+    },
+    {
+        id: 6,
+        questions: "Saya mendapatkan penjelasan yang memadai mengenai keputusan asesmen",
+    },
+    {
+        id: 7,
+        questions: "Asesor memberikan umpan balik yang mendukung setelah asesmen serta tindak lanjutnya",
+    },
+    {
+        id: 8,
+        questions: "Asesor bersama saya mempelajari semua dokumen asesmen serta menandatanganinya",
+    },
+    {
+        id: 9,
+        questions: "Saya mendapatkan jaminan kerahasiaan hasil asesmen serta penjelasan penanganan dokumen asesmen",
+    },
+    {
+        id: 10,
+        questions: "Asesor menggunakan keterampilan komunikasi yang efektif selama asesmen",
+    },
+];
 
 export default function Ak03() {
+    const { user } = useAuth();
+    const { id_result } = useAssessmentParams();
+    const [formData, setFormData] = useState<AssessmentData | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterKompeten, setFilterKompeten] = useState('all');
+    const [showModalBarcode, setShowModalBarcode] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [hasil, setHasil] = useState<{ [key: number]: string }>({});
     const [catatan, setCatatan] = useState<{ [key: number]: string }>({});
-    const [showModalBarcode, setShowModalBarcode] = useState(false);
-    const [showModalConfrimAsesment, setShowModalConfrimAsesment] = useState(false);
+    const [catatanUmum, setCatatanUmum] = useState('');
 
+    const [questions, setQuestions] = useState<AK03Question[]>([]);
 
-    const data = [
-        {
-            id: 1,
-            komponen: "Saya mendapatkan penjelasan yang cukup memadai mengenai proses asesmen/uji kompetensi",
-        },
-        {
-            id: 2,
-            komponen: "Saya diberikan kesempatan untuk mempelajari standar kompetensi yang akan diuji dan menilai diri sendiri terhadap pencapaiannya",
-        },
-        {
-            id: 3,
-            komponen: "Asesor memberikan kesempatan untuk mendiskusikan/menegosiasikan metoda, instrumen dan sumber asesmen serta jadwal asesmen",
-        },
-        {
-            id: 4,
-            komponen: "Asesor berusaha menggali seluruh bukti pendukung yang sesuai dengan latar belakang pelatihan dan pengalaman yang saya miliki",
-        },
-        {
-            id: 5,
-            komponen: "Saya sepenuhnya diberikan kesempatan untuk mendemonstrasikan kompetensi yang saya miliki selama asesmen",
-        },
-        {
-            id: 6,
-            komponen: "Saya mendapatkan penjelasan yang memadai mengenai keputusan asesmen",
-        },
-        {
-            id: 7,
-            komponen: "Asesor memberikan umpan balik yang mendukung setelah asesmen serta tindak lanjutnya",
-        },
-        {
-            id: 8,
-            komponen: "Asesor bersama saya mempelajari semua dokumen asesmen serta menandatanganinya",
-        },
-        {
-            id: 9,
-            komponen: "Saya mendapatkan jaminan kerahasiaan hasil asesmen serta penjelasan penanganan dokumen asesmen",
-        },
-        {
-            id: 10,
-            komponen: "Asesor menggunakan keterampilan komunikasi yang efektif selama asesmen",
-        },
-    ];
+    useEffect(() => {
+        if (user)
+            fetchData();
+    }, [user, id_result]);
 
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            setErrorMessage('');
+
+            const response = await api.get(`/assessments/ak-03/${id_result}`);
+            const rawData = response.data;
+
+            if (rawData.success) {
+                setFormData(rawData.data);
+                setCatatanUmum(rawData.data.result_ak03.comment || '');
+
+                if(rawData.data.result_ak03 && rawData.data.result_ak03.answers) {
+                    setQuestions(rawData.data.result_ak03.answers.map((answer: AK03Question) => ({
+                        id: answer.id,
+                        question: answer.question,
+                        answer: answer.answer,
+                        comment: answer.comment
+                    })));
+                }
+            } else {
+                // setErrorMessage('Gagal memuat data AK-03');
+            }
+        } catch (error: any) {
+            // setErrorMessage(error.response?.data?.message || 'Gagal memuat data AK-03');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const handleHasilChange = (id: number, value: string) => {
         setHasil(prev => ({
@@ -78,7 +123,7 @@ export default function Ak03() {
         if (value === 'kompeten' || value === 'belum') {
             setHasil(prev => {
                 const newHasil = { ...prev };
-                data.forEach(item => {
+                defaultQuestions.forEach(item => {
                     newHasil[item.id] = value;
                 });
                 return newHasil;
@@ -86,14 +131,77 @@ export default function Ak03() {
         }
     };
 
-    const filteredData = data.filter(item => {
-        const matchesSearch = item.komponen.toLowerCase().includes(searchTerm.toLowerCase());
+    const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setErrorMessage('');
+
+    try {
+        const unanswered = defaultQuestions.filter(q => !hasil[q.id]);
+        if (unanswered.length > 0) {
+        setErrorMessage('Harap jawab semua pertanyaan sebelum menyimpan');
+        setIsSubmitting(false);
+        return;
+        }
+
+        const payload = {
+        result_id: parseInt(id_result),
+        comment: catatanUmum || 'Tidak ada',
+        items: defaultQuestions.map(q => ({
+            question: q.questions,
+            answer: hasil[q.id] === 'kompeten' ? true : false,
+            comment: catatan[q.id] || '-',
+        })),
+        };
+
+        const response = await api.post('/assessments/ak-03/answer', payload);
+
+        if (response.data.success) {
+        setShowSuccessModal(true);
+        } else {
+        setErrorMessage(response.data.message || 'Gagal menyimpan data.');
+        }
+    } catch (error: any) {
+        setErrorMessage(error.response?.data?.message || 'Gagal menyimpan data.');
+    } finally {
+        setIsSubmitting(false);
+    }
+    };
+
+
+    const filteredData = defaultQuestions.filter(item => {
+        const matchesSearch = item.questions.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter =
             filterKompeten === 'all' ||
             (filterKompeten === 'kompeten' && hasil[item.id] === 'kompeten') ||
             (filterKompeten === 'belum' && hasil[item.id] === 'belum');
         return matchesSearch && matchesFilter;
     });
+
+    if (loading) {
+        return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E77D35]"></div>
+        </div>
+        );
+    }
+
+    if (errorMessage && !formData) {
+        return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+            <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Error</h2>
+            <p className="text-gray-600 mb-4">{errorMessage}</p>
+            <button
+                onClick={fetchData}
+                className="bg-[#E77D35] text-white px-4 py-2 rounded hover:bg-orange-600"
+            >
+                Coba Lagi
+            </button>
+            </div>
+        </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -109,6 +217,21 @@ export default function Ak03() {
                     />
                 </div>
                 <div className="m-10">
+
+                    {errorMessage && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
+                            <AlertCircle size={20} className="mr-2" />
+                            {errorMessage}
+                            <button
+                                type="button"
+                                className="ml-auto text-red-500 hover:text-red-600 focus:outline-none"
+                                onClick={() => setErrorMessage('')}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                    )}
+
                     <div className="bg-white rounded-lg shadow-sm p-4 mb-4 space-y-4">
                         {/* Baris 1 */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -121,7 +244,7 @@ export default function Ak03() {
                                     Okupasi Junior Coder
                                 </span>
                                 <span className="bg-[#E77D3533] text-[#E77D35] text-sm px-3 py-1 rounded-md font-sm">
-                                    SKM.RPL.PJ/LSPSMK24/2023
+                                    { formData?.assessment?.code || "Tidak Diketahui" }
                                 </span>
                             </div>
                         </div>
@@ -130,23 +253,32 @@ export default function Ak03() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700 mb-1">Asesi</label>
-                                <select className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <option>Pilih Asesi</option>
-                                </select>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    defaultValue={formData?.assessee?.name || "Tidak Diketahui"}
+                                    readOnly
+                                />
                             </div>
 
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700 mb-1">Asesor</label>
-                                <select className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <option>Pilih Asesor</option>
-                                </select>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    defaultValue={formData?.assessor?.name || "Tidak Diketahui"}
+                                    readOnly
+                                />
                             </div>
 
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700 mb-1">TUK</label>
-                                <select className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <option>TUK</option>
-                                </select>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    defaultValue={formData?.tuk || "Tidak Diketahui"}
+                                    readOnly
+                                />
                             </div>
 
                             <div className="flex flex-col">
@@ -154,6 +286,7 @@ export default function Ak03() {
                                 <input
                                     type="date"
                                     className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    defaultValue={formData?.schedule?.start_date ? new Date(formData?.schedule?.start_date).toISOString().split('T')[0] : ""}
                                 />
                             </div>
 
@@ -162,6 +295,7 @@ export default function Ak03() {
                                 <input
                                     type="date"
                                     className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    defaultValue={formData?.schedule?.end_date ? new Date(formData?.schedule?.end_date).toISOString().split('T')[0] : ""}
                                 />
                             </div>
                         </div>
@@ -260,7 +394,7 @@ export default function Ak03() {
                                                     {item.id}
                                                 </td>
                                                 <td className="px-2 py-2 text-xs sm:text-sm text-gray-900 break-words">
-                                                    {item.komponen}
+                                                    {item.questions}
                                                 </td>
                                                 <td className="px-2 py-2 text-center">
                                                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-2 sm:gap-4">
@@ -353,6 +487,8 @@ export default function Ak03() {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] text-sm"
                                 placeholder="Catatan"
                                 rows={4}
+                                value={catatanUmum}
+                                onChange={(e) => setCatatanUmum(e.target.value)}
                             />
 
                             <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 w-full">
@@ -365,10 +501,11 @@ export default function Ak03() {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setShowModalConfrimAsesment(true)}
-                                    className="w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-sm text-white rounded hover:bg-orange-600 transition cursor-pointer"
+                                    onClick={handleSubmit}
+                                    disabled={loading || isSubmitting}
+                                    className="w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-sm text-white rounded hover:bg-orange-600 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
                                 >
-                                    Lanjut
+                                    {isSubmitting ? 'Menyimpan...' : 'Simpan'}
                                 </button>
                             </div>
                         </div>
@@ -397,32 +534,23 @@ export default function Ak03() {
                             </div>
                         </div>
                     )}
-                    {showModalConfrimAsesment && (
+
+                    {/* Modal Sukses */}
+                    {showSuccessModal && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-[999]">
                             <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full text-center">
                                 <div className="mb-4 flex justify-center">
-                                    <img src="/img/confirm-asesmen.svg" alt="Pria Sigma" />
+                                    <CheckCircle className="w-16 h-16 text-green-500" />
                                 </div>
 
-                                <h2 className="font-bold text-lg mb-2">Konfirmasi: Anda akan memasuki sesi asesmen.</h2>
-                                <p className="text-gray-500 text-sm mb-10">
-                                    Setelah dimulai, sesi tidak dapat dijeda atau dibatalkan. Mohon pastikan Anda siap sebelum melanjutkan.
+                                <h2 className="font-bold text-lg mb-2">Data Berhasil Disimpan!</h2>
+                                <p className="text-gray-500 text-sm mb-6">
+                                    Umpan balik telah berhasil disimpan ke sistem.
                                 </p>
-
-                                <div className="flex justify-between gap-2">
-                                    <button
-                                        onClick={() => setShowModalConfrimAsesment(false)}
-                                        className="flex-1 border border-[#E77D35] text-[#E77D35] py-2 rounded hover:bg-orange-50 cursor-pointer"
-                                    >
-                                        Batalkan
-                                    </button>
-                                    <Link
-                                        to={paths.asesi.ia05}
-                                        className="flex-1 bg-[#E77D35] text-white py-2 rounded hover:bg-orange-600 cursor-pointer text-center"
-                                    >
-                                        Lanjut
-                                    </Link>
-                                </div>
+                                
+                                <p className="text-gray-700 text-sm mb-10 font-medium">
+                                    Silakan keluar dari aplikasi jika Anda telah selesai.
+                                </p>
                             </div>
                         </div>
                     )}

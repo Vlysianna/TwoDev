@@ -184,6 +184,9 @@ const routes = {
 			ak01: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-01`,
 			ak01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-01",
+			ak03: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-03`,
+			ak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-03",
 			ak04: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-04`,
 			ak04Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-04",
