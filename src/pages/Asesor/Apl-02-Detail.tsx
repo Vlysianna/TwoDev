@@ -119,7 +119,7 @@ export default function CekApl02Detail() {
                     />
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm m-10 px-5 py-7">
+                <div className="bg-white rounded-lg shadow-sm m-4 px-4 py-7">
                     {/* Header */}
                     <div className="pb-7">
                         <div className="flex flex-wrap items-center w-full gap-4 md:gap-6">

@@ -113,7 +113,7 @@ export default function AplZeroOne() {
 					/>
 				</div>
 
-				<div className="space-y-8 px-4 sm:px-6 lg:px-8 xl:px-40 py-4 sm:py-8">
+				<div className="space-y-8 mx-4 sm:mx-6 lg:px-8 xl:px-40 py-4 sm:py-8">
 					{/* Notifications */}
 					{error && (
 						<div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">

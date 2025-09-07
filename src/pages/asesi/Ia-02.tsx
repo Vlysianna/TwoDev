@@ -1,11 +1,15 @@
-import { ChevronLeft, Clock, AlertCircle, Monitor } from "lucide-react";
+import {
+  ChevronLeft,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
-import type { GroupIA, ResultIA02 } from "@/model/ia02-model";
+import type { ResultIA02 } from "@/model/ia02-model";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
@@ -16,7 +20,6 @@ export default function Ia02() {
 
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ResultIA02>({
     id: 0,
     assessment: {
@@ -54,16 +57,13 @@ export default function Ia02() {
       updated_at: "0000-00-00T00:00:00.000Z",
     },
   });
-  const [groups, setGroups] = useState<GroupIA[]>([]);
-
-  const [selectedGroup, setSelectedGroup] = useState(0);
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   useEffect(() => {
     if (id_result && id_assessment) {
       fetchResult(id_result);
-      fetchGroup(id_assessment);
     }
   }, [user]);
 
@@ -87,20 +87,30 @@ export default function Ia02() {
     }
   };
 
-  const fetchGroup = async (id_assessment: string) => {
+  const handleViewPDF = async () => {
     try {
-      setLoading(true);
+      setGeneratingPdf(true);
       const response = await api.get(
-        `/assessments/ia-02/units/${id_assessment}`
+        `/assessments/ia-02/pdf/${id_assessment}`,
+        {
+          responseType: "blob",
+        }
       );
-      if (response.data.success) {
-        setGroups(response.data.data);
-      }
-    } catch (error: any) {
-      console.log("Error fetching group:", error);
-      setError("Gagal memuat data asesmen");
+
+      // Create blob and open in new tab
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+
+      // Clean up after a delay
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error("Error viewing PDF:", error);
+      setError("Gagal membuka PDF");
     } finally {
-      setLoading(false);
+      setGeneratingPdf(false);
     }
   };
 
@@ -143,7 +153,7 @@ export default function Ia02() {
         </div>
 
         {/* Content */}
-        <div className="px-4 sm:px-6 pb-7">
+        <div className="mx-4 sm:mx-6 pb-7">
           {/* Error State */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
@@ -206,98 +216,20 @@ export default function Ia02() {
                   <li key={index}>{item}</li>
                 ))}
               </ol>
-            </div>
-          </div>
-
-          {/* Skenario Tugas Praktik Demonstrasi */}
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-            <h3 className="text-sm font-medium text-gray-800 mb-6">
-              B. Skenario Tugas Praktik Demonstrasi
-            </h3>
-
-            {loading ? (
-              <div className="flex items-center justify-center h-40">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+              {/* PDF Options */}
+              <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={handleViewPDF}
+                  disabled={generatingPdf}
+                  className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Lihat PDF
+                </button>
               </div>
-            ) : (
-              <>
-                {/* Tabs */}
-                <div className="flex gap-2 mb-6 overflow-x-auto">
-                  {groups.map((group, index) => (
-                    <button
-                      key={index}
-                      className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer whitespace-nowrap ${
-                        index === selectedGroup
-                          ? "bg-[#E77D35] text-white"
-                          : "text-gray-600 hover:text-gray-800"
-                      }`}
-                      onClick={() => setSelectedGroup(index)}
-                    >
-                      {group.name}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Unit Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {groups[selectedGroup]?.units?.map((unit, index) => (
-                    <div
-                      key={unit.id}
-                      className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
-                    >
-                      <div className="flex items-center mb-3">
-                        <div className="rounded-lg mr-3 flex-shrink-0">
-                          <Monitor size={16} className="text-[#E77D35]" />
-                        </div>
-                        <h4 className="font-medium text-[#E77D35] text-sm">
-                          Unit kompetensi {1 + index}
-                        </h4>
-                      </div>
-
-                      <h5 className="font-medium text-gray-800 mb-2 text-sm leading-tight">
-                        {unit.title}
-                      </h5>
-
-                      <p className="text-xs text-gray-500">{unit.unit_code}</p>
-                    </div>
-                  )) ?? (
-                    <div className="col-span-full text-center py-8 text-gray-500">
-                      Tidak ada unit kompetensi tersedia untuk kelompok
-                      pekerjaan ini.
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Keterangan */}
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-            <div className="pt-4">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Skenario Tugas Praktik Demonstrasi
-              </h3>
-              <p className="text-sm text-gray-700">
-                {groups[selectedGroup]?.scenario ??
-                  "Tidak ada skenario tugas praktik demonstrasi tersedia untuk kelompok pekerjaan ini."}
-              </p>
-              <ol className="list-disc list-inside text-sm text-gray-700 space-y-1 my-2">
-                {groups[selectedGroup]?.tools?.map((tool, index) => (
-                  <li key={index}>{tool.name}</li>
-                )) ?? (
-                  <li>
-                    Tidak ada alat dan perlengkapan yang tersedia untuk kelompok
-                    pekerjaan ini.
-                  </li>
-                )}
-              </ol>
-              <h3 className="text-xl font-semibold text-gray-800 my-3">
-                Waktu : {groups[selectedGroup]?.duration ?? "0"} Menit
-              </h3>
             </div>
           </div>
 
-          {/* Validasi anjay */}
+          {/* Validasi */}
           <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 items-start">
               {/* Bagian kiri (2 kolom) */}
@@ -307,7 +239,7 @@ export default function Ia02() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asesi
                   </label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <input
                       type="text"
                       placeholder="Nama Asesi"
@@ -318,7 +250,7 @@ export default function Ia02() {
                     <input
                       type="date"
                       placeholder="Tanggal"
-                      className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full sm:w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-2 sm:mt-0"
                       value={result.ia02_header.updated_at.split("T")[0]}
                       disabled
                     />
@@ -330,7 +262,7 @@ export default function Ia02() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asesor
                   </label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <input
                       type="text"
                       placeholder="Nama Asesor"
@@ -341,7 +273,7 @@ export default function Ia02() {
                     <input
                       type="date"
                       placeholder="Tanggal"
-                      className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full sm:w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-2 sm:mt-0"
                       value={result.ia02_header.updated_at.split("T")[0]}
                       disabled
                     />

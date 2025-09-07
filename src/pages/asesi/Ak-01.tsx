@@ -199,7 +199,7 @@ export default function Ak01() {
             }
           />
         </div>
-        <div className="px-6 pb-7">
+        <div className="px-4 pb-7">
           <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Header Section */}
             <div className="mb-4 border-b border-gray-200 pb-4">

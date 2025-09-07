@@ -189,7 +189,7 @@ export default function Ia05CAssessee() {
       </div>
 
       {/* Content */}
-      <div className="max-w-[1450px] mx-auto py-2 md:py-6 px-2 md:px-0">
+      <div className="mx-4 py-2 md:py-6">
         <div className="bg-white mx-4 lg:mx-6 mt-4 lg:mt-6 mb-6 rounded-lg shadow-sm border p-4 lg:p-6">
           {/* Header Info & Progress */}
           <div className="py-4 md:py-6 border-gray-200">

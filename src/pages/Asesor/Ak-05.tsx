@@ -93,16 +93,14 @@ export default function CekAk05() {
         setError("Gagal menyimpan data");
       }
     } catch (err) {
-      console.error("Error saving data:", err);      
+      console.error("Error saving data:", err);
     } finally {
       setLoading(false);
     }
   };
 
-
   const handleGenerateQRCode = async () => {
-    try {            
-
+    try {
       // Then generate QR code
       const response = await api.put(
         `/assessments/ak-05/result/assessor/${id_result}/approve`
@@ -165,11 +163,11 @@ export default function CekAk05() {
         }
       />
 
-      <main className="pt-4 px-4 sm:px-6 pb-10 max-w-7xl mx-auto space-y-8">
+      <main className="pt-4 sm:px-6 pb-10 mx-4 space-y-8">
         {/* --- Skema Sertifikasi --- */}
-        <section className="px-6 pb-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        <section className="mb-1">
+          <div className="w-full">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
               {/* Header Skema */}
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
                 {/* Kiri */}
@@ -198,7 +196,7 @@ export default function CekAk05() {
                   <span className="text-sm text-gray-700">
                     {data.result.assessment.occupation.name}
                   </span>
-                  <span className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] sm:ml-5">
+                  <span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
                     {data.result.assessment.code}
                   </span>
                 </div>
@@ -223,59 +221,61 @@ export default function CekAk05() {
         </section>
 
         {/* --- Tabel Asesi --- */}
-        <section className="overflow-x-auto">
-          <table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
-            <thead>
-              <tr>
-                <th className="p-3 border text-center">No.</th>
-                <th className="p- border text-center xs-text">Nama Asesi</th>
-                <th className="p-3 border text-center">Rekomendasi</th>
-                <th className="p-3 border text-center">Keterangan</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="p-3 border text-center">1</td>
-                <td className="p-3 border text-center">
-                  {data.result.assessee.name || "N/A"}
-                </td>
-                <td className="p-3 border">
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="rekom"
-                        value="true"
-                        checked={isCompetent === true}
-                        onChange={() => setIsCompetent(true)}
-                      />
-                      Kompeten
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="rekom"
-                        value="false"
-                        checked={isCompetent === false}
-                        onChange={() => setIsCompetent(false)}
-                      />
-                      Belum Kompeten
-                    </label>
-                  </div>
-                </td>
-                <td className="p-3 border text-center">
-                  <textarea
-                    value={deskripsi}
-                    onChange={(e) => setDeskripsi(e.target.value)}
-                    className="w-full text-center border-none focus:ring-0 focus:outline-none resize-none"
-                    rows={1}
-                    placeholder="Masukkan keterangan"
-                    style={{ minHeight: "1.5rem" }}
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+          <div className="overflow-x-auto">
+            <table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
+              <thead>
+                <tr>
+                  <th className="p-3 border text-center">No.</th>
+                  <th className="p- border text-center xs-text">Nama Asesi</th>
+                  <th className="p-3 border text-center">Rekomendasi</th>
+                  <th className="p-3 border text-center">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="p-3 border text-center">1</td>
+                  <td className="p-3 border text-center">
+                    {data.result.assessee.name || "N/A"}
+                  </td>
+                  <td className="p-3 border">
+                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="rekom"
+                          value="true"
+                          checked={isCompetent === true}
+                          onChange={() => setIsCompetent(true)}
+                        />
+                        Kompeten
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="rekom"
+                          value="false"
+                          checked={isCompetent === false}
+                          onChange={() => setIsCompetent(false)}
+                        />
+                        Belum Kompeten
+                      </label>
+                    </div>
+                  </td>
+                  <td className="p-3 border text-center">
+                    <textarea
+                      value={deskripsi}
+                      onChange={(e) => setDeskripsi(e.target.value)}
+                      className="w-full text-center border-none focus:ring-0 focus:outline-none resize-none"
+                      rows={1}
+                      placeholder="Masukkan keterangan"
+                      style={{ minHeight: "1.5rem" }}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
 
         {/* --- Form & QR --- */}
