@@ -1119,7 +1119,13 @@ function parseHTMLToIA01(html: string): IA01Group[] {
 
 		// --- cek apakah ini tabel group baru (Kelompok Pekerjaan) ---
 		const firstCellText = rows[0]?.querySelector("td")?.innerText || "";
-		if (firstCellText.match(/Kelompok Pekerjaan (\d+)/)) {
+		// console.log(firstCellText);
+		if (
+			firstCellText
+				.replace(/\s+/g, " ")
+				.trim()
+				.match(/Kelompok Pekerjaan (\d+)/)
+		) {
 			// console.log(firstCellText);
 			const groupName = firstCellText.trim();
 			currentGroup = {
