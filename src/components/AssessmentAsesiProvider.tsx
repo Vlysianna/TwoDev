@@ -103,15 +103,16 @@ export default function AssessmentAsesiProvider({
 	}, [id_assessment, id_asesor]);
 
 	useEffect(() => {
-		// console.log(approveData);
 		if (approveData == undefined || !result) return;
+		console.log(approveData, result);
 		setFilterApproveData(
-			approveData.find((data) => data.result.result_id == result?.id)
+			approveData.find((data) => data.result_id == result?.id)
 		);
 		setLoading(false);
 	}, [approveData, result]);
 
 	useEffect(() => {
+		console.log(approveData);
 		if (!id_assessment || !id_asesor) {
 			navigate(routes.asesi.dashboard, { replace: true });
 			return;

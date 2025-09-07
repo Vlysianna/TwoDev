@@ -21,7 +21,7 @@ type FormValues = {
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
 export default function DataSertifikasi() {
-	const { id_assessment, id_asesor } = useAssessmentParams();
+	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
 
 	// const { user } = useAuth();
@@ -109,7 +109,10 @@ export default function DataSertifikasi() {
 				formData.append("school_report_card", data.school_report_card);
 			}
 			if (data.field_work_practice_certificate) {
-				formData.append("field_work_practice_certificate", data.field_work_practice_certificate);
+				formData.append(
+					"field_work_practice_certificate",
+					data.field_work_practice_certificate
+				);
 			}
 			if (data.student_card) {
 				formData.append("student_card", data.student_card);
@@ -121,15 +124,11 @@ export default function DataSertifikasi() {
 				formData.append("id_card", data.id_card);
 			}
 
-			await api.post(
-				`/assessments/apl-01/create-certificate-docs`,
-				formData,
-				{
-					headers: {
-						"Content-Type": "multipart/form-data",
-					},
-				}
-			);
+			await api.post(`/assessments/apl-01/create-certificate-docs`, formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			});
 
 			setSuccess("Data berhasil disimpan! Melanjutkan ke tahap berikutnya...");
 
@@ -157,7 +156,7 @@ export default function DataSertifikasi() {
 		if (approveData == undefined) return;
 		console.log(approveData);
 		setFilterApproveData(
-			approveData.find((data: any) => data.result.assessor_id == id_asesor)
+			approveData.find((data: any) => data.result_id == id_result)
 		);
 		setLoading(false);
 	}, [approveData]);
