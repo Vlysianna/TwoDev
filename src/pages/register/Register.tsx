@@ -40,7 +40,7 @@ export default function RegisterForm() {
             setError('');
             
             // Role ID 3 untuk Assessee (default untuk public registration)
-            await registerUser(email, password, confirmPassword, 3);
+            await registerUser(name, email, password, confirmPassword, 3);
             
             // Redirect to login page after successful registration
             navigate('/auth/login', { 
