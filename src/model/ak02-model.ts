@@ -65,7 +65,7 @@ interface Assessor {
 
 export interface UnitCompetensi {
     id: number;
-    unit_code: string;
+    code: string;
     title: string;
 }
 

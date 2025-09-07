@@ -78,7 +78,8 @@ const routes = {
 				id_result: string | number,
 				id_asesi: string | number,
 				id_unit: string | number
-			) => `/asesor/assessment/${id_assessment}/${id_result}/${id_asesi}/cek-apl-02-detail/${id_unit}`,
+			) =>
+				`/asesor/assessment/${id_assessment}/${id_result}/${id_asesi}/cek-apl-02-detail/${id_unit}`,
 			cekApl02DetailPattern:
 				"/asesor/assessment/:id_assessment/:id_result/:id_asesi/cek-apl-02-detail/:id_unit",
 			ia01: (id_assessment: string | number, id_asesi: string | number) =>
@@ -184,6 +185,9 @@ const routes = {
 			ak01: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-01`,
 			ak01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-01",
+			ak02: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-02`,
+			ak02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-02",
 			ak03: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-03`,
 			ak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-03",
