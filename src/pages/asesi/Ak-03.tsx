@@ -3,6 +3,7 @@ import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link } from "react-router-dom";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import AK03 from "@/components/section/AK-03";
+import routes from "@/routes/paths";
 
 export default function Ak03() {
 	const { id_result } = useAssessmentParams();
@@ -21,7 +22,10 @@ export default function Ak03() {
 					<NavbarAsesi
 						title="Umpan balik dan catatan asesmen"
 						icon={
-							<Link to={"#"} className="text-gray-500 hover:text-gray-600">
+							<Link
+								to={routes.asesi.dashboard}
+								className="text-gray-500 hover:text-gray-600"
+							>
 								<ChevronLeft size={20} />
 							</Link>
 						}

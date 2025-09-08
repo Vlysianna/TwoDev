@@ -19,7 +19,7 @@ export default function Ak03() {
 								to={paths.asesor.assessment.dashboardAsesmenMandiri(
 									id_assessment
 								)}
-								className="text-gray-500 hover:text-gray-600"
+              className="text-gray-500 hover:text-gray-600"
 							>
 								<ChevronLeft size={20} />
 							</Link>

@@ -102,7 +102,7 @@ export default function CekAk05() {
         title="Laporan Asesmen - FR.AK.05"
         icon={
           <Link
-            to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)}
+            to={paths.asesi.dashboard}
             className="text-gray-500 hover:text-gray-600"
           >
             <ChevronLeft size={20} />

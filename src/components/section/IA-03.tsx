@@ -211,6 +211,7 @@ export default function IA03({
 		answer: string,
 		approved: boolean
 	) => {
+		if (isAssessee) return;
 		try {
 			const payload = {
 				result_id: result.id,
@@ -240,6 +241,7 @@ export default function IA03({
 
 	// Approve hasil oleh Asesi
 	const approveByAssessee = async () => {
+		if (!isAssessee) return;
 		try {
 			const response = await api.put(
 				`/assessments/ia-03/result/assessee/${id_result}/approve`
@@ -261,6 +263,7 @@ export default function IA03({
 
 	// Approve hasil oleh Asesor
 	const approveByAssessor = async () => {
+		if (isAssessee) return;
 		try {
 			const response = await api.put(
 				`/assessments/ia-03/result/assessor/${id_result}/approve`
@@ -282,6 +285,7 @@ export default function IA03({
 
 	// Simpan semua perubahan pertanyaan
 	const handleSaveAllQuestions = async () => {
+		if (isAssessee) return;
 		try {
 			setLoading(true);
 			const promises = questions.map(async (question) => {

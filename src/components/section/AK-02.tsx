@@ -202,6 +202,7 @@ export default function AK02({
 	}, [units, data.ak02_headers.rows]);
 
 	const handleCheckboxChange = (unitIndex: number, evidenceIndex: number) => {
+		if (isAssessee) return;
 		const key = `${unitIndex}-${evidenceIndex}`;
 		setSelectedOptions((prev) => ({
 			...prev,
@@ -215,6 +216,7 @@ export default function AK02({
 	};
 
 	const handleAssessmentResultChange = (value: string) => {
+		if (isAssessee) return;
 		if (assessmentResult === value) {
 			setAssessmentResult("");
 		} else {
@@ -226,6 +228,7 @@ export default function AK02({
 	};
 
 	const handleSubmit = async () => {
+		if (isAssessee) return;
 		if (!user || user.role_id !== 2) {
 			alert("Hanya asesor yang dapat mengirim data asesmen.");
 			return;
@@ -308,6 +311,7 @@ export default function AK02({
 	};
 
 	const handleGenerateQRCode = async () => {
+		if (isAssessee) return;
 		try {
 			const response = await api.put(
 				`/assessments/ak-02/result/assessor/${id_result}/approve`
@@ -323,6 +327,7 @@ export default function AK02({
 	};
 
 	const handleAssesseeApproval = async () => {
+		if (!isAssessee) return;
 		try {
 			const response = await api.put(
 				`/assessments/ak-02/result/assessee/${id_result}/approve`

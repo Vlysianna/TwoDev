@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { FileText, AlertCircle, CheckCircle } from "lucide-react";
+import { FileText, AlertCircle, CheckCircle, ChevronLeft } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
@@ -109,7 +109,14 @@ export default function AplZeroOne() {
 				<div className="bg-white rounded-lg shadow-sm mb-8">
 					<NavbarAsesi
 						title="Permohonan Sertifikasi Kompetensi"
-						icon={<FileText size={20} />}
+						icon={
+							<Link
+								to={paths.asesi.dashboard}
+								className="text-gray-500 hover:text-gray-600"
+							>
+								<ChevronLeft size={20} />
+							</Link>
+						}
 					/>
 				</div>
 

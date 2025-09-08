@@ -195,7 +195,7 @@ export default function Ia05() {
             title="Lembar Jawaban Pilihan Ganda"
             icon={
               <Link
-                to={paths.asesi.assessment.apl02(id_assessment, id_asesor)}
+                to={paths.asesi.dashboard}
                 className="text-gray-500 hover:text-gray-600"
               >
                 <ChevronLeft size={20} />
