@@ -35,15 +35,15 @@ import DashboardHome from "@/components/DashboardHome";
 import AdminApl02 from "@/pages/admin/Apl-02";
 import Contact from "@/pages/LandingPage/Contact";
 import AssessmentAsesiProvider from "@/components/AssessmentAsesiProvider";
-import Apl02 from "@/pages/asesi/Apl-02";
+import Apl02Asesi from "@/pages/asesi/Apl-02";
 import Apl02Detail from "@/pages/asesi/Apl-02-Detail";
-import Ak04 from "@/pages/asesi/Ak-04";
-import Ia05 from "@/pages/asesi/Ia-05";
-import Ia03Assessee from "@/pages/asesi/Ia-03";
-import Ia02 from "@/pages/asesi/Ia-02";
+import Ak04Asesi from "@/pages/asesi/Ak-04";
+import Ia05Asesi from "@/pages/asesi/Ia-05";
+import Ia03Asesi from "@/pages/asesi/Ia-03";
+import Ia02Asesi from "@/pages/asesi/Ia-02";
 import Ak02Asesi from "@/pages/asesi/Ak-02";
-import Ak01 from "@/pages/asesi/Ak-01";
-import Ak03 from "@/pages/asesi/Ak-03";
+import Ak01Asesi from "@/pages/asesi/Ak-01";
+import Ak03Asesi from "@/pages/asesi/Ak-03";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
@@ -51,16 +51,17 @@ import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
 import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
 import DashboardAsesmenMandiri from "@/pages/asesor/DashboardAsesmenMandiri";
 import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
-import CekApl02 from "@/pages/asesor/Apl-02";
-import CekApl02Detail from "@/pages/asesor/Apl-02-Detail";
-import Ia01 from "@/pages/asesor/Ia-01";
-import Ia01Detail from "@/pages/asesor/Ia-01-Detail";
-import Ia02Assessor from "@/pages/asesor/Ia-02";
-import Ia03 from "@/pages/asesor/Ia-03";
-import CekAk01 from "@/pages/asesor/Ak-01";
-import Ak02 from "@/pages/asesor/Ak-02";
-import Ak05 from "@/pages/asesor/Ak-05";
-import Ia05C from "@/pages/asesor/Ia-05-C";
+import Apl02Asesor from "@/pages/asesor/Apl-02";
+import Apl02DetailAsesor from "@/pages/asesor/Apl-02-Detail";
+import Ia01Asesor from "@/pages/asesor/Ia-01";
+import Ia01DetailAsesor from "@/pages/asesor/Ia-01-Detail";
+import Ia02Asesor from "@/pages/asesor/Ia-02";
+import Ia03Asesor from "@/pages/asesor/Ia-03";
+import Ak01Asesor from "@/pages/asesor/Ak-01";
+import Ak02Asesor from "@/pages/asesor/Ak-02";
+import Ak03Asesor from "@/pages/asesor/Ak-03";
+import Ak05Asesor from "@/pages/asesor/Ak-05";
+import Ia05CAsesor from "@/pages/asesor/Ia-05-C";
 import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
@@ -77,7 +78,7 @@ const router = createBrowserRouter([
 			// Landing & Public Pages
 			{ index: true, element: <LandingPage /> },
 			// legacy path for older links to APL-02 (accepts id param)
-			{ path: "/apl-02/:id", element: <Apl02 /> },
+			{ path: "/apl-02/:id", element: <Apl02Asesi /> },
 			// legacy/alternate path for assesmen aktif (avoid 404 on older links)
 			{ path: "/asesmen-aktif-asesi", element: <AsessmentAktif /> },
 			// assessor legacy path (some links point here instead of the new /asesor/... path)
@@ -195,7 +196,7 @@ const router = createBrowserRouter([
 							},
 							{
 								path: paths.asesi.assessment.apl02Pattern,
-								element: <Apl02 />,
+								element: <Apl02Asesi />,
 							},
 							{
 								path: paths.asesi.assessment.apl02DetailPattern,
@@ -211,15 +212,15 @@ const router = createBrowserRouter([
 							},
 							{
 								path: paths.asesi.assessment.ia02Pattern,
-								element: <Ia02 />,
+								element: <Ia02Asesi />,
 							},
 							{
 								path: paths.asesi.assessment.ia03Pattern,
-								element: <Ia03Assessee />,
+								element: <Ia03Asesi />,
 							},
 							{
 								path: paths.asesi.assessment.ia05Pattern,
-								element: <Ia05 />,
+								element: <Ia05Asesi />,
 							},
 							{
 								path: paths.asesi.assessment.ia05CAssesseePattern,
@@ -227,7 +228,7 @@ const router = createBrowserRouter([
 							},
 							{
 								path: paths.asesi.assessment.ak01Pattern,
-								element: <Ak01 />,
+								element: <Ak01Asesi />,
 							},
 							{
 								path: paths.asesi.assessment.ak02Pattern,
@@ -235,17 +236,17 @@ const router = createBrowserRouter([
 							},
 							{
 								path: paths.asesi.assessment.ak03Pattern,
-								element: <Ak03 />,
+								element: <Ak03Asesi />,
 							},
 							{
 								path: paths.asesi.assessment.ak04Pattern,
-								element: <Ak04 />,
+								element: <Ak04Asesi />,
 							},
 						],
 					},
 					{ path: paths.asesi.asesmenDiikuti, element: <AsessmentAktif /> },
-					{ path: paths.asesi.ak03, element: <Ak03 /> },
-					{ path: paths.asesi.ak04, element: <Ak04 /> },
+					{ path: paths.asesi.ak03, element: <Ak03Asesi /> },
+					{ path: paths.asesi.ak04, element: <Ak04Asesi /> },
 					{ path: paths.asesi.dataAsesi, element: <DataAssesi /> },
 				],
 			},
@@ -277,35 +278,51 @@ const router = createBrowserRouter([
 							},
 							{
 								path: paths.asesor.assessment.cekApl02Pattern,
-								element: <CekApl02 />,
+								element: <Apl02Asesor />,
 							},
 							{
 								path: paths.asesor.assessment.cekApl02DetailPattern,
-								element: <CekApl02Detail />,
+								element: <Apl02DetailAsesor />,
 							},
-							{ path: paths.asesor.assessment.ia01Pattern, element: <Ia01 /> },
+							{
+								path: paths.asesor.assessment.ia01Pattern,
+								element: <Ia01Asesor />,
+							},
 							{
 								path: paths.asesor.assessment.ia01DetailPattern,
-								element: <Ia01Detail />,
+								element: <Ia01DetailAsesor />,
 							},
 							{
 								path: paths.asesor.assessment.ia02Pattern,
-								element: <Ia02Assessor />,
+								element: <Ia02Asesor />,
 							},
-							{ path: paths.asesor.assessment.ia03Pattern, element: <Ia03 /> },
+							{
+								path: paths.asesor.assessment.ia03Pattern,
+								element: <Ia03Asesor />,
+							},
 							{
 								path: paths.asesor.assessment.ia05Pattern,
 								element: <IA05Assessor />,
 							},
 							{
 								path: paths.asesor.assessment.ak01Pattern,
-								element: <CekAk01 />,
+								element: <Ak01Asesor />,
 							},
-							{ path: paths.asesor.assessment.ak02Pattern, element: <Ak02 /> },
-							{ path: paths.asesor.assessment.ak05Pattern, element: <Ak05 /> },
+							{
+								path: paths.asesor.assessment.ak02Pattern,
+								element: <Ak02Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ak03Pattern,
+								element: <Ak03Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ak05Pattern,
+								element: <Ak05Asesor />,
+							},
 							{
 								path: paths.asesor.assessment.ia05cPattern,
-								element: <Ia05C />,
+								element: <Ia05CAsesor />,
 							},
 							{
 								path: paths.asesor.assessment.lembarJawabanPattern,

@@ -247,12 +247,12 @@ export default function AssessmentAsesiProvider({
 			disabled: false,
 			to: routes.asesi.assessment.ak02(id_assessment ?? "", id_asesor ?? ""),
 		},
-		// {
-		// 	value: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
-		// 	label: "AK 03",
-		// 	disabled: false,
-		// 	to: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
-		// },
+		{
+			value: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
+			label: "AK 03",
+			disabled: false,
+			to: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
+		},
 		// {
 		// 	value: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
 		// 	label: "AK 05",
