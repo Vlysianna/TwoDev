@@ -170,11 +170,6 @@ export default function AssessmentAsesiProvider({
 	// Fecth Tab Items
 	const [tabItemsState, setTabItems] = useState<any>([]);
 	const [filteredTabItems, setFilteredTabItems] = useState<any>([]);
-	useEffect(() => {
-		if (id_assessment && id_asesor && result?.assessee?.id) {
-			fetchTabItems();
-		}
-	}, [id_assessment, id_asesor, result?.assessee?.id]);
 
 	const fetchTabItems = async () => {
 		if (!id_assessment || !id_asesor || !result?.assessee?.id) return;
@@ -195,10 +190,13 @@ export default function AssessmentAsesiProvider({
 			setTabItems([]);
 		}
 	};
-	useEffect(() => {
-		fetchTabItems();
-	}, [result]);
 
+		useEffect(() => {
+		if (id_assessment && id_asesor && result?.assessee?.id) {
+			fetchTabItems();
+		}
+	}, [id_assessment, id_asesor, result?.assessee?.id]);
+	
 	// tab items
 	const tabItems = [
 		{
@@ -243,12 +241,12 @@ export default function AssessmentAsesiProvider({
 			disabled: false,
 			to: routes.asesi.assessment.ak01(id_assessment ?? "", id_asesor ?? ""),
 		},
-		// {
-		// 	value: routes.asesi.assessment.ia01(id_assessment ?? "", id_asesor ?? ""),
-		// 	label: "IA-01",
-		// 	disabled: false,
-		// 	to: routes.asesi.assessment.ia01(id_assessment ?? "", id_asesor ?? ""),
-		// },
+		{
+			value: routes.asesi.assessment.ia01Asesi(id_assessment ?? "", id_asesor ?? ""),
+			label: "IA-01",
+			disabled: false,
+			to: routes.asesi.assessment.ia01Asesi(id_assessment ?? "", id_asesor ?? ""),
+		},
 		{
 			value: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
 			label: "IA-02",
@@ -279,12 +277,12 @@ export default function AssessmentAsesiProvider({
 			disabled: false,
 			to: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
 		},
-		// {
-		// 	value: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
-		// 	label: "AK-05",
-		// 	disabled: false,
-		// 	to: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
-		// },
+		{
+			value: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
+			label: "AK-05",
+			disabled: false,
+			to: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
+		},
 	];
 
 	useEffect(() => {

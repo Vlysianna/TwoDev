@@ -140,6 +140,57 @@ export default function DataSertifikasi() {
 		}
 	};
 
+		// fetch result docs if id_result changes
+		const [resultDocs, setResultDocs] = useState<{
+			purpose: string;
+			family_card?: string | null;
+			id_card?: string | null;
+			student_card?: string | null;
+			school_report_card?: string | null;
+			field_work_practice_certificate?: string | null;
+		} | null>(null);
+
+		useEffect(() => {
+			const fetchResultDocs = async () => {
+				try {
+					const res = await api.get(
+						`/assessments/apl-01/result/docs/${id_result}`
+					);
+
+					if (res.data.success && res.data.data) {
+						const {
+							purpose,
+							family_card,
+							field_work_practice_certificate,
+							id_card,
+							school_report_card,
+							student_card,
+						} = res.data.data;
+
+						const getFileName = (url: string | null | undefined) => 
+							url ? url.split("/").pop() : null;
+
+						setResultDocs({
+							purpose: purpose || "",
+							family_card: getFileName(family_card),
+							field_work_practice_certificate: getFileName(field_work_practice_certificate),
+							id_card: getFileName(id_card),
+							school_report_card: getFileName(school_report_card),
+							student_card: getFileName(student_card),
+						});
+					} else {
+						setResultDocs(null);
+					}
+				} catch (err) {
+					console.error("Failed to fetch result data:", err);
+				}
+			};
+
+			if (id_result) {
+				fetchResultDocs();
+			}
+		}, [id_result]);
+
 	const handleNext = () => {
 		if (modalStep === 1) {
 			setModalStep(2);
@@ -321,15 +372,18 @@ export default function DataSertifikasi() {
 												name="purpose"
 												control={control}
 												rules={{ required: "Harap pilih tujuan asesmen" }}
-												render={({ field }) => (
-													<input
-														type="radio"
-														value={option}
-														checked={field.value === option}
-														onChange={(e) => field.onChange(e.target.value)}
-														className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
-													/>
-												)}
+												render={({ field }) => {
+													const checked = resultDocs?.purpose === option;
+													return (
+														<input
+															type="radio"
+															value={option}
+															checked={checked}
+															onChange={(e) => field.onChange(e.target.value)}
+															className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
+														/>
+													);
+												}}
 											/>
 											<span className="text-gray-700 text-sm sm:text-base">
 												{option}
@@ -348,29 +402,29 @@ export default function DataSertifikasi() {
 								<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
 									Bukti Persyaratan Dasar
 								</h3>
-								<div className="space-y-6">
-									{supportingFilesStatic.map((file, index) => (
-										<div key={index} className="space-y-3">
-											<p className="text-gray-700 text-sm leading-relaxed">
-												{file.title}
-											</p>
-											<Controller
-												name={file.name as keyof FormValues}
-												control={control}
-												render={({ field }) => (
-													<FileUploadArea
-														field={{
-															value: field.value as File | null,
-															onChange: field.onChange as (
-																file: File | null
-															) => void,
-														}}
+									<div className="space-y-6">
+										{supportingFilesStatic.map((file, index) => {
+											const existingFile = resultDocs ? resultDocs[file.name as keyof typeof resultDocs] : null;
+
+											return (
+												<div key={index} className="space-y-3">
+													<p className="text-gray-700 text-sm leading-relaxed">{file.title}</p>
+													<Controller
+														name={file.name as keyof FormValues}
+														control={control}
+														render={({ field }) => (
+															<FileUploadArea
+																field={{
+																	value: existingFile ? new File([], existingFile) : (field.value as File | null),
+																	onChange: field.onChange,
+																}}
+															/>
+														)}
 													/>
-												)}
-											/>
-										</div>
-									))}
-								</div>
+												</div>
+											);
+										})}
+									</div>
 							</div>
 						</div>
 
@@ -381,29 +435,29 @@ export default function DataSertifikasi() {
 									<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
 										Bukti Administratif
 									</h3>
-									<div className="space-y-6">
-										{administrativeFilesStatic.map((fileName, index) => (
-											<div key={index} className="space-y-3">
-												<p className="text-gray-700 text-sm font-medium">
-													{fileName.title}
-												</p>
-												<Controller
-													name={fileName.name as keyof FormValues}
-													control={control}
-													render={({ field }) => (
-														<FileUploadArea
-															field={{
-																value: field.value as File | null,
-																onChange: field.onChange as (
-																	file: File | null
-																) => void,
-															}}
+										<div className="space-y-6">
+											{administrativeFilesStatic.map((file, index) => {
+												const existingFile = resultDocs ? resultDocs[file.name as keyof typeof resultDocs] : null;
+
+												return (
+													<div key={index} className="space-y-3">
+														<p className="text-gray-700 text-sm font-medium">{file.title}</p>
+														<Controller
+															name={file.name as keyof FormValues}
+															control={control}
+															render={({ field }) => (
+																<FileUploadArea
+																	field={{
+																		value: existingFile ? new File([], existingFile) : (field.value as File | null),
+																		onChange: field.onChange,
+																	}}
+																/>
+															)}
 														/>
-													)}
-												/>
-											</div>
-										))}
-									</div>
+													</div>
+												);
+											})}
+										</div>
 								</div>
 
 								<div className="mt-auto pt-4 space-y-3">

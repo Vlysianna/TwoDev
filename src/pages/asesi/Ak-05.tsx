@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
-import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssessorUrl } from "@/lib/hashids";
 import type { AK05ApiResponse, AK05ResponseData } from "@/model/ak05-model";
