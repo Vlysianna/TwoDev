@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { NotepadText, ChevronLeft, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssessorUrl } from "@/lib/hashids";
-import type { AK05ApiResponse, AK05ResponseData } from "@/model/ak05-model";
+import type { AK05ResponseData } from "@/model/ak05-model";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 
 export default function CekAk05() {
-	const { id_assessment, id_result, id_asesor } = useAssessmentParams();
+	const { id_result, id_asesor } = useAssessmentParams();
 	const { user } = useAuth();
 
 	const [loading, setLoading] = useState(false);
@@ -109,11 +109,11 @@ export default function CekAk05() {
 				}
 			/>
 
-			<main className="pt-4 px-4 sm:px-6 pb-10 max-w-7xl mx-auto space-y-8">
+			<main className="pt-4 sm:px-6 pb-10 mx-4 space-y-8">
 				{/* --- Skema Sertifikasi --- */}
-				<section className="px-6 pb-6">
-					<div className="max-w-7xl mx-auto">
-						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+				<section className="mb-1">
+					<div className="w-full">
+						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
 							{/* Header Skema */}
 							<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
 								{/* Kiri */}
@@ -131,17 +131,19 @@ export default function CekAk05() {
 											<circle cx="12" cy="12" r="10" strokeWidth="2" />
 											<polyline points="12,6 12,12 16,14" strokeWidth="2" />
 										</svg>
-										<span className="text-sm text-gray-600">Sewaktu</span>
+										<span className="text-sm text-gray-600">
+											{data.result.tuk || "Sewaktu"}
+										</span>
 									</div>
 								</div>
 
 								{/* Kanan */}
 								<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
 									<span className="text-sm text-gray-700">
-										Pemrogram Junior (Junior Coder)
+										{data.result.assessment.occupation.name}
 									</span>
-									<span className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] sm:ml-5">
-										SMK.RPL.PJ/LSPSMK24/2023
+									<span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
+										{data.result.assessment.code}
 									</span>
 								</div>
 							</div>
@@ -165,65 +167,80 @@ export default function CekAk05() {
 				</section>
 
 				{/* --- Tabel Asesi --- */}
-				<section className="overflow-x-auto">
-					<table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
-						<thead>
-							<tr>
-								<th className="p-3 border text-center">No.</th>
-								<th className="p- border text-center xs-text">Nama Asesi</th>
-								<th className="p-3 border text-center">Rekomendasi</th>
-								<th className="p-3 border text-center">Keterangan</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td className="p-3 border text-center">1</td>
-								<td className="p-3 border text-center">
-									{" "}
-									{data.result.assessee.name || "N/A"}
-								</td>
-								<td className="p-3 border">
-									{data.result.result_ak05.is_competent
-										? "Kompeten"
-										: "Belum Kompeten"}
-								</td>
-								<td className="p-3 border text-center">{deskripsi || "-"}</td>
-							</tr>
-						</tbody>
-					</table>
+				<section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+					<div className="overflow-x-auto">
+						<table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
+							<thead>
+								<tr>
+									<th className="p-3 border text-center">No.</th>
+									<th className="p- border text-center xs-text">Nama Asesi</th>
+									<th className="p-3 border text-center">Rekomendasi</th>
+									<th className="p-3 border text-center">Keterangan</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td className="p-3 border text-center">1</td>
+									<td className="p-3 border text-center">
+										{data.result.assessee.name || "N/A"}
+									</td>
+									<td className="p-3 border">
+										{data.result.result_ak05.is_competent
+											? "Kompeten"
+											: "Belum Kompeten"}
+									</td>
+									<td className="p-3 border text-center">{deskripsi || "-"}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</section>
 
 				{/* --- Form & QR --- */}
 				<section className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{/* Kiri: Form Catatan */}
 					<div className="bg-white border rounded-xl p-6 shadow-sm space-y-4">
+						<h2 className="text-sm font-medium">
+							Aspek Negatif dan Positif dalam Asesemen
+						</h2>
 						<textarea
 							className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
 							rows={2}
 							placeholder="Aspek negatif dan positif"
-							disabled
 							value={negatifPositif}
+							disabled
+							onChange={(e) => setNegatifPositif(e.target.value)}
 						/>
+						<h2 className="text-sm font-medium">
+							Pencatatan Penolakan Hasil Asesmen
+						</h2>
 						<textarea
 							className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
 							rows={2}
 							placeholder="Pencatatan penolakan"
-							disabled
 							value={penolakan}
+							disabled
+							onChange={(e) => setPenolakan(e.target.value)}
 						/>
+						<h2 className="text-sm font-medium">
+							Saran Perbaikan: (Asesor/Personil Terkait)
+						</h2>
 						<textarea
 							className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
 							rows={2}
 							placeholder="Saran perbaikan"
-							disabled
 							value={saran}
+							disabled
+							onChange={(e) => setSaran(e.target.value)}
 						/>
+						<h2 className="text-sm font-medium">Catatan</h2>
 						<textarea
 							className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
 							rows={3}
 							placeholder="Catatan..."
-							disabled
 							value={catatan}
+							disabled
+							onChange={(e) => setCatatan(e.target.value)}
 						/>
 					</div>
 
@@ -251,7 +268,11 @@ export default function CekAk05() {
 							<h2 className="text-sm font-medium mb-3">Tanggal</h2>
 							<input
 								type="text"
-								value={data.result.result_ak05.updated_at || "N/A"}
+								value={
+									new Date(
+										data.result.result_ak05.updated_at
+									).toLocaleDateString("id-ID") || "N/A"
+								}
 								disabled
 								className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
 							/>
