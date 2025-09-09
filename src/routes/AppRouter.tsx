@@ -44,6 +44,7 @@ import Ia02Asesi from "@/pages/asesi/Ia-02";
 import Ak02Asesi from "@/pages/asesi/Ak-02";
 import Ak01Asesi from "@/pages/asesi/Ak-01";
 import Ak03Asesi from "@/pages/asesi/Ak-03";
+import Ak05Asesi from "@/pages/asesi/Ak-05";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
@@ -241,6 +242,10 @@ const router = createBrowserRouter([
 							{
 								path: paths.asesi.assessment.ak04Pattern,
 								element: <Ak04Asesi />,
+							},
+							{
+								path: paths.asesi.assessment.ak05Pattern,
+								element: <Ak05Asesi />,
 							},
 						],
 					},

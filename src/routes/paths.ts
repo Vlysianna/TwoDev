@@ -200,6 +200,9 @@ const routes = {
 			ak04: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-04`,
 			ak04Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-04",
+			ak05: (id_assessment: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-05`,
+			ak05Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-05",
 		},
 		asesmenDiikuti: "/asesi/riwayat",
 		ak04: "/asesi/ak-04",

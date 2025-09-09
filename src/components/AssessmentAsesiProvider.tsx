@@ -191,12 +191,12 @@ export default function AssessmentAsesiProvider({
 		}
 	};
 
-		useEffect(() => {
+	useEffect(() => {
 		if (id_assessment && id_asesor && result?.assessee?.id) {
 			fetchTabItems();
 		}
 	}, [id_assessment, id_asesor, result?.assessee?.id]);
-	
+
 	// tab items
 	const tabItems = [
 		{
@@ -242,10 +242,16 @@ export default function AssessmentAsesiProvider({
 			to: routes.asesi.assessment.ak01(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
-			value: routes.asesi.assessment.ia01Asesi(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ia01Asesi(
+				id_assessment ?? "",
+				id_asesor ?? ""
+			),
 			label: "IA-01",
 			disabled: false,
-			to: routes.asesi.assessment.ia01Asesi(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ia01Asesi(
+				id_assessment ?? "",
+				id_asesor ?? ""
+			),
 		},
 		{
 			value: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
@@ -318,12 +324,13 @@ export default function AssessmentAsesiProvider({
 								className="
 									w-8 h-8 bg-white hover:bg-slate-50 border border-slate-200 
 									rounded-full shadow-lg flex items-center justify-center
+									mb-2
 								"
 							>
 								{isTabsOpen ? (
-									<ChevronLeft className="w-4 h-4 text-slate-600" />
+									<ChevronLeft className="w-5 h-5 text-slate-700" />
 								) : (
-									<ChevronRight className="w-4 h-4 text-slate-600" />
+									<ChevronRight className="w-5 h-5 text-slate-700" />
 								)}
 							</motion.button>
 
@@ -364,9 +371,10 @@ export default function AssessmentAsesiProvider({
 														<Link
 															key={tab.value}
 															to={tab.to}
-															onClick={(e) =>
-																tab.disabled && e.preventDefault()
-															}
+															onClick={(e) => {
+																tab.disabled && e.preventDefault();
+																setIsTabsOpen(false);
+															}}
 															className={`group relative flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-300 ${
 																isActive
 																	? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/25"
