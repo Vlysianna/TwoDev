@@ -981,6 +981,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
 
 			if (text.includes("Kode Unit")) {
 				const kodeMatch = text.match(/Kode Unit\s*:?\s*(.+)/);
+				console.log(kodeMatch?.[1]?.trim());
 				const kode =
 					kodeMatch?.[1]?.trim() || cells[1]?.replace(":", "").trim() || "";
 				currentUnit = {
@@ -995,6 +996,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
 				const judulMatch = text.match(/Judul Unit\s*:?\s*(.+)/);
 				const judul =
 					judulMatch?.[1]?.trim() || cells[1]?.replace(":", "").trim() || "";
+				console.log(judul);
 				if (currentUnit) {
 					currentUnit.title = judul;
 					units.push(currentUnit);
@@ -1011,6 +1013,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
 				const target = Array.from(row.querySelectorAll("td *")).find((el) =>
 					el.textContent?.trim().toLowerCase().includes("kriteria unjuk kerja")
 				);
+				console.log(target);
 
 				if (!target) continue;
 

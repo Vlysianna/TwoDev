@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, AlertCircle, CheckCircle, ChevronLeft } from "lucide-react";
+import { AlertCircle, CheckCircle, ChevronLeft } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -8,11 +8,15 @@ import api from "@/helper/axios";
 import { Controller, useForm } from "react-hook-form";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import type { AssesseeRequest } from "@/model/assessee-model";
+import useToast from "@/components/ui/useToast";
 
 export default function AplZeroOne() {
 	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
 
 	const { user } = useAuth();
+
+	const toast = useToast();
+
 	const navigate = useNavigate();
 
 	const [loading, setLoading] = useState(false);
@@ -70,6 +74,19 @@ export default function AplZeroOne() {
 					id_asesor ?? 0
 				)
 			);
+			if (result.data.success) {
+				toast.show({
+					title: "Berhasil",
+					description: "Berhasil menyimpan data",
+					type: "success",
+				});
+			} else {
+				toast.show({
+					title: "Gagal",
+					description: "Gagal menyimpan data",
+					type: "error",
+				});
+			}
 		} catch (err: any) {
 			setError("Gagal menyimpan data. Silakan coba lagi.");
 		} finally {
@@ -405,7 +422,7 @@ export default function AplZeroOne() {
 								disabled={loading}
 								className="bg-[#E77D35] hover:bg-orange-600 text-white py-2 px-8 rounded-md"
 							>
-								{loading ? "Menyimpan..." : "Simpan & Lanjut"}
+								{loading ? "Menyimpan..." : "Simpan"}
 							</button>
 						</div>
 					</form>

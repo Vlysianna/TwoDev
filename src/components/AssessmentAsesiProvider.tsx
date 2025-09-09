@@ -8,7 +8,7 @@ import {
 	type JSX,
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, TableConfig } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 type AssessmentParams = {
@@ -173,6 +173,7 @@ export default function AssessmentAsesiProvider({
 
 	const fetchTabItems = async () => {
 		if (!id_assessment || !id_asesor || !result?.assessee?.id) return;
+		setFilteredTabItems(["Data Sertifikasi"]);
 		try {
 			const res = await api.get(
 				`/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`
@@ -183,11 +184,11 @@ export default function AssessmentAsesiProvider({
 					setTabItems(res.data.data.tabs.map((item: any) => item));
 				}
 			} else {
-				setTabItems([]);
+				// setTabItems([]);
 			}
 		} catch (error) {
 			console.error("Failed to fetch tab items:", error);
-			setTabItems([]);
+			// setTabItems([]);
 		}
 	};
 
@@ -296,7 +297,10 @@ export default function AssessmentAsesiProvider({
 			tabItems.filter((tab: any) => {
 				return tabItemsState.includes(tab.label);
 			})
+			// [tabItems[1]]
 		);
+
+		// setFilteredTabItems(["Data Sertifikasi"]);
 	}, [tabItemsState]);
 
 	return (

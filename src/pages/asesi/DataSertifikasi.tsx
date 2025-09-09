@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import useSWR from "swr";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
+import useToast from "@/components/ui/useToast";
 
 type FormValues = {
 	purpose: string;
@@ -31,6 +32,8 @@ export default function DataSertifikasi() {
 	const [success, setSuccess] = useState<string | null>(null);
 	const [modalStep, setModalStep] = useState<number | null>(null);
 	const [filterApproveData, setFilterApproveData] = useState<any>(undefined);
+
+	const toast = useToast();
 
 	const {
 		control,
@@ -124,72 +127,90 @@ export default function DataSertifikasi() {
 				formData.append("id_card", data.id_card);
 			}
 
-			await api.post(`/assessments/apl-01/create-certificate-docs`, formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			});
+			await api
+				.post(`/assessments/apl-01/create-certificate-docs`, formData, {
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				})
+				.then((response) => {
+					if (response.data.success) {
+						toast.show({
+							title: "Berhasil",
+							description: "Berhasil menyimpan data",
+							type: "success",
+						});
+					} else {
+						toast.show({
+							title: "Gagal",
+							description: "Gagal menyimpan data",
+							type: "error",
+						});
+					}
+				});
 
 			setSuccess("Data berhasil disimpan! Melanjutkan ke tahap berikutnya...");
 
 			setModalStep(1);
 		} catch (error: any) {
-			setError("Gagal menyimpan data. Silakan coba lagi.");
+			setError("Gagal menyimpan data. Silakan coba lagi. " + error.message);
 		} finally {
 			setLoading(false);
 		}
 	};
 
-		// fetch result docs if id_result changes
-		const [resultDocs, setResultDocs] = useState<{
-			purpose: string;
-			family_card?: string | null;
-			id_card?: string | null;
-			student_card?: string | null;
-			school_report_card?: string | null;
-			field_work_practice_certificate?: string | null;
-		} | null>(null);
+	// fetch result docs if id_result changes
+	const [resultDocs, setResultDocs] = useState<{
+		purpose: string;
+		family_card?: string | null;
+		id_card?: string | null;
+		student_card?: string | null;
+		school_report_card?: string | null;
+		field_work_practice_certificate?: string | null;
+	} | null>(null);
 
-		useEffect(() => {
-			const fetchResultDocs = async () => {
-				try {
-					const res = await api.get(
-						`/assessments/apl-01/result/docs/${id_result}`
-					);
+	useEffect(() => {
+		const fetchResultDocs = async () => {
+			try {
+				const res = await api.get(
+					`/assessments/apl-01/result/docs/${id_result}`
+				);
 
-					if (res.data.success && res.data.data) {
-						const {
-							purpose,
-							family_card,
-							field_work_practice_certificate,
-							id_card,
-							school_report_card,
-							student_card,
-						} = res.data.data;
+				if (res.data.success && res.data.data) {
+					const {
+						purpose,
+						family_card,
+						field_work_practice_certificate,
+						id_card,
+						school_report_card,
+						student_card,
+					} = res.data.data;
 
-						const getFileName = (url: string | null | undefined) => 
-							url ? url.split("/").pop() : null;
+					const getFileName = (url: string | null | undefined) =>
+						url ? url.split("/").pop() : null;
 
-						setResultDocs({
-							purpose: purpose || "",
-							family_card: getFileName(family_card),
-							field_work_practice_certificate: getFileName(field_work_practice_certificate),
-							id_card: getFileName(id_card),
-							school_report_card: getFileName(school_report_card),
-							student_card: getFileName(student_card),
-						});
-					} else {
-						setResultDocs(null);
-					}
-				} catch (err) {
-					console.error("Failed to fetch result data:", err);
+					setResultDocs({
+						purpose: purpose || "",
+						family_card: getFileName(family_card),
+						field_work_practice_certificate: getFileName(
+							field_work_practice_certificate
+						),
+						id_card: getFileName(id_card),
+						school_report_card: getFileName(school_report_card),
+						student_card: getFileName(student_card),
+					});
+				} else {
+					setResultDocs(null);
 				}
-			};
-
-			if (id_result) {
-				fetchResultDocs();
+			} catch (err) {
+				console.error("Failed to fetch result data:", err);
 			}
-		}, [id_result]);
+		};
+
+		if (id_result) {
+			fetchResultDocs();
+		}
+	}, [id_result]);
 
 	const handleNext = () => {
 		if (modalStep === 1) {
@@ -377,8 +398,9 @@ export default function DataSertifikasi() {
 													return (
 														<input
 															type="radio"
+															name={field.name}
 															value={option}
-															checked={checked}
+															defaultChecked={checked}
 															onChange={(e) => field.onChange(e.target.value)}
 															className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
 														/>
@@ -402,29 +424,35 @@ export default function DataSertifikasi() {
 								<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
 									Bukti Persyaratan Dasar
 								</h3>
-									<div className="space-y-6">
-										{supportingFilesStatic.map((file, index) => {
-											const existingFile = resultDocs ? resultDocs[file.name as keyof typeof resultDocs] : null;
+								<div className="space-y-6">
+									{supportingFilesStatic.map((file, index) => {
+										const existingFile = resultDocs
+											? resultDocs[file.name as keyof typeof resultDocs]
+											: null;
 
-											return (
-												<div key={index} className="space-y-3">
-													<p className="text-gray-700 text-sm leading-relaxed">{file.title}</p>
-													<Controller
-														name={file.name as keyof FormValues}
-														control={control}
-														render={({ field }) => (
-															<FileUploadArea
-																field={{
-																	value: existingFile ? new File([], existingFile) : (field.value as File | null),
-																	onChange: field.onChange,
-																}}
-															/>
-														)}
-													/>
-												</div>
-											);
-										})}
-									</div>
+										return (
+											<div key={index} className="space-y-3">
+												<p className="text-gray-700 text-sm leading-relaxed">
+													{file.title}
+												</p>
+												<Controller
+													name={file.name as keyof FormValues}
+													control={control}
+													render={({ field }) => (
+														<FileUploadArea
+															field={{
+																value: existingFile
+																	? new File([], existingFile)
+																	: (field.value as File | null),
+																onChange: field.onChange,
+															}}
+														/>
+													)}
+												/>
+											</div>
+										);
+									})}
+								</div>
 							</div>
 						</div>
 
@@ -435,29 +463,35 @@ export default function DataSertifikasi() {
 									<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
 										Bukti Administratif
 									</h3>
-										<div className="space-y-6">
-											{administrativeFilesStatic.map((file, index) => {
-												const existingFile = resultDocs ? resultDocs[file.name as keyof typeof resultDocs] : null;
+									<div className="space-y-6">
+										{administrativeFilesStatic.map((file, index) => {
+											const existingFile = resultDocs
+												? resultDocs[file.name as keyof typeof resultDocs]
+												: null;
 
-												return (
-													<div key={index} className="space-y-3">
-														<p className="text-gray-700 text-sm font-medium">{file.title}</p>
-														<Controller
-															name={file.name as keyof FormValues}
-															control={control}
-															render={({ field }) => (
-																<FileUploadArea
-																	field={{
-																		value: existingFile ? new File([], existingFile) : (field.value as File | null),
-																		onChange: field.onChange,
-																	}}
-																/>
-															)}
-														/>
-													</div>
-												);
-											})}
-										</div>
+											return (
+												<div key={index} className="space-y-3">
+													<p className="text-gray-700 text-sm font-medium">
+														{file.title}
+													</p>
+													<Controller
+														name={file.name as keyof FormValues}
+														control={control}
+														render={({ field }) => (
+															<FileUploadArea
+																field={{
+																	value: existingFile
+																		? new File([], existingFile)
+																		: (field.value as File | null),
+																	onChange: field.onChange,
+																}}
+															/>
+														)}
+													/>
+												</div>
+											);
+										})}
+									</div>
 								</div>
 
 								<div className="mt-auto pt-4 space-y-3">
@@ -468,7 +502,7 @@ export default function DataSertifikasi() {
 											disabled={loading}
 											className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 sm:py-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
 										>
-											{loading ? "Menyimpan..." : "Lanjut"}
+											{loading ? "Menyimpan..." : "Simpan"}
 										</button>
 									</div>
 								</div>

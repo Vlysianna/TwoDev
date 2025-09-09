@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Monitor, ChevronLeft, Search, Check } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -22,6 +22,7 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import useToast from "@/components/ui/useToast";
 
 type AssessmentElement = {
   id: number;
@@ -80,7 +81,8 @@ export default function Apl02Detail() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [unassessedElements, setUnassessedElements] = useState<number[]>([]);
-  const finishedRef = useRef(false);
+  
+	const toast = useToast();
 
   useEffect(() => {
     fetchElements();
@@ -271,8 +273,21 @@ export default function Apl02Detail() {
     console.log("Payload:", payload);
 
     try {
-      await api.post("/assessments/apl-02/result/send", payload);
-      navigate(paths.asesi.assessment.apl02(id_assessment, id_asesor));
+      await api.post("/assessments/apl-02/result/send", payload).then((response) => {
+        if (response.data.success) {
+          toast.show({
+            title: "Berhasil",
+            description: "Berhasil menyimpan data",
+            type: "success",
+          });
+        } else {
+          toast.show({
+            title: "Gagal",
+            description: "Gagal menyimpan data",
+            type : "error",
+          });
+        }
+      });
     } catch (error: any) {
       setSaveError('Gagal menyimpan data: ' + error.message);
       console.error("Save failed:", error);
@@ -648,7 +663,7 @@ export default function Apl02Detail() {
               transition={{ duration: 0.2, ease: "easeOut" }}
               disabled={saving || unassessedCount > 0}
             >
-              {saving ? 'Menyimpan...' : 'Save'}
+              {saving ? 'Menyimpan...' : 'Simpan'}
             </motion.button>
           </div>
         </div>

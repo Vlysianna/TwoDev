@@ -13,7 +13,12 @@ export default function Apl02() {
 	const { id_assessment, id_asesor, id_result, id_asesi } =
 		useAssessmentParams();
 
-	console.log("Assessment params:", { id_assessment, id_asesor, id_result, id_asesi });
+	console.log("Assessment params:", {
+		id_assessment,
+		id_asesor,
+		id_result,
+		id_asesi,
+	});
 
 	const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
@@ -96,20 +101,20 @@ export default function Apl02() {
 				console.log("✅ QR code berhasil digenerate");
 
 				// 🔥 PAKAI DATA DARI RESPONSE APPROVE SAJA!
-				setResultData(prev => ({
+				setResultData((prev: any) => ({
 					...prev,
 					approved_assessee: response.data.data.approved_assessee,
 					approved_assessor: response.data.data.approved_assessor,
 					is_continue: response.data.data.is_continue,
-					assessee: response.data.data.assessee
+					assessee: response.data.data.assessee,
 				}));
-
 			} else {
 				setQrError(response.data.message || "Gagal menghasilkan QR Code");
 			}
 		} catch (error: any) {
 			console.log("Error generating QR code:", error);
-			const errorMessage = error.response?.data?.message ||
+			const errorMessage =
+				error.response?.data?.message ||
 				error.message ||
 				"Gagal menghasilkan QR Code";
 			setQrError(errorMessage);
@@ -145,9 +150,10 @@ export default function Apl02() {
 		}
 	};
 
-
 	// Cek apakah completion sudah penuh (100%)
-	const isCompletionFull = completedUnits > 0 && unitCompetencies.length > 0 &&
+	const isCompletionFull =
+		completedUnits > 0 &&
+		unitCompetencies.length > 0 &&
 		completedUnits === unitCompetencies.length;
 
 	// Cek apakah QR sudah digenerate
@@ -155,7 +161,9 @@ export default function Apl02() {
 
 	// Generate URL untuk QR code
 	const assesseeQrValue = isQrGenerated ? getAssesseeUrl(Number(id_asesi)) : "";
-	const assessorQrValue = resultData?.approved_assessor ? getAssessorUrl(Number(id_asesor)) : "";
+	const assessorQrValue = resultData?.approved_assessor
+		? getAssessorUrl(Number(id_asesor))
+		: "";
 
 	return (
 		<div className="min-h-screen bg-gray-50">
@@ -270,7 +278,9 @@ export default function Apl02() {
 											</div>
 										) : (
 											<div className="text-center py-8 text-gray-500">
-												{!id_result ? "Parameter tidak lengkap" : "Tidak ada unit kompetensi"}
+												{!id_result
+													? "Parameter tidak lengkap"
+													: "Tidak ada unit kompetensi"}
 											</div>
 										)}
 									</div>
@@ -282,14 +292,18 @@ export default function Apl02() {
 								<div className="bg-white rounded-lg p-6 h-full">
 									{/* Progress Bar */}
 									<div className="mb-6">
-										<h3 className="text-xl font-medium text-gray-900 mb-4">Progress Asesmen</h3>
+										<h3 className="text-xl font-medium text-gray-900 mb-4">
+											Progress Asesmen
+										</h3>
 										<div className="flex justify-between items-center mb-2">
 											<span className="text-sm font-medium text-gray-700">
 												Completion
 											</span>
 											<span className="text-sm font-medium text-[#E77D35]">
 												{completedUnits > 0 && unitCompetencies.length > 0
-													? `${Math.round((completedUnits / unitCompetencies.length) * 100)}%`
+													? `${Math.round(
+															(completedUnits / unitCompetencies.length) * 100
+													  )}%`
 													: "0%"}
 											</span>
 										</div>
@@ -297,9 +311,13 @@ export default function Apl02() {
 											<div
 												className="bg-[#E77D35] h-3 rounded-full transition-all duration-300"
 												style={{
-													width: completedUnits > 0 && unitCompetencies.length > 0
-														? `${(completedUnits / unitCompetencies.length) * 100}%`
-														: "0%",
+													width:
+														completedUnits > 0 && unitCompetencies.length > 0
+															? `${
+																	(completedUnits / unitCompetencies.length) *
+																	100
+															  }%`
+															: "0%",
 												}}
 											></div>
 										</div>
@@ -314,8 +332,8 @@ export default function Apl02() {
 										) : (
 											<div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
 												<p className="text-sm text-yellow-800 text-center">
-													⚠️ Silakan selesaikan semua unit kompetensi terlebih dahulu
-													sebelum generate QR Code.
+													⚠️ Silakan selesaikan semua unit kompetensi terlebih
+													dahulu sebelum generate QR Code.
 												</p>
 											</div>
 										)}
@@ -323,7 +341,9 @@ export default function Apl02() {
 
 									{/* Rekomendasi Section (Read-only) */}
 									<div className="mb-6">
-										<h3 className="text-xl font-medium text-gray-900 mb-4">Rekomendasi Asesor</h3>
+										<h3 className="text-xl font-medium text-gray-900 mb-4">
+											Rekomendasi Asesor
+										</h3>
 										<div className="space-y-3">
 											{resultData?.is_continue !== undefined ? (
 												<>
@@ -332,12 +352,17 @@ export default function Apl02() {
 															type="radio"
 															name="recommendation"
 															checked={resultData.is_continue === true}
-															onChange={() => { }}
+															onChange={() => {}}
 															disabled
 															className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
 														/>
-														<span className={`text-sm text-gray-700 leading-relaxed ${resultData.is_continue === false ? 'line-through opacity-50' : ''
-															}`}>
+														<span
+															className={`text-sm text-gray-700 leading-relaxed ${
+																resultData.is_continue === false
+																	? "line-through opacity-50"
+																	: ""
+															}`}
+														>
 															Assessment <strong>dapat dilanjutkan</strong>
 														</span>
 													</div>
@@ -346,13 +371,19 @@ export default function Apl02() {
 															type="radio"
 															name="recommendation"
 															checked={resultData.is_continue === false}
-															onChange={() => { }}
+															onChange={() => {}}
 															disabled
 															className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
 														/>
-														<span className={`text-sm text-gray-700 leading-relaxed ${resultData.is_continue === true ? 'line-through opacity-50' : ''
-															}`}>
-															Assessment <strong>tidak dapat dilanjutkan</strong>
+														<span
+															className={`text-sm text-gray-700 leading-relaxed ${
+																resultData.is_continue === true
+																	? "line-through opacity-50"
+																	: ""
+															}`}
+														>
+															Assessment{" "}
+															<strong>tidak dapat dilanjutkan</strong>
 														</span>
 													</div>
 												</>
@@ -368,7 +399,9 @@ export default function Apl02() {
 									<div className="mb-6 flex justify-center gap-4 flex-col md:flex-row">
 										{/* QR Code Asesi */}
 										<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
-											<h4 className="text-sm font-semibold text-gray-800">QR Code Asesi</h4>
+											<h4 className="text-sm font-semibold text-gray-800">
+												QR Code Asesi
+											</h4>
 											{isQrGenerated ? (
 												<>
 													<QRCodeCanvas
@@ -395,26 +428,39 @@ export default function Apl02() {
 											)}
 											<button
 												onClick={handleGenerateQRCode}
-												disabled={!isCompletionFull || isQrGenerated || generatingQr || !id_result}
-												className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 text-sm ${!isCompletionFull || isQrGenerated || generatingQr || !id_result
-													? "cursor-not-allowed opacity-50"
-													: "hover:bg-orange-600 cursor-pointer"
-													}`}
+												disabled={
+													!isCompletionFull ||
+													isQrGenerated ||
+													generatingQr ||
+													!id_result
+												}
+												className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 text-sm ${
+													!isCompletionFull ||
+													isQrGenerated ||
+													generatingQr ||
+													!id_result
+														? "cursor-not-allowed opacity-50"
+														: "hover:bg-orange-600 cursor-pointer"
+												}`}
 											>
 												{generatingQr
 													? "Generating..."
 													: isQrGenerated
-														? "Telah Digenerate"
-														: "Generate QR"}
+													? "Telah Digenerate"
+													: "Generate QR"}
 											</button>
 											{qrError && (
-												<div className="text-red-500 text-xs mt-1">{qrError}</div>
+												<div className="text-red-500 text-xs mt-1">
+													{qrError}
+												</div>
 											)}
 										</div>
 
 										{/* QR Code Asesor */}
 										<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
-											<h4 className="text-sm font-semibold text-gray-800">QR Code Asesor</h4>
+											<h4 className="text-sm font-semibold text-gray-800">
+												QR Code Asesor
+											</h4>
 											{resultData?.approved_assessor ? (
 												<>
 													<QRCodeCanvas
@@ -439,11 +485,12 @@ export default function Apl02() {
 									{/* Submit Button - Hanya aktif jika asesor sudah approve */}
 									<div className="w-full">
 										<Link
-											to={paths.asesi.assessment.ak04(id_assessment, id_asesor)}
-											className={`w-full block text-center ${resultData?.approved_assessor
-												? "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
-												: "bg-gray-300 cursor-not-allowed"
-												} text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`}
+											to={"#"}
+											className={`w-full block text-center ${
+												resultData?.approved_assessor
+													? "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
+													: "bg-gray-300 cursor-not-allowed"
+											} text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`}
 										>
 											{resultData?.approved_assessor
 												? "Lanjut"

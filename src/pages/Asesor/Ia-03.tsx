@@ -18,7 +18,7 @@ export default function Ia03() {
 						title="Pertanyaan Untuk Mendukung Observasi - FR.IA.03"
 						icon={
 							<Link
-								to={paths.asesi.assessment.dataSertifikasiPattern}
+								to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)}
 								className="text-gray-500 hover:text-gray-600"
 							>
 								<ChevronLeft size={20} />

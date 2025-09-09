@@ -139,7 +139,7 @@ export default function Ia02Assessor() {
 						title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02"
 						icon={
 							<Link
-								to={paths.asesi.dashboard}
+								to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)}
 								className="text-gray-500 hover:text-gray-600"
 							>
 								<ChevronLeft size={20} />
