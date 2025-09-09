@@ -143,13 +143,6 @@ export default function AssessmentAsesiProvider({
 						location.pathname ===
 							routes.asesi.assessment.dataSertifikasi(id_assessment, id_asesor)
 					);
-					if (
-						location.pathname ===
-							routes.asesi.assessment.apl01(id_assessment, id_asesor) ||
-						location.pathname ===
-							routes.asesi.assessment.dataSertifikasi(id_assessment, id_asesor)
-					)
-						return routes.asesi.assessment.apl02(id_assessment, id_asesor);
 					return location.pathname;
 				} else {
 					return routes.asesi.assessment.dataSertifikasi(

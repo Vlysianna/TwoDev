@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileText, AlertCircle, CheckCircle, ChevronLeft } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,37 +7,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { Controller, useForm } from "react-hook-form";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
-
-// Types
-interface AssesseeJobRequest {
-	institution_name: string;
-	address: string;
-	postal_code: string;
-	position: string;
-	phone_no: string;
-	job_email: string;
-}
-
-interface AssesseeRequest {
-	id?: number;
-	user_id: number;
-	full_name: string;
-	identity_number: string;
-	birth_date: Date;
-	birth_location: string;
-	gender: string;
-	nationality: string;
-	phone_no: string;
-	house_phone_no?: string;
-	office_phone_no?: string;
-	address: string;
-	postal_code: string;
-	educational_qualifications: string;
-	jobs?: AssesseeJobRequest[];
-}
+import type { AssesseeRequest } from "@/model/assessee-model";
 
 export default function AplZeroOne() {
-	const { id_assessment, id_asesor } = useAssessmentParams();
+	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
 
 	const { user } = useAuth();
 	const navigate = useNavigate();
@@ -51,6 +24,7 @@ export default function AplZeroOne() {
 		handleSubmit,
 		control,
 		formState: { errors },
+		reset,
 	} = useForm<AssesseeRequest>({
 		defaultValues: {
 			user_id: user?.id ?? 0,
@@ -102,6 +76,27 @@ export default function AplZeroOne() {
 			setLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		const fetchAssesseeData = async () => {
+			api
+				.get(`/assessments/apl-01/result/${id_result}`)
+				.then(
+					(response) =>
+						response.data.success &&
+						reset({
+							...response.data.data,
+							gender:
+								response.data.data.gender == "male" ? "Laki-laki" : "Perempuan",
+							jobs: [response.data.data.jobs || {}],
+							birth_date: response.data.data.birth_date.split("T")[0],
+						})
+				)
+				.catch((error) => console.error(error));
+		};
+
+		fetchAssesseeData();
+	}, []);
 
 	return (
 		<div className="min-h-screen bg-white">
