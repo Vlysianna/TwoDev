@@ -16,6 +16,8 @@ import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/helper/initial";
+import { formatDate } from "@/helper/format-date";
 
 interface Schedule {
 	id: number;
@@ -167,31 +169,6 @@ export default function DashboardAsesi() {
 		if (now < start) return "Menunggu";
 		if (now >= start && now <= end) return "Aktif";
 		return "Selesai";
-	};
-
-	const formatDateFromSchedule = (
-		schedule: Schedule,
-		type: "start" | "end"
-	) => {
-		const dateString =
-			type === "start" ? schedule.start_date : schedule.end_date;
-		if (!dateString) return "TBD";
-		const date = new Date(dateString);
-		return date.toLocaleDateString("id-ID", {
-			day: "numeric",
-			month: "short",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	};
-
-	const getInitials = (name: string) => {
-		return name
-			.split(" ")
-			.map((n) => n[0])
-			.join("")
-			.toUpperCase()
-			.substring(0, 2);
 	};
 
 	const getStatusColor = (status: string) => {
@@ -377,12 +354,10 @@ export default function DashboardAsesi() {
 													<div className="px-4 py-2">
 														<div className="flex justify-between text-xs text-gray-500 mb-2">
 															<span>
-																Mulai:{" "}
-																{formatDateFromSchedule(schedule, "start")}
+																Mulai: {formatDate(schedule.start_date)}
 															</span>
 															<span>
-																Selesai:{" "}
-																{formatDateFromSchedule(schedule, "end")}
+																Selesai: {formatDate(schedule.end_date)}
 															</span>
 														</div>
 														{/* Progress Line */}
