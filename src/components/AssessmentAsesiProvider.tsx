@@ -104,7 +104,7 @@ export default function AssessmentAsesiProvider({
 
 	useEffect(() => {
 		if (approveData == undefined || !result) return;
-		console.log(approveData, result);
+		// console.log(approveData, result);
 		setFilterApproveData(
 			approveData.find((data) => data.result_id == result?.id)
 		);
@@ -112,7 +112,7 @@ export default function AssessmentAsesiProvider({
 	}, [approveData, result]);
 
 	useEffect(() => {
-		console.log(approveData);
+		// console.log(approveData);
 		if (!id_assessment || !id_asesor) {
 			navigate(routes.asesi.dashboard, { replace: true });
 			return;
@@ -139,10 +139,10 @@ export default function AssessmentAsesiProvider({
 					) {
 						return null;
 					}
-					console.log(
-						location.pathname ===
-							routes.asesi.assessment.dataSertifikasi(id_assessment, id_asesor)
-					);
+					// console.log(
+					// 	location.pathname ===
+					// 		routes.asesi.assessment.dataSertifikasi(id_assessment, id_asesor)
+					// );
 					return location.pathname;
 				} else {
 					return routes.asesi.assessment.dataSertifikasi(
@@ -167,13 +167,46 @@ export default function AssessmentAsesiProvider({
 		setIsTabsOpen(!isTabsOpen);
 	};
 
+	// Fecth Tab Items
+	const [tabItemsState, setTabItems] = useState<any>([]);
+	const [filteredTabItems, setFilteredTabItems] = useState<any>([]);
+	useEffect(() => {
+		if (id_assessment && id_asesor && result?.assessee?.id) {
+			fetchTabItems();
+		}
+	}, [id_assessment, id_asesor, result?.assessee?.id]);
+
+	const fetchTabItems = async () => {
+		if (!id_assessment || !id_asesor || !result?.assessee?.id) return;
+		try {
+			const res = await api.get(
+				`/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`
+			);
+
+			if (res.data.success) {
+				if (res.data.data && Array.isArray(res.data.data.tabs)) {
+					setTabItems(res.data.data.tabs.map((item: any) => item));
+				}
+			} else {
+				setTabItems([]);
+			}
+		} catch (error) {
+			console.error("Failed to fetch tab items:", error);
+			setTabItems([]);
+		}
+	};
+	useEffect(() => {
+		fetchTabItems();
+	}, [result]);
+
+	// tab items
 	const tabItems = [
 		{
 			value: routes.asesi.assessment.apl01(
 				id_assessment ?? "",
 				id_asesor ?? ""
 			),
-			label: "APL 01",
+			label: "APL-01",
 			disabled: false,
 			to: routes.asesi.assessment.apl01(id_assessment ?? "", id_asesor ?? ""),
 		},
@@ -194,65 +227,73 @@ export default function AssessmentAsesiProvider({
 				id_assessment ?? "",
 				id_asesor ?? ""
 			),
-			label: "APL 02",
+			label: "APL-02",
 			disabled: false,
 			to: routes.asesi.assessment.apl02(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.ak04(id_assessment ?? "", id_asesor ?? ""),
-			label: "AK 04",
+			label: "AK-04",
 			disabled: false,
 			to: routes.asesi.assessment.ak04(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.ak01(id_assessment ?? "", id_asesor ?? ""),
-			label: "AK 01",
+			label: "AK-01",
 			disabled: false,
 			to: routes.asesi.assessment.ak01(id_assessment ?? "", id_asesor ?? ""),
 		},
 		// {
 		// 	value: routes.asesi.assessment.ia01(id_assessment ?? "", id_asesor ?? ""),
-		// 	label: "IA 01",
+		// 	label: "IA-01",
 		// 	disabled: false,
 		// 	to: routes.asesi.assessment.ia01(id_assessment ?? "", id_asesor ?? ""),
 		// },
 		{
 			value: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
-			label: "IA 02",
+			label: "IA-02",
 			disabled: false,
 			to: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
-			label: "IA 03",
+			label: "IA-03",
 			disabled: false,
 			to: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.ia05(id_assessment ?? "", id_asesor ?? ""),
-			label: "IA 05",
+			label: "IA-05",
 			disabled: false,
 			to: routes.asesi.assessment.ia05(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.ak02(id_assessment ?? "", id_asesor ?? ""),
-			label: "AK 02",
+			label: "AK-02",
 			disabled: false,
 			to: routes.asesi.assessment.ak02(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
-			label: "AK 03",
+			label: "AK-03",
 			disabled: false,
 			to: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
 		},
 		// {
 		// 	value: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
-		// 	label: "AK 05",
+		// 	label: "AK-05",
 		// 	disabled: false,
 		// 	to: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
 		// },
 	];
+
+	useEffect(() => {
+		setFilteredTabItems(
+			tabItems.filter((tab: any) => {
+				return tabItemsState.includes(tab.label);
+			})
+		);
+	}, [tabItemsState]);
 
 	return (
 		<>
@@ -319,7 +360,7 @@ export default function AssessmentAsesiProvider({
 													[&::-webkit-scrollbar-thumb]:bg-orange-400/80
 												"
 											>
-												{tabItems.map((tab) => {
+												{filteredTabItems.map((tab: any) => {
 													const isActive = location.pathname === tab.value;
 													return (
 														<Link
