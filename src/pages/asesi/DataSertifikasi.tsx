@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Upload, ChevronLeft, AlertCircle, CheckCircle } from "lucide-react";
+import { Upload, ChevronLeft, AlertCircle, CheckCircle, X } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -228,7 +228,7 @@ export default function DataSertifikasi() {
 										: "Choose a file or drag & drop it here"}
 								</p>
 								<p className="text-gray-400 text-xs">
-									JPEG, PNG, PDF, and MP4 formats, up to 50MB
+									PNG, JPEG, JPG, GIF, BMP
 								</p>
 							</>
 						)}
@@ -259,7 +259,7 @@ export default function DataSertifikasi() {
 					type="file"
 					ref={fileRef}
 					className="hidden"
-					accept=".jpg,.jpeg,.png,.pdf,.mp4"
+					accept=".jpg,.jpeg,.png,"
 					onChange={(e) => field.onChange(e.target.files?.[0] || null)}
 				/>
 			</div>
@@ -424,7 +424,13 @@ export default function DataSertifikasi() {
 					{/* Modal */}
 					{modalStep !== null && (
 						<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-							<div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full text-center flex flex-col">
+							<div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full text-center flex flex-col relative">
+								<button
+									onClick={() => setModalStep(null)}
+									className="absolute top-4 right-4 text-gray-700 hover:text-black cursor-pointer"
+								>
+									<X size={24} />
+								</button>
 								{modalStep === 1 && (
 									<>
 										<img
