@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Monitor, ChevronLeft, ChevronRight, AlertCircle, Save } from 'lucide-react';
+import { Monitor, ChevronLeft, ChevronRight, AlertCircle, Save, QrCode } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,11 +20,10 @@ export default function CekApl02() {
     const [completedUnits, setCompletedUnits] = useState<number>(0);
     const [recommendation, setRecommendation] = useState<'continue' | 'stop' | null>(null);
     const [resultData, setResultData] = useState<any>(null);
-    const [generatingQr, setGeneratingQr] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [qrError, setQrError] = useState<string | null>(null);
-    const [saveError, setSaveError] = useState<string | null>(null);
-    const [saveSuccess, setSaveSuccess] = useState(false);
+    const [qrProcessing, setQrProcessing] = useState(false);
+    const [saveProcessing, setSaveProcessing] = useState(false);
+    const [processError, setProcessError] = useState<string | null>(null);
+    const [processSuccess, setProcessSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         fetchAssessment();
@@ -84,79 +83,60 @@ export default function CekApl02() {
         }
     };
 
-    const handleGenerateQRCode = async () => {
-        if (!recommendation) {
-            setQrError("Silakan pilih rekomendasi terlebih dahulu");
-            return;
-        }
-
-        if (!resultData?.apl02_header?.approved_assessee) {
-            setQrError("Asesi harus menyetujui terlebih dahulu sebelum asesor dapat generate QR");
-            return;
-        }
-
-        setGeneratingQr(true);
-        setQrError(null);
+    const handleGenerateQR = async () => {
+        setQrProcessing(true);
+        setProcessError(null);
+        setProcessSuccess(null);
 
         try {
-            console.log("Generate QR dengan rekomendasi sementara:", recommendation === 'continue');
-
-            // ENDPOINT 1: Generate QR (approve asesor)
-            const response = await api.put(
-                `/assessments/apl-02/result/assessor/${id_result}/approve`,
-                { is_continue: recommendation === 'continue' }
+            console.log("Generate QR...");
+            const qrResponse = await api.put(
+                `/assessments/apl-02/result/assessor/${id_result}/approve`
             );
 
-            console.log("Response dari server:", response.data);
-
-            if (response.data.success && response.data.data) {
-                console.log("✅ QR berhasil digenerate");
-
-                // Update state dengan data terbaru dari server
-                setResultData(prev => ({
-                    ...prev,
-                    apl02_header: {
-                        ...prev.apl02_header,
-                        approved_assessor: true,
-                        is_continue: response.data.data.is_continue
-                    }
-                }));
-            } else {
-                setQrError(response.data.message || "Gagal generate QR");
+            if (!qrResponse.data.success) {
+                throw new Error(qrResponse.data.message || "Gagal generate QR");
             }
+
+            console.log("✅ QR berhasil digenerate");
+
+            // Update state dengan data terbaru dari server
+            setResultData(prev => ({
+                ...prev,
+                apl02_header: {
+                    ...prev.apl02_header,
+                    approved_assessor: true
+                }
+            }));
+
+            setProcessSuccess("QR Code berhasil digenerate");
+            setTimeout(() => setProcessSuccess(null), 3000);
+
         } catch (error: any) {
-            console.error("Error generating QR code:", error);
+            console.error("Error generating QR:", error);
             if (error.response) {
-                console.error("Response error:", error.response.data);
-                setQrError(`Error: ${error.response.data.message || "Gagal generate QR code"}`);
+                setProcessError(`Error: ${error.response.data.message || "Gagal generate QR"}`);
             } else {
-                setQrError("Gagal generate QR code");
+                setProcessError(error.message || "Gagal generate QR");
             }
         } finally {
-            setGeneratingQr(false);
+            setQrProcessing(false);
         }
     };
 
     const handleSaveRecommendation = async () => {
         if (!recommendation) {
-            setSaveError("Silakan pilih rekomendasi terlebih dahulu");
+            setProcessError("Silakan pilih rekomendasi terlebih dahulu");
             return;
         }
 
-        if (!resultData?.apl02_header?.approved_assessor) {
-            setSaveError("Generate QR terlebih dahulu sebelum menyimpan rekomendasi");
-            return;
-        }
-
-        setSaving(true);
-        setSaveError(null);
-        setSaveSuccess(false);
+        setSaveProcessing(true);
+        setProcessError(null);
+        setProcessSuccess(null);
 
         try {
-            console.log("Menyimpan rekomendasi:", recommendation === 'continue');
-
-            // ENDPOINT 2: Simpan rekomendasi (is_continue)
-            const response = await api.post(
+            console.log("Simpan rekomendasi:", recommendation === 'continue');
+            const saveResponse = await api.post(
                 `/assessments/apl-02/result/send-header`,
                 {
                     result_id: id_result,
@@ -164,54 +144,45 @@ export default function CekApl02() {
                 }
             );
 
-            console.log("Response dari server:", response.data);
-
-            if (response.data.success) {
-                console.log("✅ Rekomendasi berhasil disimpan");
-
-                // Update state dengan data terbaru
-                setResultData(prev => ({
-                    ...prev,
-                    apl02_header: {
-                        ...prev.apl02_header,
-                        is_continue: recommendation === 'continue'
-                    }
-                }));
-
-                setSaveSuccess(true);
-
-                // Reset status sukses setelah 3 detik
-                setTimeout(() => setSaveSuccess(false), 3000);
-
-            } else {
-                setSaveError(response.data.message || "Gagal menyimpan rekomendasi");
+            if (!saveResponse.data.success) {
+                throw new Error(saveResponse.data.message || "Gagal menyimpan rekomendasi");
             }
+
+            console.log("✅ Rekomendasi berhasil disimpan");
+
+            // Update state dengan data terbaru dari server
+            setResultData(prev => ({
+                ...prev,
+                apl02_header: {
+                    ...prev.apl02_header,
+                    is_continue: recommendation === 'continue'
+                }
+            }));
+
+            setProcessSuccess("Rekomendasi berhasil disimpan");
+            setTimeout(() => setProcessSuccess(null), 3000);
+
         } catch (error: any) {
             console.error("Error saving recommendation:", error);
             if (error.response) {
-                console.error("Response error:", error.response.data);
-                setSaveError(`Error: ${error.response.data.message || "Gagal menyimpan rekomendasi"}`);
+                setProcessError(`Error: ${error.response.data.message || "Gagal menyimpan rekomendasi"}`);
             } else {
-                setSaveError("Gagal menyimpan rekomendasi");
+                setProcessError(error.message || "Gagal menyimpan rekomendasi");
             }
         } finally {
-            setSaving(false);
+            setSaveProcessing(false);
         }
     };
 
     const handleRecommendationChange = (value: 'continue' | 'stop') => {
         setRecommendation(value);
-        setQrError(null);
-        setSaveError(null);
-        setSaveSuccess(false);
+        setProcessError(null);
+        setProcessSuccess(null);
         console.log("Rekomendasi dipilih:", value);
     };
 
     // Cek apakah QR sudah digenerate
     const isQrGenerated = resultData?.apl02_header?.approved_assessor;
-
-    // Cek apakah asesi sudah menyetujui
-    const isAssesseeApproved = resultData?.apl02_header?.approved_assessee;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -351,29 +322,46 @@ export default function CekApl02() {
                                                 <div className="text-gray-500">Memuat rekomendasi...</div>
                                             ) : (
                                                 <>
-                                                    <label className={`flex items-start space-x-3 cursor-pointer ${recommendation !== 'continue' && recommendation !== null ? 'line-through text-gray-400' : ''}`}>
+                                                    <label
+                                                        className={`flex items-start space-x-3 cursor-pointer ${isQrGenerated ? "opacity-70" : ""
+                                                            }`}
+                                                    >
                                                         <input
                                                             type="radio"
                                                             name="recommendation"
-                                                            checked={recommendation === 'continue'}
-                                                            onChange={() => handleRecommendationChange('continue')}
+                                                            checked={recommendation === "continue"}
+                                                            onChange={() => handleRecommendationChange("continue")}
                                                             disabled={isQrGenerated}
                                                             className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
                                                         />
-                                                        <span className={`text-sm leading-relaxed ${isQrGenerated ? 'opacity-70' : ''}`}>
+                                                        <span
+                                                            className={`text-sm leading-relaxed ${recommendation === "stop" || recommendation === undefined || recommendation === null
+                                                                    ? "line-through opacity-50"
+                                                                    : ""
+                                                                }`}
+                                                        >
                                                             Assessment <strong>dapat dilanjutkan</strong>
                                                         </span>
                                                     </label>
-                                                    <label className={`flex items-start space-x-3 cursor-pointer ${recommendation !== 'stop' && recommendation !== null ? 'line-through text-gray-400' : ''}`}>
+
+                                                    <label
+                                                        className={`flex items-start space-x-3 cursor-pointer ${isQrGenerated ? "opacity-70" : ""
+                                                            }`}
+                                                    >
                                                         <input
                                                             type="radio"
                                                             name="recommendation"
-                                                            checked={recommendation === 'stop'}
-                                                            onChange={() => handleRecommendationChange('stop')}
+                                                            checked={recommendation === "stop"}
+                                                            onChange={() => handleRecommendationChange("stop")}
                                                             disabled={isQrGenerated}
                                                             className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
                                                         />
-                                                        <span className={`text-sm leading-relaxed ${isQrGenerated ? 'opacity-70' : ''}`}>
+                                                        <span
+                                                            className={`text-sm leading-relaxed ${recommendation === "continue" || recommendation === undefined || recommendation === null
+                                                                    ? "line-through opacity-50"
+                                                                    : ""
+                                                                }`}
+                                                        >
                                                             Assessment <strong>tidak dapat dilanjutkan</strong>
                                                         </span>
                                                     </label>
@@ -387,7 +375,7 @@ export default function CekApl02() {
                                         {/* QR Code Asesi */}
                                         <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
                                             <h4 className="text-sm font-semibold text-gray-800">QR Code Asesi</h4>
-                                            {isAssesseeApproved ? (
+                                            {resultData?.apl02_header?.approved_assessee ? (
                                                 <>
                                                     <QRCodeCanvas
                                                         value={getAssesseeUrl(Number(id_asesi))}
@@ -427,51 +415,31 @@ export default function CekApl02() {
                                                         QR Code Asesor
                                                     </span>
                                                     <span className="text-gray-400 text-xs text-center">
-                                                        Klik generate untuk membuat QR Code
+                                                        Klik tombol "Generate QR" di bawah
                                                     </span>
-                                                </div>
-                                            )}
-                                            <button
-                                                onClick={handleGenerateQRCode}
-                                                disabled={isQrGenerated || generatingQr || !recommendation || !isAssesseeApproved}
-                                                className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 text-sm ${isQrGenerated || generatingQr || !recommendation || !isAssesseeApproved
-                                                    ? "cursor-not-allowed opacity-50"
-                                                    : "hover:bg-orange-600 cursor-pointer"
-                                                    }`}
-                                            >
-                                                {generatingQr
-                                                    ? "Generating..."
-                                                    : isQrGenerated
-                                                        ? "Telah Digenerate"
-                                                        : "Generate QR"}
-                                            </button>
-                                            {qrError && (
-                                                <div className="text-red-500 text-xs mt-1 text-center">{qrError}</div>
-                                            )}
-                                            {!recommendation && !isQrGenerated && (
-                                                <div className="text-red-500 text-xs mt-1 text-center">
-                                                    Pilih rekomendasi terlebih dahulu
-                                                </div>
-                                            )}
-                                            {!isAssesseeApproved && !isQrGenerated && (
-                                                <div className="text-red-500 text-xs mt-1 text-center">
-                                                    Menunggu persetujuan asesi
                                                 </div>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* TOMBOL SIMPAN REKOMENDASI - SELALU TAMPIL TAPI DISABLE JIKA BELUM GENERATE QR */}
-                                    <div className="mb-6">
+                                    {/* TOMBOL SIMPAN REKOMENDASI */}
+                                    <div className="mb-4">
+                                        <div className="text-gray-500 text-xs mb-2 text-center">
+                                            {!recommendation
+                                                ? "Pilih rekomendasi terlebih dahulu"
+                                                : isQrGenerated
+                                                    ? "Setelah generate QR, rekomendasi tidak dapat diubah"
+                                                    : "Simpan rekomendasi sebelum generate QR"}
+                                        </div>
                                         <button
                                             onClick={handleSaveRecommendation}
-                                            disabled={saving || !recommendation || !isQrGenerated}
-                                            className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${saving || !recommendation || !isQrGenerated
+                                            disabled={saveProcessing || !recommendation || isQrGenerated}
+                                            className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${saveProcessing || !recommendation || isQrGenerated
                                                 ? "cursor-not-allowed opacity-50"
-                                                : "hover:bg-orange-600 cursor-pointer"
+                                                : "hover:bg-green-700 cursor-pointer"
                                                 }`}
                                         >
-                                            {saving ? (
+                                            {saveProcessing ? (
                                                 "Menyimpan..."
                                             ) : (
                                                 <>
@@ -480,19 +448,35 @@ export default function CekApl02() {
                                                 </>
                                             )}
                                         </button>
-                                        {saveError && (
-                                            <div className="text-red-500 text-xs mt-2 text-center">{saveError}</div>
+                                        {processError && (
+                                            <div className="text-red-500 text-xs mt-2 text-center">{processError}</div>
                                         )}
-                                        {saveSuccess && (
+                                        {processSuccess && (
                                             <div className="text-green-500 text-xs mt-2 text-center">
-                                                ✅ Rekomendasi berhasil disimpan
+                                                ✅ {processSuccess}
                                             </div>
                                         )}
-                                        <div className="text-gray-500 text-xs mt-2 text-center">
-                                            {!isQrGenerated
-                                                ? "Generate QR terlebih dahulu sebelum menyimpan"
-                                                : "Klik simpan untuk menyimpan rekomendasi"}
-                                        </div>
+                                    </div>
+
+                                    {/* TOMBOL GENERATE QR */}
+                                    <div className="mb-6">
+                                        <button
+                                            onClick={handleGenerateQR}
+                                            disabled={qrProcessing || isQrGenerated}
+                                            className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${qrProcessing || isQrGenerated
+                                                ? "cursor-not-allowed opacity-50"
+                                                : "hover:bg-orange-600 cursor-pointer"
+                                                }`}
+                                        >
+                                            {qrProcessing ? (
+                                                "Memproses..."
+                                            ) : (
+                                                <>
+                                                    <QrCode size={18} className="mr-2" />
+                                                    {isQrGenerated ? "QR Sudah Digenerate" : "Generate QR"}
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
                                 </div>
                             </div>
