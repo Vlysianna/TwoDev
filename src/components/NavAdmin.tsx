@@ -1,37 +1,84 @@
-import React from 'react';
+import { Bell, Settings } from 'lucide-react';
 import UserMenu from './UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
-const Navbar = () => {
+interface NavAdminProps {
+  title?: string;
+  icon?: React.ReactNode;
+}
+
+const NavAdmin: React.FC<NavAdminProps> = ({ 
+  title = "Dashboard Admin", 
+  icon = <Settings size={25} /> 
+}) => {
+  const { user } = useAuth();
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
+    <nav className="bg-white border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4 w-full z-50 relative">
       {/* DESKTOP NAVBAR */}
       <div className="hidden sm:flex items-center justify-between">
-        {/* Greeting */}
-        <h1 className="text-xl font-semibold text-gray-800">
-          Selamat Datang, Admin!
-        </h1>
-        {/* UserMenu only */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-4">
+          {icon && <div className="text-orange-500 hover:text-orange-600">{icon}</div>}
+          <h1 className="text-lg font-semibold text-gray-800">
+            {title}
+          </h1>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          {/* Notifications */}
+          <div className="relative">
+            <button className="relative p-3 text-gray-600 border border-gray-200 hover:text-gray-800 hover:bg-gray-100 rounded-full transition cursor-pointer">
+              <Bell size={20} />
+              <span className="absolute -top-[5px] -right-[5px] h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+          </div>
+
+          {/* User Menu */}
           <UserMenu />
         </div>
       </div>
 
       {/* MOBILE NAVBAR */}
-      <div className="sm:hidden flex flex-col space-y-2">
-        <div className="flex items-center justify-between w-full">
-          <h1 className="text-base font-semibold text-gray-800 ml-15">
-            Selamat Datang, Admin!
-          </h1>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-200">
-              <img src="/img/male avatar.svg" alt="Avatar" className="w-full h-full object-cover" />
+      <div className="sm:hidden flex items-center justify-between relative w-full">
+        {/* Left Section (Icon + Title) */}
+        <div className="flex gap-3 items-center flex-1 min-w-0">
+          {icon && (
+            <div className="text-orange-500 hover:text-orange-600 flex-shrink-0">
+              {icon}
             </div>
-          </div>
+          )}
+          <h1 className="text-base font-semibold text-gray-800 break-words truncate">
+            {title}
+          </h1>
         </div>
+
+        {/* Right Section (Notification + UserMenu) */}
+        <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
+          {/* Mobile Notification */}
+          <div className="relative">
+            <button className="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition border border-gray-200">
+              <Bell size={18} />
+              <span className="absolute -top-[1px] -right-[1px] h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button>
+          </div>
+
+          {/* User Menu */}
+          <UserMenu />
+        </div>
+      </div>
+
+      {/* Welcome Message for Mobile */}
+      <div className="sm:hidden mt-2 text-center">
+        <p className="text-sm text-gray-600">
+          Selamat datang, <span className="font-medium text-gray-800">{user?.email || 'Admin'}</span>
+        </p>
       </div>
     </nav>
   );
 };
 
-export default Navbar;
+export default NavAdmin;
