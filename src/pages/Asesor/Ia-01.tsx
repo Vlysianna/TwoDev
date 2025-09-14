@@ -75,8 +75,9 @@ export default function Ia01() {
   // Handler simpan header IA-01
   const handleSaveHeader = async () => {
     if (!id_result) return;
-    if (!assessorQrValue) {
-      setSaveHeaderError("Setujui QR Asesor terlebih dahulu sebelum menyimpan hasil rekomendasi.");
+    const completion = unitData.length > 0 ? `${Math.round((completedUnits / unitData.length) * 100)}%` : '0%';
+    if (completion !== '100%') {
+      setSaveHeaderError("Isilah semua unit terlebih dahulu sebelum menyimpan hasil rekomendasi.");
       return;
     }
 
@@ -105,11 +106,25 @@ export default function Ia01() {
     }
   };
 
-  const handleGenerateQRCode = () => {
+  const handleGenerateQRCode = async () => {
     if (!id_asesor) return;
-    const qrValue = getAssessorUrl(Number(id_asesor));
-    console.log('Generated QR Asesor:', qrValue); // Debug
-    setAssessorQrValue(qrValue);
+    const completion = unitData.length > 0 ? `${Math.round((completedUnits / unitData.length) * 100)}%` : '0%';
+    if (completion !== '100%') {
+      setSaveHeaderError("Simpan hasil rekomendasi terlebih dahulu sebelum menyetujui sebagai asesor.");
+      return;
+    }
+
+    try {
+      const response = await api.put(`/assessments/ia-01/result/assessor/${id_result}/approve`);
+      if (response.data.success) {
+        const qrValue = getAssessorUrl(Number(id_asesor));
+        console.log('Generated QR Asesor:', qrValue); // Debug
+        setAssessorQrValue(qrValue);
+      }
+    } catch (error) {
+      console.error("Error approving assessor:", error);
+      setSaveHeaderError("Gagal menyetujui sebagai asesor");
+    }
   };
 
   useEffect(() => {
@@ -673,9 +688,9 @@ export default function Ia01() {
             </span>
           )}
 
-          {!assessorQrValue && (
+          {(unitData.length > 0 ? `${Math.round((completedUnits / unitData.length) * 100)}%` : '0%') !== '100%' && (
             <span className="text-orange-600 text-sm font-medium sm:mr-4 text-center sm:text-left">
-              Setujui QR Asesor terlebih dahulu sebelum menyimpan hasil rekomendasi.
+              Isilah semua unit terlebih dahulu sebelum menyimpan hasil rekomendasi.
             </span>
           )}
 

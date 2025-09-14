@@ -173,8 +173,7 @@ export default function IA03({
 
 				// Set pertanyaan dari group pertama jika ada
 				if (response.data.data.length > 0) {
-					setSelectedGroup(0);
-					loadQuestionsForGroup(response.data.data[0]);
+					loadQuestionsForGroup(response.data.data[selectedGroup]);
 				}
 			}
 		} catch (error: any) {
@@ -230,6 +229,7 @@ export default function IA03({
 			);
 			if (response.data.success) {
 				setSuccess("Jawaban berhasil disimpan");
+				fetchUnits(id_result);
 				return response.data.data;
 			}
 		} catch (error: any) {
