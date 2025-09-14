@@ -1,4 +1,4 @@
-import { Bell, Settings } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import UserMenu from './UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -9,7 +9,7 @@ interface NavAdminProps {
 
 const NavAdmin: React.FC<NavAdminProps> = ({ 
   title = "Dashboard Admin", 
-  icon = <Settings size={25} /> 
+  icon 
 }) => {
   const { user } = useAuth();
 
