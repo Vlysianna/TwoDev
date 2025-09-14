@@ -163,18 +163,14 @@ export default function Apl02Detail() {
     }
   };
 
-  const handleGlobalProofChange = (value: string) => {
-    setGlobalProof(value);
-
-    const newProof: { [key: number]: string } = {};
+  const handleGlobalProofChange = (values: string[]) => {
     elements.forEach((item) => {
-      newProof[item.id] = value;
-      // update react-hook-form value
-      if (value) {
-        setValue(`elements.${item.id}.evidence`, [value]);
-      } else {
-        setValue(`elements.${item.id}.evidence`, []);
-      }
+      setValue(`elements.${item.id}.evidence`, values);
+    });
+
+    const newProof: { [key: number]: string[] } = {};
+    elements.forEach((item) => {
+      newProof[item.id] = values;
     });
     setSelectedProof(newProof);
   };
@@ -397,18 +393,63 @@ export default function Apl02Detail() {
                   ))}
                 </div>
 
-                {/* Global Bukti Relevan */}
+                {/* Global Bukti Relevan - Multi Select */}
                 <div className="flex items-center gap-2 flex-none w-full md:w-80">
-                  <select
-                    className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500 hover:cursor-pointer"
-                    value={globalProof}
-                    onChange={(e) => handleGlobalProofChange(e.target.value)}
-                  >
-                    <option value="">Bukti Relevan</option>
-                    <option value="dokumen1">Dokumen 1</option>
-                    <option value="dokumen2">Dokumen 2</option>
-                    <option value="dokumen3">Dokumen 3</option>
-                  </select>
+                  <Controller
+                    name="globalEvidence"
+                    control={control}
+                    render={({ field }) => (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            type="button"
+                            className="w-full px-3 py-2 bg-[#DADADA33] rounded-md text-left text-sm"
+                          >
+                            {field.value?.length > 0
+                              ? `${field.value.length} evidence selected`
+                              : "Select global evidence..."}
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[250px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Search evidences..." />
+                            <CommandEmpty>No evidence found.</CommandEmpty>
+                            <CommandGroup>
+                              {evidenceOptions.map((opt) => {
+                                const selected = field.value?.includes(opt);
+                                return (
+                                  <CommandItem
+                                    key={opt}
+                                    onSelect={() => {
+                                      const currentValues = field.value || [];
+                                      let newValues;
+
+                                      if (selected) {
+                                        newValues = currentValues.filter(v => v !== opt);
+                                      } else {
+                                        newValues = [...currentValues, opt];
+                                      }
+
+                                      field.onChange(newValues);
+                                      handleGlobalProofChange(newValues);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {opt}
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -581,6 +622,7 @@ export default function Apl02Detail() {
                             <Controller
                               name={`elements.${item.id}.evidence`}
                               control={control}
+                              defaultValue={[]}
                               render={({ field }) => {
                                 const values = field.value || [];
                                 return (
@@ -596,41 +638,44 @@ export default function Apl02Detail() {
                                           : "Select evidences..."}
                                       </button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-[200px] p-0">
+                                    <PopoverContent className="w-[250px] p-0">
                                       <Command>
-                                        <CommandInput placeholder="Search..." />
-                                        <CommandEmpty>
-                                          No evidence found.
-                                        </CommandEmpty>
+                                        <CommandInput placeholder="Search evidences..." />
+                                        <CommandEmpty>No evidence found.</CommandEmpty>
                                         <CommandGroup>
                                           {evidenceOptions.map((opt) => {
-                                            const selected = values.some((v) => {
-                                              return v === opt;
-                                            });
+                                            const selected = values.includes(opt);
                                             return (
                                               <CommandItem
                                                 key={opt}
                                                 onSelect={() => {
                                                   if (selected) {
-                                                    field.onChange(
-                                                      values.filter(
-                                                        (v) => v !== opt
-                                                      )
-                                                    );
+                                                    // Hapus evidence jika sudah dipilih
+                                                    const newValues = values.filter(v => v !== opt);
+                                                    field.onChange(newValues);
+
+                                                    // Update selectedProof state
+                                                    setSelectedProof(prev => ({
+                                                      ...prev,
+                                                      [item.id]: newValues
+                                                    }));
                                                   } else {
-                                                    field.onChange([
-                                                      ...values,
-                                                      opt,
-                                                    ]);
+                                                    // Tambah evidence jika belum dipilih
+                                                    const newValues = [...values, opt];
+                                                    field.onChange(newValues);
+
+                                                    // Update selectedProof state
+                                                    setSelectedProof(prev => ({
+                                                      ...prev,
+                                                      [item.id]: newValues
+                                                    }));
                                                   }
                                                 }}
                                               >
                                                 <Check
                                                   className={cn(
                                                     "mr-2 h-4 w-4",
-                                                    selected
-                                                      ? "opacity-100"
-                                                      : "opacity-0"
+                                                    selected ? "opacity-100" : "opacity-0"
                                                   )}
                                                 />
                                                 {opt}

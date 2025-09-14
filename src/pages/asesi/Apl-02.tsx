@@ -78,10 +78,42 @@ export default function Apl02() {
 		}
 	};
 
+	// Fungsi ambil result data
+	const fetchResultData = async () => {
+		try {
+			const response = await api.get(`/assessments/apl-02/result/${id_result}`);
+			if (response.data.success) {
+				const data = response.data.data;
+
+				// simpan ke state resultData
+				setResultData({
+					approved_assessee: data.apl02_header?.approved_assessee,
+					approved_assessor: data.apl02_header?.approved_assessor,
+					is_continue: data.apl02_header?.is_continue,
+					assessee: data.assessee,
+				});
+			}
+		} catch (err: any) {
+			console.error("Gagal fetch result data:", err);
+		}
+	};
+
+	useEffect(() => {
+		if (id_result) {
+			fetchResultData();
+		}
+	}, [id_result]);
+
 	const handleGenerateQRCode = async () => {
 		if (!isCompletionFull) return;
 		if (!id_result) {
 			setQrError("ID result tidak valid");
+			return;
+		}
+
+		// PERUBAHAN: Cek apakah asesor sudah approve
+		if (!resultData?.approved_assessor) {
+			setQrError("Menunggu persetujuan asesor terlebih dahulu");
 			return;
 		}
 
@@ -123,33 +155,6 @@ export default function Apl02() {
 		}
 	};
 
-	// Tambahkan useEffect untuk fetch result data
-	useEffect(() => {
-		if (id_result) {
-			fetchResultData();
-		}
-	}, [id_result]);
-
-	// Fungsi ambil result data
-	const fetchResultData = async () => {
-		try {
-			const response = await api.get(`/assessments/apl-02/result/${id_result}`);
-			if (response.data.success) {
-				const data = response.data.data;
-
-				// simpan ke state resultData
-				setResultData({
-					approved_assessee: data.apl02_header?.approved_assessee,
-					approved_assessor: data.apl02_header?.approved_assessor,
-					is_continue: data.apl02_header?.is_continue,
-					assessee: data.assessee,
-				});
-			}
-		} catch (err: any) {
-			console.error("Gagal fetch result data:", err);
-		}
-	};
-
 	// Cek apakah completion sudah penuh (100%)
 	const isCompletionFull =
 		completedUnits > 0 &&
@@ -159,9 +164,12 @@ export default function Apl02() {
 	// Cek apakah QR sudah digenerate
 	const isQrGenerated = resultData?.approved_assessee;
 
+	// PERUBAHAN: Cek apakah asesor sudah approve
+	const isAssessorApproved = resultData?.approved_assessor;
+
 	// Generate URL untuk QR code
 	const assesseeQrValue = isQrGenerated ? getAssesseeUrl(Number(id_asesi)) : "";
-	const assessorQrValue = resultData?.approved_assessor
+	const assessorQrValue = isAssessorApproved
 		? getAssessorUrl(Number(id_asesor))
 		: "";
 
@@ -302,8 +310,8 @@ export default function Apl02() {
 											<span className="text-sm font-medium text-[#E77D35]">
 												{completedUnits > 0 && unitCompetencies.length > 0
 													? `${Math.round(
-															(completedUnits / unitCompetencies.length) * 100
-													  )}%`
+														(completedUnits / unitCompetencies.length) * 100
+													)}%`
 													: "0%"}
 											</span>
 										</div>
@@ -313,10 +321,9 @@ export default function Apl02() {
 												style={{
 													width:
 														completedUnits > 0 && unitCompetencies.length > 0
-															? `${
-																	(completedUnits / unitCompetencies.length) *
-																	100
-															  }%`
+															? `${(completedUnits / unitCompetencies.length) *
+															100
+															}%`
 															: "0%",
 												}}
 											></div>
@@ -326,7 +333,9 @@ export default function Apl02() {
 										{isCompletionFull ? (
 											<div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
 												<p className="text-sm text-green-800 text-center">
-													Anda dapat melanjutkan dengan generate QR Code.
+													{isAssessorApproved
+														? "Anda dapat melanjutkan dengan generate QR Code."
+														: "Menunggu persetujuan asesor terlebih dahulu."}
 												</p>
 											</div>
 										) : (
@@ -352,16 +361,15 @@ export default function Apl02() {
 															type="radio"
 															name="recommendation"
 															checked={resultData.is_continue === true}
-															onChange={() => {}}
+															onChange={() => { }}
 															disabled
 															className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
 														/>
 														<span
-															className={`text-sm text-gray-700 leading-relaxed ${
-																resultData.is_continue === false
+															className={`text-sm text-gray-700 leading-relaxed ${resultData.is_continue === false
 																	? "line-through opacity-50"
 																	: ""
-															}`}
+																}`}
 														>
 															Assessment <strong>dapat dilanjutkan</strong>
 														</span>
@@ -371,19 +379,17 @@ export default function Apl02() {
 															type="radio"
 															name="recommendation"
 															checked={resultData.is_continue === false}
-															onChange={() => {}}
+															onChange={() => { }}
 															disabled
 															className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
 														/>
 														<span
-															className={`text-sm text-gray-700 leading-relaxed ${
-																resultData.is_continue === true
+															className={`text-sm text-gray-700 leading-relaxed ${resultData.is_continue === true
 																	? "line-through opacity-50"
 																	: ""
-															}`}
+																}`}
 														>
-															Assessment{" "}
-															<strong>tidak dapat dilanjutkan</strong>
+															Assessment <strong>tidak dapat dilanjutkan</strong>
 														</span>
 													</div>
 												</>
@@ -420,9 +426,11 @@ export default function Apl02() {
 														QR Code Asesi
 													</span>
 													<span className="text-gray-400 text-xs text-center">
-														{isCompletionFull
-															? "Klik generate untuk membuat QR Code"
-															: "Selesaikan semua unit"}
+														{isCompletionFull && !isAssessorApproved
+															? "Menunggu persetujuan asesor"
+															: isCompletionFull
+																? "Klik generate untuk membuat QR Code"
+																: "Selesaikan semua unit"}
 													</span>
 												</div>
 											)}
@@ -432,22 +440,23 @@ export default function Apl02() {
 													!isCompletionFull ||
 													isQrGenerated ||
 													generatingQr ||
-													!id_result
+													!id_result ||
+													!isAssessorApproved // PERUBAHAN: Tambah kondisi ini
 												}
-												className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 text-sm ${
-													!isCompletionFull ||
-													isQrGenerated ||
-													generatingQr ||
-													!id_result
+												className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 text-sm ${!isCompletionFull ||
+														isQrGenerated ||
+														generatingQr ||
+														!id_result ||
+														!isAssessorApproved
 														? "cursor-not-allowed opacity-50"
 														: "hover:bg-orange-600 cursor-pointer"
-												}`}
+													}`}
 											>
 												{generatingQr
 													? "Generating..."
 													: isQrGenerated
-													? "Telah Digenerate"
-													: "Generate QR"}
+														? "Telah Digenerate"
+														: "Generate QR"}
 											</button>
 											{qrError && (
 												<div className="text-red-500 text-xs mt-1">
@@ -461,7 +470,7 @@ export default function Apl02() {
 											<h4 className="text-sm font-semibold text-gray-800">
 												QR Code Asesor
 											</h4>
-											{resultData?.approved_assessor ? (
+											{isAssessorApproved ? (
 												<>
 													<QRCodeCanvas
 														value={assessorQrValue}
@@ -486,11 +495,10 @@ export default function Apl02() {
 									<div className="w-full">
 										<Link
 											to={"#"}
-											className={`w-full block text-center ${
-												resultData?.approved_assessor
+											className={`w-full block text-center ${resultData?.approved_assessor
 													? "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
 													: "bg-gray-300 cursor-not-allowed"
-											} text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`}
+												} text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`}
 										>
 											{resultData?.approved_assessor
 												? "Lanjut"
