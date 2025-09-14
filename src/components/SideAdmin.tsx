@@ -193,7 +193,7 @@ const Sidebar: React.FC = () => {
     <>
       {/* Mobile Menu Button - Hidden on desktop */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-orange-500 text-white rounded-md shadow-lg"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-orange-500 text-white rounded-md shadow-lg"
         onClick={toggleMobileMenu}
       >
         {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -202,14 +202,14 @@ const Sidebar: React.FC = () => {
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-30"
+          className="lg:hidden fixed inset-0 z-[55] bg-black bg-opacity-50"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar - Always visible on desktop, slide on mobile */}
       <div className={`
-        fixed inset-y-0 left-0 z-40
+        fixed inset-y-0 left-0 z-[58]
         w-64 h-screen bg-[#E77D35] text-white flex flex-col
         transform transition-transform duration-300 ease-in-out lg:transform-none
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}

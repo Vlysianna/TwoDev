@@ -42,7 +42,7 @@ interface Schedule {
 			id: number;
 			full_name: string;
 			phone_no: string;
-		};
+		}; 
 		location: string;
 	}>;
 }

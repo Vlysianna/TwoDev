@@ -2,12 +2,25 @@ import React, { useState, useRef, useEffect } from 'react';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ConfirmModal from './ConfirmModal';
 
 const UserMenu: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Tutup dropdown saat klik di luar
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!isAuthenticated || !user) {
     return null;
@@ -22,23 +35,16 @@ const UserMenu: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    if (window.confirm('Apakah Anda yakin ingin logout?')) {
-      logout();
-      navigate('/auth/login');
-    }
+  const handleLogoutClick = () => {
+    setIsProfileOpen(false);
+    setShowLogoutModal(true);
   };
 
-  // Tutup dropdown saat klik di luar
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-        setIsProfileOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const handleConfirmLogout = () => {
+    setShowLogoutModal(false);
+    logout();
+    navigate('/auth/login');
+  };
 
   return (
     <div className="relative" ref={profileRef}>
@@ -79,7 +85,7 @@ const UserMenu: React.FC = () => {
           {/* Logout */}
           <div className="p-2">
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="w-full flex items-center justify-center text-red-500 hover:bg-gray-100 p-2 rounded transition cursor-pointer"
             >
               <LogOut size={18} className="mr-2" />
@@ -88,6 +94,19 @@ const UserMenu: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleConfirmLogout}
+        title="Yakin ingin keluar?"
+        message="Logout akan mengakhiri sesi Anda saat ini, dan Anda perlu login kembali untuk melanjutkan aktivitas."
+        confirmText="Keluar"
+        cancelText="Batalkan"
+        type="danger"
+        icon={<img src="/img/gambarprialogout.svg" alt="Logout" className="w-16 h-16" />}
+      />
     </div>
   );
 };
