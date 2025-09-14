@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Monitor, ChevronLeft, Search } from 'lucide-react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import NavbarAsesor from '@/components/NavAsesor';
 import paths from "@/routes/paths";
 import api from '@/helper/axios';
@@ -65,7 +65,11 @@ const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: strin
 export default function Ia01Detail() {
   const { id_unit } = useParams();
   const { id_assessment, id_result, id_asesi } = useAssessmentParams();
+  const location = useLocation();
   const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const activeGroup = searchParams.get('group') || '';
+  const unitNumber = location.state?.unitNumber || 'N/A';
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [elements, setElements] = useState<ElementIA01[]>([]);
@@ -76,6 +80,7 @@ export default function Ia01Detail() {
   const [penilaianLanjut, setPenilaianLanjut] = useState<Record<number, string>>({});
   const finishedRef = useRef(false);
   const [unassessedCriteria, setUnassessedCriteria] = useState<number[]>([]);
+  const [unitNumberMap, setUnitNumberMap] = useState<Record<number, number>>({});
 
   // Handle Save button
   const handleSave = async () => {
@@ -90,6 +95,7 @@ export default function Ia01Detail() {
     if (!id_result) return;
     setSaving(true);
     setSaveError(null);
+
     try {
       // Pastikan semua penilaian lanjut memiliki nilai, gunakan "-" jika kosong
       const processedPenilaianLanjut = { ...penilaianLanjut };
@@ -103,9 +109,6 @@ export default function Ia01Detail() {
         });
       });
 
-      // Update state dengan nilai yang telah diproses
-      setPenilaianLanjut(processedPenilaianLanjut);
-
       // Payload per detail (kriteria kerja)
       const payload = {
         result_id: Number(id_result),
@@ -118,14 +121,27 @@ export default function Ia01Detail() {
         )
       };
 
+      // Kirim data ke API
       await api.post('/assessments/ia-01/result/send', payload);
-      navigate(paths.asesor.assessment.ia01(
+
+      // Construct navigation path with activeGroup
+      const basePath = paths.asesor.assessment.ia01(
         id_assessment ?? '-',
         id_asesi ?? '-'
-      ));
+      );
+
+      const navigationPath = activeGroup
+        ? `${basePath}?group=${encodeURIComponent(activeGroup)}`
+        : basePath;
+
+      console.log('Navigating to:', navigationPath); // Debug log
+
+      // Force navigation with replace to ensure it works
+      navigate(navigationPath, { replace: true });
+
     } catch (e: any) {
       setSaveError('Gagal menyimpan data: ' + e.message);
-      console.error(e);
+      console.error('Save error:', e);
     } finally {
       setSaving(false);
     }
@@ -237,20 +253,65 @@ export default function Ia01Detail() {
 
   // Hitung jumlah kriteria yang belum dinilai
   const unassessedCount = getUnassessedCriteria().length;
+  const fetchAllUnits = async () => {
+    if (!id_result) return;
+    try {
+      const response = await api.get(`/assessments/ia-01/units/${id_result}`);
+      if (response.data.success) {
+        // Flatten data dari group ke unit
+        const flattenedUnits = response.data.data.flatMap((group: any) =>
+          group.units.map((unit: any) => ({
+            id: unit.id,
+            title: unit.title,
+            unit_code: unit.unit_code,
+            finished: unit.finished,
+            status: unit.status,
+            progress: unit.progress,
+            group_name: group.name,
+            kPekerjaan: group.name,
+          }))
+        );
+
+        // Buat mapping id unit ke nomor urut global
+        const numberMap: Record<number, number> = {};
+        flattenedUnits.forEach((unit: any, index: number) => {
+          numberMap[unit.id] = index + 1;
+        });
+        setUnitNumberMap(numberMap);
+      }
+    } catch (error: any) {
+      console.error('fetchAllUnits error:', error);
+    }
+  };
+
+  // Panggil fungsi ini dalam useEffect
+  useEffect(() => {
+    if (id_result) {
+      fetchAllUnits();
+      fetchElements();
+    }
+  }, [id_result, id_unit]);
+
+  // Tidak perlu kirim state, langsung navigasi biasa
+  const handleBack = () => {
+    navigate(paths.asesor.assessment.ia01(
+      id_assessment ?? '-',
+      id_asesi ?? '-'
+    ) + (activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white rounded-lg shadow-sm mb-8">
+      <div className="bg-white rounded-lg shadow-sm">
         <NavbarAsesor
           title="Detail"
           icon={
-            <Link to={paths.asesor.assessment.ia01(
-              id_assessment ?? '-',
-              id_asesi ?? '-'
-            )}
-              className="text-gray-500 hover:text-gray-600">
+            <button
+              onClick={handleBack}
+              className="text-gray-500 hover:text-gray-600 cursor-pointer transition-colors flex items-center"
+            >
               <ChevronLeft size={20} />
-            </Link>
+            </button>
           }
         />
       </div>
@@ -260,7 +321,9 @@ export default function Ia01Detail() {
         <div className="pb-7 flex flex-wrap items-center gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-[#00809D]">
             <Monitor size={20} />
-            <span className="font-medium">Unit kompetensi {id_unit}</span>
+            <span className="font-medium">
+              Unit kompetensi {unitNumberMap[Number(id_unit)] || 'N/A'}
+            </span>
           </div>
 
           {/* Search */}
