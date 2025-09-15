@@ -184,10 +184,10 @@ export default function CekAk05() {
 									<td className="p-3 border text-center">
 										{data.result.assessee.name || "N/A"}
 									</td>
-									<td className="p-3 border">
+									<td className="p-3 border text-center">
 										{data.result.result_ak05.is_competent
-											? "Kompeten"
-											: "Belum Kompeten"}
+											? "K"
+											: "BK"}
 									</td>
 									<td className="p-3 border text-center">{deskripsi || "-"}</td>
 								</tr>
@@ -285,7 +285,9 @@ export default function CekAk05() {
 								<p className="text-gray-400 text-sm">Belum Generate QR</p>
 							)}
 							{qrValue && (
-								<p className="text-xs text-gray-400 mt-2">{qrValue}</p>
+								<p className="text-xs text-gray-400 mt-2">
+									{data.result.assessor.name || "Nama Asesor"}
+								</p>
 							)}
 						</div>
 					</div>
