@@ -4,12 +4,14 @@ import {
 	createContext,
 	useContext,
 	useEffect,
+	useMemo,
 	useState,
 	type JSX,
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, TableConfig } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import useSWR from "swr";
 
 type AssessmentParams = {
 	id_assessment: string;
@@ -18,8 +20,16 @@ type AssessmentParams = {
 	id_result: string;
 };
 
+export interface AssessmentRoute {
+	value: string;
+	label: string;
+	disabled?: boolean;
+	to: string;
+}
+
 const AssessmentContext = createContext<AssessmentParams | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAssessmentParams() {
 	const ctx = useContext(AssessmentContext);
 	if (!ctx)
@@ -28,6 +38,9 @@ export function useAssessmentParams() {
 		);
 	return ctx;
 }
+
+const fetcherTabs = (url: string) => api.get(url).then((res) => res.data.data.tabs);
+const fetcherResult = (url: string) => api.get(url).then((res) => res.data.data[0]);
 
 export default function AssessmentAsesiProvider({
 	children,
@@ -46,17 +59,18 @@ export default function AssessmentAsesiProvider({
 		}
 	}, [id_assessment, id_asesor, navigate]);
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [approveData, setApproveData] = useState<any[] | undefined>(undefined);
 	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [filterApproveData, setFilterApproveData] = useState<any>(undefined);
 
-	const [result, setResult] = useState<any>(null);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 	useEffect(() => {
 		const fetchApprove = async () => {
 			setLoading(true);
-			setError(null);
+			// setError(null);
 
 			try {
 				const response = await api.get(
@@ -66,41 +80,23 @@ export default function AssessmentAsesiProvider({
 				if (response.data.success) {
 					setApproveData(response.data.data);
 				} else {
-					setError("Gagal mengambil data approve");
+					// setError("Gagal mengambil data approve");
 				}
 			} catch (err) {
 				console.error("Failed to fetch approve:", err);
-				setError("Terjadi kesalahan saat mengambil data");
+				// setError("Terjadi kesalahan saat mengambil data");
+			} finally {
+				setLoading(false);
 			}
 		};
 
 		fetchApprove();
 	}, []);
 
-	useEffect(() => {
-		const fetchResult = async () => {
-			setLoading(true);
-			await api
-				.get(
-					`assessments/result/${id_assessment}/${id_asesor}/${result?.assessee.id}`
-				)
-				.then((res) => {
-					if (res.data.success) {
-						setResult(res.data.data[0]);
-					}
-				})
-				.catch((err) => {
-					console.error("Failed to fetch result:", err);
-				})
-				.finally(() => {
-					setLoading(false);
-				});
-		};
-
-		if (id_assessment && id_asesor) {
-			fetchResult();
-		}
-	}, [id_assessment, id_asesor]);
+	const { data: result } = useSWR(
+		`assessments/result/${id_assessment}/${id_asesor}/0`,
+		fetcherResult
+	);
 
 	useEffect(() => {
 		if (approveData == undefined || !result) return;
@@ -167,39 +163,13 @@ export default function AssessmentAsesiProvider({
 		setIsTabsOpen(!isTabsOpen);
 	};
 
-	// Fecth Tab Items
-	const [tabItemsState, setTabItems] = useState<any>([]);
-	const [filteredTabItems, setFilteredTabItems] = useState<any>([]);
-
-	const fetchTabItems = async () => {
-		if (!id_assessment || !id_asesor || !result?.assessee?.id) return;
-		setFilteredTabItems(["Data Sertifikasi"]);
-		try {
-			const res = await api.get(
-				`/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`
-			);
-
-			if (res.data.success) {
-				if (res.data.data && Array.isArray(res.data.data.tabs)) {
-					setTabItems(res.data.data.tabs.map((item: any) => item));
-				}
-			} else {
-				// setTabItems([]);
-			}
-		} catch (error) {
-			console.error("Failed to fetch tab items:", error);
-			// setTabItems([]);
-		}
-	};
-
-	useEffect(() => {
-		if (id_assessment && id_asesor && result?.assessee?.id) {
-			fetchTabItems();
-		}
-	}, [id_assessment, id_asesor, result?.assessee?.id]);
+  const { data: tabItemsState } = useSWR<string[]>(
+    `/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`,
+    fetcherTabs
+  );
 
 	// tab items
-	const tabItems = [
+	const tabItems: AssessmentRoute[] = [
 		{
 			value: routes.asesi.assessment.apl01(
 				id_assessment ?? "",
@@ -292,15 +262,17 @@ export default function AssessmentAsesiProvider({
 		},
 	];
 
-	useEffect(() => {
-		setFilteredTabItems(
-			tabItems.filter((tab: any) => {
+	const filteredTabItems: AssessmentRoute[] = useMemo(() => {
+		if (tabItemsState) {
+			
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			return tabItems.filter((tab) => {
 				return tabItemsState.includes(tab.label);
 			})
-			// [tabItems[1]]
-		);
-
-		// setFilteredTabItems(["Data Sertifikasi"]);
+		} else {
+			return [];
+		}
+		
 	}, [tabItemsState]);
 
 	return (
@@ -369,14 +341,14 @@ export default function AssessmentAsesiProvider({
 													[&::-webkit-scrollbar-thumb]:bg-orange-400/80
 												"
 											>
-												{filteredTabItems.map((tab: any) => {
+												{filteredTabItems.map((tab: AssessmentRoute, index) => {
 													const isActive = location.pathname === tab.value;
 													return (
 														<Link
-															key={tab.value}
+															key={index}
 															to={tab.to}
 															onClick={(e) => {
-																tab.disabled && e.preventDefault();
+																if (tab.disabled) e.preventDefault();
 																setIsTabsOpen(false);
 															}}
 															className={`group relative flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-300 ${
