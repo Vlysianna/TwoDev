@@ -22,6 +22,7 @@ export default function Ia05() {
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showModalConfirmSubmit, setShowModalConfirmSubmit] = useState(false);
+  const [answersSubmitted, setAnswersSubmitted] = useState(false)
 
   // ----- TYPES (API) -----
   interface IA05Option {
@@ -175,6 +176,37 @@ export default function Ia05() {
       setSubmitting(false);
     }
   };
+
+  const checkAnswerStatus = async () => {
+    if (!id_result) return;
+
+    try {
+      const res = await api.get(`/assessments/ia-05/result/answers/${id_result}`);
+      if (res.data.success && res.data.data && res.data.data.length > 0) {
+        // Jika sudah ada jawaban, set state dan redirect
+        setAnswersSubmitted(true);
+        navigate(paths.asesi.assessment.Ia05CAssessee(id_assessment, id_asesor));
+      }
+    } catch (error) {
+      console.log("Belum ada jawaban atau error:", error);
+    }
+  };
+
+  // Panggil fungsi pengecekan saat komponen dimuat
+  useEffect(() => {
+    checkAnswerStatus();
+  }, [id_result]);
+
+  if (answersSubmitted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E77D35] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Mengarahkan ke hasil assessment...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Hitung progress
   const totalQuestions = questions.length;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +22,7 @@ export default function Ia05CAssessee() {
   >({});
   // Assessment summary radio: 'assesment1' = Semua Tercapai, 'assesment3' = Tidak Tercapai
   const [selectedValue, setSelectedValue] = useState<string>("");
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +36,8 @@ export default function Ia05CAssessee() {
   const [unitField, setUnitField] = useState("");
   const [elementField, setElementField] = useState("");
   const [kukField, setKukField] = useState("");
+
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // Format date for display
   const formattedDate = result?.ia05_header.updated_at
@@ -54,11 +57,17 @@ export default function Ia05CAssessee() {
       setLoading(true);
       setError(null);
 
-      // Fetch both result and answers in parallel
-      const [resultResponse, answersResponse] = await Promise.all([
-        api.get(`/assessments/ia-05/result/${id_result}`),
-        api.get(`/assessments/ia-05/result/answers/${id_result}`),
-      ]);
+      // Cek dulu apakah ada jawaban
+      const answersResponse = await api.get(`/assessments/ia-05/result/answers/${id_result}`);
+
+      if (!answersResponse.data.success || !answersResponse.data.data || answersResponse.data.data.length === 0) {
+        // Jika belum ada jawaban, redirect kembali ke IA-05
+        navigate(paths.asesi.assessment.ia05(id_assessment, id_asesor));
+        return;
+      }
+
+      // Jika ada jawaban, lanjutkan mengambil data result
+      const resultResponse = await api.get(`/assessments/ia-05/result/${id_result}`);
 
       if (resultResponse.data.success) {
         const rawData: ResultIA05C = resultResponse.data.data;
@@ -78,18 +87,17 @@ export default function Ia05CAssessee() {
         setError("Gagal memuat data asesmen");
       }
 
-      if (answersResponse.data.success) {
-        setAssesseeAnswers(answersResponse.data.data);
+      // Set answers
+      setAssesseeAnswers(answersResponse.data.data);
 
-        // Initialize selected answers based on fetched data
-        const initialAnswers: Record<number, string> = {};
-        answersResponse.data.data.forEach((answer: AssesseeAnswer) => {
-          initialAnswers[answer.id] = answer.answers.approved ? "Ya" : "Tidak";
-        });
-        setSelectedAnswers(initialAnswers);
-      } else {
-        setError("Gagal memuat jawaban asesmen");
-      }
+      // Initialize selected answers based on fetched data
+      const initialAnswers: Record<number, string> = {};
+      answersResponse.data.data.forEach((answer: AssesseeAnswer) => {
+        initialAnswers[answer.id] = answer.answers.approved ? "Ya" : "Tidak";
+      });
+      setSelectedAnswers(initialAnswers);
+
+      setDataLoaded(true);
     } catch (error) {
       setError("Gagal memuat data asesmen: " + error);
       console.error("fetchData error:", error);
@@ -97,6 +105,17 @@ export default function Ia05CAssessee() {
       setLoading(false);
     }
   };
+
+  if (loading || !dataLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E77D35] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Memuat hasil assessment...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleGenerateQRCode = async () => {
     try {
