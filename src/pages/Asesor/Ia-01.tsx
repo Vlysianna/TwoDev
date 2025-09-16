@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import NavbarAsesor from '@/components/NavAsesor';
 import api from '@/helper/axios';
@@ -6,7 +6,7 @@ import paths from "@/routes/paths";
 import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
 import { QRCodeCanvas } from 'qrcode.react';
 import { getAssessorUrl, getAssesseeUrl } from '@/lib/hashids';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 
 
 export default function Ia01() {
@@ -20,8 +20,9 @@ export default function Ia01() {
   const [assessment, setAssessment] = useState<any>(null);
   const [unitData, setUnitData] = useState<any[]>([]);
   const [completedUnits, setCompletedUnits] = useState<number>(0);
-  const [valueQr, setValueQr] = useState('');
   const [resultData, setResultData] = useState<any>(null);
+  const [unitNumberMap, setUnitNumberMap] = useState<Record<number, number>>({});
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Local state for IA-01 header fields
   const [groupField, setGroupField] = useState('');
@@ -74,8 +75,9 @@ export default function Ia01() {
   // Handler simpan header IA-01
   const handleSaveHeader = async () => {
     if (!id_result) return;
-    if (!assessorQrValue) {
-      setSaveHeaderError("Setujui QR Asesor terlebih dahulu sebelum menyimpan hasil rekomendasi.");
+    const completion = unitData.length > 0 ? `${Math.round((completedUnits / unitData.length) * 100)}%` : '0%';
+    if (completion !== '100%') {
+      setSaveHeaderError("Isilah semua unit terlebih dahulu sebelum menyimpan hasil rekomendasi.");
       return;
     }
 
@@ -104,11 +106,25 @@ export default function Ia01() {
     }
   };
 
-  const handleGenerateQRCode = () => {
+  const handleGenerateQRCode = async () => {
     if (!id_asesor) return;
-    const qrValue = getAssessorUrl(Number(id_asesor));
-    console.log('Generated QR Asesor:', qrValue); // Debug
-    setAssessorQrValue(qrValue);
+    const completion = unitData.length > 0 ? `${Math.round((completedUnits / unitData.length) * 100)}%` : '0%';
+    if (completion !== '100%') {
+      setSaveHeaderError("Simpan hasil rekomendasi terlebih dahulu sebelum menyetujui sebagai asesor.");
+      return;
+    }
+
+    try {
+      const response = await api.put(`/assessments/ia-01/result/assessor/${id_result}/approve`);
+      if (response.data.success) {
+        const qrValue = getAssessorUrl(Number(id_asesor));
+        console.log('Generated QR Asesor:', qrValue); // Debug
+        setAssessorQrValue(qrValue);
+      }
+    } catch (error) {
+      console.error("Error approving assessor:", error);
+      setSaveHeaderError("Gagal menyetujui sebagai asesor");
+    }
   };
 
   useEffect(() => {
@@ -139,7 +155,6 @@ export default function Ia01() {
       setLoading(false);
     }
   };
-
   const fetchUnitData = async () => {
     if (!id_result) return;
     try {
@@ -150,10 +165,12 @@ export default function Ia01() {
         // Ambil daftar group name
         const groupNames = response.data.data.map((group: any) => group.name);
         setGroupList(groupNames);
+
         // Auto-select first group if available
         if (groupNames.length > 0) {
           setSelectedKPekerjaan(groupNames[0]);
         }
+
         // Flatten data dari group ke unit
         const flattenedUnits = response.data.data.flatMap((group: any) =>
           group.units.map((unit: any) => ({
@@ -161,7 +178,7 @@ export default function Ia01() {
             title: unit.title,
             unit_code: unit.unit_code,
             finished: unit.finished,
-            status: unit.status, // tambahkan ini!
+            status: unit.status,
             progress: unit.progress,
             group_name: group.name,
             kPekerjaan: group.name,
@@ -169,12 +186,21 @@ export default function Ia01() {
         );
 
         setUnitData(flattenedUnits);
+
+        // Buat mapping id unit ke nomor urut global
+        const numberMap: Record<number, number> = {};
+        flattenedUnits.forEach((unit: any, index: number) => {
+          numberMap[unit.id] = index + 1;
+        });
+        setUnitNumberMap(numberMap);
       }
     } catch (error: any) {
       setError('Gagal memuat unit kompetensi');
       console.error('fetchUnitData error:', error);
     }
   };
+
+  // fetchUnitData();
 
   // Dalam useEffect yang fetch resultData
   const fetchResultData = async () => {
@@ -277,13 +303,35 @@ export default function Ia01() {
   };
   const filteredData = getFilteredData();
 
+  // Simpan group aktif ke localStorage saat berubah
+  useEffect(() => {
+    if (selectedKPekerjaan) {
+      localStorage.setItem('activeGroup', selectedKPekerjaan);
+    }
+  }, [selectedKPekerjaan]);
+
+
+  useEffect(() => {
+    const groupFromUrl = searchParams.get('group');
+
+    // Prioritaskan group dari URL jika valid
+    if (groupFromUrl && groupList.includes(groupFromUrl)) {
+      setSelectedKPekerjaan(groupFromUrl);
+    }
+    // Jika tidak ada di URL, gunakan group pertama yang tersedia
+    else if (groupList.length > 0) {
+      setSelectedKPekerjaan(groupList[0]);
+    }
+  }, [groupList, searchParams]);
+
+
   return (
     <div className="min-h-screen bg-gray-100">
       <NavbarAsesor
         title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR-IA-01"
         icon={
           <Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment!)} className="text-gray-500 hover:text-gray-600">
-              <ChevronLeft size={20} />
+            <ChevronLeft size={20} />
           </Link>
         }
       />
@@ -305,7 +353,7 @@ export default function Ia01() {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <span className="text-sm text-gray-600">{assessment?.occupation?.name || 'Pemrogram Junior ( Junior Coder )'}</span>
-            <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded text-sm font-medium w-fit">
+            <div className="bg-[#E77D3533] text-[#E77D35] px-3 py-1 rounded text-sm font-medium w-fit">
               {assessment?.code || 'SMK RPL PJ/SPSMK24/2023'}
             </div>
           </div>
@@ -329,13 +377,12 @@ export default function Ia01() {
           <div className="flex flex-wrap gap-2">
             {groupList.map((tab, idx) => (
               <button
-                key={tab}
+                key={tab} // Key yang unik
                 onClick={() => setSelectedKPekerjaan(tab)}
                 className={`px-3 lg:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedKPekerjaan === tab
                   ? 'bg-[#E77D35] text-white shadow-sm'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                   }`}
-                {...(selectedKPekerjaan === '' && idx === 0 ? { autoFocus: true } : {})}
               >
                 {tab}
               </button>
@@ -368,7 +415,7 @@ export default function Ia01() {
                     </svg>
                   </div>
                   <span className="text-sm font-medium text-[#E77D35]">
-                    Unit kompetensi {unit.id}
+                    Unit kompetensi {unitNumberMap[unit.id] || 'N/A'}
                   </span>
                 </div>
               </div>
@@ -387,8 +434,8 @@ export default function Ia01() {
                     id_assessment ?? '-',
                     id_result ?? '-',
                     id_asesi ?? '-',
-                    unit.id             // ini yang jadi unitId
-                  )}
+                    unit.id
+                  ) + `?group=${encodeURIComponent(selectedKPekerjaan)}`}
                   className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
                 >
                   Lihat detail
@@ -617,8 +664,8 @@ export default function Ia01() {
                     disabled={assessorQrValue !== ""}
                     onClick={handleGenerateQRCode}
                     className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assessorQrValue
-                        ? "hover:bg-orange-600 cursor-pointer"
-                        : "cursor-not-allowed opacity-50"
+                      ? "hover:bg-orange-600 cursor-pointer"
+                      : "cursor-not-allowed opacity-50"
                       }`}
                   >
                     {assessorQrValue ? "QR Telah Digenerate" : "Setujui"}
@@ -634,22 +681,36 @@ export default function Ia01() {
             </div>
           </div>
         </div>
-        <div className="mt-8 flex justify-end items-center gap-4">
-          {saveHeaderError && <span className="text-red-500 text-sm mr-4">{saveHeaderError}</span>}
-          {!assessorQrValue && (
-            <span className="text-orange-600 text-sm font-medium mr-4">
-              Setujui QR Asesor terlebih dahulu sebelum menyimpan hasil rekomendasi.
+        <div className="mt-8 flex flex-col sm:flex-row justify-end items-center gap-4">
+          {saveHeaderError && (
+            <span className="text-red-500 text-sm sm:mr-4 text-center sm:text-left">
+              {saveHeaderError}
             </span>
           )}
+
+          {(unitData.length > 0 ? `${Math.round((completedUnits / unitData.length) * 100)}%` : '0%') !== '100%' && (
+            <span className="text-orange-600 text-sm font-medium sm:mr-4 text-center sm:text-left">
+              Isilah semua unit terlebih dahulu sebelum menyimpan hasil rekomendasi.
+            </span>
+          )}
+
           {resultData?.ia01_header?.approved_assessee && (
-            <span className="text-green-600 text-sm font-medium mr-4">
+            <span className="text-green-600 text-sm font-medium sm:mr-4 text-center sm:text-left">
               Asesi telah menyetujui rekomendasi
             </span>
           )}
+
           <button
-            className={`bg-[#E77D35] text-white px-40 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md ${(!isHeaderChanged() || !isHeaderValid() || savingHeader || !assessorQrValue)
-              ? 'opacity-60 cursor-not-allowed'
-              : 'hover:bg-[#E77D35]/90 cursor-pointer'
+            className={`
+      bg-[#E77D35] text-white 
+      w-full sm:w-auto
+      px-6 sm:px-12 lg:px-40 
+      py-3 rounded-lg font-medium 
+      transition-all duration-200 shadow-sm 
+      hover:shadow-md
+      ${(!isHeaderChanged() || !isHeaderValid() || savingHeader || !assessorQrValue)
+                ? 'opacity-60 cursor-not-allowed'
+                : 'hover:bg-[#E77D35]/90 cursor-pointer'
               }`}
             onClick={handleSaveHeader}
             disabled={!isHeaderChanged() || !isHeaderValid() || savingHeader || !assessorQrValue}

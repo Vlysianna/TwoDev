@@ -5,7 +5,7 @@ import api from '@/helper/axios';
 import { useAssessmentParams } from '@/components/AssessmentAsesiProvider';
 import { QRCodeCanvas } from 'qrcode.react';
 import { getAssesseeUrl, getAssessorUrl } from '@/lib/hashids';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import paths from "@/routes/paths";
 
 export default function Ia01Asesi() {
@@ -20,23 +20,21 @@ export default function Ia01Asesi() {
     const [valueQr, setValueQr] = useState('');
     const [resultData, setResultData] = useState<any>(null);
     const [generating, setGenerating] = useState(false);
+    const [unitNumberMap, setUnitNumberMap] = useState<Record<number, number>>({});
+    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const handleGenerateQRCode = async () => {
         if (!id_result) return;
 
         setGenerating(true);
         try {
-            // Langsung kirim persetujuan ke server
             const response = await api.put(
                 `/assessments/ia-01/result/assessee/${id_result}/approve`
             );
 
             console.log("Response approve:", response.data);
-
-            // Set QR code value setelah berhasil
             setValueQr(getAssesseeUrl(Number(id_asesi)));
-
-            // Refresh data
             fetchResultData();
         } catch (e) {
             console.error("Gagal generate QR:", e);
@@ -80,16 +78,17 @@ export default function Ia01Asesi() {
             console.log('fetchUnitData response asesi:', response.data);
 
             if (response.data.success) {
-                // Ambil daftar group name
                 const groupNames = response.data.data.map((group: any) => group.name);
                 setGroupList(groupNames);
 
-                // Auto-select first group if available
-                if (groupNames.length > 0) {
+                // Set selected group from URL or first group
+                const groupFromUrl = searchParams.get('group');
+                if (groupFromUrl && groupNames.includes(groupFromUrl)) {
+                    setSelectedKPekerjaan(groupFromUrl);
+                } else if (groupNames.length > 0) {
                     setSelectedKPekerjaan(groupNames[0]);
                 }
 
-                // Flatten data dari group ke unit (sama seperti di asesor)
                 const flattenedUnits = response.data.data.flatMap((group: any) =>
                     group.units.map((unit: any) => ({
                         id: unit.id,
@@ -99,11 +98,17 @@ export default function Ia01Asesi() {
                         status: unit.status,
                         progress: unit.progress,
                         group_name: group.name,
-                        kPekerjaan: group.name,
                     }))
                 );
 
                 setUnitData(flattenedUnits);
+
+                // Create unit number mapping
+                const numberMap: Record<number, number> = {};
+                flattenedUnits.forEach((unit: any, index: number) => {
+                    numberMap[unit.id] = index + 1;
+                });
+                setUnitNumberMap(numberMap);
             }
         } catch (error: any) {
             setError('Gagal memuat unit kompetensi');
@@ -119,26 +124,29 @@ export default function Ia01Asesi() {
 
             if (response.data.success) {
                 setResultData(response.data.data);
-
-                // Otomatis set QR code jika asesi sudah menyetujui
                 if (response.data.data.ia01_header?.approved_assessee && id_asesi) {
                     setValueQr(getAssesseeUrl(Number(id_asesi)));
                 }
             }
-
         } catch (error) {
             console.error("fetchResultData error asesi:", error);
         }
     };
 
-    // Filter data berdasarkan K-Pekerjaan yang dipilih (sama seperti di asesor)
+    // Update URL when selected group changes
+    useEffect(() => {
+        if (selectedKPekerjaan) {
+            searchParams.set('group', selectedKPekerjaan);
+            setSearchParams(searchParams);
+        }
+    }, [selectedKPekerjaan, searchParams, setSearchParams]);
+
     const getFilteredData = () => {
         return unitData.filter(unit => unit.group_name === selectedKPekerjaan);
     };
 
     const filteredData = getFilteredData();
 
-    // Format tanggal
     const assesmentDate = resultData?.ia01_header?.updated_at || assessment?.date || '';
     const formattedDate = assesmentDate
         ? new Date(assesmentDate).toLocaleDateString("id-ID", {
@@ -168,7 +176,7 @@ export default function Ia01Asesi() {
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         <span className="text-sm text-gray-600">{assessment?.occupation?.name || 'Pemrogram Junior ( Junior Coder )'}</span>
-                        <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded text-sm font-medium w-fit">
+                        <div className="bg-[#E77D3533] text-[#E77D35] px-3 py-1 rounded text-sm font-medium w-fit">
                             {assessment?.code || 'SMK RPL PJ/SPSMK24/2023'}
                         </div>
                     </div>
@@ -236,7 +244,7 @@ export default function Ia01Asesi() {
                                             </svg>
                                         </div>
                                         <span className="text-sm font-medium text-[#E77D35]">
-                                            Unit kompetensi {unit.id}
+                                            Unit kompetensi {unitNumberMap[unit.id] || 'N/A'}
                                         </span>
                                     </div>
                                 </div>
@@ -255,8 +263,8 @@ export default function Ia01Asesi() {
                                             id_assessment ?? '-',
                                             id_result ?? '-',
                                             id_asesor ?? '-',
-                                            unit.id             // ini yang jadi unitId
-                                        )}
+                                            unit.id
+                                        ) + `?group=${encodeURIComponent(selectedKPekerjaan)}`}
                                         className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
                                     >
                                         Lihat detail

@@ -16,6 +16,7 @@ export default function CekAk05() {
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(false);
+  const [generatingQR, setGeneratingQR] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AK05ResponseData | null>(null);
   const [qrValue, setQrValue] = useState("");
@@ -30,6 +31,13 @@ export default function CekAk05() {
   useEffect(() => {
     fetchData();
   }, [user]);
+
+  // Fungsi untuk mengubah status kompeten dan mengisi deskripsi otomatis
+  const handleCompetentChange = (value: boolean) => {
+    setIsCompetent(value);
+    // Set deskripsi otomatis berdasarkan pilihan
+    setDeskripsi(value ? "Kompeten" : "Belum Kompeten");
+  };
 
   const fetchData = async () => {
     try {
@@ -48,8 +56,17 @@ export default function CekAk05() {
         setPenolakan(rawData.data.result.result_ak05.rejection_notes || "");
         setSaran(rawData.data.result.result_ak05.improvement_suggestions || "");
         setCatatan(rawData.data.result.result_ak05.notes || "");
-        setIsCompetent(rawData.data.result.result_ak05.is_competent);
-        setDeskripsi(rawData.data.result.result_ak05.description || "");
+
+        const competentStatus = rawData.data.result.result_ak05.is_competent;
+        setIsCompetent(competentStatus);
+
+        // Jika sudah ada nilai di database, gunakan itu
+        // Jika belum, set otomatis berdasarkan status kompeten
+        const existingDescription = rawData.data.result.result_ak05.description;
+        setDeskripsi(
+          existingDescription ||
+          (competentStatus !== null ? (competentStatus ? "Kompeten" : "Belum Kompeten") : "")
+        );
 
         // jika sudah approve, langsung set QR
         if (rawData.data.result.result_ak05.approved_assessor) {
@@ -101,15 +118,28 @@ export default function CekAk05() {
 
   const handleGenerateQRCode = async () => {
     try {
-      // Then generate QR code
+      setGeneratingQR(true);
+
+      // Simpan data terlebih dahulu
+      await handleSave();
+
+      // Kemudian approve dan generate QR code
       const response = await api.put(
         `/assessments/ak-05/result/assessor/${id_result}/approve`
       );
+
       if (response.data.success) {
         setQrValue(getAssessorUrl(Number(id_asesor)));
+        // Refresh data untuk mendapatkan status approved_assessor yang terbaru
+        fetchData();
+      } else {
+        setError("Gagal mengapprove hasil asesmen");
       }
     } catch (err) {
       console.error("Error generating QR:", err);
+      setError("Terjadi kesalahan saat generate QR");
+    } finally {
+      setGeneratingQR(false);
     }
   };
 
@@ -246,9 +276,9 @@ export default function CekAk05() {
                           name="rekom"
                           value="true"
                           checked={isCompetent === true}
-                          onChange={() => setIsCompetent(true)}
+                          onChange={() => handleCompetentChange(true)}
                         />
-                        Kompeten
+                        K
                       </label>
                       <label className="flex items-center gap-2">
                         <input
@@ -256,9 +286,9 @@ export default function CekAk05() {
                           name="rekom"
                           value="false"
                           checked={isCompetent === false}
-                          onChange={() => setIsCompetent(false)}
+                          onChange={() => handleCompetentChange(false)}
                         />
-                        Belum Kompeten
+                        BK
                       </label>
                     </div>
                   </td>
@@ -363,20 +393,21 @@ export default function CekAk05() {
                 <p className="text-gray-400 text-sm">Belum Generate QR</p>
               )}
               {qrValue && (
-                <p className="text-xs text-gray-400 mt-2">{qrValue}</p>
+                <p className="text-xs text-gray-400 mt-2">
+                  {data.result.assessor.name || "Nama Asesor"}
+                </p>
               )}
             </div>
 
             <button
               onClick={handleGenerateQRCode}
-              disabled={isCompetent === null}
-              className={`w-full text-white py-2 rounded-lg ${
-                isCompetent === null
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-orange-500 hover:bg-orange-600"
-              }`}
+              disabled={isCompetent === null || generatingQR}
+              className={`w-full text-white py-2 rounded-lg ${isCompetent === null || generatingQR
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600"
+                }`}
             >
-              Generate QR
+              {generatingQR ? "Memproses..." : "Generate QR"}
             </button>
           </div>
         </section>

@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Upload, ChevronLeft, AlertCircle, CheckCircle, X } from "lucide-react";
+import { Upload, ChevronLeft, AlertCircle } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import api from "@/helper/axios";
-import { motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
-import useSWR from "swr";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import useToast from "@/components/ui/useToast";
 
@@ -19,21 +17,13 @@ type FormValues = {
 	id_card: File | null;
 };
 
-const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
-
 export default function DataSertifikasi() {
 	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
 
 	// const { user } = useAuth();
-	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [success, setSuccess] = useState<string | null>(null);
-	const [modalStep, setModalStep] = useState<number | null>(null);
-	const [filterApproveData, setFilterApproveData] = useState<any>(undefined);
-
-	const toast = useToast();
 
 	const {
 		control,
@@ -86,10 +76,7 @@ export default function DataSertifikasi() {
 		},
 	];
 
-	const { data: approveData, mutate } = useSWR(
-		`/assessments/apl-01/results/${id_assessment}`,
-		fetcher
-	);
+	const toast = useToast();
 
 	const onSubmit = async (data: FormValues) => {
 		try {
@@ -149,9 +136,10 @@ export default function DataSertifikasi() {
 					}
 				});
 
-			setSuccess("Data berhasil disimpan! Melanjutkan ke tahap berikutnya...");
+			// setSuccess("Data berhasil disimpan! Melanjutkan ke tahap berikutnya...");
 
-			setModalStep(1);
+			// setModalStep(1);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			setError("Gagal menyimpan data. Silakan coba lagi. " + error.message);
 		} finally {
@@ -211,41 +199,6 @@ export default function DataSertifikasi() {
 			fetchResultDocs();
 		}
 	}, [id_result]);
-
-	const handleNext = () => {
-		if (modalStep === 1) {
-			setModalStep(2);
-		} else if (modalStep === 3) {
-			// setModalStep(null);
-			localStorage.removeItem("asesiId");
-			navigate(
-				paths.asesi.assessment.apl02(id_assessment ?? 0, id_asesor ?? 0)
-			);
-		}
-	};
-
-	useEffect(() => {
-		if (approveData == undefined) return;
-		console.log(approveData);
-		setFilterApproveData(
-			approveData.find((data: any) => data.result_id == id_result)
-		);
-		setLoading(false);
-	}, [approveData]);
-
-	useEffect(() => {
-		// console.log(filterApproveData);
-		if (filterApproveData) {
-			const approved = filterApproveData.approved;
-			setModalStep(approved ? 3 : 1);
-		}
-	}, [filterApproveData]);
-
-	const handleRefresh = () => mutate();
-
-	useEffect(() => {
-		handleRefresh();
-	}, []);
 
 	// Komponen File Upload dengan Controller
 	const FileUploadArea = ({
@@ -367,13 +320,6 @@ export default function DataSertifikasi() {
 							<div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
 								<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
 								<span className="text-red-800">{error}</span>
-							</div>
-						)}
-
-						{success && (
-							<div className="lg:col-span-5 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
-								<CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-								<span className="text-green-800">{success}</span>
 							</div>
 						)}
 
@@ -509,68 +455,6 @@ export default function DataSertifikasi() {
 							</div>
 						</div>
 					</form>
-					{/* Modal */}
-					{modalStep !== null && (
-						<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-							<div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full text-center flex flex-col relative">
-								<button
-									onClick={() => setModalStep(null)}
-									className="absolute top-4 right-4 text-gray-700 hover:text-black cursor-pointer"
-								>
-									<X size={24} />
-								</button>
-								{modalStep === 1 && (
-									<>
-										<img
-											src="/img/modal-persetujuan.svg"
-											alt="Generate QR"
-											className="mx-auto mb-4 w-40"
-										/>
-										<h2 className="text-lg font-semibold">Generate QR</h2>
-										<button
-											onClick={handleNext}
-											className="bg-[#E77D35] text-white w-full py-2 rounded mt-6"
-										>
-											Lanjut
-										</button>
-									</>
-								)}
-								{modalStep === 2 && (
-									<div>
-										<img
-											src="/img/menunggu-persetujuan.svg"
-											alt="Menunggu admin"
-											className="mx-auto mb-4 w-40"
-										/>
-										<h2 className="text-lg font-semibold">
-											Menunggu persetujuan admin
-										</h2>
-									</div>
-								)}
-								{modalStep === 3 && (
-									<>
-										<motion.img
-											src="/img/setuju.svg"
-											alt="Berhasil"
-											className="mx-auto mb-4 w-24"
-											initial={{ opacity: 0, scale: 0.5 }}
-											animate={{ opacity: 1, scale: [0.5, 1.2, 1] }}
-											transition={{ duration: 0.6 }}
-										/>
-										<h2 className="text-lg font-semibold mt-4">
-											Pengajuan Anda berhasil disetujui.
-										</h2>
-										<button
-											onClick={handleNext}
-											className="bg-[#E77D35] text-white w-full py-2 rounded mt-6"
-										>
-											Lanjut
-										</button>
-									</>
-								)}
-							</div>
-						</div>
-					)}
 				</div>
 			</div>
 		</div>

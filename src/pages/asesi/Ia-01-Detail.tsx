@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Monitor, ChevronLeft, Search } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import NavbarAsesor from '@/components/NavAsesor';
 import paths from "@/routes/paths";
 import api from '@/helper/axios';
@@ -42,6 +42,8 @@ export default function Ia01AsesiDetail() {
     // key: detail.id
     const [pencapaian, setPencapaian] = useState<Record<number, string>>({});
     const [penilaianLanjut, setPenilaianLanjut] = useState<Record<number, string>>({});
+    const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (id_result && id_unit) fetchElements();
@@ -87,19 +89,29 @@ export default function Ia01AsesiDetail() {
         item.details.some(det => det.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
+    const searchParams = new URLSearchParams(location.search);
+    const activeGroup = searchParams.get('group') || '';
+
+    // Handle back dengan group parameter
+    const handleBack = () => {
+        navigate(paths.asesi.assessment.ia01Asesi(
+            id_assessment ?? '-',
+            id_asesor ?? '-'
+        ) + (activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''));
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white rounded-lg shadow-sm mb-8">
                 <NavbarAsesor
                     title="Detail (View Only)"
                     icon={
-                        <Link to={paths.asesi.assessment.ia01Asesi(
-                            id_assessment ?? '-',
-                            id_asesor ?? '-'
-                        )}
-                            className="text-gray-500 hover:text-gray-600">
+                        <button
+                            onClick={handleBack}
+                            className="text-gray-500 hover:text-gray-600 cursor-pointer transition-colors flex items-center"
+                        >
                             <ChevronLeft size={20} />
-                        </Link>
+                        </button>
                     }
                 />
             </div>
