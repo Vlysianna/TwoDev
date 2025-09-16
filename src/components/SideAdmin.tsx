@@ -43,7 +43,7 @@ const Sidebar: React.FC = () => {
       path: paths.admin.root,
     },
     {
-      name: 'Kelola Asesmen',
+      name: 'Kelola Jadwal Asesmen',
       icon: Users,
       section: 'admin',
       path: paths.admin.kelolaJadwal,

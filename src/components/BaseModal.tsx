@@ -10,7 +10,7 @@ interface BaseModalProps {
 const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, children, widthClass }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-[#E77D35]/20">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/10">
       <div className={`bg-[#E77D35] rounded-lg shadow-xl mx-4 ${widthClass || 'max-w-lg w-full'} relative`}>
         <button
           onClick={onClose}

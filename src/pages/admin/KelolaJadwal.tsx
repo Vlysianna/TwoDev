@@ -9,34 +9,44 @@ import JadwalEditModal from '@/components/JadwalEditModal';
 import paths from '@/routes/paths';
 import axiosInstance from '@/helper/axios';
 
-interface Occupation {
+// Backend response interfaces matching the actual API
+interface BackendScheduleResponse {
   id: number;
-  name: string;
-  scheme: {
+  start_date: string | Date;
+  end_date: string | Date;
+  assessment: {
     id: number;
-    name: string;
+    code: string;
+    occupation: {
+      id: number;
+      name: string;
+      scheme: {
+        id: number;
+        code: string;
+        name: string;
+      };
+    };
   };
+  schedule_details: any[];
 }
 
+// Frontend interfaces for internal use
 interface Schedule {
   id: number;
   start_date?: string | null;
   end_date?: string | null;
   assessment: {
     id: number;
-    occupation: Occupation;
+    occupation: {
+      id: number;
+      name: string;
+      scheme: {
+        id: number;
+        name: string;
+      };
+    };
   };
 }
-
-type AssessmentRaw = {
-  id: number;
-  start_date?: string;
-  end_date?: string;
-  assessment: {
-    id: number;
-    occupation: Occupation;
-  };
-};
 
 const KelolaJadwal: React.FC = () => {
   const [searchQuery] = useState<string>('');
@@ -72,20 +82,31 @@ const KelolaJadwal: React.FC = () => {
         const response = await axiosInstance.get('/schedules');
         
         if (response.data.success) {
-          // map backend response to local Schedule[] shape
-          const items = response.data.data as AssessmentRaw[];
-          setSchedules(items.map((s) => ({
-            id: s.id,
-            start_date: s.start_date,
-            end_date: s.end_date,
-            assessment: s.assessment,
-          })));
+          // Transform backend response to frontend format
+          const backendItems = response.data.data as BackendScheduleResponse[];
+          const transformedSchedules: Schedule[] = backendItems.map((item) => ({
+            id: item.id,
+            start_date: item.start_date ? (item.start_date instanceof Date ? item.start_date.toISOString() : item.start_date) : null,
+            end_date: item.end_date ? (item.end_date instanceof Date ? item.end_date.toISOString() : item.end_date) : null,
+            assessment: {
+              id: item.assessment.id,
+              occupation: {
+                id: item.assessment.occupation.id,
+                name: item.assessment.occupation.name,
+                scheme: {
+                  id: item.assessment.occupation.scheme.id,
+                  name: item.assessment.occupation.scheme.name,
+                },
+              },
+            },
+          }));
+          setSchedules(transformedSchedules);
         } else {
           setError('Gagal memuat data jadwal');
         }
-  } catch (error: unknown) {
-  console.error('Error fetching schedules:', error);
-  setError('Gagal memuat data jadwal');
+      } catch (error: unknown) {
+        console.error('Error fetching schedules:', error);
+        setError('Gagal memuat data jadwal');
       } finally {
         setLoading(false);
       }
@@ -154,35 +175,36 @@ const KelolaJadwal: React.FC = () => {
 
      const handleFilter = () => console.log('Filter clicked');
 
-     const handleExport = () => {
-       // export filteredSchedules to CSV (Excel-friendly)
-       if (!filteredSchedules || filteredSchedules.length === 0) {
-         setError('Tidak ada data untuk diekspor');
-         setTimeout(() => setError(null), 2500);
-         return;
+     const handleExport = async () => {
+       try {
+         setError(null);
+         setSuccess('Memproses ekspor...');
+         
+         // Use backend Excel export endpoint
+         const response = await axiosInstance.get('/schedules/export/excel', {
+           responseType: 'blob'
+         });
+         
+         // Create download link
+         const blob = new Blob([response.data], { 
+           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+         });
+         const url = URL.createObjectURL(blob);
+         const a = document.createElement('a');
+         a.href = url;
+         a.download = `jadwal-asesmen-${new Date().toISOString().slice(0,10)}.xlsx`;
+         document.body.appendChild(a);
+         a.click();
+         a.remove();
+         URL.revokeObjectURL(url);
+         
+         setSuccess('Ekspor berhasil. File Excel telah diunduh.');
+         setTimeout(() => setSuccess(null), 3000);
+       } catch (error) {
+         console.error('Error exporting schedules:', error);
+         setError('Gagal mengekspor data jadwal');
+         setTimeout(() => setError(null), 3000);
        }
-
-       const headers = ['Skema', 'Nama Okupasi', 'Tanggal Mulai', 'Tanggal Selesai'];
-       const rows = filteredSchedules.map(s => [
-         s.assessment?.occupation?.scheme?.name ?? '',
-         s.assessment?.occupation?.name ?? '',
-         s.start_date ? new Date(s.start_date).toLocaleDateString('id-ID') : '',
-         s.end_date ? new Date(s.end_date).toLocaleDateString('id-ID') : ''
-       ]);
-
-       const csvContent = [headers, ...rows].map(e => e.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-       const bom = '\uFEFF'; // UTF-8 BOM for Excel
-       const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
-       const url = URL.createObjectURL(blob);
-       const a = document.createElement('a');
-       a.href = url;
-       a.download = `jadwal-asesmen-${new Date().toISOString().slice(0,10)}.csv`;
-       document.body.appendChild(a);
-       a.click();
-       a.remove();
-       URL.revokeObjectURL(url);
-       setSuccess('Ekspor selesai. File akan diunduh.');
-       setTimeout(() => setSuccess(null), 3000);
      };
 
      if (loading) {

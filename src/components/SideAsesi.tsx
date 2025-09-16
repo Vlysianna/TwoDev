@@ -27,6 +27,7 @@ interface MenuItemProps {
 
 const SidebarAsesi: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false);
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -56,11 +57,18 @@ const SidebarAsesi: React.FC = () => {
     };
 
     const handleLogout = (): void => {
-        if (window.confirm("Apakah Anda yakin ingin logout?")) {
-            logout();
-            navigate("/auth/login");
-        }
+        setIsLogoutModalOpen(true);
         setIsMobileMenuOpen(false);
+    };
+
+    const confirmLogout = (): void => {
+        logout();
+        navigate("/auth/login");
+        setIsLogoutModalOpen(false);
+    };
+
+    const cancelLogout = (): void => {
+        setIsLogoutModalOpen(false);
     };
 
     const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
@@ -69,20 +77,14 @@ const SidebarAsesi: React.FC = () => {
         return (
             <Link
                 to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 relative
-    ${isActive
-                        ? "bg-[#ffffff80] text-white font-medium"
-                        : ""}
-  `}
+                className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${isActive
+                    ? 'bg-[#ffffff80] text-white'
+                    : 'text-orange-100 hover:bg-[#ffffff80] hover:text-white'
+                    }`}
                 onClick={onClick}
             >
-                {/* Border kiri putih saat aktif */}
-                {isActive && (
-                    <span className="absolute left-0 top-0 h-full w-1 bg-white rounded-r-sm" />
-                )}
-
                 <IconComponent size={18} className="flex-shrink-0" />
-                <span className="text-sm whitespace-nowrap">{item.name}</span>
+                <span className="text-sm font-medium whitespace-nowrap">{item.name}</span>
             </Link>
         );
     };
@@ -90,18 +92,21 @@ const SidebarAsesi: React.FC = () => {
     const SidebarAsesiContent = () => (
         <>
             {/* Logo Section */}
-            <div className="p-2 border-b border-orange-400 flex justify-center">
-                <Link to={paths.asesi.root} className="p-6">
-                    <div className="h-20 flex items-center justify-center">
-                        <img src={getAssetPath('/twodev-putih.svg')} alt="Logo" className="h-15 w-auto" />
-                    </div>
+            <div className="flex flex-col items-start pl-4">
+                <Link to={paths.asesi.root} className="py-10">
+                    <img src={getAssetPath('/twodev-putih.svg')} alt="Logo" className="h-15 w-auto" />
                 </Link>
             </div>
 
 
             {/* Main Menu Items */}
-            <div className="flex-1 flex flex-col ">
+            <div className="flex-1">
                 <div className="py-2">
+                    <div className="px-4 py-3">
+                        <span className="text-xs text-orange-200 font-medium uppercase tracking-wider">
+                            Asesmen
+                        </span>
+                    </div>
                     {menuItems.map((item) => (
                         <MenuItem
                             key={item.name}
@@ -133,7 +138,7 @@ const SidebarAsesi: React.FC = () => {
       <>
         {/* Mobile Menu Button - Hidden on desktop */}
         <button
-          className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-orange-500 text-white rounded-md shadow-lg"
+          className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-orange-500 text-white rounded-md shadow-lg"
           onClick={toggleMobileMenu}
         >
           {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -142,23 +147,54 @@ const SidebarAsesi: React.FC = () => {
         {/* Overlay for mobile */}
         {isMobileMenuOpen && (
           <div
-            className="lg:hidden fixed inset-0 z-30"
+            className="lg:hidden fixed inset-0 z-[55] bg-black bg-opacity-50"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
 
-        {/* SidebarAsesi - Always visible on desktop, slide on mobile */}
-        <div
-          className={`
-  fixed top-0 left-0 h-full w-64 bg-[#E77D35] text-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out
-  ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-`}
-        >
+        {/* Sidebar - Always visible on desktop, slide on mobile */}
+        <div className={`
+          fixed inset-y-0 left-0 z-[58]
+          w-64 h-screen bg-[#E77D35] text-white flex flex-col
+          transform transition-transform duration-300 ease-in-out lg:transform-none
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
           <SidebarAsesiContent />
         </div>
 
         {/* Spacer for desktop layout */}
         <div className="hidden lg:block w-64 flex-shrink-0" />
+
+        {/* Logout Confirmation Modal */}
+        {isLogoutModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-[999]">
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full text-center">
+            <div className="mb-4 flex justify-center">
+                <img src={getAssetPath('/img/gambarprialogout.svg')} alt="Pria Sigma" />
+              </div>
+
+              <h2 className="font-bold text-lg mb-2">Yakin ingin keluar?</h2>
+              <p className="text-gray-500 text-sm mb-4">
+                Logout akan mengakhiri sesi Anda saat ini, dan Anda perlu login kembali untuk melanjutkan aktivitas.
+              </p>
+
+              <div className="flex justify-between gap-2">
+                <button
+                  onClick={cancelLogout}
+                  className="flex-1 border border-orange-500 text-orange-500 py-2 rounded hover:bg-orange-50 cursor-pointer"
+                >
+                  Batalkan
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="flex-1 bg-[#E77D35] text-white py-2 rounded hover:bg-orange-600 cursor-pointer"
+                >
+                  Keluar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     );
 };

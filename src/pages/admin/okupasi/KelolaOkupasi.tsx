@@ -361,7 +361,7 @@ const KelolaOkupasi: React.FC = () => {
 														<Edit size={16} />
 													</button>
 													<button
-														className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+														className="p-2 text-gray-600 hover:bg-blue-100 rounded-lg transition-colors"
 														title="View"
 													>
 														<Eye size={16} />
