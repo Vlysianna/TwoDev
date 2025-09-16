@@ -1,7 +1,3 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Bell, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import paths from '@/routes/paths';
 import UserMenu from './UserMenu';
 import { getAssetPath } from '@/utils/assetPath';
 
@@ -11,137 +7,22 @@ interface NavbarAsesiProps {
 }
 
 export default function NavbarAsesi({ title, icon }: NavbarAsesiProps) {
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-
-  const profileRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
-
-  const handleLogout = () => {
-    console.log("User logged out");
-    setShowModal(false);
-  };
-
   return (
     <nav className="bg-white border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4 w-full z-50 relative">
-      {/* DESKTOP NAVBAR */}
-      <div className="hidden sm:flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          {icon && <div className="text-black-500 hover:text-black-600">{icon}</div>}
-          <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          {/* Notifications */}
-          <div className="relative" ref={notifRef}>
-            <button
-              onClick={() => {
-                setIsNotificationOpen(!isNotificationOpen);
-                setIsProfileOpen(false);
-              }}
-              className="relative p-3 text-gray-600 border border-gray-200 hover:text-gray-800 hover:bg-gray-100 rounded-full transition cursor-pointer"
-            >
-              <Bell size={20} />
-              <span className="absolute -top-[5px] -right-[5px] h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                10
-              </span>
-            </button>
-
-            {isNotificationOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="font-medium text-gray-800">Notifications</h3>
-                </div>
-                <div className="p-4 text-sm text-gray-500 text-center">
-                  You have 10 unread notifications
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Profile */}
-          <UserMenu />
-        </div>
-      </div>
-
-      {/* MOBILE NAVBAR */}
-      <div className="sm:hidden flex items-center justify-between relative w-full">
-        {/* Left Section (Icon + Title multiline) */}
-        <div className="flex gap-3 items-center">
-          {icon && (
-            <div className="text-orange-500 hover:text-orange-600 flex-shrink-0 self-center">
-              {icon}
-            </div>
-          )}
-          <h1 className="text-base font-semibold text-gray-800 break-words">
+      <div className="flex items-center justify-between w-full gap-4">
+        {/* Left: Icon + Title */}
+        <div className="flex items-center flex-1 min-w-0 space-x-3">
+          {icon && <div className="text-black-500 hover:text-black-600 shrink-0">{icon}</div>}
+          <h1 className="text-base sm:text-lg font-semibold text-gray-800 leading-snug break-words whitespace-normal">
             {title}
           </h1>
         </div>
 
-        {/* Right Section (Notification + UserMenu) */}
-        <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
-          <div className="relative" ref={notifRef}>
-            <button
-              onClick={() => {
-                setIsNotificationOpen(!isNotificationOpen);
-                setIsProfileOpen(false);
-              }}
-              className="relative p-4 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition border border-gray-200"
-            >
-              <Bell size={20} />
-              <span className="absolute -top-[1px] -right-[1px] h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                10
-              </span>
-            </button>
-
-            {isNotificationOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="font-medium text-gray-800">Notifications</h3>
-                </div>
-                <div className="p-4 text-sm text-gray-500 text-center">
-                  You have 10 unread notifications
-                </div>
-              </div>
-            )}
-          </div>
-
+        {/* Right: Profile */}
+        <div className="flex items-center shrink-0">
           <UserMenu />
         </div>
       </div>
-
-
-      {/* Modal konfirmasi */}
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-[999]">
-          <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full text-center">
-            <div className="mb-4 flex justify-center">
-              <img src={getAssetPath('/img/gambarprialogout.svg')} alt="Pria Sigma" />
-            </div>
-
-            <h2 className="font-bold text-lg mb-2">Yakin ingin keluar?</h2>
-            <p className="text-gray-500 text-sm mb-4">
-              Logout akan mengakhiri sesi Anda saat ini, dan Anda perlu login kembali untuk melanjutkan aktivitas.
-            </p>
-
-            <div className="flex justify-between gap-2">
-              <button
-                onClick={() => setShowModal(false)}
-                className="flex-1 border border-orange-500 text-orange-500 py-2 rounded hover:bg-orange-50 cursor-pointer"
-              >
-                Batalkan
-              </button>
-              <Link
-                to={paths.auth.login}
-                className="flex-1 bg-[#E77D35] text-white py-2 rounded hover:bg-orange-600 cursor-pointer text-center"
-              >
-                Keluar
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

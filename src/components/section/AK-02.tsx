@@ -7,6 +7,7 @@ import { AlertCircle, FileText } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ConfirmModal from "@/components/ConfirmModal";
 
 // Evidence types
 export const evidenceTypes = [
@@ -93,6 +94,10 @@ export default function AK02({
 	// QR Code states
 	const [assesseeQrValue, setAssesseeQrValue] = useState("");
 	const [assessorQrValue, setAssessorQrValue] = useState("");
+
+	// Modal state
+	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [pendingValue, setPendingValue] = useState<string>("");
 
 	useEffect(() => {
 		if (user) {
@@ -370,6 +375,24 @@ export default function AK02({
 		return true;
 	};
 
+	// Handler tombol simpan: buka modal dulu
+	const handleSaveClick = () => {
+		setPendingValue(
+			assessmentResult === "kompeten"
+				? "Kompeten"
+				: assessmentResult === "belum-kompeten"
+				? "Belum Kompeten"
+				: ""
+		);
+		setShowConfirmModal(true);
+	};
+
+	// Handler konfirmasi modal
+	const handleConfirmSave = async () => {
+		setShowConfirmModal(false);
+		await handleSubmit();
+	};
+
 	if (loading) {
 		return (
 			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -397,7 +420,7 @@ export default function AK02({
 	}
 
 	return (
-		<div className="pb-7 mx-4 sm:px-6">
+		<div>
 			{/* Header Info Section */}
 			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
 				<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
@@ -508,7 +531,7 @@ export default function AK02({
 
 			{/* Bottom form */}
 			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-10 lg:p-10 w-full">
-				<div className="bg-gray-50 p-2 lg:col-span-20 w-full">
+				<div className="p-2 lg:col-span-20 w-full">
 					<div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
 						{/* Left Section: Rekomendasi Hasil Asesmen */}
 						<div className="lg:col-span-6 order-1">
@@ -785,13 +808,30 @@ export default function AK02({
 			{!isAssessee && (
 				<div className="flex justify-end mt-6 lg:mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
 					<button
-						onClick={handleSubmit}
+						onClick={handleSaveClick}
 						className="bg-[#E77D35] hover:bg-[#d66d2a] text-white text-xs sm:text-sm font-medium px-8 sm:px-12 lg:px-45 py-2 sm:py-3 rounded-md transition-colors duration-200"
 					>
 						Simpan
 					</button>
 				</div>
 			)}
+
+			{/* Modal Konfirmasi */}
+			<ConfirmModal
+				isOpen={showConfirmModal}
+				onClose={() => setShowConfirmModal(false)}
+				onConfirm={handleConfirmSave}
+				title="Konfirmasi Simpan"
+				message={
+					<>
+						<div>Anda akan menyimpan pilihan berikut:</div>
+						<div className="mt-2 font-bold">{pendingValue}</div>
+					</>
+				}
+				confirmText="Simpan"
+				cancelText="Batal"
+				type="warning"
+			/>
 		</div>
 	);
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NotepadText, ChevronLeft, AlertCircle } from "lucide-react";
-import NavbarAsesor from "@/components/NavbarAsesor";
+import NavbarAsesor from "@/components/NavAsesor";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +10,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { getAssessorUrl } from "@/lib/hashids";
 import type { AK05ApiResponse, AK05ResponseData } from "@/model/ak05-model";
 import { Description } from "@radix-ui/react-dialog";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function CekAk05() {
   const { id_assessment, id_result, id_asesor } = useAssessmentParams();
@@ -20,6 +21,7 @@ export default function CekAk05() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AK05ResponseData | null>(null);
   const [qrValue, setQrValue] = useState("");
+  const [dataSaved, setDataSaved] = useState(false); // State untuk melacak apakah data sudah disimpan
 
   const [catatan, setCatatan] = useState("");
   const [negatifPositif, setNegatifPositif] = useState("");
@@ -27,6 +29,10 @@ export default function CekAk05() {
   const [saran, setSaran] = useState("");
   const [isCompetent, setIsCompetent] = useState<boolean | null>(null);
   const [deskripsi, setDeskripsi] = useState("");
+
+  // State untuk modal konfirmasi
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingValue, setPendingValue] = useState<string>("");
 
   useEffect(() => {
     fetchData();
@@ -37,6 +43,7 @@ export default function CekAk05() {
     setIsCompetent(value);
     // Set deskripsi otomatis berdasarkan pilihan
     setDeskripsi(value ? "Kompeten" : "Belum Kompeten");
+    setDataSaved(false); // Reset status saved ketika data berubah
   };
 
   const fetchData = async () => {
@@ -65,12 +72,17 @@ export default function CekAk05() {
         const existingDescription = rawData.data.result.result_ak05.description;
         setDeskripsi(
           existingDescription ||
-          (competentStatus !== null ? (competentStatus ? "Kompeten" : "Belum Kompeten") : "")
+          (competentStatus !== null
+            ? competentStatus
+              ? "Kompeten"
+              : "Belum Kompeten"
+            : "")
         );
 
         // jika sudah approve, langsung set QR
         if (rawData.data.result.result_ak05.approved_assessor) {
           setQrValue(getAssessorUrl(Number(id_asesor)));
+          setDataSaved(true); // Data sudah tersimpan di server
         }
       } else {
         setError("Gagal memuat data");
@@ -105,25 +117,34 @@ export default function CekAk05() {
 
       if (response.data.success) {
         console.log("Data saved successfully:", response.data);
+        setDataSaved(true); // Tandai bahwa data sudah tersimpan
+        setError(null);
         // Bisa tambahkan toast/alert sukses
       } else {
         setError("Gagal menyimpan data");
+        setDataSaved(false);
       }
     } catch (err) {
       console.error("Error saving data:", err);
+      setError("Terjadi kesalahan saat menyimpan data");
+      setDataSaved(false);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGenerateQRCode = async () => {
+    // Validasi: pastikan data sudah disimpan
+    if (!dataSaved) {
+      setError("Harap simpan data terlebih dahulu sebelum generate QR code");
+      return;
+    }
+
     try {
       setGeneratingQR(true);
+      setError(null);
 
-      // Simpan data terlebih dahulu
-      await handleSave();
-
-      // Kemudian approve dan generate QR code
+      // Approve dan generate QR code
       const response = await api.put(
         `/assessments/ak-05/result/assessor/${id_result}/approve`
       );
@@ -143,9 +164,27 @@ export default function CekAk05() {
     }
   };
 
-  const handleSelesai = async () => {
+  // const handleSelesai = async () => {
+  //   await handleSave();
+  //   // Navigate back or show success message
+  // };
+
+  // Handler tombol simpan: buka modal dulu
+  const handleSaveClick = () => {
+    setPendingValue(
+      isCompetent === true
+        ? "Kompeten"
+        : isCompetent === false
+        ? "Belum Kompeten"
+        : ""
+    );
+    setShowConfirmModal(true);
+  };
+
+  // Handler konfirmasi modal
+  const handleConfirmSave = async () => {
+    setShowConfirmModal(false);
     await handleSave();
-    // Navigate back or show success message
   };
 
   if (loading) {
@@ -180,249 +219,301 @@ export default function CekAk05() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <NavbarAsesor
-        title="Laporan Asesmen - FR.AK.05"
-        icon={
-          <Link
-            to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)}
-            className="text-gray-500 hover:text-gray-600"
-          >
-            <ChevronLeft size={20} />
-          </Link>
-        }
-      />
+      <div className="mx-auto">
+        <div className="bg-white rounded-lg shadow-sm">
+          <NavbarAsesor
+            title="Laporan Asesmen - FR.AK.05"
+            icon={
+              <Link
+                to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)}
+                className="text-gray-500 hover:text-gray-600"
+              >
+                <ChevronLeft size={20} />
+              </Link>
+            }
+          />
+        </div>
 
-      <main className="pt-4 sm:px-6 pb-10 mx-4 space-y-8">
-        {/* --- Skema Sertifikasi --- */}
-        <section className="mb-1">
-          <div className="w-full">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-              {/* Header Skema */}
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-                {/* Kiri */}
-                <div className="flex items-center space-x-3 flex-wrap">
-                  <h2 className="text-sm font-medium text-gray-800">
-                    Skema Sertifikasi (Okupasi)
-                  </h2>
-                  <div className="flex items-center space-x-2">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                      <polyline points="12,6 12,12 16,14" strokeWidth="2" />
-                    </svg>
-                    <span className="text-sm text-gray-600">
-                      {data.result.tuk || "Sewaktu"}
+        <main className="m-4">
+          <section className="mb-1">
+            <div className="w-full">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+                {/* Header Skema */}
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+                  {/* Kiri */}
+                  <div className="flex items-center space-x-3 flex-wrap">
+                    <h2 className="text-sm font-medium text-gray-800">
+                      Skema Sertifikasi (Okupasi)
+                    </h2>
+                    <div className="flex items-center space-x-2">
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                        <polyline points="12,6 12,12 16,14" strokeWidth="2" />
+                      </svg>
+                      <span className="text-sm text-gray-600">
+                        {data.result.tuk || "Sewaktu"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Kanan */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
+                    <span className="text-sm text-gray-700">
+                      {data.result.assessment.occupation.name}
+                    </span>
+                    <span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
+                      {data.result.assessment.code}
                     </span>
                   </div>
                 </div>
 
-                {/* Kanan */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
-                  <span className="text-sm text-gray-700">
-                    {data.result.assessment.occupation.name}
-                  </span>
-                  <span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
-                    {data.result.assessment.code}
-                  </span>
-                </div>
-              </div>
-
-              {/* Detail Asesi - Asesor - Waktu */}
-              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
-                {/* Asesi & Asesor */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
-                  <div className="flex flex-wrap">
-                    <span className="xs-text mr-1">Asesi:</span>
-                    <span>{data.result.assessee.name || "N/A"}</span>
-                  </div>
-                  <div className="flex flex-wrap">
-                    <span className="xs-text mr-1">Asesor:</span>
-                    <span>{data.result.assessor.name || "N/A"}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* --- Tabel Asesi --- */}
-        <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-          <div className="overflow-x-auto">
-            <table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
-              <thead>
-                <tr>
-                  <th className="p-3 border text-center">No.</th>
-                  <th className="p- border text-center xs-text">Nama Asesi</th>
-                  <th className="p-3 border text-center">Rekomendasi</th>
-                  <th className="p-3 border text-center">Keterangan</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="p-3 border text-center">1</td>
-                  <td className="p-3 border text-center">
-                    {data.result.assessee.name || "N/A"}
-                  </td>
-                  <td className="p-3 border">
-                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name="rekom"
-                          value="true"
-                          checked={isCompetent === true}
-                          onChange={() => handleCompetentChange(true)}
-                        />
-                        K
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name="rekom"
-                          value="false"
-                          checked={isCompetent === false}
-                          onChange={() => handleCompetentChange(false)}
-                        />
-                        BK
-                      </label>
+                {/* Detail Asesi - Asesor - Waktu */}
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
+                  {/* Asesi & Asesor */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                    <div className="flex flex-wrap">
+                      <span className="xs-text mr-1">Asesi:</span>
+                      <span>{data.result.assessee.name || "N/A"}</span>
                     </div>
-                  </td>
-                  <td className="p-3 border text-center">
-                    <textarea
-                      value={deskripsi}
-                      onChange={(e) => setDeskripsi(e.target.value)}
-                      className="w-full text-center border-none focus:ring-0 focus:outline-none resize-none"
-                      rows={1}
-                      placeholder="Masukkan keterangan"
-                      style={{ minHeight: "1.5rem" }}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* --- Form & QR --- */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Kiri: Form Catatan */}
-          <div className="bg-white border rounded-xl p-6 shadow-sm space-y-4">
-            <h2 className="text-sm font-medium">
-              Aspek Negatif dan Positif dalam Asesemen
-            </h2>
-            <textarea
-              className="w-full border rounded-lg p-2"
-              rows={2}
-              placeholder="Aspek negatif dan positif"
-              value={negatifPositif}
-              onChange={(e) => setNegatifPositif(e.target.value)}
-            />
-            <h2 className="text-sm font-medium">
-              Pencatatan Penolakan Hasil Asesmen
-            </h2>
-            <textarea
-              className="w-full border rounded-lg p-2"
-              rows={2}
-              placeholder="Pencatatan penolakan"
-              value={penolakan}
-              onChange={(e) => setPenolakan(e.target.value)}
-            />
-            <h2 className="text-sm font-medium">
-              Saran Perbaikan: (Asesor/Personil Terkait)
-            </h2>
-            <textarea
-              className="w-full border rounded-lg p-2"
-              rows={2}
-              placeholder="Saran perbaikan"
-              value={saran}
-              onChange={(e) => setSaran(e.target.value)}
-            />
-            <h2 className="text-sm font-medium">Catatan</h2>
-            <textarea
-              className="w-full border rounded-lg p-2"
-              rows={3}
-              placeholder="Catatan..."
-              value={catatan}
-              onChange={(e) => setCatatan(e.target.value)}
-            />
-          </div>
-
-          {/* Kanan: Asesor & QR */}
-          <div className="bg-white border rounded-xl p-6 shadow-sm flex flex-col justify-between">
-            <div>
-              <h2 className="text-sm font-medium mb-3">Asesor</h2>
-              <input
-                type="text"
-                value={data.result.assessor.name || "N/A"}
-                disabled
-                className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
-              />
+                    <div className="flex flex-wrap">
+                      <span className="xs-text mr-1">Asesor:</span>
+                      <span>{data.result.assessor.name || "N/A"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-medium mb-3">Nomor Registrasi</h2>
-              <input
-                type="text"
-                value={data.result.assessor.no_reg_met || "N/A"}
-                disabled
-                className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
-              />
-            </div>
-            <div>
-              <h2 className="text-sm font-medium mb-3">Tanggal</h2>
-              <input
-                type="text"
-                value={
-                  new Date(
-                    data.result.result_ak05.updated_at
-                  ).toLocaleDateString("id-ID") || "N/A"
-                }
-                disabled
-                className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
-              />
-            </div>
+          </section>
 
-            <div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 mb-3 h-40">
-              {qrValue ? (
-                <QRCodeCanvas value={qrValue} size={100} />
-              ) : (
-                <p className="text-gray-400 text-sm">Belum Generate QR</p>
+          {/* --- Tabel Asesi --- */}
+          <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+            <div className="overflow-x-auto">
+              <table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
+                <thead>
+                  <tr>
+                    <th className="p-3 border text-center">No.</th>
+                    <th className="p- border text-center xs-text">Nama Asesi</th>
+                    <th className="p-3 border text-center">Rekomendasi</th>
+                    <th className="p-3 border text-center">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="p-3 border text-center">1</td>
+                    <td className="p-3 border text-center">
+                      {data.result.assessee.name || "N/A"}
+                    </td>
+                    <td className="p-3 border">
+                      <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="rekom"
+                            value="true"
+                            checked={isCompetent === true}
+                            onChange={() => handleCompetentChange(true)}
+                          />
+                          K
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="rekom"
+                            value="false"
+                            checked={isCompetent === false}
+                            onChange={() => handleCompetentChange(false)}
+                          />
+                          BK
+                        </label>
+                      </div>
+                    </td>
+                    <td className="p-3 border text-center">
+                      <textarea
+                        value={deskripsi}
+                        onChange={(e) => {
+                          setDeskripsi(e.target.value);
+                          setDataSaved(false); // Reset status saved ketika data berubah
+                        }}
+                        className="w-full text-center border-none focus:ring-0 focus:outline-none resize-none"
+                        rows={1}
+                        placeholder="Masukkan keterangan"
+                        style={{ minHeight: "1.5rem" }}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* --- Form & QR --- */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Kiri: Form Catatan */}
+            <div className="bg-white border rounded-xl p-6 shadow-sm space-y-4">
+              <h2 className="text-sm font-medium">
+                Aspek Negatif dan Positif dalam Asesemen
+              </h2>
+              <textarea
+                className="w-full border rounded-lg p-2"
+                rows={2}
+                placeholder="Aspek negatif dan positif"
+                value={negatifPositif}
+                onChange={(e) => {
+                  setNegatifPositif(e.target.value);
+                  setDataSaved(false); // Reset status saved ketika data berubah
+                }}
+              />
+              <h2 className="text-sm font-medium">
+                Pencatatan Penolakan Hasil Asesmen
+              </h2>
+              <textarea
+                className="w-full border rounded-lg p-2"
+                rows={2}
+                placeholder="Pencatatan penolakan"
+                value={penolakan}
+                onChange={(e) => {
+                  setPenolakan(e.target.value);
+                  setDataSaved(false); // Reset status saved ketika data berubah
+                }}
+              />
+              <h2 className="text-sm font-medium">
+                Saran Perbaikan: (Asesor/Personil Terkait)
+              </h2>
+              <textarea
+                className="w-full border rounded-lg p-2"
+                rows={2}
+                placeholder="Saran perbaikan"
+                value={saran}
+                onChange={(e) => {
+                  setSaran(e.target.value);
+                  setDataSaved(false); // Reset status saved ketika data berubah
+                }}
+              />
+              <h2 className="text-sm font-medium">Catatan</h2>
+              <textarea
+                className="w-full border rounded-lg p-2"
+                rows={3}
+                placeholder="Catatan..."
+                value={catatan}
+                onChange={(e) => {
+                  setCatatan(e.target.value);
+                  setDataSaved(false); // Reset status saved ketika data berubah
+                }}
+              />
+
+              {/* Status Simpan */}
+              {dataSaved && (
+                <p className="text-green-500 text-sm">
+                  Data telah berhasil disimpan
+                </p>
               )}
-              {qrValue && (
-                <p className="text-xs text-gray-400 mt-2">
-                  {data.result.assessor.name || "Nama Asesor"}
+
+              {/* Tombol Simpan dengan modal konfirmasi */}
+              <button
+                onClick={handleSaveClick}
+                disabled={loading}
+                className={`w-full text-white py-2 rounded-lg ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#E77D35] hover:bg-orange-600"
+                }`}
+              >
+                {loading ? "Menyimpan..." : "Simpan Data"}
+              </button>
+            </div>
+
+            {/* Kanan: Asesor & QR */}
+            <div className="bg-white border rounded-xl p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <h2 className="text-sm font-medium mb-3">Asesor</h2>
+                <input
+                  type="text"
+                  value={data.result.assessor.name || "N/A"}
+                  disabled
+                  className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+                />
+              </div>
+              <div>
+                <h2 className="text-sm font-medium mb-3">Nomor Registrasi</h2>
+                <input
+                  type="text"
+                  value={data.result.assessor.no_reg_met || "N/A"}
+                  disabled
+                  className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+                />
+              </div>
+              <div>
+                <h2 className="text-sm font-medium mb-3">Tanggal</h2>
+                <input
+                  type="text"
+                  value={
+                    new Date(
+                      data.result.result_ak05.updated_at
+                    ).toLocaleDateString("id-ID") || "N/A"
+                  }
+                  disabled
+                  className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+                />
+              </div>
+
+              <div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 mb-3 h-40">
+                {qrValue ? (
+                  <QRCodeCanvas value={qrValue} size={100} />
+                ) : (
+                  <p className="text-gray-400 text-sm">Belum Generate QR</p>
+                )}
+                {qrValue && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    {data.result.assessor.name || "Nama Asesor"}
+                  </p>
+                )}
+              </div>
+
+              <button
+                onClick={handleGenerateQRCode}
+                disabled={!dataSaved || generatingQR || isCompetent === null}
+                className={`w-full text-white py-2 rounded-lg ${!dataSaved || generatingQR || isCompetent === null
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#E77D35] hover:bg-orange-600"
+                  }`}
+              >
+                {generatingQR ? "Memproses..." : "Generate QR"}
+              </button>
+
+              {/* Pesan error jika belum disimpan */}
+              {!dataSaved && (
+                <p className="text-red-500 text-sm mt-2">
+                  Harap simpan data terlebih dahulu sebelum generate QR
                 </p>
               )}
             </div>
+          </section>
 
-            <button
-              onClick={handleGenerateQRCode}
-              disabled={isCompetent === null || generatingQR}
-              className={`w-full text-white py-2 rounded-lg ${isCompetent === null || generatingQR
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-orange-500 hover:bg-orange-600"
-                }`}
-            >
-              {generatingQR ? "Memproses..." : "Generate QR"}
-            </button>
-          </div>
-        </section>
+          <hr className="border border-gray-200" />
 
-        <hr className="border border-gray-200" />
-
-        <div className="flex justify-end">
-          <button
-            onClick={handleSelesai}
-            className="w-full sm:w-100 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 mt-4"
-          >
-            Selesai
-          </button>
-        </div>
-      </main>
+          {/* Modal Konfirmasi */}
+          <ConfirmModal
+            isOpen={showConfirmModal}
+            onClose={() => setShowConfirmModal(false)}
+            onConfirm={handleConfirmSave}
+            title="Konfirmasi Simpan"
+            message={
+              <>
+                <div>Anda akan menyimpan pilihan berikut:</div>
+                <div className="mt-2 font-bold">{pendingValue}</div>
+              </>
+            }
+            confirmText="Simpan"
+            cancelText="Batal"
+            type="warning"
+          />
+        </main>
+      </div>
     </div>
   );
 }

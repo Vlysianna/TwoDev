@@ -9,6 +9,7 @@ import type { ResultIA02 } from "@/model/ia02-model";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
+import NavbarAsesor from "@/components/NavAsesor";
 
 export default function Ia02Assessor() {
 	const { id_result, id_assessment, id_asesi, id_asesor } =
@@ -133,23 +134,16 @@ export default function Ia02Assessor() {
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto">
-				{/* Header */}
-				<div className="bg-white rounded-lg shadow-sm mb-5">
-					<NavbarAsesi
-						title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02"
-						icon={
-							<Link
-								to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)}
-								className="text-gray-500 hover:text-gray-600"
-							>
-								<ChevronLeft size={20} />
-							</Link>
+				<div className="bg-white rounded-lg shadow-sm">
+					<NavbarAsesor title='Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02'
+						icon={<Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)} className="text-gray-500 hover:text-gray-600">
+							<ChevronLeft size={20} />
+						</Link>
 						}
 					/>
 				</div>
 
-				{/* Content */}
-				<div className="mx-4 sm:mx-6 pb-7">
+				<main className='m-4'>
 					{/* Error State */}
 					{error && (
 						<div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
@@ -158,7 +152,7 @@ export default function Ia02Assessor() {
 						</div>
 					)}
 
-					<div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+					<div className="bg-white rounded-lg shadow-sm p-6">
 						{/* Header Info */}
 						<div className="mb-6">
 							<div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -217,7 +211,7 @@ export default function Ia02Assessor() {
 								<button
 									onClick={handleViewPDF}
 									disabled={generatingPdf}
-									className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+									className="flex items-center justify-center gap-2 bg-[#E77D35] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer w-full sm:w-auto"
 								>
 									Lihat PDF
 								</button>
@@ -323,11 +317,10 @@ export default function Ia02Assessor() {
 											onClick={() => {
 												if (!assessorQrValue) handleGenerateQRCode();
 											}}
-											className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-												!assessorQrValue
-													? "hover:bg-orange-600"
-													: "cursor-not-allowed opacity-50"
-											}`}
+											className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assessorQrValue
+												? "hover:bg-orange-600"
+												: "cursor-not-allowed opacity-50"
+												}`}
 										>
 											Setujui
 										</button>
@@ -336,7 +329,7 @@ export default function Ia02Assessor() {
 							</div>
 						</div>
 					</div>
-				</div>
+				</main>
 			</div>
 		</div>
 	);

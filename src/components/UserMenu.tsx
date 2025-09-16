@@ -106,7 +106,7 @@ const UserMenu: React.FC = () => {
         confirmText="Keluar"
         cancelText="Batalkan"
         type="danger"
-        icon={<img src={getAssetPath('/img/gambarprialogout.svg')} alt="Logout" className="w-16 h-16" />}
+        icon={<img src={getAssetPath('/img/gambarprialogout.svg')} alt="Logout" className="w-48 h-48" />}
       />
     </div>
   );

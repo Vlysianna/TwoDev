@@ -6,6 +6,7 @@ import {
     Menu,
     X,
     FileText,
+    LayoutDashboard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import paths from "@/routes/paths";
@@ -33,6 +34,12 @@ const SidebarAsesor: React.FC = () => {
     const { logout } = useAuth();
 
     const menuItems: MenuItem[] = [
+        {
+            name: "Dashboard",
+            icon: LayoutDashboard,
+            section: "main",
+            path: paths.asesor.dashboardAsesor,
+        },
         {
             name: "Biodata Asesor",
             icon: FileText,
@@ -68,7 +75,7 @@ const SidebarAsesor: React.FC = () => {
         return (
             <Link
                 to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 relative
+                className={`flex items-center space-x-3 px-4 py-4 cursor-pointer transition-all duration-200 relative
     ${isActive
                         ? "bg-[#ffffff80] text-white font-medium"
                         : ""}
@@ -104,7 +111,7 @@ const SidebarAsesor: React.FC = () => {
 
             {/* Main Menu Items */}
             <div className="flex-1 flex flex-col ">
-                <div className="py-2">
+                <div className="py-3">
                     {menuItems.map((item) => (
                         <MenuItem
                             key={item.name}
@@ -117,18 +124,7 @@ const SidebarAsesor: React.FC = () => {
             </div>
 
             {/* Separator Line */}
-            <div className="mx-4 border-t border-orange-400"></div>
-
-            {/* Logout */}
-            <div className="p-2">
-                <button
-                    className="w-full flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 text-orange-100 hover:bg-orange-500 hover:text-white"
-                    onClick={handleLogout}
-                >
-                    <LogOut size={18} className="flex-shrink-0" />
-                    <span className="text-sm font-medium">Logout</span>
-                </button>
-            </div>
+            <div className="border-t border-orange-400"></div>
         </>
     );
 

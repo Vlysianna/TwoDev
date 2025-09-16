@@ -8,6 +8,7 @@ import NavbarAsesor from '@/components/NavAsesor';
 import { QRCodeCanvas } from 'qrcode.react';
 import { getAssessorUrl, getAssesseeUrl } from '@/lib/hashids';
 import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
+import ConfirmModal from '@/components/ConfirmModal';
 
 export default function CekApl02() {
     const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams();
@@ -25,6 +26,10 @@ export default function CekApl02() {
     const [isSaved, setIsSaved] = useState(false);
     const [processError, setProcessError] = useState<string | null>(null);
     const [processSuccess, setProcessSuccess] = useState<string | null>(null);
+
+    // Tambahkan state modal
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [pendingValue, setPendingValue] = useState<string>('');
 
     useEffect(() => {
         fetchAssessment();
@@ -187,10 +192,22 @@ export default function CekApl02() {
     // Cek apakah QR sudah digenerate
     const isQrGenerated = resultData?.apl02_header?.approved_assessor;
 
+    // Handler tombol simpan: buka modal dulu
+    const handleSaveRecommendationClick = () => {
+        setPendingValue(recommendation === 'continue' ? 'Assessment dapat dilanjutkan' : 'Assessment tidak dapat dilanjutkan');
+        setShowConfirmModal(true);
+    };
+
+    // Handler konfirmasi modal
+    const handleConfirmSave = async () => {
+        setShowConfirmModal(false);
+        await handleSaveRecommendation();
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="mx-auto">
-                <div className="bg-white rounded-lg shadow-sm mb-8">
+                <div className="bg-white rounded-lg shadow-sm">
                     <NavbarAsesor
                         title='Asesmen Mandiri - Review APL-02'
                         icon={
@@ -201,288 +218,308 @@ export default function CekApl02() {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mx-4 pb-7 items-stretch">
-                    {/* Error notification */}
-                    {error && (
-                        <div className="lg:col-span-5 mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
-                            <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-                            <span className="text-red-800">{error}</span>
-                        </div>
-                    )}
+                <main className='m-4'>
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 pb-7 items-stretch">
+                        {/* Error notification */}
+                        {error && (
+                            <div className="lg:col-span-5 mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+                                <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+                                <span className="text-red-800">{error}</span>
+                            </div>
+                        )}
 
-                    {!loading && (
-                        <>
-                            {/* Left Section - Certification Scheme */}
-                            <div className="lg:col-span-3 h-full">
-                                <div className="bg-white rounded-lg p-6 h-full">
-                                    <div className="mb-6">
-                                        <div className="flex justify-between items-start flex-wrap gap-5">
-                                            {/* Left */}
-                                            <div>
-                                                <h2 className="text-lg font-semibold text-gray-800 mb-1">Skema Sertifikasi</h2>
-                                                <p className="text-sm text-gray-600">Okupasi</p>
+                        {!loading && (
+                            <>
+                                {/* Left Section - Certification Scheme */}
+                                <div className="lg:col-span-3 h-full">
+                                    <div className="bg-white rounded-lg shadow-sm border p-6 h-full">
+                                        <div className="mb-6">
+                                            <div className="flex justify-between items-start flex-wrap gap-5">
+                                                {/* Left */}
+                                                <div>
+                                                    <h2 className="text-lg font-semibold text-gray-800 mb-1">Skema Sertifikasi</h2>
+                                                    <p className="text-sm text-gray-600">Okupasi</p>
+                                                </div>
+
+                                                {/* Right */}
+                                                <div className="lg:text-right sm:text-start">
+                                                    <h3 className="font-medium text-gray-800 mb-2">
+                                                        {assessments?.occupation?.name || 'Pelayanan Hotel'}
+                                                    </h3>
+                                                    <span className="bg-[#E77D3533] text-[#E77D35] text-sm px-3 py-1 rounded-md font-sm">
+                                                        {assessments?.code || 'SKM.PH.HDR/LSPSMK24/2024'}
+                                                    </span>
+                                                </div>
                                             </div>
+                                        </div>
 
-                                            {/* Right */}
-                                            <div className="lg:text-right sm:text-start">
-                                                <h3 className="font-medium text-gray-800 mb-2">
-                                                    {assessments?.occupation?.name || 'Pelayanan Hotel'}
-                                                </h3>
-                                                <span className="bg-[#E77D3533] text-[#E77D35] text-sm px-3 py-1 rounded-md font-sm">
-                                                    {assessments?.code || 'SKM.PH.HDR/LSPSMK24/2024'}
+                                        {/* Competency Units Grid */}
+                                        <div className="max-h-[500px] overflow-y-auto">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {unitCompetencies.map((unit, index) => (
+                                                    <div
+                                                        key={unit.id}
+                                                        className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
+                                                    >
+                                                        <div className="flex items-center mb-3">
+                                                            <div className="rounded-lg mr-3 flex-shrink-0">
+                                                                <Monitor size={16} className="text-[#E77D35]" />
+                                                            </div>
+                                                            <h4 className="font-medium text-[#E77D35] text-sm">
+                                                                Unit kompetensi {index + 1}
+                                                            </h4>
+                                                        </div>
+                                                        <h5 className="font-medium text-gray-800 mb-2 text-md leading-tight">
+                                                            {unit.title}
+                                                        </h5>
+                                                        <p className="text-xs text-gray-500 mb-4">
+                                                            {unit.unit_code}
+                                                        </p>
+                                                        <div className="flex items-center justify-between">
+                                                            {unit.finished ? (
+                                                                <span className="px-3 py-1 bg-[#E77D3533] text-[#E77D35] text-xs rounded">
+                                                                    Finished
+                                                                </span>
+                                                            ) : (
+                                                                <div></div>
+                                                            )}
+                                                            <Link
+                                                                to={paths.asesor.assessment.cekApl02Detail(
+                                                                    id_assessment,
+                                                                    id_result || '',
+                                                                    id_asesi || '',
+                                                                    unit.id,
+                                                                    index + 1 // Tambahkan nomor urut ke parameter
+                                                                )}
+                                                                className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
+                                                            >
+                                                                Lihat detail
+                                                                <ChevronRight size={14} className="ml-1" />
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Section - Assessment Review */}
+                                <div className="lg:col-span-2 h-full">
+                                    <div className="bg-white rounded-lg shadow-sm border p-6 h-full">
+                                        {/* Progress Bar */}
+                                        <div className="mb-6">
+                                            <h3 className="text-xl font-medium text-gray-900 mb-4">Progress Asesmen</h3>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    Completion
+                                                </span>
+                                                <span className="text-sm font-medium text-[#E77D35]">
+                                                    {completedUnits > 0 && unitCompetencies.length > 0
+                                                        ? `${Math.round((completedUnits / unitCompetencies.length) * 100)}%`
+                                                        : "0%"}
                                                 </span>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Competency Units Grid */}
-                                    <div className="max-h-[500px] overflow-y-auto">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {unitCompetencies.map((unit, index) => (
+                                            <div className="w-full bg-gray-200 rounded-full h-3">
                                                 <div
-                                                    key={unit.id}
-                                                    className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
-                                                >
-                                                    <div className="flex items-center mb-3">
-                                                        <div className="rounded-lg mr-3 flex-shrink-0">
-                                                            <Monitor size={16} className="text-[#E77D35]" />
-                                                        </div>
-                                                        <h4 className="font-medium text-[#E77D35] text-sm">
-                                                            Unit kompetensi {index + 1}
-                                                        </h4>
-                                                    </div>
-                                                    <h5 className="font-medium text-gray-800 mb-2 text-md leading-tight">
-                                                        {unit.title}
-                                                    </h5>
-                                                    <p className="text-xs text-gray-500 mb-4">
-                                                        {unit.unit_code}
-                                                    </p>
-                                                    <div className="flex items-center justify-between">
-                                                        {unit.finished ? (
-                                                            <span className="px-3 py-1 bg-[#E77D3533] text-[#E77D35] text-xs rounded">
-                                                                Finished
-                                                            </span>
-                                                        ) : (
-                                                            <div></div>
-                                                        )}
-                                                        <Link
-                                                            to={paths.asesor.assessment.cekApl02Detail(
-                                                                id_assessment,
-                                                                id_result || '',
-                                                                id_asesi || '',
-                                                                unit.id,
-                                                                index + 1 // Tambahkan nomor urut ke parameter
-                                                            )}
-                                                            className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
-                                                        >
-                                                            Lihat detail
-                                                            <ChevronRight size={14} className="ml-1" />
-                                                        </Link>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right Section - Assessment Review */}
-                            <div className="lg:col-span-2 h-full">
-                                <div className="bg-white rounded-lg p-6 h-full">
-                                    {/* Progress Bar */}
-                                    <div className="mb-6">
-                                        <h3 className="text-xl font-medium text-gray-900 mb-4">Progress Asesmen</h3>
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-sm font-medium text-gray-700">
-                                                Completion
-                                            </span>
-                                            <span className="text-sm font-medium text-[#E77D35]">
-                                                {completedUnits > 0 && unitCompetencies.length > 0
-                                                    ? `${Math.round((completedUnits / unitCompetencies.length) * 100)}%`
-                                                    : "0%"}
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-gray-200 rounded-full h-3">
-                                            <div
-                                                className="bg-[#E77D35] h-3 rounded-full transition-all duration-300"
-                                                style={{
-                                                    width: completedUnits > 0 && unitCompetencies.length > 0
-                                                        ? `${(completedUnits / unitCompetencies.length) * 100}%`
-                                                        : "0%",
-                                                }}
-                                            ></div>
-                                        </div>
-                                    </div>
-
-                                    {/* Recommendation Section */}
-                                    <div className="mb-6">
-                                        <h3 className="text-xl font-medium text-gray-900 mb-4">Rekomendasi</h3>
-                                        <div className="space-y-3">
-                                            {!resultData ? (
-                                                <div className="text-gray-500">Memuat rekomendasi...</div>
-                                            ) : (
-                                                <>
-                                                    <label
-                                                        className={`flex items-start space-x-3 cursor-pointer ${isQrGenerated ? "opacity-70" : ""
-                                                            }`}
-                                                    >
-                                                        <input
-                                                            type="radio"
-                                                            name="recommendation"
-                                                            checked={recommendation === "continue"}
-                                                            onChange={() => handleRecommendationChange("continue")}
-                                                            disabled={isQrGenerated}
-                                                            className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-                                                        />
-                                                        <span
-                                                            className={`text-sm leading-relaxed ${recommendation === "stop" || recommendation === undefined || recommendation === null
-                                                                ? "line-through opacity-50"
-                                                                : ""
-                                                                }`}
-                                                        >
-                                                            Assessment <strong>dapat dilanjutkan</strong>
-                                                        </span>
-                                                    </label>
-
-                                                    <label
-                                                        className={`flex items-start space-x-3 cursor-pointer ${isQrGenerated ? "opacity-70" : ""
-                                                            }`}
-                                                    >
-                                                        <input
-                                                            type="radio"
-                                                            name="recommendation"
-                                                            checked={recommendation === "stop"}
-                                                            onChange={() => handleRecommendationChange("stop")}
-                                                            disabled={isQrGenerated}
-                                                            className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-                                                        />
-                                                        <span
-                                                            className={`text-sm leading-relaxed ${recommendation === "continue" || recommendation === undefined || recommendation === null
-                                                                ? "line-through opacity-50"
-                                                                : ""
-                                                                }`}
-                                                        >
-                                                            Assessment <strong>tidak dapat dilanjutkan</strong>
-                                                        </span>
-                                                    </label>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* QR Code Section */}
-                                    <div className="mb-6 flex justify-center gap-4 flex-col md:flex-row">
-                                        {/* QR Code Asesi */}
-                                        <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
-                                            <h4 className="text-sm font-semibold text-gray-800">QR Code Asesi</h4>
-                                            {resultData?.apl02_header?.approved_assessee ? (
-                                                <>
-                                                    <QRCodeCanvas
-                                                        value={getAssesseeUrl(Number(id_asesi))}
-                                                        size={100}
-                                                        className="w-32 h-32 object-contain"
-                                                    />
-                                                    <div className="text-green-600 font-semibold text-xs">
-                                                        Sudah disetujui Asesi
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <div className="w-32 h-32 bg-gray-100 flex items-center justify-center">
-                                                    <span className="text-gray-400 text-xs text-center">
-                                                        Menunggu persetujuan asesi
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* QR Code Asesor */}
-                                        <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
-                                            <h4 className="text-sm font-semibold text-gray-800">QR Code Asesor</h4>
-                                            {isQrGenerated ? (
-                                                <>
-                                                    <QRCodeCanvas
-                                                        value={getAssessorUrl(Number(id_asesor))}
-                                                        size={100}
-                                                        className="w-32 h-32 object-contain"
-                                                    />
-                                                    <div className="text-green-600 font-semibold text-xs">
-                                                        Sebagai Asesor, Anda sudah setuju
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <div className="w-32 h-32 bg-gray-100 flex items-center justify-center flex-col">
-                                                    <span className="text-gray-400 text-xs text-center mb-2">
-                                                        QR Code Asesor
-                                                    </span>
-                                                    <span className="text-gray-400 text-xs text-center">
-                                                        Klik tombol "Generate QR" di bawah
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* TOMBOL SIMPAN REKOMENDASI */}
-                                    <div className="mb-4">
-                                        <div className="text-gray-500 text-xs mb-2 text-center">
-                                            {!recommendation
-                                                ? "Pilih rekomendasi terlebih dahulu"
-                                                : isQrGenerated
-                                                    ? "Setelah generate QR, rekomendasi tidak dapat diubah"
-                                                    : "Simpan rekomendasi sebelum generate QR"}
-                                        </div>
-                                        <button
-                                            onClick={handleSaveRecommendation}
-                                            disabled={saveProcessing || !recommendation || isQrGenerated}
-                                            className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${saveProcessing || !recommendation || isQrGenerated
-                                                ? "cursor-not-allowed opacity-50"
-                                                : "hover:bg-green-700 cursor-pointer"
-                                                }`}
-                                        >
-                                            {saveProcessing ? (
-                                                "Menyimpan..."
-                                            ) : (
-                                                <>
-                                                    <Save size={18} className="mr-2" />
-                                                    Simpan Rekomendasi
-                                                </>
-                                            )}
-                                        </button>
-                                        {processError && (
-                                            <div className="text-red-500 text-xs mt-2 text-center">{processError}</div>
-                                        )}
-                                        {processSuccess && (
-                                            <div className="text-green-500 text-xs mt-2 text-center">
-                                                ✅ {processSuccess}
+                                                    className="bg-[#E77D35] h-3 rounded-full transition-all duration-300"
+                                                    style={{
+                                                        width: completedUnits > 0 && unitCompetencies.length > 0
+                                                            ? `${(completedUnits / unitCompetencies.length) * 100}%`
+                                                            : "0%",
+                                                    }}
+                                                ></div>
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
 
-                                    {/* TOMBOL GENERATE QR */}
-                                    <div className="mb-6">
-                                        <button
-                                            onClick={handleGenerateQR}
-                                            disabled={qrProcessing || isQrGenerated || !isSaved}
-                                            className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${qrProcessing || isQrGenerated || !isSaved
-                                                ? "cursor-not-allowed opacity-50"
-                                                : "hover:bg-orange-600 cursor-pointer"
-                                                }`}
-                                        >
-                                            {qrProcessing ? (
-                                                "Memproses..."
-                                            ) : (
-                                                <>
-                                                    <QrCode size={18} className="mr-2" />
-                                                    {isQrGenerated ? "QR Sudah Digenerate" : "Generate QR"}
-                                                </>
+                                        {/* Recommendation Section */}
+                                        <div className="mb-6">
+                                            <h3 className="text-xl font-medium text-gray-900 mb-4">Rekomendasi</h3>
+                                            <div className="space-y-3">
+                                                {!resultData ? (
+                                                    <div className="text-gray-500">Memuat rekomendasi...</div>
+                                                ) : (
+                                                    <>
+                                                        <label
+                                                            className={`flex items-start space-x-3 cursor-pointer ${isQrGenerated ? "opacity-70" : ""
+                                                                }`}
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name="recommendation"
+                                                                checked={recommendation === "continue"}
+                                                                onChange={() => handleRecommendationChange("continue")}
+                                                                disabled={isQrGenerated}
+                                                                className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+                                                            />
+                                                            <span
+                                                                className={`text-sm leading-relaxed ${recommendation === "stop" || recommendation === undefined || recommendation === null
+                                                                    ? "line-through opacity-50"
+                                                                    : ""
+                                                                    }`}
+                                                            >
+                                                                Assessment <strong>dapat dilanjutkan</strong>
+                                                            </span>
+                                                        </label>
+
+                                                        <label
+                                                            className={`flex items-start space-x-3 cursor-pointer ${isQrGenerated ? "opacity-70" : ""
+                                                                }`}
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name="recommendation"
+                                                                checked={recommendation === "stop"}
+                                                                onChange={() => handleRecommendationChange("stop")}
+                                                                disabled={isQrGenerated}
+                                                                className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+                                                            />
+                                                            <span
+                                                                className={`text-sm leading-relaxed ${recommendation === "continue" || recommendation === undefined || recommendation === null
+                                                                    ? "line-through opacity-50"
+                                                                    : ""
+                                                                    }`}
+                                                            >
+                                                                Assessment <strong className='text-red-600'>tidak dapat dilanjutkan</strong>
+                                                            </span>
+                                                        </label>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* QR Code Section */}
+                                        <div className="mb-6 flex justify-center gap-4 flex-col md:flex-row">
+                                            {/* QR Code Asesi */}
+                                            <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+                                                <h4 className="text-sm font-semibold text-gray-800">QR Code Asesi</h4>
+                                                {resultData?.apl02_header?.approved_assessee ? (
+                                                    <>
+                                                        <QRCodeCanvas
+                                                            value={getAssesseeUrl(Number(id_asesi))}
+                                                            size={100}
+                                                            className="w-32 h-32 object-contain"
+                                                        />
+                                                        <div className="text-green-600 font-semibold text-xs">
+                                                            Sudah disetujui Asesi
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="w-32 h-32 bg-gray-100 flex items-center justify-center">
+                                                        <span className="text-gray-400 text-xs text-center">
+                                                            Menunggu persetujuan asesi
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* QR Code Asesor */}
+                                            <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+                                                <h4 className="text-sm font-semibold text-gray-800">QR Code Asesor</h4>
+                                                {isQrGenerated ? (
+                                                    <>
+                                                        <QRCodeCanvas
+                                                            value={getAssessorUrl(Number(id_asesor))}
+                                                            size={100}
+                                                            className="w-32 h-32 object-contain"
+                                                        />
+                                                        <div className="text-green-600 font-semibold text-xs">
+                                                            Sebagai Asesor, Anda sudah setuju
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="w-32 h-32 bg-gray-100 flex items-center justify-center flex-col">
+                                                        <span className="text-gray-400 text-xs text-center mb-2">
+                                                            QR Code Asesor
+                                                        </span>
+                                                        <span className="text-gray-400 text-xs text-center">
+                                                            Klik tombol "Generate QR" di bawah
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* TOMBOL SIMPAN REKOMENDASI */}
+                                        <div className="mb-4">
+                                            <div className="text-gray-500 text-xs mb-2 text-center">
+                                                {!recommendation
+                                                    ? "Pilih rekomendasi terlebih dahulu"
+                                                    : isQrGenerated
+                                                        ? "Setelah generate QR, rekomendasi tidak dapat diubah"
+                                                        : "Simpan rekomendasi sebelum generate QR"}
+                                            </div>
+                                            <button
+                                                onClick={handleSaveRecommendationClick}
+                                                disabled={saveProcessing || !recommendation || isQrGenerated}
+                                                className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${saveProcessing || !recommendation || isQrGenerated
+                                                    ? "cursor-not-allowed opacity-50"
+                                                    : "hover:bg-green-700 cursor-pointer"
+                                                    }`}
+                                            >
+                                                {saveProcessing ? (
+                                                    "Menyimpan..."
+                                                ) : (
+                                                    <>
+                                                        <Save size={18} className="mr-2" />
+                                                        Simpan Rekomendasi
+                                                    </>
+                                                )}
+                                            </button>
+                                            {processError && (
+                                                <div className="text-red-500 text-xs mt-2 text-center">{processError}</div>
                                             )}
-                                        </button>
+                                            {processSuccess && (
+                                                <div className="text-green-500 text-xs mt-2 text-center">
+                                                    ✅ {processSuccess}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* TOMBOL GENERATE QR */}
+                                        <div className="mb-6">
+                                            <button
+                                                onClick={handleGenerateQR}
+                                                disabled={qrProcessing || isQrGenerated || !isSaved}
+                                                className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${qrProcessing || isQrGenerated || !isSaved
+                                                    ? "cursor-not-allowed opacity-50"
+                                                    : "hover:bg-orange-600 cursor-pointer"
+                                                    }`}
+                                            >
+                                                {qrProcessing ? (
+                                                    "Memproses..."
+                                                ) : (
+                                                    <>
+                                                        <QrCode size={18} className="mr-2" />
+                                                        {isQrGenerated ? "QR Sudah Digenerate" : "Generate QR"}
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </>
+                        )}
+                    </div>
+                </main>
+
+                {/* Modal Konfirmasi */}
+                <ConfirmModal
+                    isOpen={showConfirmModal}
+                    onClose={() => setShowConfirmModal(false)}
+                    onConfirm={handleConfirmSave}
+                    title="Konfirmasi Simpan"
+                    message={
+                        <>
+                            Anda akan menyimpan pilihan berikut:{" "}
+                            <br /><strong>{pendingValue}</strong>
                         </>
-                    )}
-                </div>
+                    }
+                    confirmText="Simpan"
+                    cancelText="Batal"
+                    type="warning"
+                />
+
             </div>
         </div>
     );

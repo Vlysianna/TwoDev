@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import SidebarAsesi from "@/components/SideAsesi";
 import paths from "@/routes/paths";
-import { ListFilter, Search, LayoutDashboard } from "lucide-react";
+import { ListFilter, Search, LayoutDashboard, ListCheck } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -64,7 +64,7 @@ export default function AsessmentAktif() {
       <div className="flex-1 lg:ml-0 md:ml-0">
         {/* Navbar */}
         <div className="sticky top-0 z-10 bg-white shadow-sm">
-          <NavbarAsesi title="Overview" icon={<LayoutDashboard size={25} />} />
+          <NavbarAsesi title="Riwayat" icon={<ListCheck size={25} />} />
         </div>
 
         <div className="p-6">

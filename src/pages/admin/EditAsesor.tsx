@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/helper/axios';
 import { ChevronDown, Calendar, Eye, EyeOff, EyeClosed } from 'lucide-react';
-import Sidebar from '@/components/ui/SideAdmin';
-import Navbar from '@/components/ui/NavAdmin';
+import Sidebar from '@/components/SideAdmin';
+import Navbar from '@/components/NavAdmin';
 
 interface FormData {
   email: string;

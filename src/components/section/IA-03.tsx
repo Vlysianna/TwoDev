@@ -4,6 +4,7 @@ import { Clock, AlertCircle, CheckCircle, Monitor } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { GroupIA03, ResultIA03, QuestionIA03 } from "@/model/ia03-model";
 import { QRCodeCanvas } from "qrcode.react";
+import useToast from "../ui/useToast";
 
 // Static data
 export const header = {
@@ -56,6 +57,8 @@ export default function IA03({
 
 	const [questions, setQuestions] = useState<Question[]>([]);
 
+	const toast = useToast();
+
 	const [result, setResult] = useState<ResultIA03>({
 		id: 0,
 		assessment: {
@@ -105,21 +108,21 @@ export default function IA03({
 	const tabs =
 		groups.length > 0
 			? groups.map((group, index) => ({
-					id: group.id.toString(),
-					label: `${group.name} (${group.units.length} unit)`,
-					active: index === selectedGroup,
-			  }))
+				id: group.id.toString(),
+				label: `${group.name} (${group.units.length} unit)`,
+				active: index === selectedGroup,
+			}))
 			: [];
 
 	// Generate unit kompetensi from groups
 	const unitKompetensi =
 		groups.length > 0 && selectedGroup < groups.length
 			? groups[selectedGroup].units.map((unit, index) => ({
-					id: unit.id,
-					title: unit.title,
-					code: unit.unit_code,
-					status: index === 0 ? "finished" : null,
-			  }))
+				id: unit.id,
+				title: unit.title,
+				code: unit.unit_code,
+				status: index === 0 ? "finished" : null,
+			}))
 			: [];
 
 	// Effect untuk fetch data saat komponen dimount
@@ -230,11 +233,23 @@ export default function IA03({
 			if (response.data.success) {
 				setSuccess("Jawaban berhasil disimpan");
 				fetchUnits(id_result);
+				toast.show({
+					title: "Berhasil",
+					description: "Berhasil menyimpan jawaban",
+					type: "success",
+					duration: 3000
+				});
 				return response.data.data;
 			}
 		} catch (error: any) {
 			console.log("Error saving question answer:", error);
 			setError("Gagal menyimpan jawaban");
+			toast.show({
+				title: "Gagal",
+				description: "Gagal menyimpan jawaban",
+				type: "error",
+				duration: 3000
+			});
 			return null;
 		}
 	};
@@ -283,22 +298,60 @@ export default function IA03({
 		}
 	};
 
+	// Notifikasi browser
+	const showNotification = (message: string) => {
+		if ("Notification" in window) {
+			if (Notification.permission === "granted") {
+				new Notification(message);
+			} else if (Notification.permission !== "denied") {
+				Notification.requestPermission().then((permission) => {
+					if (permission === "granted") {
+						new Notification(message);
+					}
+				});
+			}
+		}
+	};
+
+	// Tambahkan state untuk error tanggapan per pertanyaan
+	const [tanggapanErrors, setTanggapanErrors] = useState<{ [key: number]: string }>(
+		{}
+	);
+
 	// Simpan semua perubahan pertanyaan
 	const handleSaveAllQuestions = async () => {
 		if (isAssessee) return;
 		try {
 			setLoading(true);
+			let errors: { [key: number]: string } = {};
+			let hasError = false;
+
+			questions.forEach((question) => {
+				if (!question.tanggapan.trim()) {
+					errors[question.id] = "tanggapan harus diisi";
+					hasError = true;
+				}
+			});
+			setTanggapanErrors(errors);
+
+			if (hasError) {
+				setError("Tanggapan harus diisi pada semua pertanyaan");
+				setLoading(false);
+				return;
+			}
+
 			const promises = questions.map(async (question) => {
 				const approved = question.pencapaian === "kompeten";
-
 				return saveQuestionAnswer(question.id, question.tanggapan, approved);
 			});
 
 			await Promise.all(promises);
-			setSuccess("Semua jawaban berhasil disimpan");
+			showNotification("Jawaban berhasil disimpan");
+			setSuccess(null); // Tidak tampilkan pesan success di UI
+			setError(null);
 		} catch (error: any) {
 			console.log("Error saving all questions:", error);
-			setError("Gagal menyimpan semua jawaban");
+			setError("Gagal menyimpan jawaban");
 		} finally {
 			setLoading(false);
 		}
@@ -325,8 +378,23 @@ export default function IA03({
 		}
 	};
 
+	// Helper untuk cek completion satu grup
+	const isGroupComplete = (group: GroupIA03) => {
+		return group.questions.every(
+			(q) => q.result && q.result.answer && q.result.approved !== undefined
+		);
+	};
+
+	// Helper untuk cek completion semua grup
+	const isAllGroupsComplete = groups.length > 0 && groups.every(isGroupComplete);
+
+	// Completion percentage
+	const completionCount = groups.filter(isGroupComplete).length;
+	const completionPercent =
+		groups.length > 0 ? Math.round((completionCount / groups.length) * 100) : 0;
+
 	return (
-		<div className="px-4 sm:px-6 pb-7">
+		<div>
 			{/* Error State */}
 			{error && (
 				<div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
@@ -335,15 +403,7 @@ export default function IA03({
 				</div>
 			)}
 
-			{/* Success State */}
-			{success && (
-				<div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
-					<CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-					<span className="text-green-800">{success}</span>
-				</div>
-			)}
-
-			<div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+			<div className="bg-white rounded-lg shadow-sm p-6">
 				{/* Header Info */}
 				<div className="mb-6">
 					<div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -409,7 +469,7 @@ export default function IA03({
 			</div>
 
 			{/* Skenario Tugas Praktik Demonstrasi */}
-			<div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
+			<div className="bg-white rounded-lg shadow-sm p-6 mt-4">
 				{/* Tabs */}
 				{loading ? (
 					<div className="flex gap-2 mb-6">
@@ -423,11 +483,10 @@ export default function IA03({
 							<button
 								key={tab.id}
 								onClick={() => handleTabClick(index)}
-								className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer whitespace-nowrap ${
-									tab.active
-										? "bg-[#E77D35] text-white"
-										: "text-gray-600 hover:text-gray-800"
-								}`}
+								className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer whitespace-nowrap ${tab.active
+									? "bg-[#E77D35] text-white"
+									: "text-gray-600 hover:text-gray-800"
+									}`}
 							>
 								{tab.label}
 							</button>
@@ -470,351 +529,181 @@ export default function IA03({
 			</div>
 
 			{/* Pertanyaan */}
-			<div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
+			<div className="bg-white rounded-lg shadow-sm p-6 mt-4">
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
 					<h3 className="text-lg font-medium text-gray-800">
 						Pertanyaan Observasi
 					</h3>
+					{/* Completion Progress */}
+					<div>
+						<div className="flex items-center gap-2">
+							<span className="text-sm font-medium">
+								Completion: {completionCount} / {groups.length} grup ({completionPercent}%)
+							</span>
+							<div className="flex-1 h-2 bg-gray-200 rounded w-32">
+								<div
+									className="h-2 bg-[#E77D35] rounded"
+									style={{
+										width: `${completionPercent}%`,
+									}}
+								></div>
+							</div>
+						</div>
+						{completionPercent < 100 && (
+							<div className="text-xs text-red-500 mt-1">
+								Selesaikan semua pertanyaan di setiap grup untuk mengaktifkan QR!
+							</div>
+						)}
+					</div>
 				</div>
 
-				{/* PERBAIKAN: Tampilkan pesan jika tidak ada pertanyaan */}
+				{/* Gabungan Table/Card Responsive */}
 				{questions.length === 0 ? (
 					<div className="text-center py-8 text-gray-500">
 						Tidak ada pertanyaan untuk group ini
 					</div>
 				) : (
-					<div className="border border-gray-200 mb-4 rounded-sm overflow-x-auto">
-						{/* Desktop View (Table) */}
-						<div className="hidden md:block">
-							<table className="w-full">
-								<thead>
-									<tr className="border-b">
-										<th className="w-[5%] text-center text-gray-700 font-medium py-2 px-4">
-											No
-										</th>
-										<th className="w-[40%] text-center text-gray-700 font-medium py-2 px-4">
-											Pertanyaan
-										</th>
-										<th className="w-[30%] text-center text-gray-700 font-medium py-2 px-4">
-											Pencapaian
-										</th>
-										<th className="w-[25%] text-center text-gray-700 font-medium py-2 px-4">
-											Tanggapan
-										</th>
-									</tr>
-								</thead>
-								<tbody>
-									{questions.map((question, index) => (
-										<tr key={question.id} className="border-b">
-											<td className="w-[5%] py-3 px-4 text-center">
-												{index + 1}
-											</td>
-											<td className="w-[40%] py-3 px-4">
-												<p className="text-sm text-gray-800">
-													{question.text || "Tidak ada pertanyaan"}
-												</p>
-											</td>
-											<td className="w-[30%] py-3 px-4">
-												<div className="flex justify-center items-center gap-4">
-													{/* Kompeten */}
-													<label
-														className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                                                    ${
-																																			question.pencapaian ===
-																																			"kompeten"
-																																				? "bg-[#E77D3533]"
-																																				: ""
-																																		}`}
-													>
-														<input
-															type="radio"
-															name={`pencapaian-${question.id}`}
-															value="kompeten"
-															checked={question.pencapaian === "kompeten"}
-															onChange={(e) =>
-																updatePencapaian(question.id, e.target.value)
-															}
-															className="hidden"
-															disabled={isAssessee}
-														/>
-														<span
-															className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                                                        ${
-																																					question.pencapaian ===
-																																					"kompeten"
-																																						? "bg-[#E77D35] border-[#E77D35]"
-																																						: "border-[#E77D35]"
-																																				} ${
-																isAssessee && "opacity-50 cursor-not-allowed"
-															}`}
-														>
-															{question.pencapaian === "kompeten" && (
-																<svg
-																	className="w-3 h-3 text-white"
-																	fill="none"
-																	stroke="currentColor"
-																	strokeWidth="3"
-																	viewBox="0 0 24 24"
-																>
-																	<path d="M5 13l4 4L19 7" />
-																</svg>
-															)}
-														</span>
-														<span
-															className={
-																question.pencapaian === "kompeten"
-																	? "text-gray-900"
-																	: "text-gray-500"
-															}
-														>
-															Kompeten
-														</span>
-													</label>
+					<div className="overflow-x-auto">
+						<table className="min-w-[500px] table-auto border-collapse">
+							<thead className="bg-gray-50">
+								<tr className="border-b">
+									<th className="w-[5%] text-center text-gray-700 font-medium py-3 px-2 text-sm">No</th>
+									<th className="w-[30%] text-left text-gray-700 font-medium py-3 px-2 text-sm">Pertanyaan</th>
+									<th className="w-[25%] text-center text-gray-700 font-medium py-3 px-2 text-sm">Pencapaian</th>
+									<th className="w-[40%] text-center text-gray-700 font-medium py-3 px-2 text-sm">Tanggapan</th>
+								</tr>
+							</thead>
+							<tbody>
+								{questions.map((question, index) => (
+									<tr key={question.id} className="border-b hover:bg-gray-50">
+										{/* No */}
+										<td className="py-3 px-2 text-center text-sm">{index + 1}</td>
 
-													{/* Belum Kompeten */}
-													<label
-														className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                                                    ${
-																																			question.pencapaian ===
-																																			"belum"
-																																				? "bg-[#E77D3533]"
-																																				: ""
-																																		} ${
-															isAssessee &&
-															"disabled:opacity-50 disabled:cursor-not-allowed"
-														}`}
-													>
-														<input
-															type="radio"
-															name={`pencapaian-${question.id}`}
-															value="belum"
-															checked={question.pencapaian === "belum"}
-															onChange={(e) =>
-																updatePencapaian(question.id, e.target.value)
-															}
-															className="hidden"
-															disabled={isAssessee}
-														/>
-														<span
-															className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                                                        ${
-																																					question.pencapaian ===
-																																					"belum"
-																																						? "bg-[#E77D35] border-[#E77D35]"
-																																						: "border-[#E77D35]"
-																																				} ${
-																isAssessee && "opacity-50 cursor-not-allowed"
-															}`}
-														>
-															{question.pencapaian === "belum" && (
-																<svg
-																	className="w-3 h-3 text-white"
-																	fill="none"
-																	stroke="currentColor"
-																	strokeWidth="3"
-																	viewBox="0 0 24 24"
-																>
-																	<path d="M5 13l4 4L19 7" />
-																</svg>
-															)}
-														</span>
-														<span
-															className={
-																question.pencapaian === "belum"
-																	? "text-gray-900"
-																	: "text-gray-500"
-															}
-														>
-															Belum Kompeten
-														</span>
-													</label>
-												</div>
-											</td>
-											<td className="w-[25%] py-3 px-4">
-												<textarea
-													value={question.tanggapan}
-													onChange={(e) =>
-														updateTanggapan(question.id, e.target.value)
-													}
-													placeholder="Tanggapan"
-													className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-													disabled={isAssessee}
-												/>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-
-						{/* Mobile View (Cards) */}
-						<div className="md:hidden">
-							{questions.map((question, index) => (
-								<div key={question.id} className="border-b p-4">
-									<div className="flex justify-between items-start mb-2">
-										<div className="font-medium text-gray-700">
-											No. {index + 1}
-										</div>
-									</div>
-
-									<div className="mb-3">
-										<div className="text-sm text-gray-600 mb-1">
-											Pertanyaan:
-										</div>
-										<p className="text-gray-800">
+										{/* Pertanyaan */}
+										<td className="py-3 px-2 text-sm text-gray-800">
 											{question.text || "Tidak ada pertanyaan"}
-										</p>
-									</div>
+										</td>
 
-									<div className="mb-3">
-										<div className="text-sm text-gray-600 mb-2">
-											Pencapaian:
-										</div>
-										<div className="flex gap-4">
-											{/* Kompeten */}
-											<label
-												className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                                            ${
-																															question.pencapaian ===
-																															"kompeten"
-																																? "bg-[#E77D3533]"
-																																: ""
-																														}`}
-											>
-												<input
-													type="radio"
-													name={`pencapaian-mobile-${question.id}`}
-													value="kompeten"
-													checked={question.pencapaian === "kompeten"}
-													onChange={(e) =>
-														updatePencapaian(question.id, e.target.value)
-													}
-													className="hidden"
-													disabled={isAssessee}
-												/>
-												<span
-													className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                                                ${
-																																	question.pencapaian ===
-																																	"kompeten"
-																																		? "bg-[#E77D35] border-[#E77D35]"
-																																		: "border-[#E77D35]"
-																																} ${
-														isAssessee && "opacity-50 cursor-not-allowed"
+										{/* Pencapaian */}
+										<td className="py-3 px-2">
+											<div className="flex justify-center items-center gap-4 flex-wrap">
+												{/* Kompeten */}
+												<label
+													className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer text-sm ${question.pencapaian === "kompeten" ? "bg-[#E77D3533]" : ""
+														}`}
+												>
+													<input
+														type="radio"
+														name={`pencapaian-${question.id}`}
+														value="kompeten"
+														checked={question.pencapaian === "kompeten"}
+														onChange={(e) => updatePencapaian(question.id, e.target.value)}
+														className="hidden"
+														disabled={isAssessee}
+													/>
+													<span
+														className={`w-4 aspect-square flex items-center justify-center rounded-full border-2
+                  ${question.pencapaian === "kompeten" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}
+                  ${isAssessee && "opacity-50 cursor-not-allowed"}`}
+													>
+														{question.pencapaian === "kompeten" && (
+															<svg
+																className="w-3 h-3 text-white"
+																fill="none"
+																stroke="currentColor"
+																strokeWidth="3"
+																viewBox="0 0 24 24"
+															>
+																<path d="M5 13l4 4L19 7" />
+															</svg>
+														)}
+													</span>
+													<span className={question.pencapaian === "kompeten" ? "text-gray-900" : "text-gray-500"}>
+														Kompeten
+													</span>
+												</label>
+
+												{/* Belum Kompeten */}
+												<label
+													className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer text-sm ${question.pencapaian === "belum" ? "bg-[#E77D3533]" : ""
+														}`}
+												>
+													<input
+														type="radio"
+														name={`pencapaian-${question.id}`}
+														value="belum"
+														checked={question.pencapaian === "belum"}
+														onChange={(e) => updatePencapaian(question.id, e.target.value)}
+														className="hidden"
+														disabled={isAssessee}
+													/>
+													<span
+														className={`w-4 aspect-square flex items-center justify-center rounded-full border-2
+                  ${question.pencapaian === "belum" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}
+                  ${isAssessee && "opacity-50 cursor-not-allowed"}`}
+													>
+														{question.pencapaian === "belum" && (
+															<svg
+																className="w-3 h-3 text-white"
+																fill="none"
+																stroke="currentColor"
+																strokeWidth="3"
+																viewBox="0 0 24 24"
+															>
+																<path d="M5 13l4 4L19 7" />
+															</svg>
+														)}
+													</span>
+													<span className={question.pencapaian === "belum" ? "text-gray-900" : "text-gray-500"}>
+														Belum Kompeten
+													</span>
+												</label>
+											</div>
+										</td>
+
+										{/* Tanggapan */}
+										<td className="py-3 px-2">
+											<textarea
+												value={question.tanggapan}
+												onChange={(e) => {
+													updateTanggapan(question.id, e.target.value);
+													setTanggapanErrors((prev) => ({
+														...prev,
+														[question.id]: e.target.value.trim() ? "" : "tanggapan harus diisi",
+													}));
+												}}
+												placeholder="Tanggapan"
+												className={`w-full min-h-[70px] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm resize-y ${tanggapanErrors[question.id] ? "border-red-500" : ""
 													}`}
-												>
-													{question.pencapaian === "kompeten" && (
-														<svg
-															className="w-3 h-3 text-white"
-															fill="none"
-															stroke="currentColor"
-															strokeWidth="3"
-															viewBox="0 0 24 24"
-														>
-															<path d="M5 13l4 4L19 7" />
-														</svg>
-													)}
-												</span>
-												<span
-													className={
-														question.pencapaian === "kompeten"
-															? "text-gray-900"
-															: "text-gray-500"
-													}
-												>
-													Kompeten
-												</span>
-											</label>
-
-											{/* Belum Kompeten */}
-											<label
-												className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                                            ${
-																															question.pencapaian ===
-																															"belum"
-																																? "bg-[#E77D3533]"
-																																: ""
-																														}`}
-											>
-												<input
-													type="radio"
-													name={`pencapaian-mobile-${question.id}`}
-													value="belum"
-													checked={question.pencapaian === "belum"}
-													onChange={(e) =>
-														updatePencapaian(question.id, e.target.value)
-													}
-													className="hidden"
-													disabled={isAssessee}
-												/>
-												<span
-													className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                                                ${
-																																	question.pencapaian ===
-																																	"belum"
-																																		? "bg-[#E77D35] border-[#E77D35]"
-																																		: "border-[#E77D35]"
-																																}`}
-												>
-													{question.pencapaian === "belum" && (
-														<svg
-															className="w-3 h-3 text-white"
-															fill="none"
-															stroke="currentColor"
-															strokeWidth="3"
-															viewBox="0 0 24 24"
-														>
-															<path d="M5 13l4 4L19 7" />
-														</svg>
-													)}
-												</span>
-												<span
-													className={
-														question.pencapaian === "belum"
-															? "text-gray-900"
-															: "text-gray-500"
-													}
-												>
-													Belum
-												</span>
-											</label>
-										</div>
-									</div>
-
-									<div>
-										<div className="text-sm text-gray-600 mb-1">Tanggapan:</div>
-										<textarea
-											value={question.tanggapan}
-											onChange={(e) =>
-												updateTanggapan(question.id, e.target.value)
-											}
-											placeholder="Tanggapan"
-											className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
-											rows={3}
-										/>
-									</div>
-								</div>
-							))}
-						</div>
+												disabled={isAssessee}
+											/>
+											{tanggapanErrors[question.id] && (
+												<span className="text-xs text-red-500 mt-1">{tanggapanErrors[question.id]}</span>
+											)}
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
 					</div>
 				)}
 
-				<div className="flex w-full justify-end">
+				<div className="flex w-full justify-end mt-2">
 					<button
 						onClick={handleSaveAllQuestions}
 						disabled={loading || isAssessee}
-						className="flex items-center justify-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
+						className="flex items-center justify-center gap-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded text-sm transition-colors disabled:opacity-50 w-full sm:w-auto cursor-pointer disabled:cursor-not-allowed"
 					>
 						<CheckCircle size={16} />
-						{loading ? "Menyimpan..." : "Simpan Semua"}
+						{loading ? "Menyimpan..." : "Simpan"}
 					</button>
 				</div>
 			</div>
 
 			{/* Umpan Balik untuk asesi */}
-			<div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
+			<div className="bg-white rounded-lg shadow-sm p-6 mt-4">
 				<div className="flex flex-col lg:flex-row gap-8">
-					{/* Kolom Form Input */}
+					{/* Kolom Kiri: Form Input Asesi dan Asesor */}
 					<div className="flex-1 space-y-6">
 						{/* Asesi */}
 						<div>
@@ -835,10 +724,10 @@ export default function IA03({
 									type="date"
 									value={
 										result.ia03_header?.updated_at &&
-										!isNaN(new Date(result.ia03_header.updated_at).getTime())
+											!isNaN(new Date(result.ia03_header.updated_at).getTime())
 											? new Date(result.ia03_header.updated_at)
-													.toISOString()
-													.split("T")[0]
+												.toISOString()
+												.split("T")[0]
 											: ""
 									}
 									className="w-full px-4 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -876,10 +765,10 @@ export default function IA03({
 									type="date"
 									value={
 										result.ia03_header?.updated_at &&
-										!isNaN(new Date(result.ia03_header.updated_at).getTime())
+											!isNaN(new Date(result.ia03_header.updated_at).getTime())
 											? new Date(result.ia03_header.updated_at)
-													.toISOString()
-													.split("T")[0]
+												.toISOString()
+												.split("T")[0]
 											: ""
 									}
 									className="w-full px-4 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -888,34 +777,12 @@ export default function IA03({
 						</div>
 					</div>
 
-					{/* Right Section: QR Codes */}
-					<div className="lg:col-span-2 order-3 flex flex-col items-center space-y-6 lg:space-y-10">
-						<div className="grid grid-cols-1 gap-4">
-							{/* Assessor QR Code */}
-							<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-								{assessorQrValue && (
-									<QRCodeCanvas
-										value={assessorQrValue}
-										size={156}
-										className="w-40 h-40 object-contain"
-									/>
-								)}
-								<span className="text-sm font-semibold text-gray-800">
-									{result.assessor.name}
-								</span>
-								{!isAssessee && !result.ia03_header.approved_assessor && (
-									<button
-										onClick={approveByAssessor}
-										className="block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600"
-									>
-										Setujui
-									</button>
-								)}
-							</div>
-
-							{/* Assessee QR Code */}
-							<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-								{assesseeQrValue && (
+					{/* Kolom Kanan: QR Codes dalam 2 Kolom */}
+					<div className="flex-1">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							{/* QR Code Asesi */}
+							<div className="p-4 bg-white border rounded-lg flex flex-col items-center justify-center py-8 gap-4">
+								{assesseeQrValue && completionPercent === 100 && (
 									<QRCodeCanvas
 										value={assesseeQrValue}
 										size={156}
@@ -930,45 +797,65 @@ export default function IA03({
 									!result.ia03_header.approved_assessee && (
 										<button
 											onClick={approveByAssessee}
-											className="block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600"
+											disabled={completionPercent < 100}
+											className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600 ${completionPercent < 100 ? "opacity-50 cursor-not-allowed" : ""}`}
 										>
-											Setujui
+											Generate QR
 										</button>
 									)}
 							</div>
+
+							{/* QR Code Asesor */}
+							<div className="p-4 bg-white border rounded-lg flex flex-col items-center justify-center py-8 gap-4">
+								{assessorQrValue && completionPercent === 100 && (
+									<QRCodeCanvas
+										value={assessorQrValue}
+										size={156}
+										className="w-40 h-40 object-contain"
+									/>
+								)}
+								<span className="text-sm font-semibold text-gray-800">
+									{result.assessor.name}
+								</span>
+								{!isAssessee && !result.ia03_header.approved_assessor && (
+									<button
+										onClick={approveByAssessor}
+										disabled={completionPercent < 100}
+										className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600 ${completionPercent < 100 ? "opacity-50 cursor-not-allowed" : ""}`}
+									>
+										Generate QR
+									</button>
+								)}
+							</div>
 						</div>
 
-						{/* Approval Status */}
-						<div className="flex flex-col items-center space-y-2 text-xs">
+						{/* Status Approval */}
+						<div className="mt-6 flex flex-col items-center space-y-2 text-xs">
 							<div
-								className={`flex items-center space-x-2 ${
-									result.ia03_header.approved_assessor
-										? "text-green-600"
-										: "text-gray-400"
-								}`}
+								className={`flex items-center space-x-2 ${result.ia03_header.approved_assessor
+									? "text-green-600"
+									: "text-gray-400"
+									}`}
 							>
 								<div
-									className={`w-2 h-2 rounded-full ${
-										result.ia03_header.approved_assessor
-											? "bg-green-600"
-											: "bg-gray-300"
-									}`}
+									className={`w-2 h-2 rounded-full ${result.ia03_header.approved_assessor
+										? "bg-green-600"
+										: "bg-gray-300"
+										}`}
 								></div>
 								<span>Assessor Approved</span>
 							</div>
 							<div
-								className={`flex items-center space-x-2 ${
-									result.ia03_header.approved_assessee
-										? "text-green-600"
-										: "text-gray-400"
-								}`}
+								className={`flex items-center space-x-2 ${result.ia03_header.approved_assessee
+									? "text-green-600"
+									: "text-gray-400"
+									}`}
 							>
 								<div
-									className={`w-2 h-2 rounded-full ${
-										result.ia03_header.approved_assessee
-											? "bg-green-600"
-											: "bg-gray-300"
-									}`}
+									className={`w-2 h-2 rounded-full ${result.ia03_header.approved_assessee
+										? "bg-green-600"
+										: "bg-gray-300"
+										}`}
 								></div>
 								<span>Assessee Approved</span>
 							</div>

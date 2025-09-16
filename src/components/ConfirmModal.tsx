@@ -6,7 +6,7 @@ interface ConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   type?: 'danger' | 'warning' | 'info';
@@ -68,13 +68,13 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 border border-gray-300 text-gray-600 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 border border-gray-300 text-gray-600 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
             >
               {cancelText}
             </button>
             <button
               onClick={onConfirm}
-              className={`flex-1 ${getButtonColor()} text-white py-2 px-4 rounded-lg transition-colors`}
+              className={`flex-1 ${getButtonColor()} text-white py-2 px-4 rounded-lg transition-colors cursor-pointer`}
             >
               {confirmText}
             </button>

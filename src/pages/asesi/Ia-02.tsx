@@ -137,8 +137,7 @@ export default function Ia02() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm mb-5">
+        <div className="bg-white rounded-lg shadow-sm">
           <NavbarAsesi
             title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02"
             icon={
@@ -152,8 +151,7 @@ export default function Ia02() {
           />
         </div>
 
-        {/* Content */}
-        <div className="mx-4 sm:mx-6 pb-7">
+        <main className='m-4'>
           {/* Error State */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
@@ -162,7 +160,7 @@ export default function Ia02() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Header Info */}
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -230,7 +228,7 @@ export default function Ia02() {
           </div>
 
           {/* Validasi */}
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 items-start">
               {/* Bagian kiri (2 kolom) */}
               <div className="lg:col-span-4 space-y-4">
@@ -314,11 +312,10 @@ export default function Ia02() {
                         if (!assesseeQrValue && assessorQrValue)
                           handleGenerateQRCode();
                       }}
-                      className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-                        !assesseeQrValue && assessorQrValue
-                          ? "hover:bg-orange-600"
-                          : "cursor-not-allowed opacity-50"
-                      }`}
+                      className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assesseeQrValue && assessorQrValue
+                        ? "hover:bg-orange-600"
+                        : "cursor-not-allowed opacity-50"
+                        }`}
                     >
                       Setujui
                     </button>
@@ -341,7 +338,7 @@ export default function Ia02() {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

@@ -83,7 +83,7 @@ export default function CekAk01() {
           );
           setSelectedTUK(
             rawData.data.locations[response.data.data.locations.length - 1] ||
-              ""
+            ""
           );
         }
 
@@ -168,20 +168,17 @@ export default function CekAk01() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto">
-        <div className="bg-white rounded-lg shadow-sm mb-8">
+        <div className="bg-white rounded-lg shadow-sm">
           <NavbarAsesor
             title="Persetujuan Asesmen dan Kerahasiaan"
             icon={
-              <Link
-                to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)}
-                className="text-gray-500 hover:text-gray-600"
-              >
+              <Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)} className="text-gray-500 hover:text-gray-600">
                 <ChevronLeft size={20} />
               </Link>
             }
           />
         </div>
-        <div className="mx-4 pb-7">
+        <main className="m-4">
           <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Header Section */}
             <div className="mb-4 border-b border-gray-200 pb-4">
@@ -238,7 +235,7 @@ export default function CekAk01() {
                       type="date"
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
                       value={new Date().toISOString().split("T")[0]}
-                      onChange={() => {}}
+                      onChange={() => { }}
                       readOnly
                     />
                     <input
@@ -294,11 +291,10 @@ export default function CekAk01() {
                           />
                           <span
                             className={`w-4 h-4 flex items-center justify-center rounded-xs border-2
-                                    ${
-                                      checked
-                                        ? "bg-orange-500 border-orange-500"
-                                        : "border-orange-400"
-                                    }`}
+                                    ${checked
+                                ? "bg-orange-500 border-orange-500"
+                                : "border-orange-400"
+                              }`}
                           >
                             {checked && (
                               <svg
@@ -334,84 +330,85 @@ export default function CekAk01() {
               <div className="mt-8 border-t border-gray-200 pt-6">
                 <div className="flex flex-col lg:flex-row justify-between gap-6">
                   {/* Kiri: isi teks */}
-                  <div className="flex-1 space-y-6">
+                  <div className="w-full lg:w-1/2 space-y-6">
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">
-                        Asesi :
-                      </h3>
+                      <h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
                       <p className="text-gray-700 leading-relaxed">
-                        Bahwa saya telah mendapatkan penjelasan terkait hak dan
-                        prosedur banding asesmen dari asesor.
+                        Bahwa saya telah mendapatkan penjelasan terkait hak dan prosedur banding asesmen dari asesor.
                       </p>
                     </div>
 
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">
-                        Asesor :
-                      </h3>
+                      <h3 className="font-semibold text-gray-900 mb-2">Asesor :</h3>
                       <p className="text-gray-700 leading-relaxed">
-                        Menyatakan tidak akan membuka hasil pekerjaan yang saya
-                        peroleh karena penugasan saya sebagai Asesor dalam
-                        pekerjaan Asesmen kepada siapapun atau organisasi apapun
-                        selain kepada pihak yang berwenang sehubungan dengan
-                        kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.
+                        Menyatakan tidak akan membuka hasil pekerjaan yang saya peroleh karena penugasan saya sebagai Asesor dalam pekerjaan Asesmen kepada siapapun atau organisasi apapun selain kepada pihak yang berwenang sehubungan dengan kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.
                       </p>
                     </div>
 
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">
-                        Asesi :
-                      </h3>
+                      <h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
                       <p className="text-gray-700 leading-relaxed">
-                        Saya setuju mengikuti asesmen dengan pemahaman bahwa
-                        informasi yang dikumpulkan hanya digunakan untuk
-                        pengembangan profesional dan hanya dapat diakses oleh
-                        orang tertentu saja.
+                        Saya setuju mengikuti asesmen dengan pemahaman bahwa informasi yang dikumpulkan hanya digunakan untuk pengembangan profesional dan hanya dapat diakses oleh orang tertentu saja.
                       </p>
                     </div>
                   </div>
 
-                  {/* QR Code Section */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
-                    <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                      {assesseeQrValue && (
-                        <QRCodeCanvas
-                          value={assesseeQrValue}
-                          size={156}
-                          className="w-40 h-40 object-contain"
-                        >
-                          {assesseeQrValue}
-                        </QRCodeCanvas>
+                  {/* Kanan: QR Code Section */}
+                  <div className="w-full lg:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* QR Code Asesi */}
+                    <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+                      <h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesi</h4>
+                      {assesseeQrValue ? (
+                        <>
+                          <QRCodeCanvas
+                            value={assesseeQrValue}
+                            size={120}
+                            className="w-40 h-40 object-contain"
+                          />
+                          <div className="text-green-600 font-semibold text-xs text-center">
+                            Sudah disetujui Asesi
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+                          <span className="text-gray-400 text-xs text-center">
+                            Menunggu persetujuan asesi
+                          </span>
+                        </div>
                       )}
-                      <span className="text-sm font-semibold text-gray-800">
-                        {data.assessee.name}
-                      </span>
+                      <span className="text-sm font-semibold text-gray-800 text-center">{data.assessee.name}</span>
                     </div>
-                    <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                      {assessorQrValue && (
-                        <QRCodeCanvas
-                          value={assessorQrValue}
-                          size={156}
-                          className="w-40 h-40 object-contain"
-                        >
-                          {assessorQrValue}
-                        </QRCodeCanvas>
+
+                    {/* QR Code Asesor */}
+                    <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+                      <h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesor</h4>
+                      {assessorQrValue ? (
+                        <>
+                          <QRCodeCanvas
+                            value={assessorQrValue}
+                            size={120}
+                            className="w-40 h-40 object-contain"
+                          />
+                          <div className="text-green-600 font-semibold text-xs text-center">
+                            Sebagai Asesor, Anda sudah setuju
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+                          <span className="text-gray-400 text-xs text-center">QR Code Asesor</span>
+                          <span className="text-gray-400 text-xs text-center">Klik tombol "Generate QR"</span>
+                        </div>
                       )}
-                      <span className="text-sm font-semibold text-gray-800">
-                        {data.assessor.name}
-                      </span>
+                      <span className="text-sm font-semibold text-gray-800 text-center">{data.assessor.name}</span>
+
                       {!assessorQrValue && (
                         <button
                           disabled={assessorQrValue !== ""}
                           onClick={() => {
-                            if (!assessorQrValue)
-                              handleGenerateQRCode();
+                            if (!assessorQrValue) handleGenerateQRCode();
                           }}
-                          className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-                            !assessorQrValue
-                              ? "hover:bg-orange-600"
-                              : "cursor-not-allowed opacity-50"
-                          }`}
+                          className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assessorQrValue ? "hover:bg-orange-600" : "cursor-not-allowed opacity-50"
+                            }`}
                         >
                           Setujui
                         </button>
@@ -422,7 +419,7 @@ export default function CekAk01() {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

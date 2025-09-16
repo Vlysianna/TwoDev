@@ -139,7 +139,7 @@ export default function DataSertifikasi() {
 			// setSuccess("Data berhasil disimpan! Melanjutkan ke tahap berikutnya...");
 
 			// setModalStep(1);
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			setError("Gagal menyimpan data. Silakan coba lagi. " + error.message);
 		} finally {
@@ -229,11 +229,10 @@ export default function DataSertifikasi() {
 					setDragActive(true);
 				}}
 				onDragLeave={() => setDragActive(false)}
-				className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border rounded-lg px-4 py-3 transition-colors ${
-					dragActive
+				className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border rounded-lg px-4 py-3 transition-colors ${dragActive
 						? "border-blue-500 bg-blue-50"
 						: "border-gray-300 bg-white hover:border-gray-400"
-				}`}
+					}`}
 			>
 				{/* Info Upload */}
 				<div className="flex items-start sm:items-center space-x-3 flex-1">
@@ -292,9 +291,9 @@ export default function DataSertifikasi() {
 	};
 
 	return (
-		<div className="max-h-screen bg-gray-50">
+		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto">
-				<div className="bg-white rounded-lg shadow-sm mb-8">
+				<div className="bg-white rounded-lg shadow-sm">
 					<NavbarAsesi
 						title="Data Sertifikasi"
 						icon={
@@ -311,113 +310,75 @@ export default function DataSertifikasi() {
 					/>
 				</div>
 
-				<div>
-					<form
-						onSubmit={handleSubmit(onSubmit)}
-						className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 px-4 sm:px-6 pb-7 items-stretch"
-					>
-						{error && (
-							<div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
-								<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-								<span className="text-red-800">{error}</span>
-							</div>
-						)}
-
-						{/* Left */}
-						<div className="space-y-6 md:col-span-3 flex flex-col h-full">
-							<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
-								<h3 className="text-gray-900 font-medium mb-4">
-									Tujuan Asesmen
-								</h3>
-								<div className="space-y-3">
-									{assessmentOptions.map((option) => (
-										<label
-											key={option}
-											className="flex items-center space-x-3 cursor-pointer"
-										>
-											<Controller
-												name="purpose"
-												control={control}
-												rules={{ required: "Harap pilih tujuan asesmen" }}
-												render={({ field }) => {
-													const checked = resultDocs?.purpose === option;
-													return (
-														<input
-															type="radio"
-															name={field.name}
-															value={option}
-															defaultChecked={checked}
-															onChange={(e) => field.onChange(e.target.value)}
-															className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
-														/>
-													);
-												}}
-											/>
-											<span className="text-gray-700 text-sm sm:text-base">
-												{option}
-											</span>
-										</label>
-									))}
+				<main className='m-4'>
+					<div>
+						<form
+							onSubmit={handleSubmit(onSubmit)}
+							className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-stretch"
+						>
+							{error && (
+								<div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+									<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+									<span className="text-red-800">{error}</span>
 								</div>
-								{errors.purpose && (
-									<p className="text-red-600 text-sm mt-2">
-										{errors.purpose.message}
-									</p>
-								)}
-							</div>
+							)}
 
-							<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
-								<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
-									Bukti Persyaratan Dasar
-								</h3>
-								<div className="space-y-6">
-									{supportingFilesStatic.map((file, index) => {
-										const existingFile = resultDocs
-											? resultDocs[file.name as keyof typeof resultDocs]
-											: null;
-
-										return (
-											<div key={index} className="space-y-3">
-												<p className="text-gray-700 text-sm leading-relaxed">
-													{file.title}
-												</p>
+							{/* Left */}
+							<div className="space-y-6 md:col-span-3 flex flex-col h-full">
+								<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
+									<h3 className="text-gray-900 font-medium mb-4">
+										Tujuan Asesmen
+									</h3>
+									<div className="space-y-3">
+										{assessmentOptions.map((option) => (
+											<label
+												key={option}
+												className="flex items-center space-x-3 cursor-pointer"
+											>
 												<Controller
-													name={file.name as keyof FormValues}
+													name="purpose"
 													control={control}
-													render={({ field }) => (
-														<FileUploadArea
-															field={{
-																value: existingFile
-																	? new File([], existingFile)
-																	: (field.value as File | null),
-																onChange: field.onChange,
-															}}
-														/>
-													)}
+													rules={{ required: "Harap pilih tujuan asesmen" }}
+													render={({ field }) => {
+														const checked = resultDocs?.purpose === option;
+														return (
+															<input
+																type="radio"
+																name={field.name}
+																value={option}
+																defaultChecked={checked}
+																onChange={(e) => field.onChange(e.target.value)}
+																className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
+															/>
+														);
+													}}
 												/>
-											</div>
-										);
-									})}
+												<span className="text-gray-700 text-sm sm:text-base">
+													{option}
+												</span>
+											</label>
+										))}
+									</div>
+									{errors.purpose && (
+										<p className="text-red-600 text-sm mt-2">
+											{errors.purpose.message}
+										</p>
+									)}
 								</div>
-							</div>
-						</div>
 
-						{/* Right */}
-						<div className="md:col-span-1 lg:col-span-2 flex flex-col h-full">
-							<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full flex flex-col">
-								<div className="flex-1">
+								<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
 									<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
-										Bukti Administratif
+										Bukti Persyaratan Dasar
 									</h3>
 									<div className="space-y-6">
-										{administrativeFilesStatic.map((file, index) => {
+										{supportingFilesStatic.map((file, index) => {
 											const existingFile = resultDocs
 												? resultDocs[file.name as keyof typeof resultDocs]
 												: null;
 
 											return (
 												<div key={index} className="space-y-3">
-													<p className="text-gray-700 text-sm font-medium">
+													<p className="text-gray-700 text-sm leading-relaxed">
 														{file.title}
 													</p>
 													<Controller
@@ -439,23 +400,63 @@ export default function DataSertifikasi() {
 										})}
 									</div>
 								</div>
+							</div>
 
-								<div className="mt-auto pt-4 space-y-3">
-									<hr className="border-gray-300" />
-									<div className="w-full">
-										<button
-											type="submit"
-											disabled={loading}
-											className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 sm:py-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
-										>
-											{loading ? "Menyimpan..." : "Simpan"}
-										</button>
+							{/* Right */}
+							<div className="md:col-span-1 lg:col-span-2 flex flex-col h-full">
+								<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full flex flex-col">
+									<div className="flex-1">
+										<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
+											Bukti Administratif
+										</h3>
+										<div className="space-y-6">
+											{administrativeFilesStatic.map((file, index) => {
+												const existingFile = resultDocs
+													? resultDocs[file.name as keyof typeof resultDocs]
+													: null;
+
+												return (
+													<div key={index} className="space-y-3">
+														<p className="text-gray-700 text-sm font-medium">
+															{file.title}
+														</p>
+														<Controller
+															name={file.name as keyof FormValues}
+															control={control}
+															render={({ field }) => (
+																<FileUploadArea
+																	field={{
+																		value: existingFile
+																			? new File([], existingFile)
+																			: (field.value as File | null),
+																		onChange: field.onChange,
+																	}}
+																/>
+															)}
+														/>
+													</div>
+												);
+											})}
+										</div>
+									</div>
+
+									<div className="mt-auto pt-4 space-y-3">
+										<hr className="border-gray-300" />
+										<div className="w-full">
+											<button
+												type="submit"
+												disabled={loading}
+												className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 sm:py-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
+											>
+												{loading ? "Menyimpan..." : "Simpan"}
+											</button>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					</form>
-				</div>
+						</form>
+					</div>
+				</main>
 			</div>
 		</div>
 	);

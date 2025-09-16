@@ -221,7 +221,7 @@ export default function AK03({
 		);
 
 	return (
-		<div className="m-10">
+		<div className="">
 			{errorMessage && (
 				<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
 					<AlertCircle size={20} className="mr-2" />

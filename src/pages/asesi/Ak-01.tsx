@@ -196,7 +196,7 @@ export default function Ak01() {
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto">
-				<div className="bg-white rounded-lg shadow-sm mb-8">
+				<div className="bg-white rounded-lg shadow-sm">
 					<NavbarAsesi
 						title="Persetujuan Asesmen dan Kerahasiaan"
 						icon={
@@ -209,7 +209,8 @@ export default function Ak01() {
 						}
 					/>
 				</div>
-				<div className="px-4 pb-7">
+
+				<main className='m-4'>
 					<div className="bg-white rounded-lg shadow-sm p-6">
 						{/* Header Section */}
 						<div className="mb-4 border-b border-gray-200 pb-4">
@@ -266,7 +267,7 @@ export default function Ak01() {
 											type="date"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
 											value={new Date().toISOString().split("T")[0]}
-											onChange={() => {}}
+											onChange={() => { }}
 											readOnly
 										/>
 										<input
@@ -319,11 +320,10 @@ export default function Ak01() {
 													/>
 													<span
 														className={`w-4 h-4 flex items-center justify-center rounded-xs border-2
-                                    ${
-																			checked
-																				? "bg-orange-500 border-orange-500"
-																				: "border-orange-400"
-																		}`}
+                                    ${checked
+																? "bg-orange-500 border-orange-500"
+																: "border-orange-400"
+															}`}
 													>
 														{checked && (
 															<svg
@@ -418,11 +418,10 @@ export default function Ak01() {
 														if (!assesseeQrValue && assessorQrValue)
 															handleGenerateQRCode();
 													}}
-													className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-														!assesseeQrValue && assessorQrValue
-															? "hover:bg-orange-600"
-															: "cursor-not-allowed opacity-50"
-													}`}
+													className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assesseeQrValue && assessorQrValue
+														? "hover:bg-orange-600"
+														: "cursor-not-allowed opacity-50"
+														}`}
 												>
 													Setujui
 												</button>
@@ -449,14 +448,13 @@ export default function Ak01() {
 							<div className="mt-10 border-t border-gray-200 pt-6 flex justify-center sm:justify-end">
 								<button
 									type="submit"
-									className={`w-full sm:w-auto bg-[#E77D35] text-white py-2 px-30 rounded transition-colors ${
-										!selectedTUK ||
+									className={`w-full sm:w-auto bg-[#E77D35] text-white py-2 px-30 rounded transition-colors ${!selectedTUK ||
 										!selectedTime ||
 										!selectedEvidences ||
 										selectedEvidences.length === 0
-											? "opacity-50 cursor-not-allowed"
-											: "hover:bg-orange-600 cursor-pointer"
-									}`}
+										? "opacity-50 cursor-not-allowed"
+										: "hover:bg-orange-600 cursor-pointer"
+										}`}
 									onClick={(e) => {
 										if (
 											!selectedTUK ||
@@ -479,7 +477,7 @@ export default function Ak01() {
 							</div>
 						</div>
 					</div>
-				</div>
+				</main>
 			</div>
 		</div>
 	);

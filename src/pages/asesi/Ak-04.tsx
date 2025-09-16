@@ -219,7 +219,7 @@ export default function Ak04() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="mx-auto">
-                <div className="bg-white rounded-lg shadow-sm mb-5">
+                <div className="bg-white rounded-lg shadow-sm">
                     <NavbarAsesi
                         title='Umpan balik dan catatan asesmen'
                         icon={
@@ -229,7 +229,8 @@ export default function Ak04() {
                         }
                     />
                 </div>
-                <div className="m-5">
+
+                <main className='m-4'>
                     {error && (
                         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
                             <AlertCircle size={20} className="mr-2" />
@@ -523,7 +524,7 @@ export default function Ak04() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </main>
             </div>
         </div>
     );
