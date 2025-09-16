@@ -63,7 +63,7 @@ export default function AssessmentRecord() {
   return (
     <div className="min-h-screen bg-gray-50">
       <NavbarAssesor
-        title="Rekaman Asesmen Kompetensi - FR.AK.02"
+        title="Rekaman Asesmen Kompetensi - FR.AK.03"
         icon={<NotepadText className="w-6 h-6" />}
       />
 
