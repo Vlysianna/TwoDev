@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, Clock } from "lucide-react";
+import { ChevronLeft, Clock, QrCode, Save } from "lucide-react";
 import NavbarAsesor from "../../components/NavAsesor";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -9,6 +9,7 @@ import type { ResultIA05C, AssesseeAnswer } from "@/model/ia05c-model";
 import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
+import ConfirmModal from "@/components/ConfirmModal";
 
 // Main Component
 export default function Ia05C() {
@@ -42,6 +43,10 @@ export default function Ia05C() {
   const [qrProcessing, setQrProcessing] = useState(false);
   const [processError, setProcessError] = useState<string | null>(null);
   const [processSuccess, setProcessSuccess] = useState<string | null>(null);
+
+  // State untuk modal konfirmasi
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingValue, setPendingValue] = useState<string>("");
 
   // Format date for display
   const formattedDate = result?.ia05_header.updated_at
@@ -255,6 +260,20 @@ export default function Ia05C() {
     }
   };
 
+  // Handler tombol simpan: buka modal dulu
+  const handleSaveFeedbackClick = () => {
+    setPendingValue(
+      feedbackResult ? "Tercapai (Kompeten)" : "Belum Tercapai (Belum Kompeten)"
+    );
+    setShowConfirmModal(true);
+  };
+
+  // Handler konfirmasi modal
+  const handleConfirmSave = async () => {
+    setShowConfirmModal(false);
+    await handleSaveFeedback();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -402,11 +421,10 @@ export default function Ia05C() {
                               {["Ya", "Tidak"].map((option) => (
                                 <label
                                   key={option}
-                                  className={`flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1 rounded-sm cursor-default transition ${
-                                    selectedAnswers[answer.id] === option
+                                  className={`flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1 rounded-sm cursor-default transition ${selectedAnswers[answer.id] === option
                                       ? "bg-[#E77D3533]"
                                       : ""
-                                  }`}
+                                    }`}
                                 >
                                   <input
                                     type="radio"
@@ -422,11 +440,10 @@ export default function Ia05C() {
                                     disabled // Disabled for assessee
                                   />
                                   <span
-                                    className={`${
-                                      selectedAnswers[answer.id] === option
+                                    className={`${selectedAnswers[answer.id] === option
                                         ? "text-gray-900"
                                         : "text-gray-500"
-                                    } whitespace-nowrap text-xs md:text-sm`}
+                                      } whitespace-nowrap text-xs md:text-sm`}
                                   >
                                     {option}
                                   </span>
@@ -445,66 +462,103 @@ export default function Ia05C() {
 
           {/* Umpan Balik Section - IA-01 style */}
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_0.8fr] gap-6 lg:gap-8 items-start">
-              {/* Left Section: Umpan Balik */}
-              <div className="lg:col-span-1 h-full flex flex-col">
-                <h3 className="text-xl font-medium text-gray-900 mb-4">
-                  Umpan Balik
-                </h3>
-                <div className="space-y-3 mb-6">
-                  <label className="flex items-start space-x-3 cursor-pointer">
+            <div className="flex flex-col">
+              {/* Radio buttons in one row */}
+              <h3 className="text-xl font-medium text-gray-900 mb-4">
+                Umpan Balik
+              </h3>
+              <div className="flex flex-col gap-4 mb-6">
+                {feedbackOptions.map((option) => (
+                  <label
+                    key={option.key}
+                    className="flex items-center space-x-3 cursor-pointer"
+                  >
                     <input
                       type="radio"
                       name="feedbackResult"
-                      checked={feedbackResult === true}
-                      onChange={() => handleFeedbackRadioChange("tercapai")}
-                      className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-                      disabled={!!assessorQrValue}
-                    />
-                    <span
-                      className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
-            ${feedbackResult === false ? "line-through opacity-50" : ""}`}
-                    >
-                      Asesi telah memenuhi seluruh aspek pengetahuan,{" "}
-                      <strong>KOMPETEN</strong>
-                    </span>
-                  </label>
-                  <label className="flex items-start space-x-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="feedbackResult"
-                      checked={feedbackResult === false}
-                      onChange={() =>
-                        handleFeedbackRadioChange("belum-tercapai")
+                      checked={
+                        (option.key === "tercapai" && feedbackResult === true) ||
+                        (option.key === "belum-tercapai" && feedbackResult === false)
                       }
+                      onChange={() => handleFeedbackRadioChange(option.key)}
                       className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
                       disabled={!!assessorQrValue}
                     />
                     <span
                       className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
-            ${feedbackResult === true ? "line-through opacity-50" : ""}`}
+    ${(option.key === "tercapai" && feedbackResult === false) ||
+                          (option.key === "belum-tercapai" && feedbackResult === true)
+                          ? "line-through opacity-50"
+                          : ""}`}
                     >
-                      Asesi belum memenuhi seluruh aspek pengetahuan,{" "}
-                      <strong className="text-red-600">BELUM KOMPETEN</strong>
+                      {option.key === "tercapai" ? (
+                        <>
+                          Asesi telah memenuhi seluruh aspek pengetahuan,{" "}
+                          <strong>KOMPETEN</strong>
+                        </>
+                      ) : (
+                        <>
+                          Asesi belum memenuhi seluruh aspek pengetahuan,{" "}
+                          <strong className="text-red-600">BELUM KOMPETEN</strong>
+                        </>
+                      )}
                     </span>
                   </label>
-                </div>
+                ))}
+              </div>
 
-                {/* Tuliskan unit/elemen/KUK jika belum tercapai */}
-                <div className="mb-4">
-                  <p className="text-sm text-gray-700 mb-3">
-                    Tuliskan unit/elemen/KUK jika belum tercapai:
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              {/* Two columns section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                {/* Left Column: Form inputs */}
+                <div className="lg:col-span-1 h-full flex flex-col">
+                  {/* Tuliskan unit/elemen/KUK jika belum tercapai */}
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-700 mb-3">
+                      Tuliskan unit/elemen/KUK jika belum tercapai:
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Unit
+                        </label>
+                        <input
+                          type="text"
+                          value={unitField}
+                          disabled={feedbackResult || !!assessorQrValue}
+                          onChange={(e) => setUnitField(e.target.value)}
+                          className={`w-full rounded-lg px-3 py-2 text-sm transition-all
+                  ${feedbackResult || !!assessorQrValue
+                              ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
+                              : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
+                `}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Elemen
+                        </label>
+                        <input
+                          type="text"
+                          value={elementField}
+                          disabled={feedbackResult || !!assessorQrValue}
+                          onChange={(e) => setElementField(e.target.value)}
+                          className={`w-full rounded-lg px-3 py-2 text-sm transition-all
+                  ${feedbackResult || !!assessorQrValue
+                              ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
+                              : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
+                `}
+                        />
+                      </div>
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Unit
+                        KUK
                       </label>
                       <input
                         type="text"
-                        value={unitField}
+                        value={kukField}
                         disabled={feedbackResult || !!assessorQrValue}
-                        onChange={(e) => setUnitField(e.target.value)}
+                        onChange={(e) => setKukField(e.target.value)}
                         className={`w-full rounded-lg px-3 py-2 text-sm transition-all
                 ${
                   feedbackResult || !!assessorQrValue
@@ -514,287 +568,225 @@ export default function Ia05C() {
               `}
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Elemen
-                      </label>
+                  </div>
+
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Asesi
+                    </h3>
+                    <div className="mb-3">
                       <input
                         type="text"
-                        value={elementField}
-                        disabled={feedbackResult || !!assessorQrValue}
-                        onChange={(e) => setElementField(e.target.value)}
-                        className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-                ${
-                  feedbackResult || !!assessorQrValue
-                    ? "bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-                    : "bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]"
-                }
-              `}
+                        value={result?.assessee.name ?? "N/A"}
+                        className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+                        readOnly
                       />
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      KUK
-                    </label>
-                    <input
-                      type="text"
-                      value={kukField}
-                      disabled={feedbackResult || !!assessorQrValue}
-                      onChange={(e) => setKukField(e.target.value)}
-                      className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-              ${
-                feedbackResult || !!assessorQrValue
-                  ? "bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-                  : "bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]"
-              }
-            `}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Middle Section: Asesi and Asesor */}
-              <div className="h-full flex flex-col">
-                {/* Asesi Section */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Asesi
-                  </h3>
-                  <div className="mb-3">
-                    <input
-                      type="text"
-                      value={result?.assessee.name ?? "N/A"}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
-                      readOnly
-                    />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={formattedDate}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
-                      readOnly
-                    />
-                    <svg
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <rect
-                        x="3"
-                        y="4"
-                        width="18"
-                        height="18"
-                        rx="2"
-                        ry="2"
-                        strokeWidth="2"
-                      ></rect>
-                      <line
-                        x1="16"
-                        y1="2"
-                        x2="16"
-                        y2="6"
-                        strokeWidth="2"
-                      ></line>
-                      <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
-                      <line
-                        x1="3"
-                        y1="10"
-                        x2="21"
-                        y2="10"
-                        strokeWidth="2"
-                      ></line>
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Asesor Section */}
-                <div className="mb-auto">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Asesor
-                  </h3>
-                  <div className="mb-3">
-                    <input
-                      type="text"
-                      value={result?.assessor.name ?? "N/A"}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
-                      readOnly
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <input
-                      type="text"
-                      value={result?.assessor.no_reg_met ?? "N/A"}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
-                      readOnly
-                    />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={formattedDate}
-                      className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
-                      readOnly
-                    />
-                    <svg
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <rect
-                        x="3"
-                        y="4"
-                        width="18"
-                        height="18"
-                        rx="2"
-                        ry="2"
-                        strokeWidth="2"
-                      ></rect>
-                      <line
-                        x1="16"
-                        y1="2"
-                        x2="16"
-                        y2="6"
-                        strokeWidth="2"
-                      ></line>
-                      <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
-                      <line
-                        x1="3"
-                        y1="10"
-                        x2="21"
-                        y2="10"
-                        strokeWidth="2"
-                      ></line>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Section: QR and Generate Button */}
-              <div className="px-2 h-full flex flex-col">
-                <div className="grid grid-cols-1 gap-4">
-                  {/* QR Asesi */}
-                  <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                    {result?.ia05_header?.approved_assessee &&
-                    assesseeQrValue ? (
-                      <QRCodeCanvas
-                        value={assesseeQrValue}
-                        size={100}
-                        className="w-40 h-40 object-contain"
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formattedDate}
+                        className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
+                        readOnly
                       />
-                    ) : (
-                      <div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400 text-sm text-center">
-                          {result?.ia05_header?.approved_assessee
-                            ? "QR Asesi sudah disetujui"
-                            : "Menunggu persetujuan asesi"}
-                        </span>
-                      </div>
-                    )}
-                    <span className="text-sm font-semibold text-gray-800">
-                      {result?.assessee?.name || "-"}
-                    </span>
-                    {result?.ia05_header?.approved_assessee && (
-                      <span className="text-green-600 font-semibold text-sm mt-2">
-                        Sudah disetujui asesi
-                      </span>
-                    )}
-                  </div>
-
-                  {/* QR Asesor */}
-                  <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
-                    {assessorQrValue ? (
-                      <QRCodeCanvas
-                        value={assessorQrValue}
-                        size={100}
-                        className="w-40 h-40 object-contain"
-                      />
-                    ) : (
-                      <div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400 text-sm text-center">
-                          QR Asesor akan muncul di sini
-                        </span>
-                      </div>
-                    )}
-                    <span className="text-sm font-semibold text-gray-800">
-                      {result?.assessor?.name || "-"}
-                    </span>
-                    {/* Tombol Setujui hanya muncul jika belum approved */}
-                    {result?.ia05_header?.approved_assessor !== true && (
-                      <button
-                        disabled={!!assessorQrValue}
-                        onClick={handleGenerateQRCode}
-                        className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-                          !assessorQrValue
-                            ? "hover:bg-orange-600 cursor-pointer"
-                            : "cursor-not-allowed opacity-50"
-                        }`}
+                      <svg
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        {assessorQrValue ? "QR Telah Digenerate" : "Setujui"}
-                      </button>
-                    )}
-                    {/* Status jika sudah approved */}
-                    {result?.ia05_header?.approved_assessor === true && (
-                      <span className="text-green-600 font-semibold text-sm mt-2">
-                        Sebagai Asesor, Anda sudah setuju
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                          strokeWidth="2"
+                        ></rect>
+                        <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
+                        <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
+                        <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Asesor Section */}
+                  <div className="mb-auto">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Asesor
+                    </h3>
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        value={result?.assessor.name ?? "N/A"}
+                        className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+                        readOnly
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        value={result?.assessor.no_reg_met ?? "N/A"}
+                        className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+                        readOnly
+                      />
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formattedDate}
+                        className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
+                        readOnly
+                      />
+                      <svg
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                          strokeWidth="2"
+                        ></rect>
+                        <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
+                        <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
+                        <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: QR code */}
+                <div className="h-full flex flex-col">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* QR Asesi */}
+                    <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
+                      {result?.ia05_header?.approved_assessee && assesseeQrValue ? (
+                        <QRCodeCanvas
+                          value={assesseeQrValue}
+                          size={100}
+                          className="w-40 h-40 object-contain"
+                        />
+                      ) : (
+                        <div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+                          <span className="text-gray-400 text-sm text-center">
+                            {result?.ia05_header?.approved_assessee
+                              ? "QR Asesi sudah disetujui"
+                              : "Menunggu persetujuan asesi"}
+                          </span>
+                        </div>
+                      )}
+                      <span className="text-sm font-semibold text-gray-800">
+                        {result?.assessee?.name || "-"}
                       </span>
+                      {result?.ia05_header?.approved_assessee && (
+                        <span className="text-green-600 font-semibold text-sm mt-2">
+                          Sudah disetujui asesi
+                        </span>
+                      )}
+                    </div>
+
+                    {/* QR Asesor */}
+                    <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+                      {assessorQrValue ? (
+                        <QRCodeCanvas
+                          value={assessorQrValue}
+                          size={100}
+                          className="w-40 h-40 object-contain"
+                        />
+                      ) : (
+                        <div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+                          <span className="text-gray-400 text-sm text-center">
+                            QR Asesor akan muncul di sini
+                          </span>
+                        </div>
+                      )}
+                      <span className="text-sm font-semibold text-gray-800">
+                        {result?.assessor?.name || "-"}
+                      </span>
+                      {/* Status jika sudah approved */}
+                      {result?.ia05_header?.approved_assessor === true && (
+                        <span className="text-green-600 font-semibold text-sm mt-2">
+                          Sebagai Asesor, Anda sudah setuju
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-8 space-y-4">
+                    {/* Status/Error messages */}
+                    {processError && (
+                      <div className="text-red-500 text-sm text-center p-2 bg-red-50 rounded-md">
+                        {processError}
+                      </div>
                     )}
+                    {processSuccess && (
+                      <div className="text-green-500 text-sm text-center p-2 bg-green-50 rounded-md">
+                        ✅ {processSuccess}
+                      </div>
+                    )}
+
+                    {/* Simpan Umpan Balik Button - Full width */}
+                    <button
+                      onClick={handleSaveFeedbackClick}
+                      disabled={saveProcessing || !!assessorQrValue}
+                      className={`w-full bg-green-600 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md
+    flex items-center justify-center
+    ${saveProcessing || !!assessorQrValue
+                          ? "opacity-60 cursor-not-allowed"
+                          : "hover:bg-green-700 cursor-pointer"
+                        }`}
+                    >
+                      <Save size={18} className="mr-2" />
+                      {saveProcessing ? "Menyimpan..." : "Simpan Umpan Balik"}
+                    </button>
+
+                    {/* Generate QR Button - Full width */}
+                    <button
+                      onClick={handleGenerateQRCode}
+                      disabled={qrProcessing || !!assessorQrValue || !isSaved}
+                      className={`w-full bg-[#E77D35] text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md
+    flex items-center justify-center
+          ${qrProcessing || !!assessorQrValue || !isSaved
+                          ? "opacity-60 cursor-not-allowed"
+                          : "hover:bg-[#E77D35]/90 cursor-pointer"
+                        }`}
+                    >
+                      <QrCode size={18} className="mr-2" />
+                      {qrProcessing
+                        ? "Memproses..."
+                        : assessorQrValue
+                          ? "QR Sudah Digenerate"
+                          : "Generate QR"}
+                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Bottom Buttons */}
-            <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center md:justify-end items-center">
-              {/* Status/Error */}
-              {processError && (
-                <span className="text-red-500 text-sm text-center">
-                  {processError}
-                </span>
-              )}
-              {processSuccess && (
-                <span className="text-green-500 text-sm text-center">
-                  ✅ {processSuccess}
-                </span>
-              )}
-
-              {/* Simpan Umpan Balik */}
-              <button
-                onClick={handleSaveFeedback}
-                disabled={saveProcessing || !!assessorQrValue}
-                className={`bg-green-600 text-white px-10 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md
-        ${
-          saveProcessing || !!assessorQrValue
-            ? "opacity-60 cursor-not-allowed"
-            : "hover:bg-green-700 cursor-pointer"
-        }`}
-              >
-                {saveProcessing ? "Menyimpan..." : "Simpan Umpan Balik"}
-              </button>
-
-              {/* Generate QR */}
-              <button
-                onClick={handleGenerateQRCode}
-                disabled={qrProcessing || assessorQrValue || !isSaved}
-                className={`bg-[#E77D35] text-white px-10 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md
-        ${
-          qrProcessing || assessorQrValue || !isSaved
-            ? "opacity-60 cursor-not-allowed"
-            : "hover:bg-[#E77D35]/90 cursor-pointer"
-        }`}
-              >
-                {qrProcessing
-                  ? "Memproses..."
-                  : assessorQrValue
-                  ? "QR Sudah Digenerate"
-                  : "Generate QR"}
-              </button>
             </div>
           </div>
         </main>
+
+        {/* Modal Konfirmasi */}
+        <ConfirmModal
+          isOpen={showConfirmModal}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleConfirmSave}
+          title="Konfirmasi Simpan"
+          message={
+            <>
+              <div>Anda akan menyimpan pilihan berikut:</div>
+              <div className="mt-2 font-bold">{pendingValue}</div>
+            </>
+          }
+          confirmText="Simpan"
+          cancelText="Batal"
+          type="warning"
+        />
       </div>
     </div>
   );

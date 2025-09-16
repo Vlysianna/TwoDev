@@ -12,8 +12,7 @@ export default function Ia03() {
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto">
-				{/* Header */}
-				<div className="bg-white rounded-lg shadow-sm mb-8">
+				<div className="bg-white rounded-lg shadow-sm">
 					<NavbarAsesor
 						title="Pertanyaan Untuk Mendukung Observasi - FR.IA.03"
 						icon={
@@ -26,13 +25,16 @@ export default function Ia03() {
 						}
 					/>
 				</div>
-				<IA03
-                isAssessee={false}
-					id_assessment={id_assessment}
-					id_result={id_result!}
-					id_asesi={id_asesi!}
-					id_asesor={id_asesor!}
-				/>
+
+				<main className='m-4'>
+					<IA03
+						isAssessee={false}
+						id_assessment={id_assessment}
+						id_result={id_result!}
+						id_asesi={id_asesi!}
+						id_asesor={id_asesor!}
+					/>
+				</main>
 			</div>
 		</div>
 	);

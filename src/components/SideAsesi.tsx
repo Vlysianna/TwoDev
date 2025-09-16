@@ -92,7 +92,7 @@ const SidebarAsesi: React.FC = () => {
             <div className="p-2 border-b border-orange-400 flex justify-center">
                 <Link to={paths.asesi.root} className="p-6">
                     <div className="h-20 flex items-center justify-center">
-                        <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
+                        <img src="/img/logo-lsp.svg" alt="Logo" className="h-full w-auto" />
                     </div>
                 </Link>
             </div>
@@ -100,7 +100,7 @@ const SidebarAsesi: React.FC = () => {
 
             {/* Main Menu Items */}
             <div className="flex-1 flex flex-col ">
-                <div className="py-2">
+                <div className="py-3">
                     {menuItems.map((item) => (
                         <MenuItem
                             key={item.name}
@@ -114,17 +114,6 @@ const SidebarAsesi: React.FC = () => {
 
             {/* Separator Line */}
             <div className="mx-4 border-t border-orange-400"></div>
-
-            {/* Logout */}
-            <div className="p-2">
-                <button
-                    className="w-full flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 text-orange-100 hover:bg-orange-500 hover:text-white"
-                    onClick={handleLogout}
-                >
-                    <LogOut size={18} className="flex-shrink-0" />
-                    <span className="text-sm font-medium">Logout</span>
-                </button>
-            </div>
         </>
     );
 

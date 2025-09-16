@@ -211,7 +211,7 @@ export default function DashboardAsesmenMandiri() {
 				</div>
 
 				{/* Breadcrumb + Content */}
-				<div className="p-4 md:p-6">
+				<div className="p-4">
 					<div className="text-sm text-gray-500 mb-4">
 						<Link to="/asesor" className="hover:underline">
 							Asesor

@@ -104,8 +104,7 @@ const UserMenu: React.FC = () => {
         message="Logout akan mengakhiri sesi Anda saat ini, dan Anda perlu login kembali untuk melanjutkan aktivitas."
         confirmText="Keluar"
         cancelText="Batalkan"
-        type="danger"
-        icon={<img src="/img/gambarprialogout.svg" alt="Logout" className="w-16 h-16" />}
+        icon={<img src="/img/gambarprialogout.svg" alt="Logout" className="w-48 h-48" />}
       />
     </div>
   );

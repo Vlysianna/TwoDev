@@ -236,7 +236,7 @@ const DashboardAsesor: React.FC = () => {
 				</div>
 
 				{/* Main Body */}
-				<main className="p-6">
+				<main className="p-4">
 					{/* Header Welcome + Search + Filter */}
 					<div className="mb-6">
 						<div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">

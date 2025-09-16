@@ -18,7 +18,7 @@ export default function Ak03() {
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto">
-				<div className="bg-white rounded-lg shadow-sm mb-8">
+				<div className="bg-white rounded-lg shadow-sm">
 					<NavbarAsesi
 						title="Umpan balik dan catatan asesmen"
 						icon={
@@ -31,7 +31,10 @@ export default function Ak03() {
 						}
 					/>
 				</div>
-				<AK03 isAssessee={true} id_result={id_result} />
+
+				<main className='m-4'>
+					<AK03 isAssessee={true} id_result={id_result} />
+				</main>
 			</div>
 		</div>
 	);

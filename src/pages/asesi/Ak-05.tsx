@@ -96,203 +96,205 @@ export default function CekAk05() {
 	}
 	return (
 		<div className="min-h-screen bg-gray-50">
-			{/* Navbar */}
-			<NavbarAsesi
-				title="Laporan Asesmen - FR.AK.05"
-				icon={
-					<Link
-						to={paths.asesi.dashboard}
-						className="text-gray-500 hover:text-gray-600"
-					>
-						<ChevronLeft size={20} />
-					</Link>
-				}
-			/>
+			<div className="mx-auto">
+				<div className="bg-white rounded-lg shadow-sm">
+					<NavbarAsesi
+						title="Laporan Asesmen - FR.AK.05"
+						icon={
+							<Link
+								to={paths.asesi.dashboard}
+								className="text-gray-500 hover:text-gray-600"
+							>
+								<ChevronLeft size={20} />
+							</Link>
+						}
+					/>
+				</div>
 
-			<main className="pt-4 sm:px-6 pb-10 mx-4 space-y-8">
-				{/* --- Skema Sertifikasi --- */}
-				<section className="mb-1">
-					<div className="w-full">
-						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-							{/* Header Skema */}
-							<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-								{/* Kiri */}
-								<div className="flex items-center space-x-3 flex-wrap">
-									<h2 className="text-sm font-medium text-gray-800">
-										Skema Sertifikasi (Okupasi)
-									</h2>
-									<div className="flex items-center space-x-2">
-										<svg
-											className="w-5 h-5 text-gray-400"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<circle cx="12" cy="12" r="10" strokeWidth="2" />
-											<polyline points="12,6 12,12 16,14" strokeWidth="2" />
-										</svg>
-										<span className="text-sm text-gray-600">
-											{data.result.tuk || "Sewaktu"}
+				<main className='m-4'>
+					<section className="mb-1">
+						<div className="w-full">
+							<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+								{/* Header Skema */}
+								<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+									{/* Kiri */}
+									<div className="flex items-center space-x-3 flex-wrap">
+										<h2 className="text-sm font-medium text-gray-800">
+											Skema Sertifikasi (Okupasi)
+										</h2>
+										<div className="flex items-center space-x-2">
+											<svg
+												className="w-5 h-5 text-gray-400"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<circle cx="12" cy="12" r="10" strokeWidth="2" />
+												<polyline points="12,6 12,12 16,14" strokeWidth="2" />
+											</svg>
+											<span className="text-sm text-gray-600">
+												{data.result.tuk || "Sewaktu"}
+											</span>
+										</div>
+									</div>
+
+									{/* Kanan */}
+									<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
+										<span className="text-sm text-gray-700">
+											{data.result.assessment.occupation.name}
+										</span>
+										<span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
+											{data.result.assessment.code}
 										</span>
 									</div>
 								</div>
 
-								{/* Kanan */}
-								<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
-									<span className="text-sm text-gray-700">
-										{data.result.assessment.occupation.name}
-									</span>
-									<span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
-										{data.result.assessment.code}
-									</span>
-								</div>
-							</div>
-
-							{/* Detail Asesi - Asesor - Waktu */}
-							<div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
-								{/* Asesi & Asesor */}
-								<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
-									<div className="flex flex-wrap">
-										<span className="xs-text mr-1">Asesi:</span>
-										<span>{data.result.assessee.name || "N/A"}</span>
-									</div>
-									<div className="flex flex-wrap">
-										<span className="xs-text mr-1">Asesor:</span>
-										<span>{data.result.assessor.name || "N/A"}</span>
+								{/* Detail Asesi - Asesor - Waktu */}
+								<div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
+									{/* Asesi & Asesor */}
+									<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+										<div className="flex flex-wrap">
+											<span className="xs-text mr-1">Asesi:</span>
+											<span>{data.result.assessee.name || "N/A"}</span>
+										</div>
+										<div className="flex flex-wrap">
+											<span className="xs-text mr-1">Asesor:</span>
+											<span>{data.result.assessor.name || "N/A"}</span>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				</section>
+					</section>
 
-				{/* --- Tabel Asesi --- */}
-				<section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-					<div className="overflow-x-auto">
-						<table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
-							<thead>
-								<tr>
-									<th className="p-3 border text-center">No.</th>
-									<th className="p- border text-center xs-text">Nama Asesi</th>
-									<th className="p-3 border text-center">Rekomendasi</th>
-									<th className="p-3 border text-center">Keterangan</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td className="p-3 border text-center">1</td>
-									<td className="p-3 border text-center">
-										{data.result.assessee.name || "N/A"}
-									</td>
-									<td className="p-3 border text-center">
-										{data.result.result_ak05.is_competent
-											? "K"
-											: "BK"}
-									</td>
-									<td className="p-3 border text-center">{deskripsi || "-"}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</section>
-
-				{/* --- Form & QR --- */}
-				<section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					{/* Kiri: Form Catatan */}
-					<div className="bg-white border rounded-xl p-6 shadow-sm space-y-4">
-						<h2 className="text-sm font-medium">
-							Aspek Negatif dan Positif dalam Asesemen
-						</h2>
-						<textarea
-							className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
-							rows={2}
-							placeholder="Aspek negatif dan positif"
-							value={negatifPositif}
-							disabled
-							onChange={(e) => setNegatifPositif(e.target.value)}
-						/>
-						<h2 className="text-sm font-medium">
-							Pencatatan Penolakan Hasil Asesmen
-						</h2>
-						<textarea
-							className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
-							rows={2}
-							placeholder="Pencatatan penolakan"
-							value={penolakan}
-							disabled
-							onChange={(e) => setPenolakan(e.target.value)}
-						/>
-						<h2 className="text-sm font-medium">
-							Saran Perbaikan: (Asesor/Personil Terkait)
-						</h2>
-						<textarea
-							className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
-							rows={2}
-							placeholder="Saran perbaikan"
-							value={saran}
-							disabled
-							onChange={(e) => setSaran(e.target.value)}
-						/>
-						<h2 className="text-sm font-medium">Catatan</h2>
-						<textarea
-							className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
-							rows={3}
-							placeholder="Catatan..."
-							value={catatan}
-							disabled
-							onChange={(e) => setCatatan(e.target.value)}
-						/>
-					</div>
-
-					{/* Kanan: Asesor & QR */}
-					<div className="bg-white border rounded-xl p-6 shadow-sm flex flex-col justify-between">
-						<div>
-							<h2 className="text-sm font-medium mb-3">Asesor</h2>
-							<input
-								type="text"
-								value={data.result.assessor.name || "N/A"}
-								disabled
-								className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
-							/>
+					{/* --- Tabel Asesi --- */}
+					<section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+						<div className="overflow-x-auto">
+							<table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
+								<thead>
+									<tr>
+										<th className="p-3 border text-center">No.</th>
+										<th className="p- border text-center xs-text">Nama Asesi</th>
+										<th className="p-3 border text-center">Rekomendasi</th>
+										<th className="p-3 border text-center">Keterangan</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td className="p-3 border text-center">1</td>
+										<td className="p-3 border text-center">
+											{data.result.assessee.name || "N/A"}
+										</td>
+										<td className="p-3 border text-center">
+											{data.result.result_ak05.is_competent
+												? "K"
+												: "BK"}
+										</td>
+										<td className="p-3 border text-center">{deskripsi || "-"}</td>
+									</tr>
+								</tbody>
+							</table>
 						</div>
-						<div>
-							<h2 className="text-sm font-medium mb-3">Nomor Registrasi</h2>
-							<input
-								type="text"
-								value={data.result.assessor.no_reg_met || "N/A"}
+					</section>
+
+					{/* --- Form & QR --- */}
+					<section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						{/* Kiri: Form Catatan */}
+						<div className="bg-white border rounded-xl p-6 shadow-sm space-y-4">
+							<h2 className="text-sm font-medium">
+								Aspek Negatif dan Positif dalam Asesemen
+							</h2>
+							<textarea
+								className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								rows={2}
+								placeholder="Aspek negatif dan positif"
+								value={negatifPositif}
 								disabled
-								className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+								onChange={(e) => setNegatifPositif(e.target.value)}
 							/>
-						</div>
-						<div>
-							<h2 className="text-sm font-medium mb-3">Tanggal</h2>
-							<input
-								type="text"
-								value={
-									new Date(
-										data.result.result_ak05.updated_at
-									).toLocaleDateString("id-ID") || "N/A"
-								}
+							<h2 className="text-sm font-medium">
+								Pencatatan Penolakan Hasil Asesmen
+							</h2>
+							<textarea
+								className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								rows={2}
+								placeholder="Pencatatan penolakan"
+								value={penolakan}
 								disabled
-								className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+								onChange={(e) => setPenolakan(e.target.value)}
+							/>
+							<h2 className="text-sm font-medium">
+								Saran Perbaikan: (Asesor/Personil Terkait)
+							</h2>
+							<textarea
+								className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								rows={2}
+								placeholder="Saran perbaikan"
+								value={saran}
+								disabled
+								onChange={(e) => setSaran(e.target.value)}
+							/>
+							<h2 className="text-sm font-medium">Catatan</h2>
+							<textarea
+								className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								rows={3}
+								placeholder="Catatan..."
+								value={catatan}
+								disabled
+								onChange={(e) => setCatatan(e.target.value)}
 							/>
 						</div>
 
-						<div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 mb-3 h-40">
-							{qrValue ? (
-								<QRCodeCanvas value={qrValue} size={100} />
-							) : (
-								<p className="text-gray-400 text-sm">Belum Generate QR</p>
-							)}
-							{qrValue && (
-								<p className="text-xs text-gray-400 mt-2">
-									{data.result.assessor.name || "Nama Asesor"}
-								</p>
-							)}
+						{/* Kanan: Asesor & QR */}
+						<div className="bg-white border rounded-xl p-6 shadow-sm flex flex-col justify-between">
+							<div>
+								<h2 className="text-sm font-medium mb-3">Asesor</h2>
+								<input
+									type="text"
+									value={data.result.assessor.name || "N/A"}
+									disabled
+									className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+								/>
+							</div>
+							<div>
+								<h2 className="text-sm font-medium mb-3">Nomor Registrasi</h2>
+								<input
+									type="text"
+									value={data.result.assessor.no_reg_met || "N/A"}
+									disabled
+									className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+								/>
+							</div>
+							<div>
+								<h2 className="text-sm font-medium mb-3">Tanggal</h2>
+								<input
+									type="text"
+									value={
+										new Date(
+											data.result.result_ak05.updated_at
+										).toLocaleDateString("id-ID") || "N/A"
+									}
+									disabled
+									className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+								/>
+							</div>
+
+							<div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 mb-3 h-40">
+								{qrValue ? (
+									<QRCodeCanvas value={qrValue} size={100} />
+								) : (
+									<p className="text-gray-400 text-sm">Belum Generate QR</p>
+								)}
+								{qrValue && (
+									<p className="text-xs text-gray-400 mt-2">
+										{data.result.assessor.name || "Nama Asesor"}
+									</p>
+								)}
+							</div>
 						</div>
-					</div>
-				</section>
-			</main>
+					</section>
+				</main>
+			</div>
 		</div>
 	);
 }
