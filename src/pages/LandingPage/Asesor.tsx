@@ -28,8 +28,7 @@ function Asesor() {
         <div className="mt-16"></div>
 
         <main className="flex-grow bg-gray-50">
-          {/* Section Hero dengan background */}
- <img
+          {/* Section Hero dengan background */}<img
             src={getAssetPath('/bgsklh.png')}
             alt=""
             className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"

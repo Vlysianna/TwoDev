@@ -15,6 +15,7 @@ import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
 import KelolaMUK from "@/pages/admin/KelolaMuk";
 import EditAsesor from "@/pages/admin/EditAsesor";
 import KelolaAkunAsesor from "@/pages/admin/AkunAsesor";
+import KelolaUser from "@/pages/admin/KelolaUser";
 import VerifikasiPage from "@/pages/admin/verifikasi";
 import RegisterPage from "@/pages/admin/register";
 import EditAsesi from "@/pages/admin/EditAsessi";
@@ -134,6 +135,7 @@ const router = createBrowserRouter([
 				),
 				children: [
 					{ index: true, element: <DashboardAdmin /> },
+					{ path: paths.admin.kelolaUser, element: <KelolaUser /> },
 					{ path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
 					{ path: paths.admin.resultAssessment, element: <ResultAssessment /> },
 					{ path: paths.admin.editAsesor, element: <EditAsesor /> },

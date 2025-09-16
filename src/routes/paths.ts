@@ -26,6 +26,7 @@ const routes = {
 	},
 	admin: {
 		root: "/admin",
+		kelolaUser: "/admin/kelola-user",
 		kelolaAkunAsesi: "/admin/kelola-akun-asesi",
 		resultAssessment: "/admin/result-assessment",
 		editAsesor: "/admin/edit-asesor",

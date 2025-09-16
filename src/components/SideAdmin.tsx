@@ -76,6 +76,12 @@ const Sidebar: React.FC = () => {
 
   const managementItems: MenuItem[] = [
     {
+      name: 'Kelola Pengguna',
+      icon: Users,
+      section: 'management',
+      path: paths.admin.kelolaUser,
+    },
+    {
       name: 'Akun Asesi',
       icon: User,
       section: 'management',
