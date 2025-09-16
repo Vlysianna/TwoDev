@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NotepadText, ChevronLeft, AlertCircle } from "lucide-react";
-import NavbarAsesor from "@/components/NavbarAsesor";
+import NavbarAsesor from "@/components/NavAsesor";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,6 +20,7 @@ export default function CekAk05() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AK05ResponseData | null>(null);
   const [qrValue, setQrValue] = useState("");
+  const [dataSaved, setDataSaved] = useState(false); // State untuk melacak apakah data sudah disimpan
 
   const [catatan, setCatatan] = useState("");
   const [negatifPositif, setNegatifPositif] = useState("");
@@ -37,6 +38,7 @@ export default function CekAk05() {
     setIsCompetent(value);
     // Set deskripsi otomatis berdasarkan pilihan
     setDeskripsi(value ? "Kompeten" : "Belum Kompeten");
+    setDataSaved(false); // Reset status saved ketika data berubah
   };
 
   const fetchData = async () => {
@@ -65,12 +67,17 @@ export default function CekAk05() {
         const existingDescription = rawData.data.result.result_ak05.description;
         setDeskripsi(
           existingDescription ||
-          (competentStatus !== null ? (competentStatus ? "Kompeten" : "Belum Kompeten") : "")
+            (competentStatus !== null
+              ? competentStatus
+                ? "Kompeten"
+                : "Belum Kompeten"
+              : "")
         );
 
         // jika sudah approve, langsung set QR
         if (rawData.data.result.result_ak05.approved_assessor) {
           setQrValue(getAssessorUrl(Number(id_asesor)));
+          setDataSaved(true); // Data sudah tersimpan di server
         }
       } else {
         setError("Gagal memuat data");
@@ -105,25 +112,34 @@ export default function CekAk05() {
 
       if (response.data.success) {
         console.log("Data saved successfully:", response.data);
+        setDataSaved(true); // Tandai bahwa data sudah tersimpan
+        setError(null);
         // Bisa tambahkan toast/alert sukses
       } else {
         setError("Gagal menyimpan data");
+        setDataSaved(false);
       }
     } catch (err) {
       console.error("Error saving data:", err);
+      setError("Terjadi kesalahan saat menyimpan data");
+      setDataSaved(false);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGenerateQRCode = async () => {
+    // Validasi: pastikan data sudah disimpan
+    if (!dataSaved) {
+      setError("Harap simpan data terlebih dahulu sebelum generate QR code");
+      return;
+    }
+
     try {
       setGeneratingQR(true);
+      setError(null);
 
-      // Simpan data terlebih dahulu
-      await handleSave();
-
-      // Kemudian approve dan generate QR code
+      // Approve dan generate QR code
       const response = await api.put(
         `/assessments/ak-05/result/assessor/${id_result}/approve`
       );
@@ -143,10 +159,10 @@ export default function CekAk05() {
     }
   };
 
-  const handleSelesai = async () => {
-    await handleSave();
-    // Navigate back or show success message
-  };
+  // const handleSelesai = async () => {
+  //   await handleSave();
+  //   // Navigate back or show success message
+  // };
 
   if (loading) {
     return (
@@ -295,7 +311,10 @@ export default function CekAk05() {
                   <td className="p-3 border text-center">
                     <textarea
                       value={deskripsi}
-                      onChange={(e) => setDeskripsi(e.target.value)}
+                      onChange={(e) => {
+                        setDeskripsi(e.target.value);
+                        setDataSaved(false); // Reset status saved ketika data berubah
+                      }}
                       className="w-full text-center border-none focus:ring-0 focus:outline-none resize-none"
                       rows={1}
                       placeholder="Masukkan keterangan"
@@ -320,7 +339,10 @@ export default function CekAk05() {
               rows={2}
               placeholder="Aspek negatif dan positif"
               value={negatifPositif}
-              onChange={(e) => setNegatifPositif(e.target.value)}
+              onChange={(e) => {
+                setNegatifPositif(e.target.value);
+                setDataSaved(false); // Reset status saved ketika data berubah
+              }}
             />
             <h2 className="text-sm font-medium">
               Pencatatan Penolakan Hasil Asesmen
@@ -330,7 +352,10 @@ export default function CekAk05() {
               rows={2}
               placeholder="Pencatatan penolakan"
               value={penolakan}
-              onChange={(e) => setPenolakan(e.target.value)}
+              onChange={(e) => {
+                setPenolakan(e.target.value);
+                setDataSaved(false); // Reset status saved ketika data berubah
+              }}
             />
             <h2 className="text-sm font-medium">
               Saran Perbaikan: (Asesor/Personil Terkait)
@@ -340,7 +365,10 @@ export default function CekAk05() {
               rows={2}
               placeholder="Saran perbaikan"
               value={saran}
-              onChange={(e) => setSaran(e.target.value)}
+              onChange={(e) => {
+                setSaran(e.target.value);
+                setDataSaved(false); // Reset status saved ketika data berubah
+              }}
             />
             <h2 className="text-sm font-medium">Catatan</h2>
             <textarea
@@ -348,8 +376,31 @@ export default function CekAk05() {
               rows={3}
               placeholder="Catatan..."
               value={catatan}
-              onChange={(e) => setCatatan(e.target.value)}
+              onChange={(e) => {
+                setCatatan(e.target.value);
+                setDataSaved(false); // Reset status saved ketika data berubah
+              }}
             />
+
+            {/* Tombol Simpan */}
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className={`w-full text-white py-2 rounded-lg ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
+            >
+              {loading ? "Menyimpan..." : "Simpan Data"}
+            </button>
+
+            {/* Status Simpan */}
+            {dataSaved && (
+              <p className="text-green-500 text-sm">
+                Data telah berhasil disimpan
+              </p>
+            )}
           </div>
 
           {/* Kanan: Asesor & QR */}
@@ -401,27 +452,26 @@ export default function CekAk05() {
 
             <button
               onClick={handleGenerateQRCode}
-              disabled={isCompetent === null || generatingQR}
-              className={`w-full text-white py-2 rounded-lg ${isCompetent === null || generatingQR
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-orange-500 hover:bg-orange-600"
-                }`}
+              disabled={!dataSaved || generatingQR || isCompetent === null}
+              className={`w-full text-white py-2 rounded-lg ${
+                !dataSaved || generatingQR || isCompetent === null
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
             >
               {generatingQR ? "Memproses..." : "Generate QR"}
             </button>
+
+            {/* Pesan error jika belum disimpan */}
+            {!dataSaved && (
+              <p className="text-red-500 text-sm mt-2">
+                Harap simpan data terlebih dahulu sebelum generate QR
+              </p>
+            )}
           </div>
         </section>
 
-        <hr className="border border-gray-200" />
-
-        <div className="flex justify-end">
-          <button
-            onClick={handleSelesai}
-            className="w-full sm:w-100 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 mt-4"
-          >
-            Selesai
-          </button>
-        </div>
+        <hr className="border border-gray-200" />       
       </main>
     </div>
   );
