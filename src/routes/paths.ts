@@ -153,11 +153,12 @@ const routes = {
 			apl02_detail: (
 				id_assessment: string | number,
 				id_asesor: string | number,
-				id_unit: string | number
+				id_unit: string | number,
+				unit_number?: string | number
 			) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-02-detail/${id_unit}`,
+				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-02-detail/${id_unit}/${unit_number}`,
 			apl02DetailPattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/apl-02-detail/:id_unit",
+				"/asesi/assessment/:id_assessment/:id_asesor/apl-02-detail/:id_unit/:unit_number",
 			frak03: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/fr.ak.03`,
 			frak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/fr.ak.03",
