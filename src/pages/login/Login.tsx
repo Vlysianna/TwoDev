@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm } from 'react-hook-form';
+import { getAssetPath } from '@/utils/assetPath';
 
 type FormValues = {
   email: string
@@ -74,7 +75,7 @@ export default function LoginForm() {
           {/* Logo and Title */}
           <div className="text-start">
             <div className="w-30 h-30 md:w-40 md:h-40 rounded-lg text-start">
-              <img src="/img/logo-lsp-oren.svg" alt="Logo" className="w-full h-full" />
+              <img src={getAssetPath('/img/logo-lsp-oren.svg')} alt="Logo" className="w-full h-full" />
             </div>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Masuk</h1>
             <p className="mb-5 text-gray-600 text-xs md:text-sm">
@@ -174,7 +175,7 @@ export default function LoginForm() {
         <div className="fixed bottom-0 pb-10 flex items-center justify-center text-xs md:text-sm text-gray-600">
           <span>Developed by</span>
           <img
-            src="/img/logo-two-dev.svg"
+            src={getAssetPath('/img/logo-two-dev.svg')}
             alt=""
             className="w-20 ml-2"
           />
@@ -194,7 +195,7 @@ export default function LoginForm() {
           <div className="text-center flex justify-center items-center">
             {/* Certificate Icon */}
             <div className="w-138 object-cover rounded-lg text-center">
-              <img src="/img/hadline login.svg" alt="" />
+              <img src={getAssetPath('/img/hadline login.svg')} alt="" />
             </div>
           </div>
         </div>

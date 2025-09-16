@@ -3,6 +3,7 @@ import { FileCheck2, ChevronLeft, X, AlertCircle, CheckCircle } from 'lucide-rea
 import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
 import NavbarAsesor from '@/components/NavAsesor';
+import { getAssetPath } from '@/utils/assetPath';
 
 export default function FaktaIntegritas() {
 

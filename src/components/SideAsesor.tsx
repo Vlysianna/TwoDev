@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getAssetPath } from '@/utils/assetPath';
 import {
     LogOut,
     Menu,
@@ -92,7 +93,7 @@ const SidebarAsesor: React.FC = () => {
                 <Link to={paths.asesor.root} className="p-6">
                     <div className="h-20 flex items-center justify-center">
                         <img
-                            src="/twodev-putih.svg"
+                            src={getAssetPath('/twodev-putih.svg')}
                             alt="Logo"
                             className="h-full object-contain"
                         />
@@ -170,7 +171,7 @@ const SidebarAsesor: React.FC = () => {
                 confirmText="Keluar"
                 cancelText="Batalkan"
                 type="danger"
-                icon={<img src="/img/gambarprialogout.svg" alt="Logout" className="w-16 h-16" />}
+                icon={<img src={getAssetPath('/img/gambarprialogout.svg')} alt="Logout" className="w-16 h-16" />}
             />
         </>
     );

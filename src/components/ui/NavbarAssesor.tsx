@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getAssetPath } from '@/utils/assetPath';
 
 interface NavbarAsesorProps {
   title: string;
@@ -67,7 +68,7 @@ export default function NavbarAsesor({ title, icon }: NavbarAsesorProps) {
               className="flex items-center space-x-2 border border-gray-200 rounded-full px-3 py-2 hover:bg-gray-100 transition cursor-pointer"
             >
               <img
-                src="/public/img/avatar-asesor.svg"
+                src={getAssetPath('/img/avatar-asesor.svg')}
                 alt="User avatar"
                 className="w-10 h-10 rounded-full"
               />
@@ -82,7 +83,7 @@ export default function NavbarAsesor({ title, icon }: NavbarAsesorProps) {
                 <div className="p-4 border-b border-gray-200 hover:cursor-pointer">
                   <div className="flex items-center space-x-2">
                     <img
-                      src="/public/img/avatar-asesor.svg"
+                      src={getAssetPath('/img/avatar-asesor.svg')}
                       alt="User avatar"
                       className="w-8 h-8 rounded-full"
                     />

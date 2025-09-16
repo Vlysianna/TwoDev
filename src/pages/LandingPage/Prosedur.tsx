@@ -1,5 +1,6 @@
 import FootLanding from "../../components/FootLanding";
 import NavLanding from "../../components/NavLanding";
+import { getAssetPath } from '@/utils/assetPath';
 
 function Prosedur() {
   return (
@@ -10,7 +11,7 @@ function Prosedur() {
         {/* Section Hero dengan background */}
         <section className="relative min-h-screen">
           <img
-            src="/bgsklh.png"
+            src={getAssetPath('/bgsklh.png')}
             alt=""
             className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />

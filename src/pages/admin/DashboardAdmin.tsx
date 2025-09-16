@@ -12,6 +12,7 @@ import api from '@/helper/axios';
 import { useToast } from '@/components/ui/useToast';
 import { useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
+import { getAssetPath } from '@/utils/assetPath';
 
 interface DashboardStats {
     totalSchemes: number;
@@ -289,7 +290,7 @@ const Dashboard: React.FC = () => {
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
-                                    <img src="/skema.svg" alt="skema" className="w-6 h-6" />
+                                    <img src={getAssetPath('/skema.svg')} alt="skema" className="w-6 h-6" />
                                 </div>
                                 <div>
                                     <p className="text-lg font-semibold text-gray-900">{stats.totalSchemes}</p>
@@ -307,7 +308,7 @@ const Dashboard: React.FC = () => {
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
-                                    <img src="/assesmen.svg" alt="assesmen" className="w-6 h-6" />
+                                    <img src={getAssetPath('/assesmen.svg')} alt="assesmen" className="w-6 h-6" />
                                 </div>
                                 <div>
                                     <p className="text-lg font-semibold text-gray-900">{stats.totalAssessments}</p>
@@ -325,7 +326,7 @@ const Dashboard: React.FC = () => {
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
-                                    <img src="/asesor.svg" alt="asesor" className="w-6 h-6" />
+                                    <img src={getAssetPath('/asesor.svg')} alt="asesor" className="w-6 h-6" />
                                 </div>
                                 <div>
                                     <p className="text-lg font-semibold text-gray-900">{stats.totalAssessors}</p>
@@ -343,7 +344,7 @@ const Dashboard: React.FC = () => {
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
-                                    <img src="/asesi.svg" alt="asesi" className="w-6 h-6" />
+                                    <img src={getAssetPath('/asesi.svg')} alt="asesi" className="w-6 h-6" />
                                 </div>
                                 <div>
                                     <p className="text-lg font-semibold text-gray-900">{stats.totalAssesses}</p>

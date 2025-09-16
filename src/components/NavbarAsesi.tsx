@@ -3,6 +3,7 @@ import { Bell, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
 import UserMenu from './UserMenu';
+import { getAssetPath } from '@/utils/assetPath';
 
 interface NavbarAsesiProps {
   title: string;
@@ -116,7 +117,7 @@ export default function NavbarAsesi({ title, icon }: NavbarAsesiProps) {
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-[999]">
           <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full text-center">
             <div className="mb-4 flex justify-center">
-              <img src="/img/gambarprialogout.svg" alt="Pria Sigma" />
+              <img src={getAssetPath('/img/gambarprialogout.svg')} alt="Pria Sigma" />
             </div>
 
             <h2 className="font-bold text-lg mb-2">Yakin ingin keluar?</h2>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { getAssetPath } from '@/utils/assetPath';
 import {
   LayoutDashboard,
   FileText,
@@ -122,7 +123,7 @@ const Sidebar: React.FC = () => {
       <div className="p-2 border-b border-orange-400">
         <Link to={paths.admin.root} className="flex items-center space-x-2 p-6">
           <div className="w-8 h-20 flex items-center justify-center flex-shrink-0">
-            <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
+            <img src={getAssetPath('/twodev-putih.svg')} alt="Logo" className="h-15 w-auto" />
           </div>
         </Link>
         <span className="p-2 text-sm text-orange-100 whitespace-nowrap">

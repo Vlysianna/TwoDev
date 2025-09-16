@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Asset base path - otomatis diset Vite berdasarkan config */
+:root {
+  --asset-base: env(BASE_URL, '/');
+}
+
 * {
 	font-family: "Satoshi", sans-serif;
 }

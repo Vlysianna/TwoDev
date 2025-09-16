@@ -65,9 +65,9 @@ import Ak05Asesor from "@/pages/asesor/Ak-05";
 import Ia05CAsesor from "@/pages/asesor/Ia-05-C";
 import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
+import IA05Assessor from "@/pages/asesor/ia-05";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
 import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
-import IA05Assessor from "@/pages/asesor/ia-05";
 import ResultAssessment from "@/pages/admin/ResultAssessment";
 import EditMUK from "@/pages/admin/EditMuk";
 
@@ -349,6 +349,8 @@ const router = createBrowserRouter([
 			},
 		],
 	},
-]);
+], {
+	basename: "/twodev-fe"
+});
 
 export default router;

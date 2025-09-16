@@ -1,5 +1,6 @@
 import FootLanding from "../../components/FootLanding";
 import NavLanding from "../../components/NavLanding";
+import { getAssetPath } from '@/utils/assetPath';
 
 function StrukturLSP() {
   return (
@@ -10,7 +11,7 @@ function StrukturLSP() {
         {/* Section Hero dengan background */}
         <section className="relative min-h-screen">
            <img
-            src="/bgsklh.png"
+            src={getAssetPath('/bgsklh.png')}
             alt=""
             className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />
@@ -40,7 +41,7 @@ function StrukturLSP() {
                 {/* Ketua LSP */}
                 <div className="flex flex-col items-center">
                   <img
-                    src="/ketua.jpg"
+                    src={getAssetPath('/ketua.jpg')}
                     alt="Ketua LSP"
                     className="w-20 h-20 rounded-full object-cover mb-2 border"
                   />
@@ -55,7 +56,7 @@ function StrukturLSP() {
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-8">
                   <div className="w-48 h-24 border rounded-lg flex flex-col items-center justify-center gap-2 p-2">
                     <img
-                      src="/sertifikasi.jpg"
+                      src={getAssetPath('/sertifikasi.jpg')}
                       alt="Dewan pengarah"
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -65,7 +66,7 @@ function StrukturLSP() {
                   </div>
                   <div className="w-48 h-24 border rounded-lg flex flex-col items-center justify-center gap-2 p-2">
                     <img
-                      src="/sertifikasi.jpg"
+                      src={getAssetPath('/sertifikasi.jpg')}
                       alt="Komite Skema"
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -81,7 +82,7 @@ function StrukturLSP() {
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-8">
                   <div className="w-48 h-24 border rounded-lg flex flex-col items-center justify-center gap-2 p-2">
                     <img
-                      src="/admin.jpg"
+                      src={getAssetPath('/admin.jpg')}
                       alt="Manajer Administrasi"
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -91,7 +92,7 @@ function StrukturLSP() {
                   </div>
                   <div className="w-48 h-24 border rounded-lg flex flex-col items-center justify-center gap-2 p-2">
                     <img
-                      src="/mutu.jpg"
+                      src={getAssetPath('/mutu.jpg')}
                       alt="Manajer Mutu"
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -101,7 +102,7 @@ function StrukturLSP() {
                   </div>
                   <div className="w-48 h-24 border rounded-lg flex flex-col items-center justify-center gap-2 p-2">
                     <img
-                      src="/sertifikasi.jpg"
+                      src={getAssetPath('/sertifikasi.jpg')}
                       alt="Manajer Sertifikasi"
                       className="w-12 h-12 rounded-full object-cover"
                     />

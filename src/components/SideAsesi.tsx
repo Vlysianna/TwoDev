@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getAssetPath } from '@/utils/assetPath';
 import {
     ClipboardList,
     LogOut,
@@ -92,7 +93,7 @@ const SidebarAsesi: React.FC = () => {
             <div className="p-2 border-b border-orange-400 flex justify-center">
                 <Link to={paths.asesi.root} className="p-6">
                     <div className="h-20 flex items-center justify-center">
-                        <img src="/twodev-putih.svg" alt="Logo" className="h-15 w-auto" />
+                        <img src={getAssetPath('/twodev-putih.svg')} alt="Logo" className="h-15 w-auto" />
                     </div>
                 </Link>
             </div>

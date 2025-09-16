@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import FootLanding from "../../components/FootLanding";
 import NavLanding from "../../components/NavLanding";
+import { getAssetPath } from '@/utils/assetPath';
 
 function TentangLSP() {
    interface CounterProps {
@@ -39,7 +40,7 @@ function TentangLSP() {
         
            <section className="relative min-h-screen">
           <img
-            src="/bgsklh.png"
+            src={getAssetPath('/bgsklh.png')}
             alt=""
             className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />
@@ -62,7 +63,7 @@ function TentangLSP() {
               {/* Gambar kiri */}
               <div className="w-full h-full">
                 <img
-                  src="/bgsklh.png"
+                  src={getAssetPath('/bgsklh.png')}
                   alt="Gedung SMKN 24 Jakarta"
                   className="rounded-lg shadow-lg aspect-square object-cover"
                 />
@@ -143,7 +144,7 @@ function TentangLSP() {
   {/* Background Image with Orange Overlay */}
   <div className="absolute inset-0 z-0 overflow-hidden">
     <img 
-      src="/bgsklh.png" 
+      src={getAssetPath('/bgsklh.png')} 
       alt="Background"
       className="w-full h-full object-cover brightness-80"
     />

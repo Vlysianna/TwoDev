@@ -4,6 +4,7 @@ import { ChevronDown, Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import UserMenu from './UserMenu';
 import paths from '@/routes/paths';
+import { getAssetPath } from '@/utils/assetPath';
 
 const NavLanding: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -80,7 +81,7 @@ const NavLanding: React.FC = () => {
 				<div className="flex justify-between items-center h-16">
 					{/* Logo */}
 					<div className="flex items-center">
-						<img src="/twodev-teks.svg" alt="Wodev" className="h-8" />
+						<img src={getAssetPath('/twodev-teks.svg')} alt="Wodev" className="h-8" />
 					</div>
 
 					{/* Desktop Navigation */}

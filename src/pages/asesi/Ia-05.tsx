@@ -8,6 +8,7 @@ import {
 import { useState, useEffect } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
+import { getAssetPath } from '@/utils/assetPath';
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
@@ -416,7 +417,7 @@ export default function Ia05() {
               <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-[999]">
                 <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full text-center">
                   <div className="mb-4 flex justify-center">
-                    <img src="/img/confirm-submit.svg" alt="Pria Sigma" />
+                    <img src={getAssetPath('/img/confirm-submit.svg')} alt="Pria Sigma" />
                   </div>
 
                   <h2 className="font-bold text-lg mb-2">

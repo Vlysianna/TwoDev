@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ConfirmModal from './ConfirmModal';
+import { getAssetPath } from '@/utils/assetPath';
 
 const UserMenu: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -54,7 +55,7 @@ const UserMenu: React.FC = () => {
         className="flex items-center sm:space-x-2 border border-gray-200 rounded-full px-2 py-2 hover:bg-gray-100 transition cursor-pointer"
       >
         <img
-          src="/img/avatar-asesor.svg"
+          src={getAssetPath('/img/avatar-asesor.svg')}
           alt="User avatar"
           className="w-10 h-10 rounded-full"
         />
@@ -71,7 +72,7 @@ const UserMenu: React.FC = () => {
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
               <img
-                src="/img/avatar-asesor.svg"
+                src={getAssetPath('/img/avatar-asesor.svg')}
                 alt="User avatar"
                 className="w-8 h-8 rounded-full"
               />
@@ -105,7 +106,7 @@ const UserMenu: React.FC = () => {
         confirmText="Keluar"
         cancelText="Batalkan"
         type="danger"
-        icon={<img src="/img/gambarprialogout.svg" alt="Logout" className="w-16 h-16" />}
+        icon={<img src={getAssetPath('/img/gambarprialogout.svg')} alt="Logout" className="w-16 h-16" />}
       />
     </div>
   );

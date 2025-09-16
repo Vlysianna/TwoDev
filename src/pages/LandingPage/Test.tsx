@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/NavAdmin"
 import Sidebar from "../../components/SideAdmin"
+import { getAssetPath } from '@/utils/assetPath';
 
 function Test() {
     const beritaImages = [
-    { src: '/bgsklh.png', alt: 'Berita 1' },
-    { src: '/bgsklh.png', alt: 'Berita 2' },
-    { src: '/bgsklh.png', alt: 'Berita 3' },
+    { src: getAssetPath('/bgsklh.png'), alt: 'Berita 1' },
+    { src: getAssetPath('/bgsklh.png'), alt: 'Berita 2' },
+    { src: getAssetPath('/bgsklh.png'), alt: 'Berita 3' },
   ];
    // Definisikan tipe props untuk komponen Counter
   interface CounterProps {
@@ -119,7 +120,7 @@ function Test() {
                 </div>
                 <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-white to-transparent flex items-end justify-start opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <img
-                    src="/twodev-teks.svg"
+                    src={getAssetPath('/twodev-teks.svg')}
                     alt="Wodev"
                     className="h-6 w-auto mb-4 ml-4"
                   />

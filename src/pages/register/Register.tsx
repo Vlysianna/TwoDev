@@ -3,6 +3,7 @@ import { Eye, EyeClosed, Clock, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import paths from '@/routes/paths';
+import { getAssetPath } from '@/utils/assetPath';
 
 export default function RegisterForm() {
     const [name, setName] = useState('');
@@ -64,7 +65,7 @@ export default function RegisterForm() {
                     {/* Logo and Title */}
                     <div className="text-start mb-4">
                         <div className="w-30 h-30 md:w-40 md:h-40 rounded-lg text-start">
-                            <img src="/img/logo-lsp-oren.svg" alt="" className='w-full h-full' />
+                            <img src={getAssetPath('/img/logo-lsp-oren.svg')} alt="" className='w-full h-full' />
                         </div>
                         <h1 className="text-2xl font-semibold text-gray-900 mb-2">Buat Akun</h1>
                         <p className="text-gray-600 text-sm">
@@ -189,7 +190,7 @@ export default function RegisterForm() {
                 <div className="block sm:hidden fixed bottom-0 pb-10 flex items-center justify-center text-xs md:text-sm text-gray-600 w-full bg-white">
                     <span>Developed by</span>
                     <img
-                        src="/img/logo-two-dev.svg"
+                        src={getAssetPath('/img/logo-two-dev.svg')}
                         alt=""
                         className="w-20 ml-2"
                     />
@@ -200,7 +201,7 @@ export default function RegisterForm() {
             <div className="hidden lg:flex lg:flex-1 bg-[#F0F5FA4D] justify-center relative overflow-hidden">
                 {/* Background decorative elements */}
                 <div className="w-134.5 object-cover rounded-lg text-center">
-                    <img src="/img/headline-register.png" alt="" />
+                    <img src={getAssetPath('/img/headline-register.png')} alt="" />
                 </div>
             </div>
         </div>
