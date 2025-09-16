@@ -39,7 +39,7 @@ export function useAssessmentParams() {
 	return ctx;
 }
 
-const fetcherTabs = (url: string) => api.get(url).then((res) => res.data.data.tabs);
+const fetcherTabs = (url: string) => api.get(url).then((res) => res.data.data);
 const fetcherResult = (url: string) => api.get(url).then((res) => res.data.data[0]);
 
 export default function AssessmentAsesiProvider({
@@ -163,7 +163,7 @@ export default function AssessmentAsesiProvider({
 		setIsTabsOpen(!isTabsOpen);
 	};
 
-  const { data: tabItemsState } = useSWR<string[]>(
+  const { data: navigation } = useSWR(
     `/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`,
     fetcherTabs
   );
@@ -263,17 +263,22 @@ export default function AssessmentAsesiProvider({
 	];
 
 	const filteredTabItems: AssessmentRoute[] = useMemo(() => {
-		if (tabItemsState) {
-			
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			return tabItems.filter((tab) => {
-				return tabItemsState.includes(tab.label);
-			})
-		} else {
-			return [];
+		if (!navigation?.tabs) return [];
+
+		let filtered = tabItems.filter((tab) =>
+			navigation?.tabs.includes(tab.label)
+		);
+
+  	const apl02Index = filtered.findIndex((tab) => tab.label === "APL-02");
+
+		if (apl02Index !== -1 && navigation?.enable_other_route === false) {
+			filtered = filtered.map((tab, idx) =>
+				idx > apl02Index ? { ...tab, disabled: true } : tab
+			);
 		}
-		
-	}, [tabItemsState]);
+
+		return filtered;
+	}, [navigation]);
 
 	return (
 		<>
@@ -349,11 +354,13 @@ export default function AssessmentAsesiProvider({
 															to={tab.to}
 															onClick={(e) => {
 																if (tab.disabled) e.preventDefault();
-																setIsTabsOpen(false);
+																else setIsTabsOpen(false);
 															}}
-															className={`group relative flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-300 ${
-																isActive
-																	? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/25"
+															className={`group relative flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-300 
+																${isActive
+																? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/25"
+																: tab.disabled
+																	? "text-slate-400 cursor-not-allowed bg-slate-100/50" // style disabled
 																	: "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
 															}`}
 														>
