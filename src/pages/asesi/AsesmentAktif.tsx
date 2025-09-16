@@ -132,6 +132,8 @@ export default function AsessmentAktif() {
                           className={`${
                             assessment.status === "Competent"
                               ? "bg-green-300 text-green-800"
+                              : assessment.status === "On Going"
+                              ? "bg-yellow-200 text-yellow-800"
                               : "bg-red-300 text-red-800"
                           } text-xs px-3 py-1 rounded-full font-medium`}
                         >
