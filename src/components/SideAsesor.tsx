@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     LogOut,
     Menu,
@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import paths from "@/routes/paths";
+import { useAuth } from "@/contexts/AuthContext";
+import ConfirmModal from "./ConfirmModal";
 
 interface MenuItem {
     name: string;
@@ -24,7 +26,10 @@ interface MenuItemProps {
 
 const SidebarAsesor: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+    const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
     const location = useLocation();
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const menuItems: MenuItem[] = [
         {
@@ -47,9 +52,13 @@ const SidebarAsesor: React.FC = () => {
     };
 
     const handleLogout = (): void => {
-        // Add logout logic here
-        console.log("Logout clicked");
-        setIsMobileMenuOpen(false);
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = (): void => {
+        setShowLogoutModal(false);
+        logout();
+        navigate(paths.auth.login);
     };
 
     const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
@@ -126,7 +135,7 @@ const SidebarAsesor: React.FC = () => {
         <>
             {/* Mobile Menu Button - Hidden on desktop */}
             <button
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-orange-500 text-white rounded-md shadow-lg"
+                className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-orange-500 text-white rounded-md shadow-lg"
                 onClick={toggleMobileMenu}
             >
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -135,21 +144,34 @@ const SidebarAsesor: React.FC = () => {
             {/* Overlay for mobile */}
             {isMobileMenuOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 z-30"
+                    className="lg:hidden fixed inset-0 z-[55] bg-black bg-opacity-50"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
 
             {/* SidebarAsesor - Always visible on desktop, slide on mobile */}
-            <div className={`
-  fixed top-0 left-0 h-full w-64 bg-[#E77D35] text-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out
-  ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                        <div className={`
+    fixed top-0 left-0 h-full w-64 bg-[#E77D35] text-white shadow-lg z-[58] transform transition-transform duration-300 ease-in-out
+    ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
 `}>
                 <SidebarAsesorContent />
             </div>
 
             {/* Spacer for desktop layout */}
             <div className="hidden lg:block w-64 flex-shrink-0" />
+
+            {/* Logout Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={confirmLogout}
+                title="Yakin ingin keluar?"
+                message="Logout akan mengakhiri sesi Anda saat ini, dan Anda perlu login kembali untuk melanjutkan aktivitas."
+                confirmText="Keluar"
+                cancelText="Batalkan"
+                type="danger"
+                icon={<img src="/img/gambarprialogout.svg" alt="Logout" className="w-16 h-16" />}
+            />
         </>
     );
 };
