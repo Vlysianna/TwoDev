@@ -92,13 +92,7 @@ const Sidebar: React.FC = () => {
       icon: UserCheck,
       section: 'management',
       path: paths.admin.kelolaAkunAsesor,
-    },
-    {
-      name: 'Register',
-      icon: LogIn,
-      section: 'management',
-      path: paths.auth.register,
-    },
+    }
   ];
 
   const handleItemClick = (): void => {

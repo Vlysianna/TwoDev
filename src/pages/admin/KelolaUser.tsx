@@ -231,6 +231,24 @@ const KelolaUser: React.FC = () => {
     return 'Verified'; // Placeholder
   };
 
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '-';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '-';
+      
+      return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '-';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F7FAFC] flex">
@@ -446,7 +464,7 @@ const KelolaUser: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(user.created_at).toLocaleDateString('id-ID')}
+                            {formatDate(user.created_at)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                             <div className="flex items-center justify-center space-x-2">

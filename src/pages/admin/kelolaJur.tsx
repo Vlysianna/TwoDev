@@ -117,7 +117,7 @@ const KelolaJurusan = () => {
 								<input
 									type="text"
 									{...register("name", { required: true })}
-									placeholder="Masukkan nama jurusan"
+									placeholder="Masukkan Deksripsi Jurusan"
 									className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
 								/>
 							</div>
