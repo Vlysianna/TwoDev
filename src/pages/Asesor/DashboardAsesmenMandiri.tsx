@@ -24,7 +24,12 @@ interface AssesseeData {
 interface TabResponse {
 	assessment_id: number;
 	assessment_code: string;
-	tabs: string[];
+	tabs: Tab[];
+}
+
+interface Tab {
+	name: string;
+	status: 'Not Started' | 'Waiting' | 'Completed';
 }
 
 export default function DashboardAsesmenMandiri() {
@@ -40,7 +45,7 @@ export default function DashboardAsesmenMandiri() {
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [tabData, setTabData] = useState<TabResponse | null>();
-	const [selectedTab, setSelectedTab] = useState<string>("apl-01");
+	const [selectedTab, setSelectedTab] = useState<string>("apl-02");
 	const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
 
 	useEffect(() => {
@@ -131,10 +136,6 @@ export default function DashboardAsesmenMandiri() {
 
 	const getActionText = () => {
 		switch (selectedTab.toLowerCase()) {
-			case "apl-01":
-				return "Cek APL-01 >";
-			case "data-sertifikasi":
-				return "Cek Data Sertifikasi >";
 			case "apl-02":
 				return "Cek APL-02 >";
 			case "ia-01":
@@ -153,8 +154,6 @@ export default function DashboardAsesmenMandiri() {
 				return "Cek AK-02 >";
 			case "ak-03":
 				return "Cek AK-03 >";
-			case "ak-04":
-				return "Cek AK-04 >";
 			case "ak-05":
 				return "Cek AK-05 >";
 			default:
@@ -251,15 +250,19 @@ export default function DashboardAsesmenMandiri() {
 							{tabData &&
 								tabData.tabs.map((tab) => (
 									<button
-										key={tab}
-										onClick={() => setSelectedTab(tab)}
-										className={`flex-shrink-0 px-4 py-2 rounded-md ${
-											selectedTab === tab
-												? "bg-[#E77D35] text-white"
+										key={tab.name}
+										onClick={() => setSelectedTab(tab.name)}
+										className={`flex-shrink-0 px-3 py-2 rounded-md ${
+											selectedTab.toLowerCase() === tab.name.toLowerCase()
+												? "bg-[#E77D35] text-white" 
+												: (tab.status === "Completed") 
+												? "bg-green-200 text-green-700 hover:bg-green-300"
+												: (tab.status === "Waiting")
+												? "bg-gray-300 text-gray-700 hover:bg-gray-400"
 												: "text-gray-600 hover:bg-gray-100"
 										}`}
 									>
-										{tab}
+										{tab.name}
 									</button>
 								))}
 						</div>

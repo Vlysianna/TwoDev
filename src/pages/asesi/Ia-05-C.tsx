@@ -58,16 +58,24 @@ export default function Ia05CAssessee() {
       setError(null);
 
       // Cek dulu apakah ada jawaban
-      const answersResponse = await api.get(`/assessments/ia-05/result/answers/${id_result}`);
+      const answersResponse = await api.get(
+        `/assessments/ia-05/result/answers/${id_result}`
+      );
 
-      if (!answersResponse.data.success || !answersResponse.data.data || answersResponse.data.data.length === 0) {
+      if (
+        !answersResponse.data.success ||
+        !answersResponse.data.data ||
+        answersResponse.data.data.length === 0
+      ) {
         // Jika belum ada jawaban, redirect kembali ke IA-05
         navigate(paths.asesi.assessment.ia05(id_assessment, id_asesor));
         return;
       }
 
       // Jika ada jawaban, lanjutkan mengambil data result
-      const resultResponse = await api.get(`/assessments/ia-05/result/${id_result}`);
+      const resultResponse = await api.get(
+        `/assessments/ia-05/result/${id_result}`
+      );
 
       if (resultResponse.data.success) {
         const rawData: ResultIA05C = resultResponse.data.data;
@@ -211,7 +219,7 @@ export default function Ia05CAssessee() {
       <div className="mx-4 py-2 md:py-6">
         <div className="bg-white mx-4 lg:mx-6 mt-4 lg:mt-6 mb-6 rounded-lg shadow-sm border p-4 lg:p-6">
           {/* Header Info & Progress */}
-          <div className="py-4 md:py-6 border-gray-200">
+          <div className="border-gray-200 mb-6">
             {/* Top Row */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4 mb-3 md:mb-4">
               {/* Left */}
@@ -237,7 +245,7 @@ export default function Ia05CAssessee() {
             </div>
 
             {/* Filter Row + Progress */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 items-center">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <span className="text-sm text-gray-500">
                   <span className="font-bold">Asesi:</span>{" "}
@@ -248,64 +256,19 @@ export default function Ia05CAssessee() {
                   {result?.assessor?.name || "-"}
                 </span>
               </div>
-              <div className="col-span-1 md:col-span-1">
-                <div className="flex flex-col md:flex-row md:gap-6 space-y-2 md:space-y-0">
-                  {options.map((option) => (
-                    <label
-                      key={option.key}
-                      className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-default transition 
-                        ${
-                          selectedValue === option.key ? "bg-[#E77D3533]" : ""
-                        }`}
-                    >
-                      <input
-                        type="radio"
-                        name="assesment"
-                        value={option.key}
-                        className="w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-                        checked={selectedValue === option.key}
-                        onChange={() => handleRadioChange(option.key)}
-                        disabled // Disabled for assessee
-                      />
-                      {selectedValue === option.key && (
-                        <svg
-                          className="w-3 h-3 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                      <span
-                        className={`${
-                          selectedValue === option.key
-                            ? "text-gray-900"
-                            : "text-gray-500"
-                        } whitespace-nowrap text-sm`}
-                      >
-                        {option.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-3">
+              <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-3 w-full md:w-auto justify-end">
                 {/* Teks Asesmen Awal */}
                 <span className="text-sm font-medium text-gray-400">
                   Asesmen awal: {assesseeAnswers.length} /{" "}
                   {assesseeAnswers.length}
                 </span>
-
                 {/* Progress Bar */}
-                <div className="w-full md:w-1/2 bg-gray-200 rounded-full h-2">
+                <div className="w-full md:w-48 bg-gray-200 rounded-full h-2 ml-0 md:ml-4">
                   <div
                     className="bg-[#E77D35] h-2 rounded-full"
                     style={{ width: "100%" }}
                   ></div>
                 </div>
-
                 {/* Persen */}
                 <span className="text-sm font-medium text-[#E77D35]">100%</span>
               </div>
@@ -610,8 +573,15 @@ export default function Ia05CAssessee() {
                   {!result?.ia05_header?.approved_assessee && (
                     <button
                       onClick={handleGenerateQRCode}
-                      disabled={assessorQrValue === "" || assesseeQrValue !== ""}
-                      className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2` + (assessorQrValue === "" || assesseeQrValue !== "" ? " opacity-50 cursor-not-allowed" : "hover:bg-orange-600")}
+                      disabled={
+                        assessorQrValue === "" || assesseeQrValue !== ""
+                      }
+                      className={
+                        `block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2` +
+                        (assessorQrValue === "" || assesseeQrValue !== ""
+                          ? " opacity-50 cursor-not-allowed"
+                          : "hover:bg-orange-600")
+                      }
                     >
                       {assesseeQrValue ? "QR Telah Digenerate" : "Setujui"}
                     </button>

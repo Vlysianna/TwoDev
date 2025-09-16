@@ -46,10 +46,10 @@ export default function Ia05C() {
   // Format date for display
   const formattedDate = result?.ia05_header.updated_at
     ? new Date(result.ia05_header.updated_at).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    })
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
     : "";
 
   useEffect(() => {
@@ -138,7 +138,7 @@ export default function Ia05C() {
     } catch (error: any) {
       setProcessError(
         "Gagal menyimpan data: " +
-        (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message)
       );
       setIsSaved(false);
     } finally {
@@ -247,7 +247,7 @@ export default function Ia05C() {
     } catch (error: any) {
       setError(
         "Gagal menyimpan data: " +
-        (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message)
       );
       console.error("Submit error:", error);
     } finally {
@@ -301,7 +301,7 @@ export default function Ia05C() {
           />
         </div>
 
-        <main className='m-4'>
+        <main className="m-4">
           <div className="bg-white mb-4 rounded-lg shadow-sm border p-6">
             {/* Header Info & Progress */}
             <div className="border-gray-200 mb-6">
@@ -314,7 +314,9 @@ export default function Ia05C() {
                   </h2>
                   <div className="flex items-center text-xs md:text-sm text-gray-500">
                     <Clock size={12} className="text-gray-500 mr-1" />
-                    <span className="text-gray-600">{result?.tuk ?? "N/A"}</span>
+                    <span className="text-gray-600">
+                      {result?.tuk ?? "N/A"}
+                    </span>
                   </div>
                 </div>
 
@@ -341,52 +343,6 @@ export default function Ia05C() {
                     {result?.assessor?.name || "-"}
                   </span>
                 </div>
-                <div className="flex flex-col md:flex-row md:gap-6 space-y-2 md:space-y-0">
-                  {options.map((option) => (
-                    <label
-                      key={option.key}
-                      className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition 
-                        ${selectedValue === option.key ? "bg-[#E77D3533]" : ""
-                          }`}
-                    >
-                      <input
-                        type="radio"
-                        name="assesment"
-                        value={option.key}
-                        className="hidden"
-                        checked={selectedValue === option.key}
-                        onChange={() => handleRadioChange(option.key)}
-                      />
-                      <span
-                        className={`w-5 aspect-square flex items-center justify-center rounded-full border-2 
-                          ${selectedValue === option.key
-                              ? "bg-[#E77D35] border-[#E77D35]"
-                              : "border-[#E77D35]"
-                            }`}
-                      >
-                        {selectedValue === option.key && (
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </span>
-                      <span
-                        className={`${selectedValue === option.key
-                            ? "text-gray-900"
-                            : "text-gray-500"
-                            } whitespace-nowrap text-sm`}
-                      >
-                        {option.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
                 <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-3 w-full md:w-auto justify-end">
                   {/* Teks Asesmen Awal */}
                   <span className="text-sm font-medium text-gray-400">
@@ -401,12 +357,14 @@ export default function Ia05C() {
                     ></div>
                   </div>
                   {/* Persen */}
-                  <span className="text-sm font-medium text-[#E77D35]">100%</span>
+                  <span className="text-sm font-medium text-[#E77D35]">
+                    100%
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Table */}
+            {/* Table - Readonly for assessee */}
             <div className="overflow-x-auto p-3 md:p-6 border border-gray-200 rounded-sm">
               <div className="w-full overflow-x-auto">
                 <div className="min-w-[600px]">
@@ -444,46 +402,31 @@ export default function Ia05C() {
                               {["Ya", "Tidak"].map((option) => (
                                 <label
                                   key={option}
-                                  className={`flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1 rounded-sm cursor-pointer transition ${selectedAnswers[answer.id] === option
-                                    ? "bg-[#E77D3533]"
-                                    : ""
-                                    }`}
+                                  className={`flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1 rounded-sm cursor-default transition ${
+                                    selectedAnswers[answer.id] === option
+                                      ? "bg-[#E77D3533]"
+                                      : ""
+                                  }`}
                                 >
                                   <input
                                     type="radio"
                                     name={`q-${answer.id}`}
                                     value={option}
-                                    className="hidden"
+                                    className="w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
                                     checked={
                                       selectedAnswers[answer.id] === option
                                     }
                                     onChange={() =>
                                       handleTableRadioChange(answer.id, option)
                                     }
+                                    disabled // Disabled for assessee
                                   />
                                   <span
-                                    className={`w-4 md:w-5 aspect-square flex items-center justify-center rounded-full border-2 ${selectedAnswers[answer.id] === option
-                                      ? "bg-[#E77D35] border-[#E77D35]"
-                                      : "border-[#E77D35]"
-                                      }`}
-                                  >
-                                    {selectedAnswers[answer.id] === option && (
-                                      <svg
-                                        className="w-2 h-2 md:w-3 md:h-3 text-white"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="3"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path d="M5 13l4 4L19 7" />
-                                      </svg>
-                                    )}
-                                  </span>
-                                  <span
-                                    className={`${selectedAnswers[answer.id] === option
-                                      ? "text-gray-900"
-                                      : "text-gray-500"
-                                      } whitespace-nowrap text-xs md:text-sm`}
+                                    className={`${
+                                      selectedAnswers[answer.id] === option
+                                        ? "text-gray-900"
+                                        : "text-gray-500"
+                                    } whitespace-nowrap text-xs md:text-sm`}
                                   >
                                     {option}
                                   </span>
@@ -518,9 +461,12 @@ export default function Ia05C() {
                       className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
                       disabled={!!assessorQrValue}
                     />
-                    <span className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
-            ${feedbackResult === false ? 'line-through opacity-50' : ''}`}>
-                      Asesi telah memenuhi seluruh aspek pengetahuan, <strong>KOMPETEN</strong>
+                    <span
+                      className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
+            ${feedbackResult === false ? "line-through opacity-50" : ""}`}
+                    >
+                      Asesi telah memenuhi seluruh aspek pengetahuan,{" "}
+                      <strong>KOMPETEN</strong>
                     </span>
                   </label>
                   <label className="flex items-start space-x-3 cursor-pointer">
@@ -528,13 +474,18 @@ export default function Ia05C() {
                       type="radio"
                       name="feedbackResult"
                       checked={feedbackResult === false}
-                      onChange={() => handleFeedbackRadioChange("belum-tercapai")}
+                      onChange={() =>
+                        handleFeedbackRadioChange("belum-tercapai")
+                      }
                       className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
                       disabled={!!assessorQrValue}
                     />
-                    <span className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
-            ${feedbackResult === true ? 'line-through opacity-50' : ''}`}>
-                      Asesi belum memenuhi seluruh aspek pengetahuan, <strong className="text-red-600">BELUM KOMPETEN</strong>
+                    <span
+                      className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
+            ${feedbackResult === true ? "line-through opacity-50" : ""}`}
+                    >
+                      Asesi belum memenuhi seluruh aspek pengetahuan,{" "}
+                      <strong className="text-red-600">BELUM KOMPETEN</strong>
                     </span>
                   </label>
                 </div>
@@ -555,9 +506,11 @@ export default function Ia05C() {
                         disabled={feedbackResult || !!assessorQrValue}
                         onChange={(e) => setUnitField(e.target.value)}
                         className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-                ${feedbackResult || !!assessorQrValue
-                            ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                            : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
+                ${
+                  feedbackResult || !!assessorQrValue
+                    ? "bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
+                    : "bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]"
+                }
               `}
                       />
                     </div>
@@ -571,9 +524,11 @@ export default function Ia05C() {
                         disabled={feedbackResult || !!assessorQrValue}
                         onChange={(e) => setElementField(e.target.value)}
                         className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-                ${feedbackResult || !!assessorQrValue
-                            ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                            : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
+                ${
+                  feedbackResult || !!assessorQrValue
+                    ? "bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
+                    : "bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]"
+                }
               `}
                       />
                     </div>
@@ -588,9 +543,11 @@ export default function Ia05C() {
                       disabled={feedbackResult || !!assessorQrValue}
                       onChange={(e) => setKukField(e.target.value)}
                       className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-              ${feedbackResult || !!assessorQrValue
-                          ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                          : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
+              ${
+                feedbackResult || !!assessorQrValue
+                  ? "bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
+                  : "bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]"
+              }
             `}
                     />
                   </div>
@@ -634,9 +591,21 @@ export default function Ia05C() {
                         ry="2"
                         strokeWidth="2"
                       ></rect>
-                      <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
+                      <line
+                        x1="16"
+                        y1="2"
+                        x2="16"
+                        y2="6"
+                        strokeWidth="2"
+                      ></line>
                       <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
-                      <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
+                      <line
+                        x1="3"
+                        y1="10"
+                        x2="21"
+                        y2="10"
+                        strokeWidth="2"
+                      ></line>
                     </svg>
                   </div>
                 </div>
@@ -684,9 +653,21 @@ export default function Ia05C() {
                         ry="2"
                         strokeWidth="2"
                       ></rect>
-                      <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
+                      <line
+                        x1="16"
+                        y1="2"
+                        x2="16"
+                        y2="6"
+                        strokeWidth="2"
+                      ></line>
                       <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
-                      <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
+                      <line
+                        x1="3"
+                        y1="10"
+                        x2="21"
+                        y2="10"
+                        strokeWidth="2"
+                      ></line>
                     </svg>
                   </div>
                 </div>
@@ -697,7 +678,8 @@ export default function Ia05C() {
                 <div className="grid grid-cols-1 gap-4">
                   {/* QR Asesi */}
                   <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                    {result?.ia05_header?.approved_assessee && assesseeQrValue ? (
+                    {result?.ia05_header?.approved_assessee &&
+                    assesseeQrValue ? (
                       <QRCodeCanvas
                         value={assesseeQrValue}
                         size={100}
@@ -745,10 +727,11 @@ export default function Ia05C() {
                       <button
                         disabled={!!assessorQrValue}
                         onClick={handleGenerateQRCode}
-                        className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assessorQrValue
-                          ? "hover:bg-orange-600 cursor-pointer"
-                          : "cursor-not-allowed opacity-50"
-                          }`}
+                        className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                          !assessorQrValue
+                            ? "hover:bg-orange-600 cursor-pointer"
+                            : "cursor-not-allowed opacity-50"
+                        }`}
                       >
                         {assessorQrValue ? "QR Telah Digenerate" : "Setujui"}
                       </button>
@@ -768,10 +751,14 @@ export default function Ia05C() {
             <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center md:justify-end items-center">
               {/* Status/Error */}
               {processError && (
-                <span className="text-red-500 text-sm text-center">{processError}</span>
+                <span className="text-red-500 text-sm text-center">
+                  {processError}
+                </span>
               )}
               {processSuccess && (
-                <span className="text-green-500 text-sm text-center">✅ {processSuccess}</span>
+                <span className="text-green-500 text-sm text-center">
+                  ✅ {processSuccess}
+                </span>
               )}
 
               {/* Simpan Umpan Balik */}
@@ -779,10 +766,11 @@ export default function Ia05C() {
                 onClick={handleSaveFeedback}
                 disabled={saveProcessing || !!assessorQrValue}
                 className={`bg-green-600 text-white px-10 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md
-        ${saveProcessing || !!assessorQrValue
-                    ? "opacity-60 cursor-not-allowed"
-                    : "hover:bg-green-700 cursor-pointer"
-                  }`}
+        ${
+          saveProcessing || !!assessorQrValue
+            ? "opacity-60 cursor-not-allowed"
+            : "hover:bg-green-700 cursor-pointer"
+        }`}
               >
                 {saveProcessing ? "Menyimpan..." : "Simpan Umpan Balik"}
               </button>
@@ -792,16 +780,17 @@ export default function Ia05C() {
                 onClick={handleGenerateQRCode}
                 disabled={qrProcessing || assessorQrValue || !isSaved}
                 className={`bg-[#E77D35] text-white px-10 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md
-        ${qrProcessing || assessorQrValue || !isSaved
-                    ? "opacity-60 cursor-not-allowed"
-                    : "hover:bg-[#E77D35]/90 cursor-pointer"
-                  }`}
+        ${
+          qrProcessing || assessorQrValue || !isSaved
+            ? "opacity-60 cursor-not-allowed"
+            : "hover:bg-[#E77D35]/90 cursor-pointer"
+        }`}
               >
                 {qrProcessing
                   ? "Memproses..."
                   : assessorQrValue
-                    ? "QR Sudah Digenerate"
-                    : "Generate QR"}
+                  ? "QR Sudah Digenerate"
+                  : "Generate QR"}
               </button>
             </div>
           </div>
