@@ -60,7 +60,7 @@ const evidenceOptions: EvidenceOptionType[] = [
 ];
 
 export default function Apl02Detail() {
-  const { id_unit } = useParams();
+  const { id_unit, unit_number } = useParams();
   const { id_assessment, id_asesor, id_result } = useAssessmentParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -320,7 +320,9 @@ export default function Apl02Detail() {
                 {/* Unit Kompetensi */}
                 <div className="flex items-center gap-2 text-[#00809D] flex-none">
                   <Monitor size={20} />
-                  <span className="font-medium">Unit kompetensi 1</span>
+                  <span className="font-medium">
+                    Unit kompetensi {unit_number || 1}
+                  </span>
                 </div>
 
                 {/* Search */}

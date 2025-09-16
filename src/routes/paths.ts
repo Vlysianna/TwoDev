@@ -77,11 +77,12 @@ const routes = {
 				id_assessment: string | number,
 				id_result: string | number,
 				id_asesi: string | number,
-				id_unit: string | number
+				id_unit: string | number,
+				unit_number?: string | number
 			) =>
-				`/asesor/assessment/${id_assessment}/${id_result}/${id_asesi}/cek-apl-02-detail/${id_unit}`,
+				`/asesor/assessment/${id_assessment}/${id_result}/${id_asesi}/cek-apl-02-detail/${id_unit}/${unit_number}`,
 			cekApl02DetailPattern:
-				"/asesor/assessment/:id_assessment/:id_result/:id_asesi/cek-apl-02-detail/:id_unit",
+				"/asesor/assessment/:id_assessment/:id_result/:id_asesi/cek-apl-02-detail/:id_unit/:unit_number",
 			ia01: (id_assessment: string, id_asesi: string, activeGroup?: string) =>
 				`/asesor/assessment/${id_assessment}/ia-01/${id_asesi}${activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''}`,
 			ia01Pattern: "/asesor/assessment/:id_assessment/ia-01/:id_asesi",
@@ -153,11 +154,12 @@ const routes = {
 			apl02_detail: (
 				id_assessment: string | number,
 				id_asesor: string | number,
-				id_unit: string | number
+				id_unit: string | number,
+				unit_number?: string | number
 			) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-02-detail/${id_unit}`,
+				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-02-detail/${id_unit}/${unit_number}`,
 			apl02DetailPattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/apl-02-detail/:id_unit",
+				"/asesi/assessment/:id_assessment/:id_asesor/apl-02-detail/:id_unit/:unit_number",
 			frak03: (id_assessment: string | number, id_asesor: string | number) =>
 				`/asesi/assessment/${id_assessment}/${id_asesor}/fr.ak.03`,
 			frak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/fr.ak.03",

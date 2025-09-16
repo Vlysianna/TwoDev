@@ -238,7 +238,7 @@ export default function Apl02() {
 									<div className="max-h-[500px] overflow-y-auto">
 										{unitCompetencies.length > 0 ? (
 											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-												{unitCompetencies.map((unit) => (
+												{unitCompetencies.map((unit, index) => (
 													<div
 														key={unit.id}
 														className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
@@ -248,7 +248,7 @@ export default function Apl02() {
 																<Monitor size={16} className="text-[#E77D35]" />
 															</div>
 															<h4 className="font-medium text-[#E77D35] text-sm">
-																Unit kompetensi {unit.id}
+																Unit kompetensi {index + 1}
 															</h4>
 														</div>
 
@@ -273,7 +273,8 @@ export default function Apl02() {
 																to={paths.asesi.assessment.apl02_detail(
 																	id_assessment,
 																	id_asesor,
-																	unit.id
+																	unit.id,
+																	index + 1 // Tambahkan nomor urut sebagai argumen baru
 																)}
 																className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
 															>
