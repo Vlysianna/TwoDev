@@ -22,6 +22,7 @@ export default function CekApl02() {
     const [resultData, setResultData] = useState<any>(null);
     const [qrProcessing, setQrProcessing] = useState(false);
     const [saveProcessing, setSaveProcessing] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
     const [processError, setProcessError] = useState<string | null>(null);
     const [processSuccess, setProcessSuccess] = useState<string | null>(null);
 
@@ -146,6 +147,7 @@ export default function CekApl02() {
 
             if (!saveResponse.data.success) {
                 throw new Error(saveResponse.data.message || "Gagal menyimpan rekomendasi");
+                setIsSaved(false);
             }
 
             console.log("✅ Rekomendasi berhasil disimpan");
@@ -160,6 +162,7 @@ export default function CekApl02() {
             }));
 
             setProcessSuccess("Rekomendasi berhasil disimpan");
+            setIsSaved(true);
             setTimeout(() => setProcessSuccess(null), 3000);
 
         } catch (error: any) {
@@ -462,8 +465,8 @@ export default function CekApl02() {
                                     <div className="mb-6">
                                         <button
                                             onClick={handleGenerateQR}
-                                            disabled={qrProcessing || isQrGenerated}
-                                            className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${qrProcessing || isQrGenerated
+                                            disabled={qrProcessing || isQrGenerated || !isSaved}
+                                            className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${qrProcessing || isQrGenerated || !isSaved
                                                 ? "cursor-not-allowed opacity-50"
                                                 : "hover:bg-orange-600 cursor-pointer"
                                                 }`}

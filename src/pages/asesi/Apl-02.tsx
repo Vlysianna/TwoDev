@@ -36,7 +36,7 @@ export default function Apl02() {
 			fetchUnitCompetencies();
 		} else {
 			console.error("Missing required params:", { id_assessment, id_result });
-			setError("Parameter asesmen tidak lengkap");
+			// setError("Parameter asesmen tidak lengkap");
 		}
 	}, [user, id_assessment, id_result]);
 
@@ -489,21 +489,6 @@ export default function Apl02() {
 												</div>
 											)}
 										</div>
-									</div>
-
-									{/* Submit Button - Hanya aktif jika asesor sudah approve */}
-									<div className="w-full">
-										<Link
-											to={"#"}
-											className={`w-full block text-center ${resultData?.approved_assessor
-													? "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
-													: "bg-gray-300 cursor-not-allowed"
-												} text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`}
-										>
-											{resultData?.approved_assessor
-												? "Lanjut"
-												: "Menunggu persetujuan asesor"}
-										</Link>
 									</div>
 								</div>
 							</div>
