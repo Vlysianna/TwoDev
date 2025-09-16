@@ -28,6 +28,6 @@ export interface ScheduleCompletedDetail {
 }
 
 export interface ScheduleCompleted {
-    status: "Competent" | "Not Competent";
+    status: "Competent" | "Not Competent" | "On Going";
     detail: ScheduleCompletedDetail;
 }
