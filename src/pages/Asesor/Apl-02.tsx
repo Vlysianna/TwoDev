@@ -238,7 +238,7 @@ export default function CekApl02() {
                                     {/* Competency Units Grid */}
                                     <div className="max-h-[500px] overflow-y-auto">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {unitCompetencies.map((unit) => (
+                                            {unitCompetencies.map((unit, index) => (
                                                 <div
                                                     key={unit.id}
                                                     className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
@@ -248,18 +248,15 @@ export default function CekApl02() {
                                                             <Monitor size={16} className="text-[#E77D35]" />
                                                         </div>
                                                         <h4 className="font-medium text-[#E77D35] text-sm">
-                                                            Unit kompetensi {unit.id}
+                                                            Unit kompetensi {index + 1}
                                                         </h4>
                                                     </div>
-
                                                     <h5 className="font-medium text-gray-800 mb-2 text-md leading-tight">
                                                         {unit.title}
                                                     </h5>
-
                                                     <p className="text-xs text-gray-500 mb-4">
                                                         {unit.unit_code}
                                                     </p>
-
                                                     <div className="flex items-center justify-between">
                                                         {unit.finished ? (
                                                             <span className="px-3 py-1 bg-[#E77D3533] text-[#E77D35] text-xs rounded">
@@ -268,13 +265,13 @@ export default function CekApl02() {
                                                         ) : (
                                                             <div></div>
                                                         )}
-
                                                         <Link
                                                             to={paths.asesor.assessment.cekApl02Detail(
                                                                 id_assessment,
                                                                 id_result || '',
                                                                 id_asesi || '',
-                                                                unit.id
+                                                                unit.id,
+                                                                index + 1 // Tambahkan nomor urut ke parameter
                                                             )}
                                                             className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
                                                         >
@@ -339,8 +336,8 @@ export default function CekApl02() {
                                                         />
                                                         <span
                                                             className={`text-sm leading-relaxed ${recommendation === "stop" || recommendation === undefined || recommendation === null
-                                                                    ? "line-through opacity-50"
-                                                                    : ""
+                                                                ? "line-through opacity-50"
+                                                                : ""
                                                                 }`}
                                                         >
                                                             Assessment <strong>dapat dilanjutkan</strong>
@@ -361,8 +358,8 @@ export default function CekApl02() {
                                                         />
                                                         <span
                                                             className={`text-sm leading-relaxed ${recommendation === "continue" || recommendation === undefined || recommendation === null
-                                                                    ? "line-through opacity-50"
-                                                                    : ""
+                                                                ? "line-through opacity-50"
+                                                                : ""
                                                                 }`}
                                                         >
                                                             Assessment <strong>tidak dapat dilanjutkan</strong>

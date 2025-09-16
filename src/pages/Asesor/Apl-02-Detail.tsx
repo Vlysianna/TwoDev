@@ -51,7 +51,7 @@ const evidenceOptions: EvidenceOptionType[] = [
 ];
 
 export default function CekApl02Detail() {
-    const { id_unit } = useParams();
+    const { id_unit, unit_number } = useParams();
     const { id_assessment, id_result, id_asesi } = useAssessmentParams();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterKompeten, setFilterKompeten] = useState("all");
@@ -126,7 +126,9 @@ export default function CekApl02Detail() {
                             {/* Unit Kompetensi */}
                             <div className="flex items-center gap-2 text-[#00809D] flex-none">
                                 <Monitor size={20} />
-                                <span className="font-medium">Unit kompetensi</span>
+                                <span className="font-medium">
+                                    Unit kompetensi {unit_number || 1}
+                                </span>
                             </div>
 
                             {/* Search */}
