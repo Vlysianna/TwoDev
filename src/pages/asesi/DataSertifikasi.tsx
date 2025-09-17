@@ -141,7 +141,7 @@ export default function DataSertifikasi() {
 			// setModalStep(1);
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
-			setError("Gagal menyimpan data. Silakan coba lagi. " + error.message);
+			setError("Gagal menyimpan data. Silakan coba lagi. " + error.response.data.message);
 		} finally {
 			setLoading(false);
 		}
