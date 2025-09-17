@@ -55,8 +55,7 @@ interface RecapData {
 }
 
 const RecapAssessmentAdmin: React.FC = () => {
-    const { scheduleDetailId } = useParams<{ scheduleDetailId: string }>();
-    const id_assesor = useParams<{ id_assesor: string }>().id_assesor;
+    const { scheduleDetailId, id_asesor } = useParams<{ scheduleDetailId: string; id_asesor: string }>();
     const [data, setData] = useState<RecapData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -64,11 +63,13 @@ const RecapAssessmentAdmin: React.FC = () => {
     useEffect(() => {
         const fetchRecapData = async () => {
             if (!scheduleDetailId) return;
+            console.log("Fetching recap data for scheduleDetailId:", scheduleDetailId);
+            console.log("Fetching recap data for scheduleDetailId:", id_asesor);
 
             setLoading(true);
             try {
                 // Using the actual backend endpoint
-                const response = await api.get(`/assessments/assessment-recapt/admin/${scheduleDetailId}/${id_assesor}`);
+                const response = await api.get(`/assessments/assessment-recapt/admin/${scheduleDetailId}/${id_asesor}`);
                 if (response.data.success) {
                     setData(response.data.data);
                 } else {
@@ -198,7 +199,7 @@ const RecapAssessmentAdmin: React.FC = () => {
                 <main className="flex-1 overflow-auto p-6 space-y-6">
                     <div className="mb-6">
                         <nav className="flex text-sm text-gray-500">
-                            <Link to={paths.admin.resultAssessment} className="hover:underline">
+                            <Link to={paths.admin.resultAssessment.root} className="hover:underline">
                                 Hasil Asesmen
                             </Link>
                             <span className="mx-2">/</span>

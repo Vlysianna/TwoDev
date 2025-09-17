@@ -28,7 +28,9 @@ const routes = {
 		root: "/admin",
 		kelolaUser: "/admin/kelola-user",
 		kelolaAkunAsesi: "/admin/kelola-akun-asesi",
-<<<<<<< Updated upstream
+		recapAssessmentAdmin: (scheduleDetailId: string | number, id_asesor: string | number) => 
+			`/admin/recap-assessment/${scheduleDetailId}/${id_asesor}`,
+		recapAssessmentAdminPattern: "/admin/recap-assessment/:scheduleDetailId/:id_asesor",
 		resultAssessment: {
 			root: "/admin/result-assessment",
 			dashboard: (id_assessment: string | number, id_asesor: string | number) =>
@@ -77,15 +79,6 @@ const routes = {
 				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/data-sertifikasi`,
 			dataSertifikasiPattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/data-sertifikasi"
 		},
-=======
-		resultAssessment: "/admin/result-assessment",
-		recapAssessmentAdmin: (scheduleDetailId: string | number, id_assesor : string) =>
-			`/admin/recap-assessment/${scheduleDetailId}/${id_assesor}`,
-		recapAssessmentAdminPattern: "/admin/recap-assessment/:scheduleDetailId/:id_assesor",
-		detailAssessmentAdmin: (id_assessment: string | number, id_assesor : string) =>
-			`/admin/assessment/${id_assessment}/${id_assesor}`,
-		detailAssessmentAdminPattern: "/admin/assessment/:id_assessment/:id_assesor",
->>>>>>> Stashed changes
 		editAsesor: "/admin/edit-asesor",
 		createAsesor: "/admin/asesor/create",
 		editAsesorById: (id: string | number) => `/admin/asesor/edit/${id}`,
