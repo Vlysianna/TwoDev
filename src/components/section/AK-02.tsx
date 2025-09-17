@@ -728,6 +728,15 @@ export default function AK02({
 										Sudah disetujui asesi
 									</span>
 								)}
+								{/* Tambahkan tombol approval untuk asesi */}
+								{isAssessee && !data?.ak02_headers?.approved_assessee && (
+									<button
+										onClick={handleAssesseeApproval}
+										className="mt-4 px-4 py-2 bg-[#E77D35] text-white rounded hover:bg-orange-600 transition"
+									>
+										Setujui sebagai Asesi
+									</button>
+								)}
 							</div>
 
 							{/* QR Asesor */}

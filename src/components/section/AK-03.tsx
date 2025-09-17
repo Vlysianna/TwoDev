@@ -95,6 +95,7 @@ export default function AK03({
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filterKompeten, setFilterKompeten] = useState("all");
 	const [catatanUmum, setCatatanUmum] = useState("");
+	const [showNotif, setShowNotif] = useState(false);
 
 	const {
 		control,
@@ -190,8 +191,12 @@ export default function AK03({
 			};
 
 			const response = await api.post("/assessments/ak-03/answer", payload);
-			if (!response.data.success)
+			if (!response.data.success) {
 				setErrorMessage(response.data.message || "Gagal menyimpan data.");
+			} else {
+				setShowNotif(true); // Tampilkan notifikasi
+				setTimeout(() => setShowNotif(false), 2500); // Sembunyikan setelah 2.5 detik
+			}
 		} catch (error: any) {
 			setErrorMessage(error.response?.data?.message || "Gagal menyimpan data.");
 		}
@@ -222,6 +227,14 @@ export default function AK03({
 
 	return (
 		<div className="">
+			{/* Notifikasi Simpan */}
+			{showNotif && (
+				<div className="fixed top-6 right-6 z-50 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded shadow flex items-center animate-fade-in">
+					<Check size={20} className="mr-2" />
+					Data berhasil disimpan!
+				</div>
+			)}
+
 			{errorMessage && (
 				<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
 					<AlertCircle size={20} className="mr-2" />
