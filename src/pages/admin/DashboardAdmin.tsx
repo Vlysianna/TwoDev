@@ -4,7 +4,15 @@ import {
     Eye,
     Trash2,
     AlertCircle,
-    Loader2
+    Loader2,
+    FileText,
+    Briefcase,
+    Calendar,
+    CalendarCheck,
+    Settings,
+    CheckCircle2,
+    X,
+    AlertTriangle
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
@@ -224,12 +232,36 @@ const Dashboard: React.FC = () => {
         <div className="min-h-screen bg-[#F7FAFC] flex">
             {/* Confirmation Modal */}
             {confirmModal.open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/5">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-                        <h3 className="text-lg font-semibold mb-2">Konfirmasi</h3>
-                        <p className="text-sm text-gray-600 mb-4">{confirmModal.message}</p>
-                        <div className="flex justify-end gap-3">
-                            <button onClick={() => setConfirmModal({ open: false })} className="px-4 py-2 border rounded">Batal</button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/40">
+                    <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl transform transition-all">
+                        <div className="flex items-start mb-4">
+                            {confirmModal.action === 'delete' ? (
+                                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-4">
+                                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                                </div>
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mr-4">
+                                    <CheckCircle2 className="w-5 h-5 text-orange-600" />
+                                </div>
+                            )}
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-gray-900">Konfirmasi {confirmModal.action === 'delete' ? 'Hapus' : 'Verifikasi'}</h3>
+                                <p className="text-sm text-gray-600 mt-1">{confirmModal.message}</p>
+                            </div>
+                            <button 
+                                onClick={() => setConfirmModal({ open: false })}
+                                className="text-gray-400 hover:text-gray-600 p-1"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button 
+                                onClick={() => setConfirmModal({ open: false })} 
+                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors"
+                            >
+                                Batal
+                            </button>
                             <button
                                 onClick={async () => {
                                     const id = confirmModal.id;
@@ -263,9 +295,13 @@ const Dashboard: React.FC = () => {
                                         toast.show({ title: 'Error', description: 'Terjadi error', type: 'error' });
                                     }
                                 }}
-                                className="px-4 py-2 bg-[#E77D35] text-white rounded"
+                                className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-all ${
+                                    confirmModal.action === 'delete' 
+                                        ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' 
+                                        : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
+                                }`}
                             >
-                                Ya
+                                {confirmModal.action === 'delete' ? 'Hapus' : 'Ya, Lanjutkan'}
                             </button>
                         </div>
                     </div>
@@ -287,21 +323,25 @@ const Dashboard: React.FC = () => {
                     {/* Statistics Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         {/* Jurusan Card */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
+                        <div className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 p-6 transition-all duration-300 hover:border-orange-200">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gradient-to-br from-[#E77D35] to-orange-500 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
                                     <img src={getAssetPath('/skema.svg')} alt="skema" className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <p className="text-lg font-semibold text-gray-900">{stats.totalSchemes}</p>
-                                    <p className="text-sm text-gray-600">Jurusan</p>
+                                    <p className="text-2xl font-bold text-gray-900 mb-1">{stats.totalSchemes}</p>
+                                    <p className="text-sm text-gray-600">Total Jurusan</p>
                                 </div>
                             </div>
-                            <hr className="my-4" />
-                            <button onClick={() => navigate(paths.admin.kelolaJurusan)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
-                                Lihat Detail
-                                <span>→</span>
-                            </button>
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <button 
+                                    onClick={() => navigate(paths.admin.kelolaJurusan)} 
+                                    className="text-sm text-gray-500 hover:text-orange-600 flex items-center justify-between w-full group-hover:text-orange-500 transition-colors"
+                                >
+                                    <span>Lihat Detail</span>
+                                    <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Assasmen Card */}
@@ -360,15 +400,21 @@ const Dashboard: React.FC = () => {
                     </div>
 
                     {/* Jadwal Assasmen Table */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-                        <div className="p-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8 overflow-hidden">
+                        <div className="p-6 bg-gradient-to-r from-orange-50 to-white">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-semibold text-gray-900">Jadwal Assasmen</h2>
-                                <button onClick={() => navigate(paths.admin.kelolaJadwal)} className="text-sm text-gray-500 hover:text-[#E77D35]">
-                                    Lihat Semua &gt;&gt;
+                                <div>
+                                    <h2 className="text-xl font-semibold text-gray-900 mb-1">Jadwal Assasmen</h2>
+                                    <p className="text-sm text-gray-500">Daftar jadwal assessment yang akan datang</p>
+                                </div>
+                                <button 
+                                    onClick={() => navigate(paths.admin.kelolaJadwal)} 
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all"
+                                >
+                                    Lihat Semua
+                                    <span className="text-lg">→</span>
                                 </button>
                             </div>
-                            <div className="border-b border-gray-200"></div>
                         </div>
 
                         <div className="px-6 pb-6">
@@ -404,39 +450,55 @@ const Dashboard: React.FC = () => {
                                             schedules.map((item, index) => (
                                                 <tr
                                                     key={item.id}
-                                                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
+                                                    className={`group ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-orange-50/50 transition-all`}
                                                 >
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                        {item.assessment.occupation.scheme.name}
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center">
+                                                            <div className="flex-shrink-0 h-8 w-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mr-3">
+                                                                <FileText size={16} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900">{item.assessment.occupation.scheme.name}</p>
+                                                                <p className="text-xs text-gray-500">Scheme ID: {item.assessment.id}</p>
+                                                            </div>
+                                                        </div>
                                                     </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                        {item.assessment.occupation.name}
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                            {item.assessment.occupation.name}
+                                                        </span>
                                                     </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                        {formatDate(item.start_date)}
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <Calendar size={14} className="mr-2 text-gray-400" />
+                                                            {formatDate(item.start_date)}
+                                                        </div>
                                                     </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                        {formatDate(item.end_date)}
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <CalendarCheck size={14} className="mr-2 text-gray-400" />
+                                                            {formatDate(item.end_date)}
+                                                        </div>
                                                     </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                                                        <div className="flex items-center justify-center space-x-2">
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center justify-center space-x-1">
                                                             <button
                                                                 onClick={() => handleEdit(item.id)}
-                                                                className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
+                                                                className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all"
                                                                 title="Edit"
                                                             >
                                                                 <Edit3 size={16} />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleView(item.id)}
-                                                                className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
+                                                                className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all"
                                                                 title="View"
                                                             >
                                                                 <Eye size={16} />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDelete(item.id)}
-                                                                className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
+                                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                                                 title="Delete"
                                                             >
                                                                 <Trash2 size={16} />
@@ -453,15 +515,21 @@ const Dashboard: React.FC = () => {
                     </div>
 
                     {/* Verifikasi Approval Table */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div className="p-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="p-6 bg-gradient-to-r from-orange-50 to-white">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-semibold text-gray-900">Verifikasi Approval</h2>
-                                <button onClick={() => navigate(paths.admin.verifikasi)} className="text-sm text-gray-500 hover:text-[#E77D35]">
-                                    Lihat Semua &gt;&gt;
+                                <div>
+                                    <h2 className="text-xl font-semibold text-gray-900 mb-1">Verifikasi Approval</h2>
+                                    <p className="text-sm text-gray-500">Daftar pengajuan yang membutuhkan verifikasi</p>
+                                </div>
+                                <button 
+                                    onClick={() => navigate(paths.admin.verifikasi)} 
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all"
+                                >
+                                    Lihat Semua
+                                    <span className="text-lg">→</span>
                                 </button>
                             </div>
-                            <div className="border-b border-gray-200"></div>
                         </div>
 
                         <div className="px-6 pb-6">
