@@ -53,7 +53,6 @@ const routes = {
 		editAsessi: "/admin/edit-asesi",
 		kelolaJadwal: "/admin/kelola-jadwal",
 		tambahJadwal: "/admin/tambah-jadwal",
-		apl02: "/admin/apl-02",
 	},
 	asesor: {
 		root: "/asesor",

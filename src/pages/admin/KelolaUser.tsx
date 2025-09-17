@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Filter,
   Search,
   Plus,
   Edit3,
@@ -9,7 +8,7 @@ import {
   Loader2,
   AlertCircle,
   Download,
-  UserPlus
+  Users
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
@@ -254,7 +253,7 @@ const KelolaUser: React.FC = () => {
       <div className="min-h-screen bg-[#F7FAFC] flex">
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <Navbar title="Kelola Pengguna" icon={<UserPlus size={24} />} />
+          <Navbar title="Kelola Pengguna" icon={<Users size={20} />} />
           <main className="flex-1 overflow-auto p-6 flex items-center justify-center">
             <div className="text-center">
               <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-[#E77D35]" />
@@ -271,7 +270,7 @@ const KelolaUser: React.FC = () => {
       <div className="min-h-screen bg-[#F7FAFC] flex">
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <Navbar title="Kelola Pengguna" icon={<UserPlus size={24} />} />
+          <Navbar title="Kelola Pengguna" icon={<Users size={20} />} />
           <main className="flex-1 overflow-auto p-6 flex items-center justify-center">
             <div className="text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -294,7 +293,7 @@ const KelolaUser: React.FC = () => {
     <div className="min-h-screen bg-[#F7FAFC] flex">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar title="Kelola Pengguna" icon={<UserPlus size={24} />} />
+        <Navbar title="Kelola Pengguna" icon={<Users size={20} />} />
         <main className="flex-1 overflow-auto p-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             {/* Header */}

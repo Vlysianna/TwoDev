@@ -5,13 +5,15 @@ import {
   Edit3,
   Eye,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  UserCheck
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import AssessorModal from '@/components/AssessorModal';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 import api from '@/helper/axios';
+import { useNavigate } from 'react-router-dom';
 
 interface Role {
   id: number;
@@ -49,6 +51,8 @@ const KelolaAkunAsesor: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [assessorToDelete, setAssessorToDelete] = useState<User | null>(null);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -79,11 +83,11 @@ const KelolaAkunAsesor: React.FC = () => {
 
   // Navigation for create/edit
   const handleCreate = () => {
-    window.location.href = '/admin/asesor/create';
+    navigate('/admin/asesor/create');
   };
 
   const handleEdit = (user: User) => {
-    window.location.href = `/admin/asesor/edit/${user.id}`;
+    navigate(`/admin/asesor/edit/${user.id}`);
   };
 
   const handleView = (id: number) => {
@@ -138,7 +142,7 @@ const KelolaAkunAsesor: React.FC = () => {
       <div className="min-h-screen bg-[#F7FAFC] flex">
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <Navbar />
+          <Navbar title="Kelola Akun Asesor" icon={<UserCheck size={20} />} />
           <main className="flex-1 overflow-auto p-6">
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
@@ -156,7 +160,7 @@ const KelolaAkunAsesor: React.FC = () => {
     <div className="min-h-screen bg-[#F7FAFC] flex">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar />
+        <Navbar title="Kelola Akun Asesor" icon={<UserCheck size={20} />} />
 
         <main className="flex-1 overflow-auto p-6">
           {/* Error Alert */}
