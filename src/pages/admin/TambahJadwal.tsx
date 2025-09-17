@@ -338,6 +338,9 @@ const TambahJadwal: React.FC = () => {
 																</>
 															)}
 														</select>
+														<label className="block text-sm font-medium text-red-500 mb-1 italic">
+															*Asesor yang muncul di sini adalah asesor yang sudah melengkapi persyaratan.
+														</label>
 													</div>
 
 													<div>
