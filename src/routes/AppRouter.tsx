@@ -67,6 +67,7 @@ import Ia05CAsesor from "@/pages/asesor/Ia-05-C";
 import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
 import IA05Assessor from "@/pages/asesor/ia-05";
+import RecapAssessment from "@/pages/asesor/RecapAssessment";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
 import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
 import ResultAssessment from "@/pages/admin/ResultAssessment";
@@ -345,6 +346,8 @@ const router = createBrowserRouter([
 						element: <DashboardPenilaian />,
 					},
 					{ path: paths.asesor.biodata, element: <BiodataAsesor /> },
+					{ path: paths.asesor.assessmentReceipt, element: <RecapAssessment /> },
+					{ path: paths.asesor.recapAssessmentPattern, element: <RecapAssessment /> },
 
 					{ path: paths.asesor.dataAsesor, element: <DataAsesor /> },
 				],

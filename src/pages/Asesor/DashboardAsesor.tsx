@@ -8,6 +8,7 @@ import {
 	Clock,
 	ChevronRight,
 	MapPinned,
+	FileBarChart,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -378,14 +379,24 @@ const DashboardAsesor: React.FC = () => {
 														<p className="text-xs text-gray-500">{card.role}</p>
 													</div>
 												</div>
-												<Link
-													to={paths.asesor.assessment.dashboardAsesmenMandiri(
-														card.idAssessment || 0
-													)}
-													className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
-												>
-													<ChevronRight className="w-4 h-4 text-white" />
-												</Link>
+												<div className="flex items-center space-x-2">
+													<Link
+														to={paths.asesor.recapAssessment(card.id)}
+														className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
+														title="Recap Assessment"
+													>
+														<FileBarChart className="w-4 h-4 text-white" />
+													</Link>
+													<Link
+														to={paths.asesor.assessment.dashboardAsesmenMandiri(
+															card.idAssessment || 0
+														)}
+														className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+														title="Dashboard Assessment"
+													>
+														<ChevronRight className="w-4 h-4 text-white" />
+													</Link>
+												</div>
 											</div>
 										</div>
 									</div>
