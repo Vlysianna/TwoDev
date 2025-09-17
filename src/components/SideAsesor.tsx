@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getAssetPath } from '@/utils/assetPath';
 import {
@@ -7,10 +7,12 @@ import {
     X,
     FileText,
     LayoutDashboard,
+    AlertCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBiodataCheck } from "@/hooks/useBiodataCheck";
 import ConfirmModal from "./ConfirmModal";
 
 interface MenuItem {
@@ -32,23 +34,40 @@ const SidebarAsesor: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const { biodataComplete, refreshBiodataCheck } = useBiodataCheck();
 
-    const menuItems: MenuItem[] = [
-        {
-            name: "Dashboard",
-            icon: LayoutDashboard,
-            section: "main",
-            path: paths.asesor.dashboardAsesor,
-        },
-        {
-            name: "Biodata Asesor",
-            icon: FileText,
-            section: "main",
-            path: paths.asesor.biodata,
-        },
+    // Refresh biodata check when navigating to dashboard routes
+    useEffect(() => {
+        if (location.pathname.includes('/asesor/dashboard') && refreshBiodataCheck) {
+            refreshBiodataCheck();
+        }
+    }, [location.pathname, refreshBiodataCheck]);
 
+    const getMenuItems = (): MenuItem[] => {
+        const baseItems: MenuItem[] = [];
 
-    ];
+        if (biodataComplete) {
+            // If biodata is complete, show Dashboard and other menus
+            baseItems.push({
+                name: "Dashboard",
+                icon: LayoutDashboard,
+                section: "main",
+                path: paths.asesor.dashboardAsesor,
+            });
+        } else {
+            // If biodata is not complete, only show Biodata menu
+            baseItems.push({
+                name: "Biodata Asesor",
+                icon: FileText,
+                section: "main",
+                path: paths.asesor.biodata,
+            });
+        }
+
+        return baseItems;
+    };
+
+    const menuItems = getMenuItems();
 
     const handleItemClick = (): void => {
         // Close mobile menu when item is clicked
@@ -59,9 +78,7 @@ const SidebarAsesor: React.FC = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
-    const handleLogout = (): void => {
-        setShowLogoutModal(true);
-    };
+
 
     const confirmLogout = (): void => {
         setShowLogoutModal(false);
@@ -121,6 +138,19 @@ const SidebarAsesor: React.FC = () => {
                         />
                     ))}
                 </div>
+
+                {/* Informative message when biodata is incomplete */}
+                {!biodataComplete && (
+                    <div className="mx-4 mb-4 p-3 bg-[#ffffff20] rounded-lg border border-[#ffffff40]">
+                        <div className="flex items-center space-x-2 mb-2">
+                            <AlertCircle size={16} className="text-yellow-300" />
+                            <span className="text-xs font-medium text-white">Biodata Diperlukan</span>
+                        </div>
+                        <p className="text-xs text-[#ffffffcc] leading-relaxed">
+                            Silakan lengkapi biodata Anda untuk mengakses Dashboard dan semua fitur asesor.
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Separator Line */}

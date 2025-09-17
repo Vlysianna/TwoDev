@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBiodataCheck } from "@/hooks/useBiodataCheck";
 import api from "@/helper/axios";
 import {
 	ListFilter,
@@ -17,6 +18,7 @@ import NavbarAsesor from "@/components/NavAsesor";
 
 const DashboardAsesor: React.FC = () => {
 	const { user } = useAuth();
+	const { biodataComplete } = useBiodataCheck();
 
 	interface ScheduleDetail {
 		id: number;

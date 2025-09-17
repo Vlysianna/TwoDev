@@ -72,6 +72,8 @@ import Ia01Asesi from "@/pages/asesi/Ia-01";
 import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
 import ResultAssessment from "@/pages/admin/ResultAssessment";
 import EditMUK from "@/pages/admin/EditMuk";
+import BiodataProtectedRoute from "@/components/BiodataProtectedRoute";
+import AsesorIndexRoute from "@/components/AsesorIndexRoute";
 
 const router = createBrowserRouter([
 	{
@@ -268,12 +270,18 @@ const router = createBrowserRouter([
 					</ProtectedRoute>
 				),
 				children: [
+					// Biodata route - tidak perlu BiodataProtectedRoute
+					{ path: paths.asesor.biodata, element: <BiodataAsesor /> },
+					
+					// Assessment routes dengan BiodataProtectedRoute
 					{
 						path: paths.asesor.assessment.root,
 						element: (
-							<AssessmentAsesorProvider>
-								<Outlet />
-							</AssessmentAsesorProvider>
+							<BiodataProtectedRoute>
+								<AssessmentAsesorProvider>
+									<Outlet />
+								</AssessmentAsesorProvider>
+							</BiodataProtectedRoute>
 						),
 						children: [
 							{
@@ -338,18 +346,52 @@ const router = createBrowserRouter([
 							},
 						],
 					},
-					{ index: true, element: <DashboardAsesor /> },
-					{ path: paths.asesor.dashboardAsesor, element: <DashboardAsesor /> },
-
+					
+					// Index route - redirect based on biodata status
+					{ 
+						index: true, 
+						element: <AsesorIndexRoute />
+					},
+					{ 
+						path: paths.asesor.dashboardAsesor, 
+						element: (
+							<BiodataProtectedRoute>
+								<DashboardAsesor />
+							</BiodataProtectedRoute>
+						) 
+					},
 					{
 						path: paths.asesor.dashboardPenilaian,
-						element: <DashboardPenilaian />,
+						element: (
+							<BiodataProtectedRoute>
+								<DashboardPenilaian />
+							</BiodataProtectedRoute>
+						),
 					},
-					{ path: paths.asesor.biodata, element: <BiodataAsesor /> },
-					{ path: paths.asesor.assessmentReceipt, element: <RecapAssessment /> },
-					{ path: paths.asesor.recapAssessmentPattern, element: <RecapAssessment /> },
-
-					{ path: paths.asesor.dataAsesor, element: <DataAsesor /> },
+					{ 
+						path: paths.asesor.assessmentReceipt, 
+						element: (
+							<BiodataProtectedRoute>
+								<RecapAssessment />
+							</BiodataProtectedRoute>
+						) 
+					},
+					{ 
+						path: paths.asesor.recapAssessmentPattern, 
+						element: (
+							<BiodataProtectedRoute>
+								<RecapAssessment />
+							</BiodataProtectedRoute>
+						) 
+					},
+					{ 
+						path: paths.asesor.dataAsesor, 
+						element: (
+							<BiodataProtectedRoute>
+								<DataAsesor />
+							</BiodataProtectedRoute>
+						) 
+					},
 				],
 			},
 		],

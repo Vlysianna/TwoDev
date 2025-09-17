@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { ArrowLeft, FileText, LayoutDashboard, Upload } from 'lucide-react';
+import { ArrowLeft, FileText, LayoutDashboard, Upload, AlertCircle } from 'lucide-react';
 import NavbarAsesor from '@/components/NavAsesor';
 import api from '@/helper/axios';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+import paths from '@/routes/paths';
 import SidebarAsesor from '@/components/SideAsesor';
+import { useBiodataCheck } from '@/hooks/useBiodataCheck';
 
 export default function BiodataAsesor() {
   const [formData, setFormData] = useState({
     nama: '',
     alamat: '',
-    tempatLahir: '',
+    tempatLahir: '', // This will be stored in localStorage for now as it's not in DB schema
     tanggalLahir: '',
     email: '',
     noRegMET: '',
     noTelp: '',
-    catatan: ''
+    catatan: '' // This will be stored in localStorage for now as it's not in DB schema
   });
 
   const [files, setFiles] = useState<Record<string, File | null>>({
@@ -27,12 +30,16 @@ export default function BiodataAsesor() {
   });
 
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { refreshBiodataCheck } = useBiodataCheck();
   const [assessor, setAssessor] = useState<Record<string, unknown> | null>(null);
   const [assessorDetail, setAssessorDetail] = useState<Record<string, unknown> | null>(null);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [redirectMessage, setRedirectMessage] = useState<string | null>(null);
 
   const safeGet = (obj: Record<string, unknown> | null, key: string) => {
     if (!obj) return '';
@@ -69,13 +76,43 @@ export default function BiodataAsesor() {
           try {
             const det = await api.get(`/assessor-detail/${resp.data.data.id}`);
             if (det.data?.success) setAssessorDetail(det.data.data);
-          } catch {
-            // ignore missing detail
+          } catch (detailError: any) {
+            // 404 is normal if assessor detail doesn't exist yet
+            if (detailError.response?.status !== 404) {
+              console.error('Error loading assessor detail:', detailError);
+            }
           }
         }
-      } catch {
-        // no assessor yet
+      } catch (error: any) {
+        // Handle different error types
+        if (error.response?.status === 401) {
+          // Token expired, redirect to login
+          console.error('Authentication failed - redirecting to login');
+          navigate('/login');
+          return;
+        } else if (error.response?.status === 404) {
+          // New user without assessor data - this is normal
+          console.log('New user - no assessor data yet');
+        } else {
+          console.error('Error loading assessor data:', error);
+        }
       }
+      
+      // Load additional data from localStorage
+      const savedAdditionalData = localStorage.getItem(`assessor_additional_${user.id}`);
+      if (savedAdditionalData) {
+        try {
+          const additionalData = JSON.parse(savedAdditionalData);
+          setFormData(prev => ({
+            ...prev,
+            tempatLahir: additionalData.tempatLahir || '',
+            catatan: additionalData.catatan || ''
+          }));
+        } catch {
+          // ignore parsing errors
+        }
+      }
+      
       setInitialLoading(false);
     };
 
@@ -87,22 +124,39 @@ export default function BiodataAsesor() {
     if (assessor) {
       setFormData(prev => ({
         ...prev,
-        nama: safeGet(assessor, 'full_name') || prev.nama || '',
-        email: safeGet(assessor, 'email') || prev.email || '',
+        nama: safeGet(assessor, 'name') || user?.full_name || prev.nama || '', // Use name from assessor or user.full_name
+        email: user?.email || prev.email || '', // email comes from user context
+        alamat: safeGet(assessor, 'address') || prev.alamat || '', // address is in assessor table
+        tanggalLahir: safeGet(assessor, 'birth_date') || prev.tanggalLahir || '', // birth_date is in assessor table
+        noRegMET: safeGet(assessor, 'no_reg_met') || prev.noRegMET || '', // no_reg_met is in assessor table
+        noTelp: safeGet(assessor, 'phone_no') || prev.noTelp || '', // phone_no is in assessor table
+      }));
+    } else if (user) {
+      // For new users without assessor data, pre-fill with user data
+      setFormData(prev => ({
+        ...prev,
+        nama: user.full_name || prev.nama || '',
+        email: user.email || prev.email || '',
       }));
     }
 
     if (assessorDetail) {
-      setFormData(prev => ({
-        ...prev,
-        alamat: safeGet(assessorDetail, 'address') || prev.alamat || '',
-        tempatLahir: safeGet(assessorDetail, 'birth_place') || prev.tempatLahir || '',
-        tanggalLahir: safeGet(assessorDetail, 'birth_date') || prev.tanggalLahir || '',
-        noRegMET: safeGet(assessorDetail, 'tax_id_number') || prev.noRegMET || '',
-        noTelp: safeGet(assessorDetail, 'phone_no') || prev.noTelp || '',
-      }));
+      // Don't override noRegMET since it should come from assessor table, not detail
+      // assessor_detail.tax_id_number is for NPWP file path, not the actual number
     }
-  }, [assessor, assessorDetail]);
+  }, [assessor, assessorDetail, user]);
+
+  // Check for redirect message
+  useEffect(() => {
+    if (location.state && (location.state as any).message) {
+      setRedirectMessage((location.state as any).message);
+      // Clear the message after 10 seconds
+      const timer = setTimeout(() => {
+        setRedirectMessage(null);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -110,40 +164,78 @@ export default function BiodataAsesor() {
     setSuccessMessage(null);
     setErrorMessage(null);
     try {
-      // 1) If files present, upload each and get paths
+      // 1) Prepare file uploads
       const uploaded: Record<string, string> = {};
-      for (const key of Object.keys(files)) {
-        const file = files[key];
+      const fileMapping = {
+        npwp: 'tax_id_number',
+        coverBuku: 'bank_book_cover', 
+        sertifikatAsesor: 'certificate',
+        ktp: 'national_id',
+        pasFoto: 'id_card'
+      };
+
+      // Upload files if present
+      for (const [frontendKey, backendKey] of Object.entries(fileMapping)) {
+        const file = files[frontendKey];
         if (file) {
           const fd = new FormData();
           fd.append('file', file);
-          // server uploads route expects 'apl-01' folder structure; use generic uploads endpoint
-          const up = await api.post('/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-          if (up.data?.success && up.data.data?.path) uploaded[key] = up.data.data.path;
+          try {
+            const up = await api.post('/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            if (up.data?.success && up.data.data?.path) {
+              uploaded[backendKey] = up.data.data.path;
+            }
+          } catch (uploadError) {
+            console.error(`Failed to upload ${frontendKey}:`, uploadError);
+            // Continue with other files even if one fails
+          }
         }
       }
 
-      // 2) If assessor exists, update basic fields
-      const assessorId = assessor?.id;
+      // 2) Create or update assessor basic data
+      let assessorId = assessor?.id;
+      
       if (assessorId) {
+        // Update existing assessor
         await api.put(`/assessor/${assessorId}`, {
+          user_id: user.id,
+          scheme_id: (assessor?.scheme_id as number) ?? 1, // default scheme_id if not set
           address: formData.alamat,
           phone_no: formData.noTelp,
           birth_date: formData.tanggalLahir,
           no_reg_met: formData.noRegMET,
-          scheme_id: assessor.scheme_id ?? undefined,
-          user_id: assessor.user_id ?? user.id,
         });
+      } else {
+        // Create new assessor if doesn't exist
+        const createResp = await api.post('/assessor', {
+          user_id: user.id,
+          scheme_id: 1, // default scheme_id
+          address: formData.alamat,
+          phone_no: formData.noTelp,
+          birth_date: formData.tanggalLahir,
+          no_reg_met: formData.noRegMET,
+        });
+        
+        if (createResp.data?.success) {
+          assessorId = createResp.data.data.id;
+          setAssessor(createResp.data.data);
+        }
       }
 
       // 3) Upsert assessor-detail
       if (assessorId) {
-        await api.post(`/assessor-detail/${assessorId}`, {
-          tax_id_number: formData.noRegMET || assessorDetail?.tax_id_number || uploaded.npwp || '',
-          bank_book_cover: uploaded.coverBuku || assessorDetail?.bank_book_cover || '',
-          certificate: uploaded.sertifikatAsesor || assessorDetail?.certificate || '',
-          national_id: uploaded.ktp || assessorDetail?.national_id || '',
-        });
+        try {
+          await api.post(`/assessor-detail/${assessorId}`, {
+            tax_id_number: uploaded.tax_id_number || safeGet(assessorDetail, 'tax_id_number') || '',
+            bank_book_cover: uploaded.bank_book_cover || safeGet(assessorDetail, 'bank_book_cover') || '',
+            certificate: uploaded.certificate || safeGet(assessorDetail, 'certificate') || '',
+            national_id: uploaded.national_id || safeGet(assessorDetail, 'national_id') || '',
+            id_card: uploaded.id_card || safeGet(assessorDetail, 'id_card') || '',
+          });
+        } catch (detailError: any) {
+          console.error('Error saving assessor detail:', detailError);
+          // Continue with saving even if detail fails
+        }
       }
 
       // refresh local detail
@@ -154,7 +246,29 @@ export default function BiodataAsesor() {
         // ignore
       }
 
+      // Save additional data to localStorage (data not in database schema)
+      const additionalData = {
+        tempatLahir: formData.tempatLahir,
+        catatan: formData.catatan
+      };
+      localStorage.setItem(`assessor_additional_${user.id}`, JSON.stringify(additionalData));
+
       setSuccessMessage('Data berhasil disimpan');
+      
+      // Refresh biodata check to update sidebar
+      await refreshBiodataCheck();
+      
+      // If came from redirect, navigate back to original page after 2 seconds
+      if (location.state && (location.state as any).from) {
+        setTimeout(() => {
+          navigate((location.state as any).from, { replace: true });
+        }, 2000);
+      } else {
+        // Navigate to dashboard after 2 seconds
+        setTimeout(() => {
+          navigate(paths.asesor.dashboardAsesor, { replace: true });
+        }, 2000);
+      }
     } catch (error) {
       console.error(error);
       setErrorMessage('Gagal menyimpan data');
@@ -189,6 +303,60 @@ export default function BiodataAsesor() {
           {errorMessage && (
             <div className="p-4 mb-4 bg-red-50 border border-red-200 text-red-800 rounded">{errorMessage}</div>
           )}
+          {redirectMessage && (
+            <div className="p-4 mb-4 bg-orange-50 border border-orange-200 text-orange-800 rounded flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+              <span>{redirectMessage}</span>
+            </div>
+          )}
+
+          {/* Welcome Card - show completion status */}
+          {!initialLoading && (
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6 mb-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                    Status Biodata Asesor
+                  </h3>
+                  {!assessor || !assessorDetail ? (
+                    <>
+                      <p className="text-blue-800 text-sm mb-3">
+                        Untuk mengakses Dashboard dan fitur-fitur asesor lainnya, Anda perlu melengkapi biodata terlebih dahulu. 
+                        Hal ini diperlukan untuk memastikan proses sertifikasi yang akurat dan sesuai standar.
+                      </p>
+                      <div className="flex items-center space-x-2 text-blue-700">
+                        <AlertCircle className="w-4 h-4" />
+                        <span className="text-xs font-medium">
+                          Belum lengkap - Lengkapi semua field yang diperlukan
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-blue-800 text-sm mb-3">
+                        Biodata Anda sudah tersimpan. Anda dapat memperbarui informasi kapan saja.
+                        Setelah disimpan, Anda akan dapat mengakses semua fitur asesor.
+                      </p>
+                      <div className="flex items-center space-x-2 text-green-700">
+                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                        <span className="text-xs font-medium">
+                          Biodata lengkap - Akses penuh tersedia
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Biodata Asesor Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
             <div className="p-4 sm:p-6">

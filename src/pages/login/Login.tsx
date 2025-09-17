@@ -5,6 +5,7 @@ import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm } from 'react-hook-form';
 import { getAssetPath } from '@/utils/assetPath';
+import api from '@/helper/axios';
 
 type FormValues = {
   email: string
@@ -53,9 +54,24 @@ export default function LoginForm() {
     setError('');
     setSuccessMessage('');
     
-    await login(email, password).then(() => {
+    await login(email, password).then(async () => {
       setSuccessMessage('Login berhasil');
-      navigate(from, { replace: true });
+      
+      // Get user info to check role
+      try {
+        const response = await api.get('/auth/me');
+        const userRole = response.data.data.role_id;
+        
+        // For asesor users, always redirect to asesor root to ensure biodata check
+        if (userRole === 2 && from.startsWith('/asesor') && from !== '/asesor') {
+          navigate('/asesor', { replace: true });
+        } else {
+          navigate(from, { replace: true });
+        }
+      } catch (error) {
+        // If can't get user info, use default redirect
+        navigate(from, { replace: true });
+      }
     }).catch((err: any) => {
       // console.log(err);
       const errorMessage = err.response?.data?.message || 'Terjadi kesalahan';

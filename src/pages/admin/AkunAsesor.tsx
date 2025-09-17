@@ -25,6 +25,14 @@ interface Assessor {
   scheme_id: number;
   address: string;
   birth_date: string;
+  identity_number?: string;
+  birth_location?: string;
+  gender?: string;
+  nationality?: string;
+  house_phone_no?: string;
+  office_phone_no?: string;
+  postal_code?: string;
+  educational_qualifications?: string;
 }
 
 interface User {
@@ -89,9 +97,100 @@ const KelolaAkunAsesor: React.FC = () => {
   const handleView = (id: number) => {
     (async () => {
       try {
+        // Get user data
         const res = await api.get(`/user/${id}`);
         if (res?.data?.success) {
-          setSelectedAssessor(res.data.data);
+          const userData = res.data.data;
+          
+          // Get assessor data by user_id
+          try {
+            const assessorRes = await api.get(`/assessor/user/${id}`);
+            if (assessorRes?.data?.success) {
+              const assessorData = assessorRes.data.data;
+              
+              // Get assessor detail if assessor exists
+              try {
+                const detailRes = await api.get(`/assessor-detail/${assessorData.id}`);
+                if (detailRes?.data?.success) {
+                  const detailData = detailRes.data.data;
+                  
+                  // Merge all data in the format expected by AssessorModal
+                  userData.assessor = {
+                    id: assessorData.id,
+                    full_name: assessorData.full_name,
+                    phone_no: assessorData.phone_no || detailData.phone_no,
+                    identity_number: detailData.tax_id_number,
+                    birth_date: assessorData.birth_date || detailData.birth_date,
+                    birth_location: detailData.birth_place,
+                    gender: detailData.gender,
+                    nationality: detailData.nationality,
+                    house_phone_no: detailData.house_phone_no,
+                    office_phone_no: detailData.office_phone_no,
+                    address: assessorData.address || detailData.address,
+                    postal_code: detailData.postal_code,
+                    educational_qualifications: detailData.educational_qualifications,
+                    scheme_id: assessorData.scheme_id,
+                  };
+                } else {
+                  // Just use assessor data without detail
+                  userData.assessor = {
+                    id: assessorData.id,
+                    full_name: assessorData.full_name,
+                    phone_no: assessorData.phone_no,
+                    identity_number: '',
+                    birth_date: assessorData.birth_date,
+                    birth_location: '',
+                    gender: '',
+                    nationality: '',
+                    house_phone_no: '',
+                    office_phone_no: '',
+                    address: assessorData.address,
+                    postal_code: '',
+                    educational_qualifications: '',
+                    scheme_id: assessorData.scheme_id,
+                  };
+                }
+              } catch {
+                // Assessor detail might not exist, use basic assessor data
+                userData.assessor = {
+                  id: assessorData.id,
+                  full_name: assessorData.full_name,
+                  phone_no: assessorData.phone_no,
+                  identity_number: '',
+                  birth_date: assessorData.birth_date,
+                  birth_location: '',
+                  gender: '',
+                  nationality: '',
+                  house_phone_no: '',
+                  office_phone_no: '',
+                  address: assessorData.address,
+                  postal_code: '',
+                  educational_qualifications: '',
+                  scheme_id: assessorData.scheme_id,
+                };
+              }
+            }
+          } catch {
+            // Assessor might not exist, create empty assessor structure
+            userData.assessor = {
+              id: 0,
+              full_name: userData.full_name || '',
+              phone_no: '',
+              identity_number: '',
+              birth_date: '',
+              birth_location: '',
+              gender: '',
+              nationality: '',
+              house_phone_no: '',
+              office_phone_no: '',
+              address: '',
+              postal_code: '',
+              educational_qualifications: '',
+              scheme_id: 0,
+            };
+          }
+          
+          setSelectedAssessor(userData);
           setIsDetailModalOpen(true);
         } else {
           setError(res?.data?.message || 'Gagal memuat data pengguna');
