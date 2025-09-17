@@ -74,6 +74,8 @@ import EditMUK from "@/pages/admin/EditMuk";
 import RecapAssessmentAdmin from "@/pages/admin/RecapAssessment";
 import DetailAssessmentAdmin from "@/pages/admin/DetailAssessment";
 import AssessmentAdminProvider from "@/components/AssessmentAdminProvider";
+import BiodataProtectedRoute from "@/components/BiodataProtectedRoute";
+import AsesorIndexRoute from "@/components/AsesorIndexRoute";
 
 const router = createBrowserRouter(
   [
@@ -286,114 +288,143 @@ const router = createBrowserRouter(
           ],
         },
 
-        // Asesor routes (protected - role 2)
-        {
-          path: paths.asesor.root,
-          element: (
-            <ProtectedRoute allowedRoles={[2]}>
-              <Outlet />
-            </ProtectedRoute>
-          ),
-          children: [
-            {
-              path: paths.asesor.assessment.root,
-              element: (
-                <AssessmentAsesorProvider>
-                  <Outlet />
-                </AssessmentAsesorProvider>
-              ),
-              children: [
-                {
-                  path: paths.asesor.assessment.dashboardAsesmenMandiriPattern,
-                  element: <DashboardAsesmenMandiri />,
-                },
-                {
-                  path: paths.asesor.assessment.faktaIntegritasPattern,
-                  element: <FaktaIntegritas />,
-                },
-                {
-                  path: paths.asesor.assessment.cekApl02Pattern,
-                  element: <Apl02Asesor />,
-                },
-                {
-                  path: paths.asesor.assessment.cekApl02DetailPattern,
-                  element: <Apl02DetailAsesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ia01Pattern,
-                  element: <Ia01Asesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ia01DetailPattern,
-                  element: <Ia01DetailAsesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ia02Pattern,
-                  element: <Ia02Asesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ia03Pattern,
-                  element: <Ia03Asesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ia05Pattern,
-                  element: <IA05Assessor />,
-                },
-                {
-                  path: paths.asesor.assessment.ak01Pattern,
-                  element: <Ak01Asesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ak02Pattern,
-                  element: <Ak02Asesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ak03Pattern,
-                  element: <Ak03Asesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ak05Pattern,
-                  element: <Ak05Asesor />,
-                },
-                {
-                  path: paths.asesor.assessment.ia05cPattern,
-                  element: <Ia05CAsesor />,
-                },
-                {
-                  path: paths.asesor.assessment.lembarJawabanPattern,
-                  // element: <LembarJawaban />,
-                },
-              ],
-            },
-            { index: true, element: <DashboardAsesor /> },
-            {
-              path: paths.asesor.dashboardAsesor,
-              element: <DashboardAsesor />,
-            },
-
-            {
-              path: paths.asesor.dashboardPenilaian,
-              element: <DashboardPenilaian />,
-            },
-            { path: paths.asesor.biodata, element: <BiodataAsesor /> },
-            {
-              path: paths.asesor.assessmentReceipt,
-              element: <RecapAssessment />,
-            },
-            {
-              path: paths.asesor.recapAssessmentPattern,
-              element: <RecapAssessment />,
-            },
-
-            { path: paths.asesor.dataAsesor, element: <DataAsesor /> },
-          ],
-        },
-      ],
-    },
-  ],
-  {
-    basename: "/twodev-fe",
-  }
-);
+			// Asesor routes (protected - role 2)
+			{
+				path: paths.asesor.root,
+				element: (
+					<ProtectedRoute allowedRoles={[2]}>
+						<Outlet />
+					</ProtectedRoute>
+				),
+				children: [
+					// Biodata route - tidak perlu BiodataProtectedRoute
+					{ path: paths.asesor.biodata, element: <BiodataAsesor /> },
+					
+					// Assessment routes dengan BiodataProtectedRoute
+					{
+						path: paths.asesor.assessment.root,
+						element: (
+							<BiodataProtectedRoute>
+								<AssessmentAsesorProvider>
+									<Outlet />
+								</AssessmentAsesorProvider>
+							</BiodataProtectedRoute>
+						),
+						children: [
+							{
+								path: paths.asesor.assessment.dashboardAsesmenMandiriPattern,
+								element: <DashboardAsesmenMandiri />,
+							},
+							{
+								path: paths.asesor.assessment.faktaIntegritasPattern,
+								element: <FaktaIntegritas />,
+							},
+							{
+								path: paths.asesor.assessment.cekApl02Pattern,
+								element: <Apl02Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.cekApl02DetailPattern,
+								element: <Apl02DetailAsesor />,
+							},
+							{
+								path: paths.asesor.assessment.ia01Pattern,
+								element: <Ia01Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ia01DetailPattern,
+								element: <Ia01DetailAsesor />,
+							},
+							{
+								path: paths.asesor.assessment.ia02Pattern,
+								element: <Ia02Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ia03Pattern,
+								element: <Ia03Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ia05Pattern,
+								element: <IA05Assessor />,
+							},
+							{
+								path: paths.asesor.assessment.ak01Pattern,
+								element: <Ak01Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ak02Pattern,
+								element: <Ak02Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ak03Pattern,
+								element: <Ak03Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ak05Pattern,
+								element: <Ak05Asesor />,
+							},
+							{
+								path: paths.asesor.assessment.ia05cPattern,
+								element: <Ia05CAsesor />,
+							},
+							{
+								path: paths.asesor.assessment.lembarJawabanPattern,
+								// element: <LembarJawaban />,
+							},
+						],
+					},
+					
+					// Index route - redirect based on biodata status
+					{ 
+						index: true, 
+						element: <AsesorIndexRoute />
+					},
+					{ 
+						path: paths.asesor.dashboardAsesor, 
+						element: (
+							<BiodataProtectedRoute>
+								<DashboardAsesor />
+							</BiodataProtectedRoute>
+						) 
+					},
+					{
+						path: paths.asesor.dashboardPenilaian,
+						element: (
+							<BiodataProtectedRoute>
+								<DashboardPenilaian />
+							</BiodataProtectedRoute>
+						),
+					},
+					{ 
+						path: paths.asesor.assessmentReceipt, 
+						element: (
+							<BiodataProtectedRoute>
+								<RecapAssessment />
+							</BiodataProtectedRoute>
+						) 
+					},
+					{ 
+						path: paths.asesor.recapAssessmentPattern, 
+						element: (
+							<BiodataProtectedRoute>
+								<RecapAssessment />
+							</BiodataProtectedRoute>
+						) 
+					},
+					{ 
+						path: paths.asesor.dataAsesor, 
+						element: (
+							<BiodataProtectedRoute>
+								<DataAsesor />
+							</BiodataProtectedRoute>
+						) 
+					},
+				],
+			},
+		],
+	},
+], {
+	basename: "/twodev-fe"
+});
 
 export default router;

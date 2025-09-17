@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Edit, Eye, Trash2, Filter, X, ChevronDown, Calendar } from "lucide-react";
+import { Edit, Eye, Trash2, X, ChevronDown, Calendar } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
 import NavAdmin from "@/components/NavAdmin";
@@ -21,14 +21,13 @@ const KelolaOkupasi: React.FC = () => {
 	);
 
 	// form stores name and selected scheme id as string
-	const [formData, setFormData] = useState({ code: "", schemeId: "" });
-	const [editFormData, setEditFormData] = useState({ code: "", schemeId: "" });
+	const [formData, setFormData] = useState({ name: "", schemeId: "" });
+	const [editFormData, setEditFormData] = useState({ name: "", schemeId: "" });
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const [isEditDropdownOpen, setIsEditDropdownOpen] = useState(false);
 
 	const [okupasiData, setOkupasiData] = useState<OkupasiData[]>([]);
 	const [schemes, setSchemes] = useState<{ id: number; name: string }[]>([]);
-	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +61,7 @@ const KelolaOkupasi: React.FC = () => {
 				})
 				.then(() => {
 					fetchOccupations();
-					setFormData({ code: "", schemeId: "" });
+					setFormData({ name: "", schemeId: "" });
 				})
 				.catch(() => setError("Gagal menambah okupasi"));
 		}
@@ -73,7 +72,7 @@ const KelolaOkupasi: React.FC = () => {
 		if (!occ) return;
 		setEditingOkupasi(occ);
 		setEditFormData({
-			code: occ.name,
+			name: occ.name,
 			schemeId: occ.scheme?.id ? String(occ.scheme.id) : "",
 		});
 		setIsEditModalOpen(true);
@@ -109,13 +108,12 @@ const KelolaOkupasi: React.FC = () => {
 				fetchOccupations();
 				setIsEditModalOpen(false);
 				setEditingOkupasi(null);
-				setEditFormData({ code: "", schemeId: "" });
+				setEditFormData({ name: "", schemeId: "" });
 			})
 			.catch(() => setError("Gagal memperbarui okupasi"));
 	};
 
 	const fetchOccupations = async () => {
-		setLoading(true);
 		setError(null);
 		try {
 			const res = await axiosInstance.get("/occupations");
@@ -126,8 +124,6 @@ const KelolaOkupasi: React.FC = () => {
 			}
 		} catch (e) {
 			setError("Gagal memuat okupasi");
-		} finally {
-			setLoading(false);
 		}
 	};
 
@@ -181,6 +177,13 @@ const KelolaOkupasi: React.FC = () => {
 							Kelola Okupasi
 						</h1>
 					</div>
+
+					{/* Error Alert */}
+					{error && (
+						<div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+							<span className="text-red-800">{error}</span>
+						</div>
+					)}
 
 					<div className="bg-white rounded-lg sm:rounded-xl shadow p-4 sm:p-6 mb-4 sm:mb-6 transition-all duration-300 hover:shadow-md">
 						<h2 className="text-base sm:text-lg font-semibold mb-4">
@@ -267,10 +270,7 @@ const KelolaOkupasi: React.FC = () => {
 								Daftar Okupasi
 							</h3>
 							<div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-								<button className="border border-gray-300 px-3 sm:px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-all duration-200 text-sm">
-									<Filter size={14} className="sm:w-4 sm:h-4" /> Filter
-								</button>
-								<button className="bg-[#E77D35] hover:bg-[#E77D35]/90 text-white px-3 sm:px-4 py-2 rounded-lg text-sm transition-all duration-200 shadow-sm hover:shadow-md">
+								<button onClick={handleExport} className="bg-[#E77D35] hover:bg-[#E77D35]/90 text-white px-3 sm:px-4 py-2 rounded-lg text-sm transition-all duration-200 shadow-sm hover:shadow-md">
 									Export ke Excel
 								</button>
 							</div>
@@ -303,6 +303,7 @@ const KelolaOkupasi: React.FC = () => {
 											<Edit size={16} />
 										</button>
 										<button
+											onClick={() => handleView(item.id)}
 											className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
 											title="View"
 										>
@@ -361,6 +362,7 @@ const KelolaOkupasi: React.FC = () => {
 														<Edit size={16} />
 													</button>
 													<button
+														onClick={() => handleView(item.id)}
 														className="p-2 text-gray-600 hover:bg-blue-100 rounded-lg transition-colors"
 														title="View"
 													>

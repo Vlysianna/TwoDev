@@ -100,7 +100,7 @@ const routes = {
 			edit: (id_assessment: string | number) =>
 				`/admin/muk/edit/${id_assessment}`,
 		},
-		kelolaJurusan: "/admin/kelola-jurusan",
+		kelolaJurusan: "/admin/kelolaJur",
 		okupasi: {
 			root: "/admin/okupasi",
 			index: "/admin/okupasi",

@@ -1,24 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Filter,
-  Download,
-  Edit3,
   Eye,
-  Trash2,
   AlertCircle,
   UserCheck
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import AssessorModal from '@/components/AssessorModal';
-import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 import api from '@/helper/axios';
-import { useNavigate } from 'react-router-dom';
-
-interface Role {
-  id: number;
-  name: string;
-}
 
 interface Assessor {
   id: number;
@@ -27,13 +16,22 @@ interface Assessor {
   scheme_id: number;
   address: string;
   birth_date: string;
+  identity_number?: string;
+  birth_location?: string;
+  gender?: string;
+  nationality?: string;
+  house_phone_no?: string;
+  office_phone_no?: string;
+  postal_code?: string;
+  educational_qualifications?: string;
 }
 
 interface User {
   id: number;
+  full_name: string;
   email: string;
-  full_name?: string;
-  role: Role;
+  role: string;
+  status: string;
   assessor?: Assessor;
 }
 
@@ -46,12 +44,7 @@ const KelolaAkunAsesor: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAssessor, setSelectedAssessor] = useState<User | null>(null);
   
-  // Delete modal states
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [assessorToDelete, setAssessorToDelete] = useState<User | null>(null);
 
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
@@ -61,12 +54,10 @@ const KelolaAkunAsesor: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/user');
+      const response = await api.get('/assessor/user/status');
       if (response?.data?.success) {
         const data = Array.isArray(response.data.data) ? response.data.data : [];
-        // Filter for assessor users (role_id === 2)
-        const assessorUsers = data.filter((user: User) => user.role && user.role.id === 2);
-        setUsers(assessorUsers);
+        setUsers(data);
       } else {
         setError(response?.data?.message || 'Gagal memuat data pengguna');
       }
@@ -81,25 +72,119 @@ const KelolaAkunAsesor: React.FC = () => {
   };
 
 
-  // Navigation for create/edit
-  const handleCreate = () => {
-    navigate('/admin/asesor/create');
-  };
 
-  const handleEdit = (user: User) => {
-    navigate(`/admin/asesor/edit/${user.id}`);
-  };
 
   const handleView = (id: number) => {
     (async () => {
       try {
-        const res = await api.get(`/user/${id}`);
-        if (res?.data?.success) {
-          setSelectedAssessor(res.data.data);
-          setIsDetailModalOpen(true);
-        } else {
-          setError(res?.data?.message || 'Gagal memuat data pengguna');
+        // Find user data from the already loaded users array
+        const userData = users.find(user => user.id === id);
+        if (!userData) {
+          console.error('User not found');
+          return;
         }
+
+        // Create user object with the basic info
+        const userWithFullData: User = {
+          id: userData.id,
+          email: userData.email,
+          full_name: userData.full_name,
+          role: userData.role,
+          status: userData.status
+        };
+
+        // If user has complete assessor data, get detailed assessor info
+        if (userData.status === 'Lengkap') {
+          try {
+            const assessorRes = await api.get(`/assessor/user/${id}`);
+            if (assessorRes?.data?.success) {
+              const assessorData = assessorRes.data.data;
+              
+              // Get assessor detail if assessor exists
+              try {
+                const detailRes = await api.get(`/assessor-detail/${assessorData.id}`);
+                if (detailRes?.data?.success) {
+                  const detailData = detailRes.data.data;
+                  
+                  // Merge all data in the format expected by AssessorModal
+                  userWithFullData.assessor = {
+                    id: assessorData.id,
+                    full_name: assessorData.full_name,
+                    phone_no: assessorData.phone_no || detailData.phone_no,
+                    identity_number: detailData.tax_id_number,
+                    birth_date: assessorData.birth_date || detailData.birth_date,
+                    birth_location: detailData.birth_place,
+                    gender: detailData.gender,
+                    nationality: detailData.nationality,
+                    house_phone_no: detailData.house_phone_no,
+                    office_phone_no: detailData.office_phone_no,
+                    address: assessorData.address || detailData.address,
+                    postal_code: detailData.postal_code,
+                    educational_qualifications: detailData.educational_qualifications,
+                    scheme_id: assessorData.scheme_id,
+                  };
+                } else {
+                  // Just use assessor data without detail
+                  userWithFullData.assessor = {
+                    id: assessorData.id,
+                    full_name: assessorData.full_name,
+                    phone_no: assessorData.phone_no,
+                    identity_number: '',
+                    birth_date: assessorData.birth_date,
+                    birth_location: '',
+                    gender: '',
+                    nationality: '',
+                    house_phone_no: '',
+                    office_phone_no: '',
+                    address: assessorData.address,
+                    postal_code: '',
+                    educational_qualifications: '',
+                    scheme_id: assessorData.scheme_id,
+                  };
+                }
+              } catch {
+                // Assessor detail might not exist, use basic assessor data
+                userWithFullData.assessor = {
+                  id: assessorData.id,
+                  full_name: assessorData.full_name,
+                  phone_no: assessorData.phone_no,
+                  identity_number: '',
+                  birth_date: assessorData.birth_date,
+                  birth_location: '',
+                  gender: '',
+                  nationality: '',
+                  house_phone_no: '',
+                  office_phone_no: '',
+                  address: assessorData.address,
+                  postal_code: '',
+                  educational_qualifications: '',
+                  scheme_id: assessorData.scheme_id,
+                };
+              }
+            }
+          } catch {
+            // Assessor might not exist, create empty assessor structure
+            userWithFullData.assessor = {
+              id: 0,
+              full_name: userData.full_name || '',
+              phone_no: '',
+              identity_number: '',
+              birth_date: '',
+              birth_location: '',
+              gender: '',
+              nationality: '',
+              house_phone_no: '',
+              office_phone_no: '',
+              address: '',
+              postal_code: '',
+              educational_qualifications: '',
+              scheme_id: 0,
+            };
+          }
+        }
+          
+        setSelectedAssessor(userWithFullData);
+        setIsDetailModalOpen(true);
       } catch (err) {
         console.error('Failed to fetch user detail:', err);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -108,34 +193,7 @@ const KelolaAkunAsesor: React.FC = () => {
     })();
   };
 
-  const handleDeleteClick = (user: User) => {
-    setAssessorToDelete(user);
-    setIsDeleteModalOpen(true);
-  };
 
-  const handleDeleteConfirm = async () => {
-    if (!assessorToDelete) return;
-
-    try {
-      setDeleteLoading(true);
-      await api.delete(`/user/${assessorToDelete.id}`);
-      await fetchUsers(); // Refresh the list
-      setIsDeleteModalOpen(false);
-      setAssessorToDelete(null);
-    } catch (error: unknown) {
-      console.error('Error deleting user:', error);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const msg = (error as any)?.response?.data?.message || 'Gagal menghapus pengguna';
-      setError(msg);
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  // No modal success needed for create/edit
-
-  const handleFilter = () => console.log('Filter clicked');
-  const handleExport = () => console.log('Export to Excel clicked');
 
   if (loading) {
     return (
@@ -183,14 +241,6 @@ const KelolaAkunAsesor: React.FC = () => {
           {/* Page Title */}
           <div className="mb-6">
             <h1 className="text-2xl font-semibold text-gray-900 mb-4">Kelola Akun Asessor</h1>
-            
-            {/* Create Account Button */}
-            <button
-              onClick={handleCreate}
-              className="px-14 py-2 bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
-            >
-              Buat Akun
-            </button>
           </div>
 
           {/* Main Content Card - This is the box container like in Figma */}
@@ -199,22 +249,6 @@ const KelolaAkunAsesor: React.FC = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Akun Asessor</h2>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={handleFilter}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    Filter
-                    <Filter size={16} className='text-[#E77D35]'/>
-                  </button>
-                  <button
-                    onClick={handleExport}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
-                  >
-                    <Download size={16} />
-                    Export ke Excel
-                  </button>
-                </div>
               </div>
               {/* Full width border line */}
               <div className="border-b border-gray-200"></div>
@@ -233,7 +267,10 @@ const KelolaAkunAsesor: React.FC = () => {
                         Email
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Phone
+                        Role
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Status
                       </th>
                       <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
                         Actions
@@ -247,36 +284,31 @@ const KelolaAkunAsesor: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.assessor?.full_name || user.full_name || '-'}
+                          {user.full_name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {user.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.assessor?.phone_no || '-'}
+                          {user.role}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            user.status === 'Lengkap' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {user.status}
+                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
-                            <button
-                              onClick={() => handleEdit(user)}
-                              className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
-                              title="Edit"
-                            >
-                              <Edit3 size={16} />
-                            </button>
                             <button
                               onClick={() => handleView(user.id)}
                               className="p-2 text-[#E77D35] hover:bg-orange-100 rounded-md transition-colors"
                               title="View"
                             >
                               <Eye size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(user)}
-                              className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
-                              title="Delete"
-                            >
-                              <Trash2 size={16} />
                             </button>
                           </div>
                         </td>
@@ -300,15 +332,7 @@ const KelolaAkunAsesor: React.FC = () => {
         mode="show"
       />
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmDeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        loading={deleteLoading}
-        title="Hapus Akun Assessor"
-        message={`Apakah Anda yakin ingin menghapus akun assessor "${assessorToDelete?.assessor?.full_name || assessorToDelete?.email}"? Tindakan ini tidak dapat dibatalkan.`}
-      />
+
     </div>
   );
 };
