@@ -71,7 +71,7 @@ const Sidebar: React.FC = () => {
       name: 'Hasil Asesmen',
       icon: FileText,
       section: 'admin',
-      path: paths.admin.resultAssessment,
+      path: paths.admin.resultAssessment.root,
     },
   ];
 
