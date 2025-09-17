@@ -294,7 +294,8 @@ export default function Ak01() {
 										/>
 										<div>
 											<select
-												className={`w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500 cursor-pointer ${tukError ? "border border-red-500" : ""}`}
+												className={`w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500 cursor-pointer ${tukError ? "border border-red-500" : ""
+													}`}
 												value={selectedTUK}
 												onChange={handleTUKChange}
 												onBlur={() => {
@@ -311,9 +312,16 @@ export default function Ak01() {
 															</option>
 														))}
 											</select>
+
+											{/* Pesan error */}
 											{tukError && (
 												<p className="text-red-500 text-xs mt-1">{tukError}</p>
 											)}
+
+											{/* Keterangan wajib memilih */}
+											<p className="text-gray-400 text-xs mt-1 italic">
+												*Anda harus memilih TUK sebelum melanjutkan
+											</p>
 										</div>
 									</div>
 								</div>
