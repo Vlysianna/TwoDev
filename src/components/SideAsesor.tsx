@@ -141,7 +141,7 @@ const SidebarAsesor: React.FC = () => {
             {/* Overlay for mobile */}
             {isMobileMenuOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 z-[55] bg-black bg-opacity-50"
+                    className="lg:hidden fixed inset-0 z-[55]"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
