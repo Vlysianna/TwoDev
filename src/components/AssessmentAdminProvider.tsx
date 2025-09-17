@@ -19,12 +19,6 @@ type AssessmentParams = {
 
 type AssessmentContextType = AssessmentParams;
 
-type AssessorData = {
-    id: number;
-    scheme_id: number;
-    no_reg_met: string;
-};
-
 const AssessmentContext = createContext<AssessmentContextType | null>(null);
 
 export function useAssessmentParams() {
@@ -41,8 +35,7 @@ export default function AssessmentAdminProvider({
 }: {
     children: JSX.Element | JSX.Element[];
 }) {
-    const { id_assessment, id_asesi } = useParams();
-    const [assessorData, setAssessorData] = useState<AssessorData | undefined>(undefined);
+    const { id_assessment, id_asesor, id_asesi } = useParams();
     const [resultData, setResultData] = useState<any[] | undefined>(undefined);
 
     const { user } = useAuth();
@@ -52,37 +45,9 @@ export default function AssessmentAdminProvider({
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchAssessorData = async () => {
-            if (!user) {
-                setLoading(false);
-                return;
-            }
-
+        const fetchResult = async () => {
             try {
-                setLoading(true);
-                const resp = await api.get(`/assessor/user/${user.id}`);
-                if (resp.data?.success) {
-                    const data = resp.data.data;
-                    setAssessorData(data);
-
-                    if (id_assessment && id_asesi) {
-                        await fetchResult(data.id);
-                    }
-                } else {
-                    console.error(resp.data.message);
-                    setError("Failed to fetch assessor data");
-                }
-            } catch (err) {
-                console.error("Failed to fetch assessor data:", err);
-                setError("Failed to fetch assessor data");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchResult = async (assessorId: number) => {
-            try {
-                const resp = await api.get(`/assessments/result/${id_assessment}/${assessorId}/${id_asesi}`);
+                const resp = await api.get(`/assessments/result/${id_assessment}/${id_asesor}/${id_asesi}`);
                 if (resp.data.success) {
                     const data = resp.data.data;
                     setResultData(data);
@@ -96,12 +61,12 @@ export default function AssessmentAdminProvider({
             }
         };
 
-        fetchAssessorData();
-    }, [user, id_assessment, id_asesi]);
+        fetchResult();
+    }, [user, id_assessment, id_asesor, id_asesi]);
 
     useEffect(() => {
-        if (!id_assessment) {
-            navigate(routes.asesor.dashboardAsesor, {
+        if (!id_assessment || !id_asesor) {
+            navigate(routes.admin.resultAssessment.root, {
                 replace: true,
             });
         }
@@ -128,7 +93,7 @@ export default function AssessmentAdminProvider({
             value={{
                 id_assessment: id_assessment!,
                 id_asesi: id_asesi || null,
-                id_asesor: assessorData ? String(assessorData.id) : null,
+                id_asesor: id_asesor!,
                 id_result: resultData && resultData.length > 0
                     ? String(resultData[resultData.length - 1]?.id)
                     : null,
