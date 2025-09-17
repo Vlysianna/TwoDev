@@ -182,7 +182,7 @@ export default function AK03({
 
 			const payload = {
 				result_id: parseInt(id_result),
-				comment: data.catatanUmum || "Tidak ada",
+				comment: data.catatanUmum,
 				items: data.answers.map((a: any, i: number) => ({
 					question: questions[i].question,
 					answer: a.answer === "ya",
@@ -524,12 +524,18 @@ export default function AK03({
 							Catatan/komentar lainnya (apabila ada) :
 						</label>
 
-						<textarea
-							className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] text-sm"
-							placeholder="Catatan"
-							rows={4}
-							value={catatanUmum}
-							onChange={(e) => setCatatanUmum(e.target.value)}
+						<Controller
+							control={control}
+							name="catatanUmum"
+							render={({ field }) => (
+								<textarea
+									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] text-sm"
+									placeholder="Catatan"
+									rows={4}
+									{...field}
+									disabled={!isAssessee}
+								/>
+							)}
 						/>
 
 						<div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 w-full">

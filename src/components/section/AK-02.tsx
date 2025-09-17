@@ -8,6 +8,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "@/components/ConfirmModal";
+import useToast from "../ui/useToast";
 
 // Evidence types
 export const evidenceTypes = [
@@ -100,6 +101,7 @@ export default function AK02({
 	const [pendingValue, setPendingValue] = useState<string>("");
 
 	const [saveHeaderError, setSaveHeaderError] = useState<string | null>(null);
+	const toast = useToast();
 
 
 	useEffect(() => {
@@ -294,15 +296,17 @@ export default function AK02({
 			);
 
 			if (response.data.success) {
-				alert("Data asesmen berhasil disimpan!");
-				// Navigate to AK-05 page after successful submission
-				navigate(routes.asesor.assessment.ak05(id_assessment, id_asesi!));
+				toast?.show({
+					type: "success",
+					title: "Berhasil",
+					description: "Data asesmen berhasil disimpan!",
+				});
 			} else {
-				alert(
-					`Gagal menyimpan data asesmen: ${
-						response.data.message || "Terjadi kesalahan"
-					}`
-				);
+				toast?.show({
+					type: "error",
+					title: "Gagal",
+					description: response.data.message || "Terjadi kesalahan",
+				});
 			}
 		} catch (error: any) {
 			console.error("Submit error:", error);

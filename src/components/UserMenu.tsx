@@ -51,6 +51,7 @@ const UserMenu: React.FC = () => {
     <div className="relative" ref={profileRef}>
       {/* Tombol Profile */}
       <button
+        type="button"
         onClick={() => setIsProfileOpen(!isProfileOpen)}
         className="flex items-center sm:space-x-2 border border-gray-200 rounded-full px-2 py-2 hover:bg-gray-100 transition cursor-pointer"
       >
@@ -86,6 +87,7 @@ const UserMenu: React.FC = () => {
           {/* Logout */}
           <div className="p-2">
             <button
+              type="button"
               onClick={handleLogoutClick}
               className="w-full flex items-center justify-center text-red-500 hover:bg-gray-100 p-2 rounded transition cursor-pointer"
             >
