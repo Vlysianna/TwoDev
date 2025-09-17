@@ -536,7 +536,7 @@ export default function Ia01Detail() {
         <div className="flex justify-end items-center gap-4 mt-6">
           {saveError && <span className="text-red-500 text-sm mr-4">{saveError}</span>}
           <button
-            className="bg-[#E77D35] px-12 text-white lg:px-20 py-2 rounded-lg font-medium hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60"
+            className="bg-[#E77D35] px-12 text-white lg:px-20 py-2 rounded-lg font-medium cursor-pointer hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60"
             onClick={handleSave}
             disabled={saving || unassessedCount > 0}
           >

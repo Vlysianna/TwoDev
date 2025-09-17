@@ -219,7 +219,7 @@ export default function Ia02() {
                 <button
                   onClick={handleViewPDF}
                   disabled={generatingPdf}
-                  className="flex items-center justify-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 bg-[#E77D35] cursor-pointer text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Lihat PDF
                 </button>
@@ -312,7 +312,7 @@ export default function Ia02() {
                         if (!assesseeQrValue && assessorQrValue)
                           handleGenerateQRCode();
                       }}
-                      className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assesseeQrValue && assessorQrValue
+                      className={`block text-center cursor-pointer bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assesseeQrValue && assessorQrValue
                         ? "hover:bg-orange-600"
                         : "cursor-not-allowed opacity-50"
                         }`}

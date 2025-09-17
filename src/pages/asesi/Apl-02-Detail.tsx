@@ -394,7 +394,7 @@ export default function Apl02Detail() {
                           <PopoverTrigger asChild>
                             <button
                               type="button"
-                              className="w-full px-3 py-2 bg-[#DADADA33] rounded-md text-left text-sm"
+                              className="w-full px-3 py-2 bg-[#DADADA33] rounded-md text-left text-sm cursor-pointer"
                             >
                               {field.value?.length > 0
                                 ? `${field.value.length} evidence selected`
@@ -602,7 +602,7 @@ export default function Apl02Detail() {
                                         <button
                                           type="button"
                                           role="combobox"
-                                          className="w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left"
+                                          className="w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left cursor-pointer"
                                         >
                                           {values.length > 0
                                             ? `${values.length} selected`

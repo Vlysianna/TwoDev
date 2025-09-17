@@ -797,7 +797,7 @@ export default function IA03({
 										<button
 											onClick={approveByAssessee}
 											disabled={completionPercent < 100}
-											className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${completionPercent < 100
+											className={`block text-center bg-[#E77D35] cursor-pointer text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${completionPercent < 100
 												? "opacity-50 cursor-not-allowed"
 												: "hover:bg-orange-600"
 												}`}

@@ -404,7 +404,7 @@ export default function Ia01() {
                   <button
                     key={tab} // Key yang unik
                     onClick={() => setSelectedKPekerjaan(tab)}
-                    className={`px-3 lg:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedKPekerjaan === tab
+                    className={`px-3 lg:px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition-colors ${selectedKPekerjaan === tab
                       ? 'bg-[#E77D35] text-white shadow-sm'
                       : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                       }`}
