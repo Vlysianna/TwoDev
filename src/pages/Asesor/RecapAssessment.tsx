@@ -121,6 +121,20 @@ const RecapAssessment: React.FC = () => {
 		}
 	};
 
+	// Tambahkan fungsi untuk translate status ke bahasa Indonesia
+	const getStatusLabel = (status: string) => {
+		switch (status) {
+			case "Competent":
+				return "Kompeten";
+			case "Not Competent":
+				return "Belum Kompeten";
+			case "On Going":
+				return "Sedang Berlangsung";
+			default:
+				return status;
+		}
+	};
+
 	if (loading) {
 		return (
 			<div className="flex min-h-screen bg-gray-50">
@@ -361,7 +375,7 @@ const RecapAssessment: React.FC = () => {
 													)}`}
 												>
 													{getStatusIcon(assessee.status)}
-													<span>{assessee.status}</span>
+													<span>{getStatusLabel(assessee.status)}</span>
 												</span>
 											</td>
 										</tr>

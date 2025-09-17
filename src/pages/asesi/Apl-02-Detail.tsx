@@ -276,6 +276,8 @@ export default function Apl02Detail() {
             description: "Berhasil menyimpan data",
             type: "success",
           });
+          // Navigate ke halaman APL-02 setelah simpan sukses
+          navigate(paths.asesi.assessment.apl02(id_assessment, id_asesor));
         } else {
           toast.show({
             title: "Gagal",
@@ -397,14 +399,14 @@ export default function Apl02Detail() {
                               className="w-full px-3 py-2 bg-[#DADADA33] rounded-md text-left text-sm cursor-pointer"
                             >
                               {field.value?.length > 0
-                                ? `${field.value.length} evidence selected`
-                                : "Select global evidence..."}
+                                ? `${field.value.length} Bukti Relevan telah dipilih`
+                                : "Pilih Bukti Relevan"}
                             </button>
                           </PopoverTrigger>
                           <PopoverContent className="w-[250px] p-0">
                             <Command>
-                              <CommandInput placeholder="Search evidences..." />
-                              <CommandEmpty>No evidence found.</CommandEmpty>
+                              <CommandInput placeholder="Cari Bukti Relevan" />
+                              <CommandEmpty>Bukti Relevan tidak ditemukan.</CommandEmpty>
                               <CommandGroup>
                                 {evidenceOptions.map((opt) => {
                                   const selected = field.value?.includes(opt);
@@ -605,7 +607,7 @@ export default function Apl02Detail() {
                                           className="w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left cursor-pointer"
                                         >
                                           {values.length > 0
-                                            ? `${values.length} selected`
+                                            ? `${values.length} bukti terpilih`
                                             : "Select evidences..."}
                                         </button>
                                       </PopoverTrigger>
