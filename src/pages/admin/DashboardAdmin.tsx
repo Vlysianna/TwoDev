@@ -513,7 +513,7 @@ const Dashboard: React.FC = () => {
                                                             ✓
                                                         </button>
                                                         <button
-                                                            onClick={() => handleView(item.id)}
+                                                            onClick={() => handleViewBukti(item.id)}
                                                             className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
                                                             title="View"
                                                         >

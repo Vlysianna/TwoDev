@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Filter, Download, Edit, Eye, Trash2, AlertTriangle, X, Album } from "lucide-react";
+import { Download, Edit, Eye, Trash2, AlertTriangle, X, Album } from "lucide-react";
 import Navbar from "@/components/NavAdmin";
 import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
@@ -206,10 +206,6 @@ const KelolaJurusan = () => {
 									Daftar Jurusan
 								</h2>
 								<div className="flex flex-col sm:flex-row gap-3">
-									<button className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
-										<Filter className="w-4 h-4 mr-2" />
-										Filter
-									</button>
 									<button className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
 										<Download className="w-4 h-4 mr-2" />
 										Export to Excel

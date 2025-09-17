@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Edit3, Eye, Trash2, AlertCircle, File } from 'lucide-react';
+import { Edit3, Eye, Trash2, AlertCircle, File } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 import JadwalViewModal from '@/components/JadwalViewModal';
 import JadwalEditModal from '@/components/JadwalEditModal';
@@ -61,7 +61,6 @@ const KelolaJadwal: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedJadwal, setSelectedJadwal] = useState<Schedule | null>(null);
   const [editLoading, setEditLoading] = useState(false);
-    const navigate = useNavigate();
 
     useEffect(() => {
       fetchSchedules();
@@ -173,8 +172,6 @@ const KelolaJadwal: React.FC = () => {
       }
     };
 
-     const handleFilter = () => console.log('Filter clicked');
-
      const handleExport = async () => {
        try {
          setError(null);
@@ -282,13 +279,6 @@ const KelolaJadwal: React.FC = () => {
                   Daftar Jadwal Asesmen
                 </h2>
                 <div className="flex flex-wrap gap-3 sm:space-x-3">
-                  <button
-                    onClick={handleFilter}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto"
-                  >
-                    Filter
-                    <Filter size={16} className="text-[#E77D35]" />
-                  </button>
                   <button
                     onClick={handleExport}
                     className="bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors w-full sm:w-[152px] h-[41px]"
