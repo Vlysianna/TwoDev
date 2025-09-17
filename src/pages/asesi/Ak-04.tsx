@@ -25,6 +25,9 @@ export default function Ak04() {
         question3: ''
     });
 
+    // State untuk menandai apakah data sudah tersimpan
+    const [isSaved, setIsSaved] = useState(false);
+
     const questions = [
         'Apakah Proses banding telah dijelaskan kepada anda?',
         'Apakah Anda telah mendiskusikan Banding dengan asesor?',
@@ -58,12 +61,13 @@ export default function Ak04() {
 
                     // PERBAIKAN: Pastikan tidak ada nilai "tidak" yang terisi secara default
                     setAnswers({
-                        question1: q1_yes === true || q1_yes === 1 ? 'ya' : '',
-                        question2: q2_yes === true || q2_yes === 1 ? 'ya' : '',
-                        question3: q3_yes === true || q3_yes === 1 ? 'ya' : ''
+                        question1: q1_yes === true || q1_yes === 1 ? 'ya' : 'tidak',
+                        question2: q2_yes === true || q2_yes === 1 ? 'ya' : 'tidak',
+                        question3: q3_yes === true || q3_yes === 1 ? 'ya' : 'tidak'
                     });
 
                     setReason(reason || '');
+                    setIsSaved(true); // Tandai bahwa data sudah tersimpan
 
                     if (approved_assessee) {
                         setValueQr(getAssesseeUrl(Number(id_asesi)));
@@ -75,6 +79,7 @@ export default function Ak04() {
                         question2: '',
                         question3: ''
                     });
+                    setIsSaved(false); // Pastikan state direset jika tidak ada data
                 }
             } else {
                 setError('Gagal mengambil data hasil asesmen: ' + response.data.message);
@@ -88,6 +93,9 @@ export default function Ak04() {
     };
 
     const handleAnswerChange = (questionKey: QuestionKey, value: string) => {
+        // Jangan izinkan perubahan jika data sudah tersimpan
+        if (isSaved) return;
+
         setAnswers(prev => ({ ...prev, [questionKey]: value }));
         // Hapus error untuk pertanyaan ini jika diisi
         if (formErrors[questionKey]) {
@@ -155,8 +163,9 @@ export default function Ak04() {
                 throw new Error(approveResponse.data.message || 'Gagal approve data');
             }
 
-            // 3. Refresh data
-            fetchResultData();
+            // 3. Set QR code dan tandai sebagai tersimpan
+            setValueQr(getAssesseeUrl(Number(id_asesi)));
+            setIsSaved(true);
 
         } catch (e: any) {
             console.error("Error submit:", e);
@@ -317,7 +326,8 @@ export default function Ak04() {
                                                 <label
                                                     className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-xs sm:text-sm
                                                         ${answers[questionKey] === 'ya' ? "bg-[#E77D3533]" : ""}
-                                                        ${hasError ? "border border-red-500" : ""}`}
+                                                        ${hasError ? "border border-red-500" : ""}
+                                                        ${isSaved ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                                                 >
                                                     <input
                                                         type="radio"
@@ -326,6 +336,7 @@ export default function Ak04() {
                                                         checked={answers[questionKey] === 'ya'}
                                                         onChange={() => handleAnswerChange(questionKey, 'ya')}
                                                         className="hidden"
+                                                        disabled={isSaved}
                                                     />
                                                     <span
                                                         className={`w-4 h-4 flex items-center justify-center rounded-full border-2
@@ -352,7 +363,8 @@ export default function Ak04() {
                                                 <label
                                                     className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-xs sm:text-sm
                                                         ${answers[questionKey] === 'tidak' ? "bg-[#E77D3533]" : ""}
-                                                        ${hasError ? "border border-red-500" : ""}`}
+                                                        ${hasError ? "border border-red-500" : ""}
+                                                        ${isSaved ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                                                 >
                                                     <input
                                                         type="radio"
@@ -361,6 +373,7 @@ export default function Ak04() {
                                                         checked={answers[questionKey] === 'tidak'}
                                                         onChange={() => handleAnswerChange(questionKey, 'tidak')}
                                                         className="hidden"
+                                                        disabled={isSaved}
                                                     />
                                                     <span
                                                         className={`w-4 h-4 flex items-center justify-center rounded-full border-2
@@ -427,6 +440,7 @@ export default function Ak04() {
                                 <textarea
                                     value={reason}
                                     onChange={(e) => {
+                                        if (isSaved) return;
                                         setReason(e.target.value);
                                         // Hapus error untuk reason jika diisi
                                         if (formErrors.reason) {
@@ -440,8 +454,10 @@ export default function Ak04() {
                                     placeholder="Catatan"
                                     className={`w-full h-full p-3 border rounded-md resize-none 
                                         focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm min-h-[150px]
-                                        ${formErrors.reason ? 'border-red-500' : 'border-gray-300'}`}
+                                        ${formErrors.reason ? 'border-red-500' : 'border-gray-300'}
+                                        ${isSaved ? 'cursor-not-allowed opacity-70 bg-gray-100' : ''}`}
                                     rows={6}
+                                    readOnly={isSaved}
                                 />
                                 {formErrors.reason && (
                                     <p className="text-red-500 text-xs mt-1">{formErrors.reason}</p>
@@ -492,13 +508,13 @@ export default function Ak04() {
                         <div className="flex justify-end">
                             <button
                                 onClick={handleSubmit}
-                                disabled={submitting || !!valueQr || !isFormComplete}
+                                disabled={submitting || !!valueQr || !isFormComplete || isSaved}
                                 className={`w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-white rounded-md 
                                     hover:bg-orange-600 focus:outline-none focus:ring-2 
                                     focus:ring-[#E77D35] focus:ring-offset-2 font-medium
-                                    ${submitting || valueQr || !isFormComplete ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                                    ${submitting || valueQr || !isFormComplete || isSaved ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                             >
-                                {submitting ? "Menyimpan..." : valueQr ? "Tersimpan" : "Simpan"}
+                                {submitting ? "Menyimpan..." : valueQr || isSaved ? "Tersimpan" : "Simpan"}
                             </button>
                         </div>
                     </div>
@@ -507,5 +523,3 @@ export default function Ak04() {
         </div>
     );
 }
-
-

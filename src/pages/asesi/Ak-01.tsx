@@ -18,6 +18,7 @@ export default function Ak01() {
 	const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [tukError, setTukError] = useState<string | null>(null); // State untuk error TUK
 
 	const [data, setData] = useState<ResultAK01>({
 		id: 0,
@@ -119,6 +120,14 @@ export default function Ak01() {
 
 	const navigate = useNavigate();
 	const handleOnSubmit = async () => {
+		// Validasi TUK
+		if (!selectedTUK) {
+			setTukError("TUK harus dipilih");
+			return;
+		}
+
+		setTukError(null); // Hapus error jika validasi berhasil
+
 		const requestData = {
 			result_id: id_result,
 			evidences: selectedEvidences,
@@ -165,6 +174,14 @@ export default function Ak01() {
 				return [...prev, evidence];
 			}
 		});
+	};
+
+	const handleTUKChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setSelectedTUK(e.target.value);
+		// Hapus error ketika pengguna mulai memilih TUK
+		if (tukError) {
+			setTukError(null);
+		}
 	};
 
 	if (loading) {
@@ -267,33 +284,45 @@ export default function Ak01() {
 											type="date"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
 											value={new Date().toISOString().split("T")[0]}
-											onChange={() => { }}
 											readOnly
 										/>
 										<input
 											type="time"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
 											value={selectedTime}
-											onChange={(e) => {
-												setSelectedTime(e.target.value);
-												console.log(selectedTime);
-											}}
+											readOnly // Kolom jam dibuat read-only
 										/>
-										<select
-											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500 cursor-pointer"
-											value={selectedTUK}
-											onChange={(e) => setSelectedTUK(e.target.value)}
-										>
-											<option value="">TUK</option>
-											{data.locations &&
-												Array.from(new Set(data.locations))
-													.sort()
-													.map((location, index) => (
-														<option key={index} value={location}>
-															{location}
-														</option>
-													))}
-										</select>
+										<div>
+											<select
+												className={`w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500 cursor-pointer ${tukError ? "border border-red-500" : ""
+													}`}
+												value={selectedTUK}
+												onChange={handleTUKChange}
+												onBlur={() => {
+													if (!selectedTUK) setTukError("TUK harus dipilih");
+												}}
+											>
+												<option value="">Pilih TUK</option>
+												{data.locations &&
+													Array.from(new Set(data.locations))
+														.sort()
+														.map((location, index) => (
+															<option key={index} value={location}>
+																{location}
+															</option>
+														))}
+											</select>
+
+											{/* Pesan error */}
+											{tukError && (
+												<p className="text-red-500 text-xs mt-1">{tukError}</p>
+											)}
+
+											{/* Keterangan wajib memilih */}
+											<p className="text-gray-400 text-xs mt-1 italic">
+												*Anda harus memilih TUK sebelum melanjutkan
+											</p>
+										</div>
 									</div>
 								</div>
 
@@ -433,7 +462,7 @@ export default function Ak01() {
 								</div>
 							</div>
 
-							<div className="mt-10 border-t border-gray-200 pt-6 flex justify-center sm:justify-end">
+							<div className="mt-10 border-t border-gray-200 pt-6 flex flex-col items-center sm:items-end">
 								<button
 									type="submit"
 									className={`w-full sm:w-auto bg-[#E77D35] text-white py-2 px-30 rounded transition-colors ${!selectedTUK ||
@@ -462,6 +491,9 @@ export default function Ak01() {
 								>
 									Simpan
 								</button>
+								{tukError && (
+									<p className="text-red-500 text-xs mt-2">{tukError}</p>
+								)}
 							</div>
 						</div>
 					</div>

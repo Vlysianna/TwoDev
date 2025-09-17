@@ -1,6 +1,6 @@
 import Navbar from '../../components/NavAdmin';
 import Sidebar from '../../components/SideAdmin';
-import { Eye, SquareCheck, Download, X, Menu } from "lucide-react";
+import { Eye, SquareCheck, Download, X, Menu, Bell, Check } from "lucide-react";
 import { useEffect, useState, useCallback } from 'react';
 import api from '@/helper/axios';
 import { useToast } from '@/components/ui/useToast';
@@ -133,7 +133,7 @@ export default function VerifikasiPage() {
               <Menu size={24} />
             </button>
             <div className="w-full">
-              <Navbar />
+              <Navbar title="Verifikasi" icon={<Check size={20} />} />
             </div>
           </div>
 

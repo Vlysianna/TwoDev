@@ -675,7 +675,7 @@ export default function Apl02Detail() {
               {saveError && <span className="text-red-500 text-sm">{saveError}</span>}
               <motion.button
                 type="submit"
-                className="bg-[#E77D35] hover:bg-[#E77D35] text-white font-bold py-2 mb-6 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-60"
+                className="bg-[#E77D35] hover:bg-[#E77D35] text-white font-bold py-2 mb-6 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-60 cursor-pointer hover:bg-orange-600"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}

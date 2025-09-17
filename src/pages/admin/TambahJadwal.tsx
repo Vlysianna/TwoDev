@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
-import { Plus, Trash2, AlertCircle, CheckCircle } from "lucide-react";
+import { Plus, Trash2, AlertCircle, CheckCircle, File } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import axiosInstance from "@/helper/axios";
@@ -157,7 +157,7 @@ const TambahJadwal: React.FC = () => {
 		<div className="min-h-screen bg-[#F7FAFC] flex">
 			<Sidebar />
 			<div className="flex-1 flex flex-col min-w-0">
-				<Navbar />
+				<Navbar title="Tambah Jadwal" icon={<File size={20} />} />
 				<main className="flex-1 overflow-auto p-6">
 					{/* Alerts */}
 					{error && (

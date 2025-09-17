@@ -74,7 +74,7 @@ export default function LoginForm() {
       }
     }).catch((err: any) => {
       // console.log(err);
-      const errorMessage = err.response?.data?.message || 'Terjadi kesalahan';
+      const errorMessage = err.message || 'Terjadi kesalahan';
       setError(errorMessage);
     });
   };

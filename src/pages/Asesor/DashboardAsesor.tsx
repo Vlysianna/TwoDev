@@ -261,10 +261,6 @@ const DashboardAsesor: React.FC = () => {
 										onChange={(e) => setSearchTerm(e.target.value)}
 									/>
 								</div>
-								<button className="flex-shrink-0 flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-sm hover:bg-gray-50">
-									<ListFilter className="w-4 h-4 text-gray-600" />
-									<span className="text-gray-600">Filter</span>
-								</button>
 							</div>
 						</div>
 

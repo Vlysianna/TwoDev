@@ -20,6 +20,7 @@ export default function AplZeroOne() {
 	const navigate = useNavigate();
 
 	const [loading, setLoading] = useState(false);
+	const [isLocked, setIsLocked] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 
@@ -101,13 +102,14 @@ export default function AplZeroOne() {
 				.then(
 					(response) =>
 						response.data.success &&
-						reset({
+						(reset({
 							...response.data.data,
 							gender:
 								response.data.data.gender == "male" ? "Laki-laki" : "Perempuan",
 							jobs: [response.data.data.jobs || {}],
 							birth_date: response.data.data.birth_date.split("T")[0],
-						})
+						}),
+						setIsLocked(true))
 				)
 				.catch((error) => console.error(error));
 		};
@@ -148,7 +150,8 @@ export default function AplZeroOne() {
 							</div>
 						)}
 
-						<form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+		<form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+			<fieldset disabled={isLocked}>
 							{/* Data Pribadi */}
 							<div>
 								<h2 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -418,15 +421,16 @@ export default function AplZeroOne() {
 							</div>
 
 							<div className="flex justify-end">
-								<button
-									type="submit"
-									disabled={loading}
-									className="bg-[#E77D35] hover:bg-orange-600 text-white py-2 px-8 rounded-md"
-								>
-									{loading ? "Menyimpan..." : "Simpan"}
-								</button>
+						<button
+							type="submit"
+							disabled={loading || isLocked}
+							className="bg-[#E77D35] hover:bg-orange-600 text-white py-2 px-8 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed"
+						>
+							{loading ? "Menyimpan..." : "Simpan"}
+						</button>
 							</div>
-						</form>
+				</fieldset>
+			</form>
 					</div>
 				</main>
 			</div>
