@@ -13,7 +13,8 @@ import {
   File,
   Calendar,
   Album,
-  LogIn
+  LogIn,
+  ClipboardPen
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import paths from '@/routes/paths';
@@ -44,7 +45,7 @@ const Sidebar: React.FC = () => {
     },
     {
       name: 'Kelola Jadwal Asesmen',
-      icon: Users,
+      icon: ClipboardPen,
       section: 'admin',
       path: paths.admin.kelolaJadwal,
     },

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Edit, Eye, Trash2, Filter, X, ChevronDown } from "lucide-react";
+import { Edit, Eye, Trash2, Filter, X, ChevronDown, Calendar } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
 import NavAdmin from "@/components/NavAdmin";
@@ -168,7 +168,7 @@ const KelolaOkupasi: React.FC = () => {
 			<Sidebar />
 
 			<div className="flex-1 flex flex-col min-w-0">
-				<NavAdmin />
+				<NavAdmin title="Kelola Okupasi" icon={<Calendar size={20} />} />
 
 				<div className="p-3 sm:p-4 lg:p-6">
 					<div className="mb-4 sm:mb-6">

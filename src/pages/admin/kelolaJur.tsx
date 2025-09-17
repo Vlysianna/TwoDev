@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Filter, Download, Edit, Eye, Trash2, AlertTriangle, X } from "lucide-react";
+import { Filter, Download, Edit, Eye, Trash2, AlertTriangle, X, Album } from "lucide-react";
 import Navbar from "@/components/NavAdmin";
 import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
@@ -137,7 +137,7 @@ const KelolaJurusan = () => {
 			<Sidebar />
 			<div className="lg:ml-64">
 				<div className="sticky top-0 z-20 bg-white shadow-sm">
-					<Navbar />
+					<Navbar title="Kelola Jurusan" icon={<Album size={20} />} />
 				</div>
 				<div className="p-4 lg:p-6 pt-20 lg:pt-6">
 					<div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">

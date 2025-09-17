@@ -3,7 +3,7 @@ import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import { useNavigate } from 'react-router-dom';
 import api from '@/helper/axios';
-import { Loader2, RefreshCcw } from 'lucide-react';
+import { FileText, Loader2, RefreshCcw } from 'lucide-react';
 
 // Types & helpers
 interface AssesseeRow { id: number; name: string; email: string; status: string; }
@@ -104,7 +104,7 @@ const ResultAssessment: React.FC = () => {
     <div className="min-h-screen bg-[#F7FAFC] flex">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar />
+        <Navbar title="Hasil Assessment" icon={<FileText size={20} />}  />
         <main className="flex-1 overflow-auto p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Result Assessment</h1>

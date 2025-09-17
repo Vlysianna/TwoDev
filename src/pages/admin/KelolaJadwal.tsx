@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Edit3, Eye, Trash2, AlertCircle } from 'lucide-react';
+import { Filter, Edit3, Eye, Trash2, AlertCircle, File } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import { Link, useNavigate } from 'react-router-dom';
@@ -212,7 +212,7 @@ const KelolaJadwal: React.FC = () => {
          <div className="min-h-screen bg-[#F7FAFC] flex">
            <Sidebar />
            <div className="flex-1 flex flex-col min-w-0">
-             <Navbar />
+             <Navbar title="Kelola Jadwal" icon={<File size={20} />} />
              <main className="flex-1 overflow-auto p-6">
                <div className="flex items-center justify-center h-64">
                  <div className="text-center">
@@ -230,7 +230,7 @@ const KelolaJadwal: React.FC = () => {
     <div className="min-h-screen bg-[#F7FAFC] flex">
     <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
-    <Navbar />
+      <Navbar title="Kelola Jadwal" icon={<File size={20} />} />
             <main className="flex-1 overflow-auto p-6">
                 {/* Error Alert */}
                 {error && (

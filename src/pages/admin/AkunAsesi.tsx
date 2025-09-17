@@ -5,7 +5,8 @@ import {
   Eye,
   Trash2,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  User
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
@@ -142,7 +143,7 @@ const KelolaAkunAsesi: React.FC = () => {
       <div className="min-h-screen bg-[#F7FAFC] flex">
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <Navbar />
+          <Navbar title="Akun Asesi" icon={<User size={20} />} />
           <main className="flex-1 overflow-auto p-6 flex items-center justify-center">
             <div className="text-center">
               <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-[#E77D35]" />
@@ -158,7 +159,7 @@ const KelolaAkunAsesi: React.FC = () => {
     <div className="min-h-screen bg-[#F7FAFC] flex">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar />
+        <Navbar title="Akun Asesi" icon={<User size={20} />} />
 
         <main className="flex-1 overflow-auto p-6">
           {/* Error Alert */}
