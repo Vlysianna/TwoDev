@@ -41,12 +41,13 @@ export default function AssessmentAdminProvider({
     const { user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchResult = async () => {
             try {
+                setLoading(true);
                 const resp = await api.get(`/assessments/result/${id_assessment}/${id_asesor}/${id_asesi}`);
                 if (resp.data.success) {
                     const data = resp.data.data;
@@ -58,13 +59,16 @@ export default function AssessmentAdminProvider({
             } catch (err) {
                 console.error("Failed to fetch result data:", err);
                 setError("Failed to fetch result data");
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchResult();
+        if (id_assessment && id_asesor && id_asesi) fetchResult();
     }, [user, id_assessment, id_asesor, id_asesi]);
 
     useEffect(() => {
+        if (location.pathname == routes.admin.resultAssessment.root) return;
         if (!id_assessment || !id_asesor) {
             navigate(routes.admin.resultAssessment.root, {
                 replace: true,
