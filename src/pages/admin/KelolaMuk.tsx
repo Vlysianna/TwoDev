@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Filter, Edit3, Eye, Trash2, AlertCircle, File } from "lucide-react";
+import { Edit3, Eye, Trash2, AlertCircle, File } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
@@ -9,15 +9,13 @@ import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 import type { MukType } from "@/lib/types";
 
 const KelolaMUK: React.FC = () => {
-	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
-	const [exportLoading, setExportLoading] = useState<boolean>(false);
+	const [exportLoading] = useState<boolean>(false);
 	const [muks, setMuks] = useState<MukType[]>([]);
-	const [filteredMuks, setFilteredMuks] = useState<MukType[]>([]);
 
 	const navigate = useNavigate();
 
@@ -43,28 +41,13 @@ const KelolaMUK: React.FC = () => {
 		}
 	};
 
-	useEffect(() => {
-		const filtered = muks.filter(
-			(muk) =>
-				muk.occupation.scheme.code
-					.toLowerCase()
-					.includes(searchQuery.toLowerCase()) ||
-				muk.occupation.scheme.name
-					.toLowerCase()
-					.includes(searchQuery.toLowerCase())
-		);
-		setFilteredMuks(filtered);
-	}, [muks, searchQuery]);
+
 
 	const handleEdit = (id: number) => {
 		console.log("Edit user:", id);
 		navigate(paths.admin.muk.edit(id));
 	};
 	const handleView = (id: number) => console.log("View user:", id);
-	const handleDelete = (id: number) => {
-		setDeletingId(id);
-		setDeleteModalOpen(true);
-	};
 
 	const confirmDelete = async () => {
 		if (!deletingId) return;
@@ -72,17 +55,16 @@ const KelolaMUK: React.FC = () => {
 			setDeleteLoading(true);
 			await axiosInstance.delete(`/assessments/${deletingId}`);
 			// optimistic update
-			setFilteredMuks((prev) => prev.filter((muk) => muk.id !== deletingId));
+			setMuks((prev) => prev.filter((muk) => muk.id !== deletingId));
 			setDeleteModalOpen(false);
 			setDeletingId(null);
 		} catch (error: unknown) {
-			console.error("Error deleting scheme:", error);
-			setError("Gagal menghapus skema");
+			console.error("Error deleting assessment:", error);
+			setError("Gagal menghapus MUK");
 		} finally {
 			setDeleteLoading(false);
 		}
 	};
-	const handleFilter = () => console.log("Filter clicked");
 	const handleExport = async () => {
 		// setExportLoading(true);
 		// setError(null);
@@ -190,26 +172,6 @@ const KelolaMUK: React.FC = () => {
 									Kelola MUK
 								</h2>
 								<div className="flex flex-wrap gap-3 sm:space-x-3 items-center">
-									<div className="relative w-full sm:w-auto">
-										<input
-											type="text"
-											placeholder="Cari skema..."
-											value={searchQuery}
-											onChange={(e) => setSearchQuery(e.target.value)}
-											className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 w-full sm:w-64"
-										/>
-										<Search
-											className="absolute left-3 top-2.5 text-gray-400"
-											size={16}
-										/>
-									</div>
-									<button
-										onClick={handleFilter}
-										className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto"
-									>
-										Filter
-										<Filter size={16} className="text-[#E77D35]" />
-									</button>
 									<button
 										onClick={handleExport}
 										className="bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors w-full sm:w-[152px] h-[41px] flex items-center justify-center"
@@ -251,7 +213,7 @@ const KelolaMUK: React.FC = () => {
 										</tr>
 									</thead>
 									<tbody className="bg-white divide-y divide-gray-200">
-										{filteredMuks.map((muk, index) => (
+										{muks.map((muk, index) => (
 											<tr
 												key={muk.id}
 												className={`${
