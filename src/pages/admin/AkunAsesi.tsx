@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Filter,
-  Edit3,
   Eye,
-  Trash2,
   Loader2,
   AlertCircle,
   User
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 import AssesseeModal from '@/components/AssesseeModal';
-import { useNavigate } from 'react-router-dom';
 import api from '@/helper/axios';
 
 interface UserData {
@@ -48,12 +43,6 @@ const KelolaAkunAsesi: React.FC = () => {
   // Detail modal state (for view only)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAssessee, setSelectedAssessee] = useState<UserData | null>(null);
-  const navigate = useNavigate();
-  
-  // Delete modal states
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [assesseeToDelete, setAssesseeToDelete] = useState<UserData | null>(null);
 
   useEffect(() => {
     fetchAssessees();
@@ -84,14 +73,7 @@ const KelolaAkunAsesi: React.FC = () => {
     }
   };
 
-  const handleCreate = () => {
-    navigate('/admin/edit-asesi');
-  };
 
-
-  const handleEdit = (user: UserData) => {
-    navigate(`/admin/edit-asesi/${user.id}`);
-  };
 
   const handleView = async (id: number) => {
     try {
@@ -109,34 +91,7 @@ const KelolaAkunAsesi: React.FC = () => {
     }
   };
 
-  const handleDeleteClick = (user: UserData) => {
-    setAssesseeToDelete(user);
-    setIsDeleteModalOpen(true);
-  };
 
-  const handleDeleteConfirm = async () => {
-    if (!assesseeToDelete) return;
-
-    try {
-      setDeleteLoading(true);
-  await api.delete(`/user/${assesseeToDelete.id}`);
-      await fetchAssessees(); // Refresh the list
-      setIsDeleteModalOpen(false);
-      setAssesseeToDelete(null);
-    } catch (error: unknown) {
-      console.error('Error deleting user:', error);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const msg = (error as any)?.response?.data?.message || 'Gagal menghapus pengguna';
-      setError(msg);
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  // No modal success needed for create/edit
-
-  const handleFilter = () => console.log('Filter clicked');
-  const handleExport = () => console.log('Export to Excel clicked');
 
   if (loading) {
     return (
@@ -182,14 +137,6 @@ const KelolaAkunAsesi: React.FC = () => {
           {/* Page Title */}
           <div className="mb-6">
             <h1 className="text-2xl font-semibold text-gray-900 mb-4">Kelola Akun Asesi</h1>
-            
-            {/* Create Account Button */}
-            <button
-              onClick={handleCreate}
-              className="w-[191px] h-[41px] bg-[#E77D35] text-white text-sm font-medium rounded-md hover:bg-orange-600 transition-colors"
-            >
-              Buat Akun
-            </button>
           </div>
 
           {/* Main Content Card - This is the box container like in Figma */}
@@ -198,21 +145,6 @@ const KelolaAkunAsesi: React.FC = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[26px] font-semibold text-[#000000]">Akun Asesi</h2>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={handleFilter}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    Filter
-                    <Filter size={16} className="text-[#E77D35]" />
-                  </button>
-                  <button
-                    onClick={handleExport}
-                    className="w-[152px] h-[41px] bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
-                  >
-                    Export ke Excel
-                  </button>
-                </div>
               </div>
               {/* Full width border line */}
               <div className="border-b border-gray-200"></div>
@@ -275,25 +207,11 @@ const KelolaAkunAsesi: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
                             <button
-                              onClick={() => handleEdit(user)}
-                              className="p-2 text-orange-500 hover:bg-orange-50 rounded-md transition-colors"
-                              title="Edit"
-                            >
-                              <Edit3 size={16} />
-                            </button>
-                            <button
                               onClick={() => handleView(user.id)}
                               className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                               title="View"
                             >
                               <Eye size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(user)}
-                              className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                              title="Delete"
-                            >
-                              <Trash2 size={16} />
                             </button>
                           </div>
                         </td>
@@ -317,15 +235,7 @@ const KelolaAkunAsesi: React.FC = () => {
         mode="show"
       />
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmDeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        loading={deleteLoading}
-        title="Hapus Akun Asesi"
-        message={`Apakah Anda yakin ingin menghapus akun asesi "${assesseeToDelete?.assessee?.full_name || assesseeToDelete?.email}"? Tindakan ini tidak dapat dibatalkan.`}
-      />
+
     </div>
   );
 };
