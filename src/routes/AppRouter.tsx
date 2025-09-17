@@ -71,6 +71,8 @@ import Ia01Asesi from "@/pages/asesi/Ia-01";
 import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
 import ResultAssessment from "@/pages/admin/ResultAssessment";
 import EditMUK from "@/pages/admin/EditMuk";
+import RecapAssessmentAdmin from "@/pages/admin/RecapAssessment";
+import DetailAssessmentAdmin from "@/pages/admin/DetailAssessment";
 
 const router = createBrowserRouter([
 	{
@@ -138,6 +140,11 @@ const router = createBrowserRouter([
 					{ path: paths.admin.kelolaUser, element: <KelolaUser /> },
 					{ path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
 					{ path: paths.admin.resultAssessment, element: <ResultAssessment /> },
+					{ path: paths.admin.recapAssessmentAdminPattern, element: <RecapAssessmentAdmin /> },
+					{
+						path: paths.admin.detailAssessmentAdminPattern,
+						element: <DetailAssessmentAdmin />,
+					},
 					{ path: paths.admin.editAsesor, element: <EditAsesor /> },
 					{ path: paths.admin.createAsesor, element: <EditAsesor /> },
 					{ path: paths.admin.editAsesorPattern, element: <EditAsesor /> },
