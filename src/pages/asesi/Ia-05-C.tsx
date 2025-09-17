@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, Clock } from "lucide-react";
+import { Calendar, ChevronLeft, Clock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
@@ -227,8 +227,8 @@ export default function Ia05CAssessee() {
                     Skema Sertifikasi (Okupasi)
                   </h2>
                   <div className="flex items-center text-xs md:text-sm text-gray-500">
-                    <Clock size={12} className="text-gray-500 mr-1" />
-                    <span className="text-gray-600">{result?.tuk ?? "N/A"}</span>
+                    <Clock size={16} className="text-gray-500 mr-2" />
+                    <span className="text-gray-600 capitalize">{result?.tuk ?? "N/A"}</span>
                   </div>
                 </div>
 
@@ -463,25 +463,7 @@ export default function Ia05CAssessee() {
                       className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
                       readOnly
                     />
-                    <svg
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <rect
-                        x="3"
-                        y="4"
-                        width="18"
-                        height="18"
-                        rx="2"
-                        ry="2"
-                        strokeWidth="2"
-                      ></rect>
-                      <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
-                      <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
-                      <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
-                    </svg>
+                    <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2" />
                   </div>
                 </div>
 
@@ -513,25 +495,7 @@ export default function Ia05CAssessee() {
                       className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
                       readOnly
                     />
-                    <svg
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <rect
-                        x="3"
-                        y="4"
-                        width="18"
-                        height="18"
-                        rx="2"
-                        ry="2"
-                        strokeWidth="2"
-                      ></rect>
-                      <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
-                      <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
-                      <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
-                    </svg>
+                    <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2" />
                   </div>
                 </div>
               </div>

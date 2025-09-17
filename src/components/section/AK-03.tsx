@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, X, AlertCircle } from "lucide-react";
+import { Search, X, AlertCircle, Check } from "lucide-react";
 import api from "@/helper/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AK03Question, AssessmentData } from "@/model/ak03-model";
@@ -95,6 +95,7 @@ export default function AK03({
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filterKompeten, setFilterKompeten] = useState("all");
 	const [catatanUmum, setCatatanUmum] = useState("");
+	const [showNotif, setShowNotif] = useState(false);
 
 	const {
 		control,
@@ -190,8 +191,12 @@ export default function AK03({
 			};
 
 			const response = await api.post("/assessments/ak-03/answer", payload);
-			if (!response.data.success)
+			if (!response.data.success) {
 				setErrorMessage(response.data.message || "Gagal menyimpan data.");
+			} else {
+				setShowNotif(true); // Tampilkan notifikasi
+				setTimeout(() => setShowNotif(false), 2500); // Sembunyikan setelah 2.5 detik
+			}
 		} catch (error: any) {
 			setErrorMessage(error.response?.data?.message || "Gagal menyimpan data.");
 		}
@@ -222,6 +227,14 @@ export default function AK03({
 
 	return (
 		<div className="">
+			{/* Notifikasi Simpan */}
+			{showNotif && (
+				<div className="fixed top-6 right-6 z-50 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded shadow flex items-center animate-fade-in">
+					<Check size={20} className="mr-2" />
+					Data berhasil disimpan!
+				</div>
+			)}
+
 			{errorMessage && (
 				<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
 					<AlertCircle size={20} className="mr-2" />
@@ -377,18 +390,7 @@ export default function AK03({
 											}`}
 									>
 										{filterKompeten === opt.value && (
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												viewBox="0 0 20 20"
-												fill="white"
-												className="w-3 h-3"
-											>
-												<path
-													fillRule="evenodd"
-													d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-													clipRule="evenodd"
-												/>
-											</svg>
+											<Check className="w-4 h-4 text-white" />
 										)}
 									</span>
 									<span
@@ -475,18 +477,7 @@ export default function AK03({
 																			}`}
 																		>
 																			{field.value === val.toLowerCase() && (
-																				<svg
-																					xmlns="http://www.w3.org/2000/svg"
-																					viewBox="0 0 20 20"
-																					fill="white"
-																					className="w-3 h-3"
-																				>
-																					<path
-																						fillRule="evenodd"
-																						d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-																						clipRule="evenodd"
-																					/>
-																				</svg>
+																				<Check className="w-4 h-4 text-white" />
 																			)}
 																		</span>
 																		<span

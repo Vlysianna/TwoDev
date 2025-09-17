@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, Clock, Monitor } from 'lucide-react';
 import NavbarAsesor from '@/components/NavAsesor';
 import api from '@/helper/axios';
 import { useAssessmentParams } from '@/components/AssessmentAsesiProvider';
@@ -180,10 +180,7 @@ export default function Ia01Asesi() {
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                 <h2 className="text-lg font-medium whitespace-nowrap">Skema Sertifikasi (Okupasi)</h2>
                                 <div className="flex items-center space-x-2">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <circle cx="12" cy="12" r="10" strokeWidth="2"></circle>
-                                        <polyline points="12,6 12,12 16,14" strokeWidth="2"></polyline>
-                                    </svg>
+                                    <Clock className="w-5 h-5 text-gray-400" />
                                     <span className="text-sm text-gray-600">Sewaktu</span>
                                 </div>
                             </div>
@@ -215,7 +212,7 @@ export default function Ia01Asesi() {
                                     <button
                                         key={tab}
                                         onClick={() => setSelectedKPekerjaan(tab)}
-                                        className={`px-3 lg:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedKPekerjaan === tab
+                                        className={`px-3 lg:px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition-colors ${selectedKPekerjaan === tab
                                             ? 'bg-[#E77D35] text-white shadow-sm'
                                             : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                                             }`}
@@ -248,13 +245,7 @@ export default function Ia01Asesi() {
                                         <div className="flex items-start justify-between mb-3">
                                             <div className="flex items-center space-x-2">
                                                 <div className="w-5 h-5 flex items-center justify-center">
-                                                    <svg className="w-4 h-4 text-[#E77D35]" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
+                                                    <Monitor size={16} className="text-[#E77D35]" />
                                                 </div>
                                                 <span className="text-sm font-medium text-[#E77D35]">
                                                     Unit kompetensi {unitNumberMap[unit.id] || 'N/A'}
@@ -396,12 +387,7 @@ export default function Ia01Asesi() {
                                             readOnly
                                             disabled
                                         />
-                                        <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"></rect>
-                                            <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
-                                            <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
-                                            <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
-                                        </svg>
+                                        <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2" />
                                     </div>
                                 </div>
                                 <div className="mb-auto">
@@ -432,12 +418,7 @@ export default function Ia01Asesi() {
                                             readOnly
                                             disabled
                                         />
-                                        <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"></rect>
-                                            <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"></line>
-                                            <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"></line>
-                                            <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"></line>
-                                        </svg>
+                                        <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2" />
                                     </div>
                                 </div>
                                 <div className="flex-grow"></div>
