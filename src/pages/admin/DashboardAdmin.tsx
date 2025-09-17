@@ -286,7 +286,7 @@ const Dashboard: React.FC = () => {
 
                     {/* Statistics Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        {/* Skema Sertifikasi Card */}
+                        {/* Jurusan Card */}
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
@@ -294,11 +294,11 @@ const Dashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <p className="text-lg font-semibold text-gray-900">{stats.totalSchemes}</p>
-                                    <p className="text-sm text-gray-600">Skema Sertifikasi</p>
+                                    <p className="text-sm text-gray-600">Jurusan</p>
                                 </div>
                             </div>
                             <hr className="my-4" />
-                            <button onClick={() => navigate(paths.admin.kelolaMUK)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                            <button onClick={() => navigate(paths.admin.kelolaJurusan)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
                                 Lihat Detail
                                 <span>→</span>
                             </button>
@@ -312,11 +312,11 @@ const Dashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <p className="text-lg font-semibold text-gray-900">{stats.totalAssessments}</p>
-                                    <p className="text-sm text-gray-600">Assasmen</p>
+                                    <p className="text-sm text-gray-600">MUK</p>
                                 </div>
                             </div>
                             <hr className="my-4" />
-                            <button onClick={() => navigate(paths.admin.apl02)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                            <button onClick={() => navigate(paths.admin.muk.root)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
                                 Lihat Detail
                                 <span>→</span>
                             </button>
