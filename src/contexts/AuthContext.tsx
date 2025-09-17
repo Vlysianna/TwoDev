@@ -153,7 +153,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = (): void => {
+    localStorage.clear();
     dispatch({ type: 'LOGOUT' });
+    window.location.href = '';
   };
 
   const checkAuth = async (): Promise<void> => {
