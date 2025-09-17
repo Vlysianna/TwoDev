@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, AlertCircle, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
@@ -9,10 +9,12 @@ import { getAssessorUrl } from "@/lib/hashids";
 import type { AK05ResponseData } from "@/model/ak05-model";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function CekAk05() {
 	const { id_result, id_asesor } = useAssessmentParams();
 	const { user } = useAuth();
+	const navigate = useNavigate();
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -25,6 +27,9 @@ export default function CekAk05() {
 	const [saran, setSaran] = useState("");
 	const [isCompetent, setIsCompetent] = useState<boolean | null>(null);
 	const [deskripsi, setDeskripsi] = useState("");
+
+	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [saving, setSaving] = useState(false);
 
 	useEffect(() => {
 		fetchData();
@@ -63,6 +68,18 @@ export default function CekAk05() {
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const handleSaveClick = () => {
+		setShowConfirmModal(true);
+	};
+
+	const handleConfirmSave = async () => {
+		setSaving(true);
+		// Jika perlu, bisa tambahkan API call di sini untuk update status selesai
+		setShowConfirmModal(false);
+		setSaving(false);
+		navigate(paths.asesi.dashboard);
 	};
 
 	if (loading) {
@@ -110,7 +127,6 @@ export default function CekAk05() {
 						}
 					/>
 				</div>
-
 				<main className='m-4'>
 					<section className="mb-1">
 						<div className="w-full">
@@ -273,16 +289,41 @@ export default function CekAk05() {
 
 							<div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 mb-3 h-40">
 								{qrValue ? (
-									<QRCodeCanvas value={qrValue} size={100} />
+									<>
+										<QRCodeCanvas value={qrValue} size={100} />
+										<p className="text-xs text-gray-400 mt-2">
+											{data.result.assessor.name || "Nama Asesor"}
+										</p>
+									</>
 								) : (
 									<p className="text-gray-400 text-sm">Belum Generate QR</p>
 								)}
-								{qrValue && (
-									<p className="text-xs text-gray-400 mt-2">
-										{data.result.assessor.name || "Nama Asesor"}
-									</p>
-								)}
 							</div>
+							{/* Tambahkan tombol simpan jika QR sudah ada */}
+							{qrValue && (
+								<>
+									<button
+										onClick={handleSaveClick}
+										disabled={saving}
+										className={`w-full text-white py-2 rounded-lg mt-2 cursor-pointer ${saving
+											? "bg-gray-400 cursor-not-allowed"
+											: "bg-[#E77D35] hover:bg-orange-600"
+										}`}
+									>
+										{saving ? "Menyimpan..." : "Simpan"}
+									</button>
+									<ConfirmModal
+										isOpen={showConfirmModal}
+										onClose={() => setShowConfirmModal(false)}
+										onConfirm={handleConfirmSave}
+										title="Konfirmasi Selesai"
+										message="Apakah Anda yakin ingin menyelesaikan asesmen ini? Setelah disimpan, Anda tidak dapat mengubah data lagi."
+										confirmText="Oke"
+										cancelText="Batal"
+										type="warning"
+									/>
+								</>
+							)}
 						</div>
 					</section>
 				</main>
