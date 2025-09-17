@@ -23,6 +23,7 @@ export default function DataSertifikasi() {
 
 	// const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
+	const [isLocked, setIsLocked] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const {
@@ -187,8 +188,10 @@ export default function DataSertifikasi() {
 						school_report_card: getFileName(school_report_card),
 						student_card: getFileName(student_card),
 					});
+					setIsLocked(true);
 				} else {
 					setResultDocs(null);
+					setIsLocked(false);
 				}
 			} catch (err) {
 				console.error("Failed to fetch result data:", err);
@@ -216,7 +219,7 @@ export default function DataSertifikasi() {
 		const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
 			e.preventDefault();
 			setDragActive(false);
-			if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+			if (!isLocked && e.dataTransfer.files && e.dataTransfer.files[0]) {
 				field.onChange(e.dataTransfer.files[0]);
 			}
 		};
@@ -264,16 +267,18 @@ export default function DataSertifikasi() {
 					{fileData && (
 						<button
 							type="button"
-							onClick={() => field.onChange(null)}
+							onClick={() => !isLocked && field.onChange(null)}
 							className="flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 hover:bg-red-100 text-sm font-medium cursor-pointer"
+							disabled={isLocked}
 						>
 							Hapus
 						</button>
 					)}
 					<button
 						type="button"
-						onClick={() => fileRef.current?.click()}
+						onClick={() => !isLocked && fileRef.current?.click()}
 						className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 text-sm font-medium cursor-pointer"
+						disabled={isLocked}
 					>
 						{fileData ? "Ganti" : "Browse"}
 					</button>
@@ -284,7 +289,7 @@ export default function DataSertifikasi() {
 					ref={fileRef}
 					className="hidden"
 					accept=".jpg,.jpeg,.png,"
-					onChange={(e) => field.onChange(e.target.files?.[0] || null)}
+					onChange={(e) => !isLocked && field.onChange(e.target.files?.[0] || null)}
 				/>
 			</div>
 		);
@@ -312,10 +317,11 @@ export default function DataSertifikasi() {
 
 				<main className='m-4'>
 					<div>
-						<form
+				<form
 							onSubmit={handleSubmit(onSubmit)}
 							className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-stretch"
 						>
+					<fieldset disabled={isLocked}>
 							{error && (
 								<div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
 									<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
@@ -335,7 +341,7 @@ export default function DataSertifikasi() {
 												key={option}
 												className="flex items-center space-x-3 cursor-pointer"
 											>
-												<Controller
+										<Controller
 													name="purpose"
 													control={control}
 													rules={{ required: "Harap pilih tujuan asesmen" }}
@@ -347,8 +353,9 @@ export default function DataSertifikasi() {
 																name={field.name}
 																value={option}
 																defaultChecked={checked}
-																onChange={(e) => field.onChange(e.target.value)}
+														onChange={(e) => !isLocked && field.onChange(e.target.value)}
 																className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
+														disabled={isLocked}
 															/>
 														);
 													}}
@@ -381,7 +388,7 @@ export default function DataSertifikasi() {
 													<p className="text-gray-700 text-sm leading-relaxed">
 														{file.title}
 													</p>
-													<Controller
+										<Controller
 														name={file.name as keyof FormValues}
 														control={control}
 														render={({ field }) => (
@@ -420,7 +427,7 @@ export default function DataSertifikasi() {
 														<p className="text-gray-700 text-sm font-medium">
 															{file.title}
 														</p>
-														<Controller
+										<Controller
 															name={file.name as keyof FormValues}
 															control={control}
 															render={({ field }) => (
@@ -443,9 +450,9 @@ export default function DataSertifikasi() {
 									<div className="mt-auto pt-4 space-y-3">
 										<hr className="border-gray-300" />
 										<div className="w-full">
-											<button
+									<button
 												type="submit"
-												disabled={loading}
+										disabled={loading || isLocked}
 												className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 sm:py-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
 											>
 												{loading ? "Menyimpan..." : "Simpan"}
@@ -454,7 +461,8 @@ export default function DataSertifikasi() {
 									</div>
 								</div>
 							</div>
-						</form>
+					</fieldset>
+				</form>
 					</div>
 				</main>
 			</div>
