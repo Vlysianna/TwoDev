@@ -3,7 +3,7 @@ import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import type { ResultAK02, UnitCompetensi } from "@/model/ak02-model";
 import routes from "@/routes/paths";
-import { AlertCircle, FileText } from "lucide-react";
+import { AlertCircle, Calendar, Check, FileText, QrCode, Save } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -98,6 +98,9 @@ export default function AK02({
 	// Modal state
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const [pendingValue, setPendingValue] = useState<string>("");
+
+	const [saveHeaderError, setSaveHeaderError] = useState<string | null>(null);
+
 
 	useEffect(() => {
 		if (user) {
@@ -507,18 +510,23 @@ export default function AK02({
 										</td>
 										{evidenceTypes.map((_, evidenceIndex) => (
 											<td key={evidenceIndex} className="py-4 px-3 text-center">
-												<input
-													type="checkbox"
-													checked={isChecked(unitIndex, evidenceIndex)}
-													onChange={() =>
-														handleCheckboxChange(unitIndex, evidenceIndex)
-													}
-													className="w-4 h-4 rounded border-2 border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-													style={{
-														accentColor: "#FF7601",
-													}}
-													disabled={isAssessee}
-												/>
+												<label className="inline-flex items-center cursor-pointer">
+													<input
+														type="checkbox"
+														checked={isChecked(unitIndex, evidenceIndex)}
+														onChange={() => handleCheckboxChange(unitIndex, evidenceIndex)}
+														disabled={isAssessee}
+														className="hidden peer"
+													/>
+													<span
+														className="w-5 h-5 flex items-center justify-center rounded border-2 border-gray-300 
+               peer-checked:bg-[#E77D35] peer-checked:border-[#E77D35] transition"
+													>
+														{/* Icon centang putih */}
+														<Check className={`w-4 h-4 text-white ${isChecked(unitIndex, evidenceIndex) ? 'block' : 'hidden'}`} />
+													</span>
+												</label>
+
 											</td>
 										))}
 									</tr>
@@ -530,273 +538,268 @@ export default function AK02({
 			)}
 
 			{/* Bottom form */}
-			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-10 lg:p-10 w-full">
-				<div className="p-2 lg:col-span-20 w-full">
-					<div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
-						{/* Left Section: Rekomendasi Hasil Asesmen */}
-						<div className="lg:col-span-6 order-1">
-							<h2 className="text-sm sm:text-base font-semibold text-gray-800 mb-4 lg:mb-6">
-								Rekomendasi Hasil Asesmen
-							</h2>
-
-							<div className="mb-4 lg:mb-6">
-								<div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-6 lg:space-x-8">
-									<label className="flex items-center">
-										<input
-											type="checkbox"
-											checked={assessmentResult === "kompeten"}
-											onChange={() => handleAssessmentResultChange("kompeten")}
-											disabled={isAssessee}
-											className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-3 disabled:opacity-50 disabled:cursor-not-allowed"
-										/>
-										<span
-											className={`text-xs sm:text-sm ${
-												isAssessee ? "text-gray-400" : "text-gray-700"
-											}`}
-										>
-											Kompeten
-										</span>
-									</label>
-									<label className="flex items-center">
-										<input
-											type="checkbox"
-											checked={assessmentResult === "belum-kompeten"}
-											onChange={() =>
-												handleAssessmentResultChange("belum-kompeten")
-											}
-											disabled={isAssessee}
-											className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded mr-3 disabled:opacity-50 disabled:cursor-not-allowed"
-										/>
-										<span
-											className={`text-xs sm:text-sm ${
-												isAssessee ? "text-gray-400" : "text-gray-700"
-											}`}
-										>
-											Belum Kompeten
-										</span>
-									</label>
-								</div>
-							</div>
-
-							{/* Tindak Lanjut */}
-							<div className="mb-4 lg:mb-6">
-								<label
-									className={`block text-xs sm:text-sm font-medium mb-2 ${
-										isAssessee
-											? "text-gray-400"
-											: assessmentResult === "kompeten"
-											? "text-gray-400"
-											: "text-gray-700"
-									}`}
-								>
-									Tindak lanjut yang dibutuhkan
-									{assessmentResult === "belum-kompeten" && !isAssessee && (
-										<span className="text-red-500 ml-1">*</span>
-									)}
-								</label>
-								<p className="text-xs text-gray-500 mb-2">
-									(Masukkan pekerjaan tambahan dan asesmen yang diperlukan untuk
-									mencapai kompetensi)
-								</p>
-								<div
-									className={`border border-gray-300 rounded-md p-3 min-h-[60px] sm:min-h-[80px] focus-within:ring-2 focus-within:ring-orange-500 ${
-										isAssessee || assessmentResult === "kompeten"
-											? "bg-gray-100"
-											: ""
-									}`}
-								>
-									<textarea
-										value={followUp}
-										onChange={(e) => setFollowUp(e.target.value)}
-										disabled={isAssessee || assessmentResult === "kompeten"}
-										className={`w-full resize-none border-none outline-none text-xs sm:text-sm ${
-											isAssessee || assessmentResult === "kompeten"
-												? "bg-gray-100 text-gray-500 cursor-not-allowed"
-												: ""
-										}`}
-										rows={3}
-										placeholder={
-											assessmentResult === "kompeten"
-												? "Tidak diperlukan untuk hasil kompeten"
-												: ""
-										}
-									/>
-								</div>
-							</div>
-
-							{/* Komentar Asesor */}
-							<div>
-								<label
-									className={`block text-xs sm:text-sm font-medium mb-2 ${
-										isAssessee ? "text-gray-400" : "text-gray-700"
-									}`}
-								>
-									Komentar/ Observasi oleh asesor
-									{!isAssessee && <span className="text-red-500 ml-1">*</span>}
-								</label>
-								<div
-									className={`border border-gray-300 rounded-md p-3 min-h-[60px] sm:min-h-[80px] focus-within:ring-2 focus-within:ring-orange-500 ${
-										isAssessee ? "bg-gray-100" : ""
-									}`}
-								>
-									<textarea
-										value={assessorComments}
-										onChange={(e) => setAssessorComments(e.target.value)}
-										disabled={isAssessee}
-										className={`w-full resize-none border-none outline-none text-xs sm:text-sm ${
-											isAssessee
-												? "bg-gray-100 text-gray-500 cursor-not-allowed"
-												: ""
-										}`}
-										rows={3}
-										placeholder=""
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Middle Section: User Info */}
-						<div className="lg:col-span-4 order-2 lg:order-2">
-							<div className="mb-8 lg:mb-15">
-								<h3 className="text-xs sm:text-sm font-semibold mb-3 text-gray-400">
-									Asesi
-								</h3>
-								<div className="mb-3">
+			<div className="bg-white mt-4 rounded-lg shadow-sm border p-6">
+				{/* Bagian Rekomendasi - Full Width */}
+				<div className="mb-6">
+					<h3 className="text-xl font-medium text-gray-900 mb-4">Rekomendasi</h3>
+					<div className="space-y-3">
+						{!data ? (
+							<div className="text-gray-500">Memuat rekomendasi...</div>
+						) : (
+							<>
+								<label className="flex items-start space-x-3 cursor-pointer">
 									<input
-										type="text"
-										value={data.assessee.name}
-										disabled
-										className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md text-xs sm:text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
+										type="radio"
+										name="recommendation"
+										checked={assessmentResult === 'kompeten'}
+										onChange={() => handleAssessmentResultChange('kompeten')}
+										className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+										disabled={isAssessee || !!data.ak02_headers?.approved_assessor}
 									/>
-								</div>
-								<div className="flex items-center space-x-2">
-									<div className="flex-1">
-										<input
-											type="date"
-											value={new Date().toISOString().split("T")[0]}
-											disabled
-											className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md text-xs sm:text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
-										/>
-									</div>
-								</div>
-							</div>
-
-							<div className="mb-6">
-								<h3 className="text-xs sm:text-sm font-semibold mb-3 text-gray-400">
-									Asesor
-								</h3>
-								<div className="mb-3">
-									<input
-										type="text"
-										value={data.assessor.name}
-										disabled
-										className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md text-xs sm:text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
-									/>
-								</div>
-								<div className="mb-3">
-									<input
-										type="text"
-										value={data.assessor.no_reg_met}
-										disabled
-										className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md text-xs sm:text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
-									/>
-								</div>
-								<div className="flex items-center space-x-2">
-									<div className="flex-1">
-										<input
-											type="date"
-											value={new Date().toISOString().split("T")[0]}
-											disabled
-											className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md text-xs sm:text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
-										/>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						{/* Right Section: QR Codes */}
-						<div className="lg:col-span-2 order-3 flex flex-col items-center space-y-6 lg:space-y-10">
-							<div className="grid grid-cols-1 gap-4">
-								{/* Assessor QR Code */}
-								<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-									{assessorQrValue && (
-										<QRCodeCanvas
-											value={assessorQrValue}
-											size={156}
-											className="w-40 h-40 object-contain"
-										/>
-									)}
-									<span className="text-sm font-semibold text-gray-800">
-										{data.assessor.name}
+									<span className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
+                ${assessmentResult === 'belum-kompeten' ? 'line-through opacity-50' : ''}`}>
+										Asesi telah memenuhi pencapaian seluruh kriteria unjuk kerja, direkomendasikan <strong>KOMPETEN</strong>
 									</span>
-									{!isAssessee && !data.ak02_headers.approved_assessor && (
+								</label>
+								<label className="flex items-start space-x-3 cursor-pointer">
+									<input
+										type="radio"
+										name="recommendation"
+										checked={assessmentResult === 'belum-kompeten'}
+										onChange={() => handleAssessmentResultChange('belum-kompeten')}
+										className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+										disabled={isAssessee || !!data.ak02_headers?.approved_assessor}
+									/>
+									<span className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
+                ${assessmentResult === 'kompeten' ? 'line-through opacity-50' : ''}`}>
+										Asesi belum memenuhi pencapaian seluruh kriteria unjuk kerja, direkomendasikan <strong
+											className='text-red-600'>BELUM KOMPETEN</strong>
+									</span>
+								</label>
+							</>
+						)}
+					</div>
+				</div>
+
+				{/* Tindak Lanjut */}
+				<div className="mb-6">
+					<label className={`block text-sm font-medium mb-2 ${isAssessee || assessmentResult === 'kompeten' ? "text-gray-400" : "text-gray-700"
+						}`}>
+						Tindak lanjut yang dibutuhkan
+						{assessmentResult === 'belum-kompeten' && !isAssessee && (
+							<span className="text-red-500 ml-1">*</span>
+						)}
+					</label>
+					<p className="text-xs text-gray-500 mb-2">
+						(Masukkan pekerjaan tambahan dan asesmen yang diperlukan untuk mencapai kompetensi)
+					</p>
+					<div className={`border border-gray-300 rounded-lg p-3 focus-within:ring-2 focus-within:ring-[#E77D35] ${isAssessee || assessmentResult === 'kompeten' ? 'bg-gray-100' : ''
+						}`}>
+						<textarea
+							value={followUp}
+							onChange={(e) => setFollowUp(e.target.value)}
+							disabled={isAssessee || assessmentResult === 'kompeten'}
+							className={`w-full resize-none border-none outline-none text-sm ${isAssessee || assessmentResult === 'kompeten'
+									? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+									: ''
+								}`}
+							rows={3}
+							placeholder={
+								assessmentResult === 'kompeten'
+									? 'Tidak diperlukan untuk hasil kompeten'
+									: ''
+							}
+						/>
+					</div>
+				</div>
+
+				{/* Komentar Asesor */}
+				<div className="mb-6">
+					<label className={`block text-sm font-medium mb-2 ${isAssessee ? "text-gray-400" : "text-gray-700"
+						}`}>
+						Komentar/ Observasi oleh asesor
+						{!isAssessee && <span className="text-red-500 ml-1">*</span>}
+					</label>
+					<div className={`border border-gray-300 rounded-lg p-3 focus-within:ring-2 focus-within:ring-[#E77D35] ${isAssessee ? 'bg-gray-100' : ''
+						}`}>
+						<textarea
+							value={assessorComments}
+							onChange={(e) => setAssessorComments(e.target.value)}
+							disabled={isAssessee}
+							className={`w-full resize-none border-none outline-none text-sm ${isAssessee
+									? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+									: ''
+								}`}
+							rows={3}
+							placeholder=""
+						/>
+					</div>
+				</div>
+
+				{/* Dua Kolom: Asesi/Asesor dan QR Code */}
+				<div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 lg:gap-8 items-start">
+					{/* Kolom Kiri - Asesi dan Asesor */}
+					<div className="h-full flex flex-col">
+						<div className='mb-2'>
+							<label className="block text-sm font-medium text-gray-700 mb-2">Pada :</label>
+						</div>
+
+						{/* Bagian Asesi dan Asesor */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							{/* Asesi */}
+							<div>
+								<h3 className="text-lg font-medium text-gray-900 mb-4">Asesi</h3>
+								<div className="mb-3">
+									<input
+										type="text"
+										value={data?.assessee?.name || '-'}
+										className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+										readOnly
+									/>
+								</div>
+								<div className="relative mb-4">
+									<input
+										type="text"
+										value={new Date().toLocaleDateString('id-ID')}
+										className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
+										readOnly
+									/>
+									<Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2" />
+								</div>
+							</div>
+
+							{/* Asesor */}
+							<div>
+								<h3 className="text-lg font-medium text-gray-900 mb-4">Asesor</h3>
+								<div className="mb-3">
+									<input
+										type="text"
+										value={data?.assessor?.name || '-'}
+										className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+										readOnly
+									/>
+								</div>
+								<div className="mb-3">
+									<input
+										type="text"
+										value={data?.assessor?.no_reg_met || '-'}
+										className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700"
+										readOnly
+									/>
+								</div>
+								<div className="relative">
+									<input
+										type="text"
+										value={new Date().toLocaleDateString('id-ID')}
+										className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
+										readOnly
+									/>
+									<Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* Kolom Kanan - QR Code */}
+					<div className="h-full flex flex-col">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							{/* QR Asesi */}
+							<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
+								{data?.ak02_headers?.approved_assessee && assesseeQrValue ? (
+									<QRCodeCanvas
+										value={assesseeQrValue}
+										size={100}
+										className="w-40 h-40 object-contain"
+									/>
+								) : (
+									<div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+										<span className="text-gray-400 text-sm text-center">
+											{data?.ak02_headers?.approved_assessee
+												? "QR Asesi sudah disetujui"
+												: "Menunggu persetujuan asesi"}
+										</span>
+									</div>
+								)}
+								<span className="text-sm font-semibold text-gray-800">
+									{data?.assessee?.name || "-"}
+								</span>
+								{data?.ak02_headers?.approved_assessee && (
+									<span className="text-green-600 font-semibold text-sm mt-2">
+										Sudah disetujui asesi
+									</span>
+								)}
+							</div>
+
+							{/* QR Asesor */}
+							<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+								{assessorQrValue ? (
+									<QRCodeCanvas
+										value={assessorQrValue}
+										size={100}
+										className="w-40 h-40 object-contain"
+									/>
+								) : (
+									<div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+										<span className="text-gray-400 text-sm text-center">
+											QR Asesor akan muncul di sini
+										</span>
+									</div>
+								)}
+								<span className="text-sm font-semibold text-gray-800">
+									{data?.assessor?.name || "-"}
+								</span>
+								{data?.ak02_headers?.approved_assessor === true && (
+									<span className="text-green-600 font-semibold text-sm mt-2">
+										Sebagai Asesor, Anda sudah setuju
+									</span>
+								)}
+							</div>
+
+							{/* Section bawah tombol (full width, col-span-2) */}
+							<div className="col-span-1 sm:col-span-2 mt-8 flex flex-col items-center gap-4">
+								{saveHeaderError && (
+									<span className="text-red-500 text-sm text-center">{saveHeaderError}</span>
+								)}
+
+								{/* Tombol Simpan Rekomendasi */}
+								<div className="w-full flex flex-col gap-4">
+									<div>
+										<div className="text-gray-500 text-xs mb-2 text-center">
+											{!assessmentResult
+												? "Pilih rekomendasi terlebih dahulu"
+												: assessorQrValue
+													? "Setelah generate QR, rekomendasi tidak dapat diubah"
+													: "Simpan rekomendasi sebelum generate QR"}
+										</div>
+										<button
+											onClick={handleSaveClick}
+											disabled={isAssessee || !assessmentResult || assessorQrValue}
+											className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${isAssessee || !assessmentResult || assessorQrValue
+												? "cursor-not-allowed opacity-50"
+												: "hover:bg-green-700 cursor-pointer"
+												}`}
+										>
+											<Save size={18} className="mr-2" />
+											Simpan Rekomendasi
+										</button>
+									</div>
+
+									{/* Generate QR */}
+									<div>
 										<button
 											onClick={handleGenerateQRCode}
-											className="block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600"
+											disabled={isAssessee || assessorQrValue || !data.ak02_headers}
+											className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${isAssessee || assessorQrValue || !data.ak02_headers
+												? "cursor-not-allowed opacity-50"
+												: "hover:bg-orange-600 cursor-pointer"
+												}`}
 										>
-											Setujui
+											<QrCode size={18} className="mr-2" />
+											{assessorQrValue
+												? "QR Sudah Digenerate"
+												: "Generate QR"}
 										</button>
-									)}
-								</div>
-
-								{/* Assessee QR Code */}
-								<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-									{assesseeQrValue && (
-										<QRCodeCanvas
-											value={assesseeQrValue}
-											size={156}
-											className="w-40 h-40 object-contain"
-										/>
-									)}
-									<span className="text-sm font-semibold text-gray-800">
-										{data.assessee.name}
-									</span>
-									{isAssessee &&
-										data.ak02_headers.approved_assessor &&
-										!data.ak02_headers.approved_assessee && (
-											<button
-												onClick={handleAssesseeApproval}
-												className="block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600"
-											>
-												Setujui
-											</button>
-										)}
-								</div>
-							</div>
-
-							{/* Approval Status */}
-							<div className="flex flex-col items-center space-y-2 text-xs">
-								<div
-									className={`flex items-center space-x-2 ${
-										data.ak02_headers.approved_assessor
-											? "text-green-600"
-											: "text-gray-400"
-									}`}
-								>
-									<div
-										className={`w-2 h-2 rounded-full ${
-											data.ak02_headers.approved_assessor
-												? "bg-green-600"
-												: "bg-gray-300"
-										}`}
-									></div>
-									<span>Assessor Approved</span>
-								</div>
-								<div
-									className={`flex items-center space-x-2 ${
-										data.ak02_headers.approved_assessee
-											? "text-green-600"
-											: "text-gray-400"
-									}`}
-								>
-									<div
-										className={`w-2 h-2 rounded-full ${
-											data.ak02_headers.approved_assessee
-												? "bg-green-600"
-												: "bg-gray-300"
-										}`}
-									></div>
-									<span>Assessee Approved</span>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -804,17 +807,6 @@ export default function AK02({
 				</div>
 			</div>
 
-			{/* Submit Button - Only show for assessor */}
-			{!isAssessee && (
-				<div className="flex justify-end mt-6 lg:mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-					<button
-						onClick={handleSaveClick}
-						className="bg-[#E77D35] hover:bg-[#d66d2a] text-white text-xs sm:text-sm font-medium px-8 sm:px-12 lg:px-45 py-2 sm:py-3 rounded-md transition-colors duration-200"
-					>
-						Simpan
-					</button>
-				</div>
-			)}
 
 			{/* Modal Konfirmasi */}
 			<ConfirmModal

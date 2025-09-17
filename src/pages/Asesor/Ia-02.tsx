@@ -223,7 +223,7 @@ export default function Ia02Assessor() {
 					<div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
 						<div className="grid grid-cols-1 lg:grid-cols-6 gap-6 items-start">
 							{/* Bagian kiri (2 kolom) */}
-							<div className="lg:col-span-4 space-y-4">
+							<div className="lg:col-span-3 space-y-4">
 								{/* Asesi */}
 								<div>
 									<label className="block text-sm font-medium text-gray-700 mb-1">
@@ -283,43 +283,64 @@ export default function Ia02Assessor() {
 							</div>
 
 							{/* QR Code Section */}
-							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:col-span-2">
-								<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-									{assesseeQrValue && (
-										<QRCodeCanvas
-											value={assesseeQrValue}
-											size={156}
-											className="w-40 h-40 object-contain"
-										>
-											{assesseeQrValue}
-										</QRCodeCanvas>
+							<div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:col-span-3 gap-4">
+								{/* QR Code Asesi */}
+								<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+									<h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesi</h4>
+									{assesseeQrValue ? (
+										<>
+											<QRCodeCanvas
+												value={assesseeQrValue}
+												size={120}
+												className="w-40 h-40 object-contain"
+											/>
+											<div className="text-green-600 font-semibold text-xs text-center">
+												Sudah disetujui Asesi
+											</div>
+										</>
+									) : (
+										<div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+											<span className="text-gray-400 text-xs text-center">
+												Menunggu persetujuan asesi
+											</span>
+										</div>
 									)}
-									<span className="text-sm font-semibold text-gray-800">
+									<span className="text-sm font-semibold text-gray-800 text-center">
 										{result.assessee.name}
 									</span>
 								</div>
-								<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-									{assessorQrValue && (
-										<QRCodeCanvas
-											value={assessorQrValue}
-											size={156}
-											className="w-40 h-40 object-contain"
-										>
-											{assessorQrValue}
-										</QRCodeCanvas>
+
+								{/* QR Code Asesor */}
+								<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+									<h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesor</h4>
+									{assessorQrValue ? (
+										<>
+											<QRCodeCanvas
+												value={assessorQrValue}
+												size={120}
+												className="w-40 h-40 object-contain"
+											/>
+											<div className="text-green-600 font-semibold text-xs text-center">
+												Sebagai Asesor, Anda sudah setuju
+											</div>
+										</>
+									) : (
+										<div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+											<span className="text-gray-400 text-xs text-center">QR Code Asesor</span>
+											<span className="text-gray-400 text-xs text-center">Klik tombol "Generate QR"</span>
+										</div>
 									)}
-									<span className="text-sm font-semibold text-gray-800">
+									<span className="text-sm font-semibold text-gray-800 text-center">
 										{result.assessor.name}
 									</span>
+
 									{!assessorQrValue && (
 										<button
 											disabled={assessorQrValue !== ""}
 											onClick={() => {
 												if (!assessorQrValue) handleGenerateQRCode();
 											}}
-											className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assessorQrValue
-												? "hover:bg-orange-600"
-												: "cursor-not-allowed opacity-50"
+											className={`block cursor-pointer text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assessorQrValue ? "hover:bg-orange-600" : "cursor-not-allowed opacity-50"
 												}`}
 										>
 											Setujui

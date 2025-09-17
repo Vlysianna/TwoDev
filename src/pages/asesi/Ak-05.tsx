@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, AlertCircle } from "lucide-react";
+import { ChevronLeft, AlertCircle, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
@@ -123,15 +123,7 @@ export default function CekAk05() {
 											Skema Sertifikasi (Okupasi)
 										</h2>
 										<div className="flex items-center space-x-2">
-											<svg
-												className="w-5 h-5 text-gray-400"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<circle cx="12" cy="12" r="10" strokeWidth="2" />
-												<polyline points="12,6 12,12 16,14" strokeWidth="2" />
-											</svg>
+											<Clock className="w-5 h-5 text-gray-400" />
 											<span className="text-sm text-gray-600">
 												{data.result.tuk || "Sewaktu"}
 											</span>

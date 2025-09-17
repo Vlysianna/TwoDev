@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Monitor, ChevronLeft, Search } from 'lucide-react';
+import { Monitor, ChevronLeft, Search, Check } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import paths from '@/routes/paths';
 import NavbarAsesor from '@/components/NavAsesor';
@@ -173,18 +173,7 @@ export default function CekApl02Detail() {
                                                     }`}
                                             >
                                                 {filterKompeten === opt.value && (
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 20 20"
-                                                        fill="white"
-                                                        className="w-3 h-3"
-                                                    >
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
+                                                    <Check className="w-4 h-4 text-white" />
                                                 )}
                                             </span>
                                             <span
@@ -288,15 +277,7 @@ export default function CekApl02Detail() {
                                                                             }`}
                                                                     >
                                                                         {pencapaianStatus === "kompeten" && (
-                                                                            <svg
-                                                                                className="w-3 h-3 text-white"
-                                                                                fill="none"
-                                                                                stroke="currentColor"
-                                                                                strokeWidth="3"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <path d="M5 13l4 4L19 7" />
-                                                                            </svg>
+                                                                            <Check className="w-4 h-4 text-white" />
                                                                         )}
                                                                     </span>
                                                                     <span
@@ -329,15 +310,7 @@ export default function CekApl02Detail() {
                                                                             }`}
                                                                     >
                                                                         {pencapaianStatus === "belum" && (
-                                                                            <svg
-                                                                                className="w-3 h-3 text-white"
-                                                                                fill="none"
-                                                                                stroke="currentColor"
-                                                                                strokeWidth="3"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <path d="M5 13l4 4L19 7" />
-                                                                            </svg>
+                                                                            <Check className="w-4 h-4 text-white" />
                                                                         )}
                                                                     </span>
                                                                     <span

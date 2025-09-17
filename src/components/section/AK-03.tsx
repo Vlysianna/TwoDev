@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, X, AlertCircle } from "lucide-react";
+import { Search, X, AlertCircle, Check } from "lucide-react";
 import api from "@/helper/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AK03Question, AssessmentData } from "@/model/ak03-model";
@@ -377,18 +377,7 @@ export default function AK03({
 											}`}
 									>
 										{filterKompeten === opt.value && (
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												viewBox="0 0 20 20"
-												fill="white"
-												className="w-3 h-3"
-											>
-												<path
-													fillRule="evenodd"
-													d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-													clipRule="evenodd"
-												/>
-											</svg>
+											<Check className="w-4 h-4 text-white" />
 										)}
 									</span>
 									<span
@@ -475,18 +464,7 @@ export default function AK03({
 																			}`}
 																		>
 																			{field.value === val.toLowerCase() && (
-																				<svg
-																					xmlns="http://www.w3.org/2000/svg"
-																					viewBox="0 0 20 20"
-																					fill="white"
-																					className="w-3 h-3"
-																				>
-																					<path
-																						fillRule="evenodd"
-																						d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-																						clipRule="evenodd"
-																					/>
-																				</svg>
+																				<Check className="w-4 h-4 text-white" />
 																			)}
 																		</span>
 																		<span

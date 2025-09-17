@@ -1,6 +1,6 @@
 import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
-import { Clock, AlertCircle, CheckCircle, Monitor } from "lucide-react";
+import { Clock, AlertCircle, CheckCircle, Monitor, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { GroupIA03, ResultIA03, QuestionIA03 } from "@/model/ia03-model";
 import { QRCodeCanvas } from "qrcode.react";
@@ -607,15 +607,7 @@ export default function IA03({
                   ${isAssessee && "opacity-50 cursor-not-allowed"}`}
 													>
 														{question.pencapaian === "kompeten" && (
-															<svg
-																className="w-3 h-3 text-white"
-																fill="none"
-																stroke="currentColor"
-																strokeWidth="3"
-																viewBox="0 0 24 24"
-															>
-																<path d="M5 13l4 4L19 7" />
-															</svg>
+															<Check className="w-4 h-4 text-white" />
 														)}
 													</span>
 													<span className={question.pencapaian === "kompeten" ? "text-gray-900" : "text-gray-500"}>
@@ -643,15 +635,7 @@ export default function IA03({
                   ${isAssessee && "opacity-50 cursor-not-allowed"}`}
 													>
 														{question.pencapaian === "belum" && (
-															<svg
-																className="w-3 h-3 text-white"
-																fill="none"
-																stroke="currentColor"
-																strokeWidth="3"
-																viewBox="0 0 24 24"
-															>
-																<path d="M5 13l4 4L19 7" />
-															</svg>
+															<Check className="w-4 h-4 text-white" />
 														)}
 													</span>
 													<span className={question.pencapaian === "belum" ? "text-gray-900" : "text-gray-500"}>
@@ -782,82 +766,85 @@ export default function IA03({
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 							{/* QR Code Asesi */}
 							<div className="p-4 bg-white border rounded-lg flex flex-col items-center justify-center py-8 gap-4">
-								{assesseeQrValue && completionPercent === 100 && (
-									<QRCodeCanvas
-										value={assesseeQrValue}
-										size={156}
-										className="w-40 h-40 object-contain"
-									/>
+								<h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesi</h4>
+
+								{assesseeQrValue && completionPercent === 100 ? (
+									<>
+										<QRCodeCanvas
+											value={assesseeQrValue}
+											size={120}
+											className="w-40 h-40 object-contain"
+										/>
+										<div className="text-green-600 font-semibold text-xs text-center">
+											Sudah disetujui Asesi
+										</div>
+									</>
+								) : (
+									<div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+										<span className="text-gray-400 text-xs text-center">
+											Menunggu persetujuan Asesi
+										</span>
+									</div>
 								)}
-								<span className="text-sm font-semibold text-gray-800">
+
+								<span className="text-sm font-semibold text-gray-800 text-center">
 									{result.assessee.name}
 								</span>
+
 								{isAssessee &&
 									result.ia03_header.approved_assessor &&
 									!result.ia03_header.approved_assessee && (
 										<button
 											onClick={approveByAssessee}
 											disabled={completionPercent < 100}
-											className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600 ${completionPercent < 100 ? "opacity-50 cursor-not-allowed" : ""}`}
+											className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${completionPercent < 100
+												? "opacity-50 cursor-not-allowed"
+												: "hover:bg-orange-600"
+												}`}
 										>
-											Generate QR
+											Setujui
 										</button>
 									)}
 							</div>
 
 							{/* QR Code Asesor */}
 							<div className="p-4 bg-white border rounded-lg flex flex-col items-center justify-center py-8 gap-4">
-								{assessorQrValue && completionPercent === 100 && (
-									<QRCodeCanvas
-										value={assessorQrValue}
-										size={156}
-										className="w-40 h-40 object-contain"
-									/>
+								<h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesor</h4>
+
+								{assessorQrValue && completionPercent === 100 ? (
+									<>
+										<QRCodeCanvas
+											value={assessorQrValue}
+											size={120}
+											className="w-40 h-40 object-contain"
+										/>
+										<div className="text-green-600 font-semibold text-xs text-center">
+											Sebagai Asesor, Anda sudah setuju
+										</div>
+									</>
+								) : (
+									<div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+										<span className="text-gray-400 text-xs text-center">QR Code Asesor</span>
+										<span className="text-gray-400 text-xs text-center">Klik tombol "Generate QR"</span>
+									</div>
 								)}
-								<span className="text-sm font-semibold text-gray-800">
+
+								<span className="text-sm font-semibold text-gray-800 text-center">
 									{result.assessor.name}
 								</span>
+
 								{!isAssessee && !result.ia03_header.approved_assessor && (
 									<button
 										onClick={approveByAssessor}
 										disabled={completionPercent < 100}
-										className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 hover:bg-orange-600 ${completionPercent < 100 ? "opacity-50 cursor-not-allowed" : ""}`}
+										className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${completionPercent < 100
+											? "opacity-50 cursor-not-allowed"
+											: "hover:bg-orange-600"
+											}`}
 									>
-										Generate QR
+										Setujui
 									</button>
 								)}
-							</div>
-						</div>
-
-						{/* Status Approval */}
-						<div className="mt-6 flex flex-col items-center space-y-2 text-xs">
-							<div
-								className={`flex items-center space-x-2 ${result.ia03_header.approved_assessor
-									? "text-green-600"
-									: "text-gray-400"
-									}`}
-							>
-								<div
-									className={`w-2 h-2 rounded-full ${result.ia03_header.approved_assessor
-										? "bg-green-600"
-										: "bg-gray-300"
-										}`}
-								></div>
-								<span>Assessor Approved</span>
-							</div>
-							<div
-								className={`flex items-center space-x-2 ${result.ia03_header.approved_assessee
-									? "text-green-600"
-									: "text-gray-400"
-									}`}
-							>
-								<div
-									className={`w-2 h-2 rounded-full ${result.ia03_header.approved_assessee
-										? "bg-green-600"
-										: "bg-gray-300"
-										}`}
-								></div>
-								<span>Assessee Approved</span>
 							</div>
 						</div>
 					</div>

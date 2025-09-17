@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileCheck2, ChevronLeft, AlertCircle } from "lucide-react";
+import { FileCheck2, ChevronLeft, AlertCircle, Check } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -321,24 +321,12 @@ export default function Ak01() {
 													<span
 														className={`w-4 h-4 flex items-center justify-center rounded-xs border-2
                                     ${checked
-																? "bg-orange-500 border-orange-500"
-																: "border-orange-400"
+																? "bg-[#E77D35] border-[#E77D35]"
+																: "border-[#E77D35]"
 															}`}
 													>
 														{checked && (
-															<svg
-																className="w-3 h-3 text-white"
-																fill="none"
-																stroke="currentColor"
-																strokeWidth="2"
-																viewBox="0 0 24 24"
-															>
-																<path
-																	strokeLinecap="round"
-																	strokeLinejoin="round"
-																	d="M5 13l4 4L19 7"
-																/>
-															</svg>
+															<Check className="w-4 h-4 text-white" />
 														)}
 													</span>
 													<span
@@ -418,7 +406,7 @@ export default function Ak01() {
 														if (!assesseeQrValue && assessorQrValue)
 															handleGenerateQRCode();
 													}}
-													className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assesseeQrValue && assessorQrValue
+													className={`block text-center cursor-pointer bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assesseeQrValue && assessorQrValue
 														? "hover:bg-orange-600"
 														: "cursor-not-allowed opacity-50"
 														}`}
