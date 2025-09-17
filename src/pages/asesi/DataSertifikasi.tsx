@@ -21,7 +21,6 @@ export default function DataSertifikasi() {
 	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
 
-	// const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [isLocked, setIsLocked] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -30,6 +29,7 @@ export default function DataSertifikasi() {
 		control,
 		handleSubmit,
 		formState: { errors },
+		setValue,
 	} = useForm<FormValues>({
 		defaultValues: {
 			purpose: "",
@@ -44,7 +44,7 @@ export default function DataSertifikasi() {
 	const assessmentOptions = [
 		"Sertifikasi",
 		"Sertifikasi Ulang",
-		"Pengakuan Kompetensi Terkini ( PKT )",
+		"Pengakuan Kompetensi Terkini (PKT)",
 		"Rekognisi Pembelajaran Lampau",
 		"Lainnya",
 	];
@@ -52,15 +52,15 @@ export default function DataSertifikasi() {
 	const administrativeFilesStatic = [
 		{
 			title: "Copy Kartu Pelajar",
-			name: "student_card",
+			name: "student_card" as keyof FormValues,
 		},
 		{
 			title: "Copy Kartu Keluarga/Copy KTP",
-			name: "family_card",
+			name: "family_card" as keyof FormValues,
 		},
 		{
 			title: "Pas foto 3 x 4 berwarna sebanyak 2 lembar",
-			name: "id_card",
+			name: "id_card" as keyof FormValues,
 		},
 	];
 
@@ -68,12 +68,12 @@ export default function DataSertifikasi() {
 		{
 			title:
 				"Copy Raport SMK pada Konsentrasi Keahlian Rekayasa Perangkat Lunak semester 1 s.d. 5",
-			name: "school_report_card",
+			name: "school_report_card" as keyof FormValues,
 		},
 		{
 			title:
 				"Copy sertifikat/Surat Keterangan Praktik Kerja Lapangan (PKL) pada bidang Software Development",
-			name: "field_work_practice_certificate",
+			name: "field_work_practice_certificate" as keyof FormValues,
 		},
 	];
 
@@ -85,12 +85,6 @@ export default function DataSertifikasi() {
 			setError(null);
 
 			const formData = new FormData();
-
-			// Object.entries(data).forEach(([key, value]) => {
-			// 	if (value) {
-			// 		formData.append(key, value);
-			// 	}
-			// });
 			formData.append("purpose", data.purpose);
 			formData.append("assessor_id", String(id_asesor));
 			formData.append("assessee_id", String(asesiId));
@@ -136,19 +130,13 @@ export default function DataSertifikasi() {
 						});
 					}
 				});
-
-			// setSuccess("Data berhasil disimpan! Melanjutkan ke tahap berikutnya...");
-
-			// setModalStep(1);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
-			setError("Gagal menyimpan data. Silakan coba lagi. " + error.response.data.message);
+			setError("Gagal menyimpan data. Silakan coba lagi. " + error.response?.data?.message);
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	// fetch result docs if id_result changes
 	const [resultDocs, setResultDocs] = useState<{
 		purpose: string;
 		family_card?: string | null;
@@ -175,19 +163,18 @@ export default function DataSertifikasi() {
 						student_card,
 					} = res.data.data;
 
-					const getFileName = (url: string | null | undefined) =>
-						url ? url.split("/").pop() : null;
-
 					setResultDocs({
 						purpose: purpose || "",
-						family_card: getFileName(family_card),
-						field_work_practice_certificate: getFileName(
-							field_work_practice_certificate
-						),
-						id_card: getFileName(id_card),
-						school_report_card: getFileName(school_report_card),
-						student_card: getFileName(student_card),
+						family_card,
+						field_work_practice_certificate,
+						id_card,
+						school_report_card,
+						student_card,
 					});
+
+					// Set form values based on fetched data
+					if (purpose) setValue("purpose", purpose);
+
 					setIsLocked(true);
 				} else {
 					setResultDocs(null);
@@ -201,16 +188,17 @@ export default function DataSertifikasi() {
 		if (id_result) {
 			fetchResultDocs();
 		}
-	}, [id_result]);
+	}, [id_result, setValue]);
 
-	// Komponen File Upload dengan Controller
 	const FileUploadArea = ({
 		field,
+		existingFileName,
 	}: {
 		field: {
 			value: File | null;
 			onChange: (file: File | null) => void;
 		};
+		existingFileName?: string | null;
 	}) => {
 		const fileRef = useRef<HTMLInputElement | null>(null);
 		const fileData = field.value;
@@ -237,7 +225,6 @@ export default function DataSertifikasi() {
 						: "border-gray-300 bg-white hover:border-gray-400"
 					}`}
 			>
-				{/* Info Upload */}
 				<div className="flex items-start sm:items-center space-x-3 flex-1">
 					<div className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 bg-gray-50 shrink-0">
 						<Upload className="w-5 h-5 text-gray-500" />
@@ -247,12 +234,16 @@ export default function DataSertifikasi() {
 							<p className="text-gray-700 text-sm font-medium break-all">
 								{fileData.name} ({(fileData.size / 1024 / 1024).toFixed(1)} MB)
 							</p>
+						) : existingFileName ? (
+							<p className="text-gray-700 text-sm font-medium break-all">
+								{existingFileName}
+							</p>
 						) : (
 							<>
 								<p className="text-gray-700 text-sm font-medium">
 									{dragActive
 										? "Lepaskan file di sini..."
-										: "Choose a file or drag & drop it here"}
+										: "Pilih file atau seret & lepas di sini"}
 								</p>
 								<p className="text-gray-400 text-xs">
 									PNG, JPEG, JPG, GIF, BMP
@@ -262,9 +253,8 @@ export default function DataSertifikasi() {
 					</div>
 				</div>
 
-				{/* Tombol Aksi */}
 				<div className="flex flex-row sm:flex-row gap-2 w-full sm:w-auto">
-					{fileData && (
+					{(fileData || existingFileName) && (
 						<button
 							type="button"
 							onClick={() => !isLocked && field.onChange(null)}
@@ -280,7 +270,7 @@ export default function DataSertifikasi() {
 						className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 text-sm font-medium cursor-pointer"
 						disabled={isLocked}
 					>
-						{fileData ? "Ganti" : "Browse"}
+						{fileData || existingFileName ? "Ganti" : "Pilih File"}
 					</button>
 				</div>
 
@@ -288,7 +278,7 @@ export default function DataSertifikasi() {
 					type="file"
 					ref={fileRef}
 					className="hidden"
-					accept=".jpg,.jpeg,.png,"
+					accept=".jpg,.jpeg,.png,.pdf"
 					onChange={(e) => !isLocked && field.onChange(e.target.files?.[0] || null)}
 				/>
 			</div>
@@ -315,129 +305,83 @@ export default function DataSertifikasi() {
 					/>
 				</div>
 
-				<main className='m-4'>
+				<main className="m-4">
 					<div>
-				<form
+						<form
 							onSubmit={handleSubmit(onSubmit)}
-							className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-stretch"
+							className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6"
 						>
-					<fieldset disabled={isLocked}>
-							{error && (
-								<div className="lg:col-span-5 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
-									<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-									<span className="text-red-800">{error}</span>
-								</div>
-							)}
+							<fieldset disabled={isLocked} className="contents">
+								{error && (
+									<div className="col-span-full bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
+										<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+										<span className="text-red-800">{error}</span>
+									</div>
+								)}
 
-							{/* Left */}
-							<div className="space-y-6 md:col-span-3 flex flex-col h-full">
-								<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
-									<h3 className="text-gray-900 font-medium mb-4">
-										Tujuan Asesmen
-									</h3>
-									<div className="space-y-3">
-										{assessmentOptions.map((option) => (
-											<label
-												key={option}
-												className="flex items-center space-x-3 cursor-pointer"
-											>
-										<Controller
-													name="purpose"
-													control={control}
-													rules={{ required: "Harap pilih tujuan asesmen" }}
-													render={({ field }) => {
-														const checked = resultDocs?.purpose === option;
-														return (
+								{/* Left Column - Tujuan Asesmen & Bukti Persyaratan Dasar */}
+								<div className="space-y-6 md:col-span-2 lg:col-span-3">
+									<div className="bg-white rounded-lg border border-gray-200 p-6">
+										<h3 className="text-gray-900 font-medium mb-4">
+											Tujuan Asesmen
+										</h3>
+										<div className="space-y-3">
+											{assessmentOptions.map((option) => (
+												<label
+													key={option}
+													className="flex items-center space-x-3 cursor-pointer"
+												>
+													<Controller
+														name="purpose"
+														control={control}
+														rules={{ required: "Harap pilih tujuan asesmen" }}
+														render={({ field }) => (
 															<input
 																type="radio"
 																name={field.name}
 																value={option}
-																defaultChecked={checked}
-														onChange={(e) => !isLocked && field.onChange(e.target.value)}
+																checked={field.value === option}
+																onChange={(e) => field.onChange(e.target.value)}
 																className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
-														disabled={isLocked}
-															/>
-														);
-													}}
-												/>
-												<span className="text-gray-700 text-sm sm:text-base">
-													{option}
-												</span>
-											</label>
-										))}
-									</div>
-									{errors.purpose && (
-										<p className="text-red-600 text-sm mt-2">
-											{errors.purpose.message}
-										</p>
-									)}
-								</div>
-
-								<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full">
-									<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
-										Bukti Persyaratan Dasar
-									</h3>
-									<div className="space-y-6">
-										{supportingFilesStatic.map((file, index) => {
-											const existingFile = resultDocs
-												? resultDocs[file.name as keyof typeof resultDocs]
-												: null;
-
-											return (
-												<div key={index} className="space-y-3">
-													<p className="text-gray-700 text-sm leading-relaxed">
-														{file.title}
-													</p>
-										<Controller
-														name={file.name as keyof FormValues}
-														control={control}
-														render={({ field }) => (
-															<FileUploadArea
-																field={{
-																	value: existingFile
-																		? new File([], existingFile)
-																		: (field.value as File | null),
-																	onChange: field.onChange,
-																}}
+																disabled={isLocked}
 															/>
 														)}
 													/>
-												</div>
-											);
-										})}
+													<span className="text-gray-700 text-sm">
+														{option}
+													</span>
+												</label>
+											))}
+										</div>
+										{errors.purpose && (
+											<p className="text-red-600 text-sm mt-2">
+												{errors.purpose.message}
+											</p>
+										)}
 									</div>
-								</div>
-							</div>
 
-							{/* Right */}
-							<div className="md:col-span-1 lg:col-span-2 flex flex-col h-full">
-								<div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 h-full flex flex-col">
-									<div className="flex-1">
-										<h3 className="text-gray-900 font-medium mb-4 sm:mb-6">
-											Bukti Administratif
+									<div className="bg-white rounded-lg border border-gray-200 p-6">
+										<h3 className="text-gray-900 font-medium mb-6">
+											Bukti Persyaratan Dasar
 										</h3>
 										<div className="space-y-6">
-											{administrativeFilesStatic.map((file, index) => {
+											{supportingFilesStatic.map((file, index) => {
 												const existingFile = resultDocs
-													? resultDocs[file.name as keyof typeof resultDocs]
+													? resultDocs[file.name]
 													: null;
 
 												return (
 													<div key={index} className="space-y-3">
-														<p className="text-gray-700 text-sm font-medium">
+														<p className="text-gray-700 text-sm leading-relaxed">
 															{file.title}
 														</p>
-										<Controller
-															name={file.name as keyof FormValues}
+														<Controller
+															name={file.name}
 															control={control}
 															render={({ field }) => (
 																<FileUploadArea
-																	field={{
-																		value: existingFile
-																			? new File([], existingFile)
-																			: (field.value as File | null),
-																		onChange: field.onChange,
-																	}}
+																	field={field}
+																	existingFileName={existingFile}
 																/>
 															)}
 														/>
@@ -446,23 +390,55 @@ export default function DataSertifikasi() {
 											})}
 										</div>
 									</div>
+								</div>
 
-									<div className="mt-auto pt-4 space-y-3">
-										<hr className="border-gray-300" />
-										<div className="w-full">
-									<button
+								{/* Right Column - Bukti Administratif */}
+								<div className="md:col-span-1 lg:col-span-2">
+									<div className="bg-white rounded-lg border border-gray-200 p-6 h-full flex flex-col">
+										<div className="flex-1">
+											<h3 className="text-gray-900 font-medium mb-6">
+												Bukti Administratif
+											</h3>
+											<div className="space-y-6">
+												{administrativeFilesStatic.map((file, index) => {
+													const existingFile = resultDocs
+														? resultDocs[file.name]
+														: null;
+
+													return (
+														<div key={index} className="space-y-3">
+															<p className="text-gray-700 text-sm font-medium">
+																{file.title}
+															</p>
+															<Controller
+																name={file.name}
+																control={control}
+																render={({ field }) => (
+																	<FileUploadArea
+																		field={field}
+																		existingFileName={existingFile}
+																	/>
+																)}
+															/>
+														</div>
+													);
+												})}
+											</div>
+										</div>
+
+										<div className="mt-8 pt-4 border-t border-gray-300">
+											<button
 												type="submit"
-										disabled={loading || isLocked}
-												className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-normal py-2 sm:py-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
+												disabled={loading || isLocked}
+												className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 rounded-md transition duration-200"
 											>
 												{loading ? "Menyimpan..." : "Simpan"}
 											</button>
 										</div>
 									</div>
 								</div>
-							</div>
-					</fieldset>
-				</form>
+							</fieldset>
+						</form>
 					</div>
 				</main>
 			</div>
