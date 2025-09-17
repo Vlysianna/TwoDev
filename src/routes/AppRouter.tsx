@@ -33,7 +33,6 @@ import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
-import AdminApl02 from "@/pages/admin/Apl-02";
 import Contact from "@/pages/LandingPage/Contact";
 import AssessmentAsesiProvider from "@/components/AssessmentAsesiProvider";
 import Apl02Asesi from "@/pages/asesi/Apl-02";
@@ -161,7 +160,6 @@ const router = createBrowserRouter([
 					{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
 					{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
 					{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
-					{ path: paths.admin.apl02, element: <AdminApl02 /> },
 
 					// Okupasi nested
 					{

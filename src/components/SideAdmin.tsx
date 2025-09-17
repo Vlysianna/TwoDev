@@ -50,7 +50,7 @@ const Sidebar: React.FC = () => {
       path: paths.admin.kelolaJadwal,
     },
     {
-      name: 'Kelengkapan MUK',
+      name: 'Kelola MUK',
       icon: File,
       section: 'admin',
       path: paths.admin.muk.root,
@@ -68,7 +68,7 @@ const Sidebar: React.FC = () => {
       path: paths.admin.kelolaJurusan,
     },
     {
-      name: 'Result Assessment',
+      name: 'Hasil Asesmen',
       icon: FileText,
       section: 'admin',
       path: paths.admin.resultAssessment,
