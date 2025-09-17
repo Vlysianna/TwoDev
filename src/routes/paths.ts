@@ -60,6 +60,10 @@ const routes = {
 		biodata: "/asesor/biodata",
 		dashboardAsesor: "/asesor/dashboard-asesor",
 		dashboardPenilaian: "/asesor/dashboard-penilaian",
+		assessmentReceipt: "/asesor/assessment-receipt",
+		recapAssessment: (scheduleDetailId: string | number) =>
+			`/asesor/recap-assessment/${scheduleDetailId}`,
+		recapAssessmentPattern: "/asesor/recap-assessment/:scheduleDetailId",
 		assessment: {
 			root: "/asesor/assessment",
 			dashboardAsesmenMandiri: (id_assessment: string | number) =>
@@ -132,6 +136,9 @@ const routes = {
 			) => `/asesor/assessment/${id_assessment}/${id_asesi}/lembar-jawaban`,
 			lembarJawabanPattern:
 				"/asesor/assessment/:id_assessment/:id_asesi/lembar-jawaban",
+			recapAssessment: (id_assessment: string | number) =>
+				`/asesor/assessment/${id_assessment}/recap`,
+			recapAssessmentPattern: "/asesor/assessment/:id_assessment/recap",
 		},
 		dataAsesor: "/asesor/data-asesor",
 	},

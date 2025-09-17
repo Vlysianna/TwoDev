@@ -252,15 +252,15 @@ export default function DashboardAsesmenMandiri() {
 									<button
 										key={tab.name}
 										onClick={() => setSelectedTab(tab.name)}
-										className={`flex-shrink-0 px-3 py-2 rounded-md ${
-											selectedTab.toLowerCase() === tab.name.toLowerCase()
-												? "bg-[#E77D35] text-white" 
-												: (tab.status === "Completed") 
-												? "bg-green-200 text-green-700 hover:bg-green-300"
-												: (tab.status === "Waiting")
-												? "bg-gray-300 text-gray-700 hover:bg-gray-400"
-												: "text-gray-600 hover:bg-gray-100"
-										}`}
+										className={`flex-shrink-0 px-3 py-2 cursor-pointer rounded-md border-b-2 transition-all duration-200
+    ${selectedTab.toLowerCase() === tab.name.toLowerCase()
+												? "border-orange-800 bg-[#E77D35] text-white font-semibold"
+												: tab.status === "Completed"
+													? "border-green-500 text-green-700 font-medium"
+													: tab.status === "Waiting"
+														? "border-yellow-500 text-yellow-600 font-medium"
+														: "border-blue-300 text-blue-600"
+											}`}
 									>
 										{tab.name}
 									</button>
@@ -343,7 +343,7 @@ export default function DashboardAsesmenMandiri() {
 												<td className="px-4 py-3 text-center">
 													<button
 														onClick={() => handleActionClick(asesi.assessee_id)}
-														className="text-[#E77D35] underline text-sm hover:text-orange-600"
+														className="text-[#E77D35] underline text-sm hover:text-orange-600 cursor-pointer"
 													>
 														{getActionText()}
 													</button>

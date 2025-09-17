@@ -131,7 +131,7 @@ export default function IA05Assessor() {
             </div>
             <div className="flex justify-end mt-8">
               <button
-                className="bg-[#E77D35] hover:bg-orange-600 text-white text-sm font-medium px-8 py-2 rounded-md transition-colors duration-200"
+                className="bg-[#E77D35] hover:bg-orange-600 text-white text-sm font-medium px-8 py-2 rounded-md transition-colors duration-200 cursor-pointer"
                 onClick={() => navigate(paths.asesor.assessment.ia05c(id_assessment || '', id_asesi || ''))}
                 disabled={!id_assessment || !id_asesi}
               >

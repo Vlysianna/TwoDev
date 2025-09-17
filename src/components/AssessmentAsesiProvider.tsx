@@ -305,7 +305,7 @@ export default function AssessmentAsesiProvider({
 								className="
 									w-8 h-8 bg-white hover:bg-slate-50 border border-slate-200 
 									rounded-full shadow-lg flex items-center justify-center
-									mb-2
+									mb-2 cursor-pointer
 								"
 							>
 								{isTabsOpen ? (
