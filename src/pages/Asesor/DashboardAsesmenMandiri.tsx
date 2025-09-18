@@ -94,7 +94,14 @@ export default function DashboardAsesmenMandiri() {
 			);
 			if (response.data.success) {
 				console.log(response.data.data);
-				setAssesseeData(response.data.data);
+				setAssesseeData(
+					 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+					 response.data.data.sort((a: any, b: any) => {
+						if (a.status === false && b.status === true) return -1;
+						if (a.status === true && b.status === false) return 1;
+						return a.assessee_name.localeCompare(b.assessee_name);
+					})
+				);
 			} else {
 				setError(response.data.message);
 			}
