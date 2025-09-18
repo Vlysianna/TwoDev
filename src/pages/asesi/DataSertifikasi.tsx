@@ -131,7 +131,10 @@ export default function DataSertifikasi() {
 					}
 				});
 		} catch (error: any) {
-			setError("Gagal menyimpan data. Silakan coba lagi. " + error.response?.data?.message);
+			setError(
+				"Gagal menyimpan data. Silakan coba lagi. " +
+					error.response?.data?.message
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -189,101 +192,6 @@ export default function DataSertifikasi() {
 			fetchResultDocs();
 		}
 	}, [id_result, setValue]);
-
-	const FileUploadArea = ({
-		field,
-		existingFileName,
-	}: {
-		field: {
-			value: File | null;
-			onChange: (file: File | null) => void;
-		};
-		existingFileName?: string | null;
-	}) => {
-		const fileRef = useRef<HTMLInputElement | null>(null);
-		const fileData = field.value;
-		const [dragActive, setDragActive] = useState(false);
-
-		const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-			e.preventDefault();
-			setDragActive(false);
-			if (!isLocked && e.dataTransfer.files && e.dataTransfer.files[0]) {
-				field.onChange(e.dataTransfer.files[0]);
-			}
-		};
-
-		return (
-			<div
-				onDrop={handleDrop}
-				onDragOver={(e) => {
-					e.preventDefault();
-					setDragActive(true);
-				}}
-				onDragLeave={() => setDragActive(false)}
-				className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border rounded-lg px-4 py-3 transition-colors ${dragActive
-						? "border-blue-500 bg-blue-50"
-						: "border-gray-300 bg-white hover:border-gray-400"
-					}`}
-			>
-				<div className="flex items-start sm:items-center space-x-3 flex-1">
-					<div className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 bg-gray-50 shrink-0">
-						<Upload className="w-5 h-5 text-gray-500" />
-					</div>
-					<div className="flex flex-col">
-						{fileData ? (
-							<p className="text-gray-700 text-sm font-medium break-all">
-								{fileData.name} ({(fileData.size / 1024 / 1024).toFixed(1)} MB)
-							</p>
-						) : existingFileName ? (
-							<p className="text-gray-700 text-sm font-medium break-all">
-								{existingFileName}
-							</p>
-						) : (
-							<>
-								<p className="text-gray-700 text-sm font-medium">
-									{dragActive
-										? "Lepaskan file di sini..."
-										: "Pilih file atau seret & lepas di sini"}
-								</p>
-								<p className="text-gray-400 text-xs">
-									PNG, JPEG, JPG, GIF, BMP
-								</p>
-							</>
-						)}
-					</div>
-				</div>
-
-				<div className="flex flex-row sm:flex-row gap-2 w-full sm:w-auto">
-					{(fileData || existingFileName) && (
-						<button
-							type="button"
-							onClick={() => !isLocked && field.onChange(null)}
-							className="flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 hover:bg-red-100 text-sm font-medium cursor-pointer"
-							disabled={isLocked}
-						>
-							Hapus
-						</button>
-					)}
-					<button
-						type="button"
-						onClick={() => !isLocked && fileRef.current?.click()}
-						className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 text-sm font-medium cursor-pointer"
-						disabled={isLocked}
-					>
-						{fileData || existingFileName ? "Ganti" : "Pilih File"}
-					</button>
-				</div>
-
-				<input
-					type="file"
-					ref={fileRef}
-					className="hidden"
-					accept=".jpg,.jpeg,.png,.pdf"
-					onChange={(e) => !isLocked && field.onChange(e.target.files?.[0] || null)}
-				/>
-			</div>
-		);
-	};
 
 	return (
 		<div className="min-h-screen bg-gray-50">
@@ -382,6 +290,7 @@ export default function DataSertifikasi() {
 																<FileUploadArea
 																	field={field}
 																	existingFileName={existingFile}
+																	isLocked={isLocked}
 																/>
 															)}
 														/>
@@ -417,6 +326,7 @@ export default function DataSertifikasi() {
 																	<FileUploadArea
 																		field={field}
 																		existingFileName={existingFile}
+																		isLocked={isLocked}
 																	/>
 																)}
 															/>
@@ -445,3 +355,101 @@ export default function DataSertifikasi() {
 		</div>
 	);
 }
+
+const FileUploadArea = ({
+	field,
+	existingFileName,
+	isLocked,
+}: {
+	field: {
+		value: File | null;
+		onChange: (file: File | null) => void;
+	};
+	existingFileName?: string | null;
+	isLocked?: boolean;
+}) => {
+	const fileRef = useRef<HTMLInputElement | null>(null);
+	const fileData = field.value;
+	const [dragActive, setDragActive] = useState(false);
+
+	const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		setDragActive(false);
+		if (!isLocked && e.dataTransfer.files && e.dataTransfer.files[0]) {
+			field.onChange(e.dataTransfer.files[0]);
+		}
+	};
+
+	return (
+		<div
+			onDrop={handleDrop}
+			onDragOver={(e) => {
+				e.preventDefault();
+				setDragActive(true);
+			}}
+			onDragLeave={() => setDragActive(false)}
+			className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border rounded-lg px-4 py-3 transition-colors ${
+				dragActive
+					? "border-blue-500 bg-blue-50"
+					: "border-gray-300 bg-white hover:border-gray-400"
+			}`}
+		>
+			<div className="flex items-start sm:items-center space-x-3 flex-1">
+				<div className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 bg-gray-50 shrink-0">
+					<Upload className="w-5 h-5 text-gray-500" />
+				</div>
+				<div className="flex flex-col">
+					{fileData ? (
+						<p className="text-gray-700 text-sm font-medium break-all">
+							{fileData.name} ({(fileData.size / 1024 / 1024).toFixed(1)} MB)
+						</p>
+					) : existingFileName ? (
+						<p className="text-gray-700 text-sm font-medium break-all">
+							{existingFileName}
+						</p>
+					) : (
+						<>
+							<p className="text-gray-700 text-sm font-medium">
+								{dragActive
+									? "Lepaskan file di sini..."
+									: "Pilih file atau seret & lepas di sini"}
+							</p>
+							<p className="text-gray-400 text-xs">PNG, JPEG, JPG, GIF, BMP</p>
+						</>
+					)}
+				</div>
+			</div>
+
+			<div className="flex flex-row sm:flex-row gap-2 w-full sm:w-auto">
+				{(fileData || existingFileName) && (
+					<button
+						type="button"
+						onClick={() => !isLocked && field.onChange(null)}
+						className="flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 hover:bg-red-100 text-sm font-medium cursor-pointer"
+						disabled={isLocked}
+					>
+						Hapus
+					</button>
+				)}
+				<button
+					type="button"
+					onClick={() => !isLocked && fileRef.current?.click()}
+					className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 text-sm font-medium cursor-pointer"
+					disabled={isLocked}
+				>
+					{fileData || existingFileName ? "Ganti" : "Pilih File"}
+				</button>
+			</div>
+
+			<input
+				type="file"
+				ref={fileRef}
+				className="hidden"
+				accept=".jpg,.jpeg,.png,.pdf"
+				onChange={(e) =>
+					!isLocked && field.onChange(e.target.files?.[0] || null)
+				}
+			/>
+		</div>
+	);
+};
