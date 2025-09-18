@@ -4,9 +4,9 @@ import Navbar from '@/components/NavAdmin';
 import { Link, useNavigate } from 'react-router-dom';
 import paths from "@/routes/paths";
 import api from '@/helper/axios';
-import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, Mail, Phone, MapPin, Calendar, ArrowRight } from 'lucide-react';
+import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, Mail, Phone, MapPin, Calendar, ArrowRight, Users } from 'lucide-react';
 
-// Types & helpers (tetap sama)
+// Types & helpers
 interface Assessor {
   id: number;
   full_name: string;
@@ -44,7 +44,6 @@ interface AssessmentResult {
 
 interface ExpandedRow {
   assessmentId: number;
-  scheduleId: number;
 }
 
 const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
@@ -68,6 +67,17 @@ const ResultAssessment: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [expandedRows, setExpandedRows] = useState<ExpandedRow[]>([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Handle window resize for responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -94,40 +104,34 @@ const ResultAssessment: React.FC = () => {
     void loadData();
   }, [loadData]);
 
-  const toggleRowExpansion = (assessmentId: number, scheduleId: number) => {
-    const isExpanded = expandedRows.some(row =>
-      row.assessmentId === assessmentId && row.scheduleId === scheduleId
-    );
+  const toggleRowExpansion = (assessmentId: number) => {
+    const isExpanded = expandedRows.some(row => row.assessmentId === assessmentId);
 
     if (isExpanded) {
-      setExpandedRows(expandedRows.filter(row =>
-        !(row.assessmentId === assessmentId && row.scheduleId === scheduleId)
-      ));
+      setExpandedRows(expandedRows.filter(row => row.assessmentId !== assessmentId));
     } else {
-      setExpandedRows([...expandedRows, { assessmentId, scheduleId }]);
+      setExpandedRows([...expandedRows, { assessmentId }]);
     }
   };
 
-  const isRowExpanded = (assessmentId: number, scheduleId: number) => {
-    return expandedRows.some(row =>
-      row.assessmentId === assessmentId && row.scheduleId === scheduleId
-    );
+  const isRowExpanded = (assessmentId: number) => {
+    return expandedRows.some(row => row.assessmentId === assessmentId);
   };
 
   return (
     <div className="min-h-screen bg-[#F7FAFC] flex">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         <Navbar title="Hasil Assessment" icon={<FileText size={20} />} />
-        <main className="flex-1 overflow-auto p-6">
-          <nav className="flex text-sm text-gray-500">
+        <main className="flex-1 overflow-auto p-4 md:p-6">
+          <nav className="flex text-sm text-gray-500 mb-4">
             <span>Hasil Asesmen</span>
           </nav>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Hasil Assessment</h1>
-            <div className="flex items-center gap-3">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Hasil Assessment</h1>
+            <div className="flex items-center gap-3 flex-wrap">
               {lastUpdated && (
-                <span className="text-xs text-gray-500 hidden sm:inline">
+                <span className="text-xs text-gray-500">
                   Update: {lastUpdated.toLocaleTimeString()}
                 </span>
               )}
@@ -136,7 +140,8 @@ const ResultAssessment: React.FC = () => {
                 disabled={loading}
                 className="px-3 py-2 bg-white border border-gray-300 text-sm rounded flex items-center gap-2 hover:bg-gray-50 disabled:opacity-60"
               >
-                <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} /> Reload
+                <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} />
+                <span className="hidden sm:inline">Reload</span>
               </button>
               <button
                 onClick={() => navigate('/admin')}
@@ -166,108 +171,204 @@ const ResultAssessment: React.FC = () => {
 
           {!loading && !error && data.length > 0 && (
             <div className="bg-white rounded-lg shadow overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-[#E77D35]">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Kode Assessment
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Skema & Okupasi
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Periode
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Lokasi
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {data.map((assessment) => (
-                    <React.Fragment key={assessment.id}>
-                      {assessment.schedule_details.map((schedule) => {
-                        const isExpanded = isRowExpanded(assessment.id, schedule.id);
+              {/* Desktop View */}
+              <div className="hidden md:block">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-[#E77D35]">
+                    <tr>
+                      <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Kode Assessment
+                      </th>
+                      <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Skema & Okupasi
+                      </th>
+                      <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Periode
+                      </th>
+                      <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Jumlah Asesor
+                      </th>
+                      <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {data.map((assessment) => {
+                      const isExpanded = isRowExpanded(assessment.id);
 
-                        return (
-                          <React.Fragment key={schedule.id}>
-                            <tr
-                              className="cursor-pointer hover:bg-gray-50"
-                              onClick={() => toggleRowExpansion(assessment.id, schedule.id)}
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {assessment.assessment.code}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <div>
-                                  <span className="font-semibold">{assessment.assessment.occupation.scheme.name}</span>
-                                  <br />
-                                  <span>{assessment.assessment.occupation.name}</span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {formatDate(assessment.start_date)} - {formatDate(assessment.end_date)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${assessment.status === 'Selesai'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-yellow-100 text-yellow-800'
-                                  }`}>
-                                  {assessment.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {schedule.location}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                              </td>
-                            </tr>
+                      return (
+                        <React.Fragment key={assessment.id}>
+                          <tr
+                            className="cursor-pointer hover:bg-gray-50"
+                            onClick={() => toggleRowExpansion(assessment.id)}
+                          >
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {assessment.assessment.code}
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 text-sm text-gray-500">
+                              <div>
+                                <span className="font-semibold">{assessment.assessment.occupation.scheme.name}</span>
+                                <br />
+                                <span>{assessment.assessment.occupation.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {formatDate(assessment.start_date)} - {formatDate(assessment.end_date)}
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${assessment.status === 'Selesai'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                {assessment.status}
+                              </span>
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <Users size={16} />
+                                <span>{assessment.schedule_details.length} Asesor</span>
+                              </div>
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                            </td>
+                          </tr>
 
-                            {isExpanded && (
-                              <tr className="bg-gray-100">
-                                <td colSpan={6} className="px-2">
-                                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                                    <div className="flex items-center gap-3 ml-5">
-                                      <User size={18} className="text-gray-600" />
-                                      <span className="font-medium">{schedule.assessor.full_name}</span>
+                          {isExpanded && (
+                            <>
+                              {assessment.schedule_details.map((schedule) => (
+                                <tr key={schedule.id} className="bg-gray-50">
+                                  <td colSpan={6} className="px-4 lg:px-6 py-1">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2">
+                                      <div className="flex items-center gap-3 flex-wrap">
+                                        <MapPin size={16} className="text-gray-600" />
+                                        <span className="font-medium">{schedule.location}</span>
+                                        <span className="text-gray-400 hidden md:inline">|</span>
+                                        <User size={16} className="text-gray-600" />
+                                        <span>{schedule.assessor.full_name}</span>
+                                      </div>
+                                      <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
+                                        <button
+                                          className="px-2 text-[#E77D35] rounded hover:text-orange-600 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(paths.admin.resultAssessment.dashboard(assessment.id, String(schedule.assessor.id)));
+                                          }}
+                                        >
+                                          Lihat Detail Asesmen <ArrowRight size={16} />
+                                        </button>
+
+                                        <button
+                                          className="px-2 text-blue-500 rounded hover:text-blue-700 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id)));
+                                          }}
+                                        >
+                                          Lihat Berita Acara <ArrowRight size={16} />
+                                        </button>
+                                      </div>
                                     </div>
-                                    <div className="flex flex-col p-2 gap-2">
-                                      <button
-                                        className="px-2 text-[#E77D35] rounded hover:text-orange-600 transition-colors text-sm cursor-pointer flex items-center gap-2"
-                                        onClick={() =>
-                                          navigate(paths.admin.resultAssessment.dashboard(assessment.id, String(schedule.assessor.id)))
-                                        }
-                                      >
-                                        Lihat Detail Asesmen <ArrowRight size={16} />
-                                      </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-                                      <button
-                                        className="px-2 text-blue-400 rounded hover:text-blue-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
-                                        onClick={() =>
-                                          navigate(paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id)))
-                                        }
-                                      >
-                                        Lihat Berita Acara <ArrowRight size={16} />
-                                      </button>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
+              {/* Mobile View */}
+              <div className="md:hidden">
+                {data.map((assessment) => {
+                  const isExpanded = isRowExpanded(assessment.id);
+
+                  return (
+                    <div key={assessment.id} className="border-b border-gray-200">
+                      <div
+                        className="p-4 cursor-pointer hover:bg-gray-50"
+                        onClick={() => toggleRowExpansion(assessment.id)}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900 mb-1">
+                              {assessment.assessment.code}
+                            </div>
+                            <div className="text-sm text-gray-500 mb-2">
+                              <div className="font-semibold">{assessment.assessment.occupation.scheme.name}</div>
+                              <div>{assessment.assessment.occupation.name}</div>
+                            </div>
+                            <div className="text-sm text-gray-500 mb-2">
+                              {formatDate(assessment.start_date)} - {formatDate(assessment.end_date)}
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${assessment.status === 'Selesai'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                {assessment.status}
+                              </span>
+                              <div className="flex items-center gap-1 text-sm text-gray-500">
+                                <Users size={16} />
+                                <span>{assessment.schedule_details.length} Asesor</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="pl-2">
+                            {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                          </div>
+                        </div>
+                      </div>
+
+                      {isExpanded && (
+                        <div className="bg-gray-50">
+                          {assessment.schedule_details.map((schedule) => (
+                            <div key={schedule.id} className="last:mb-0 border-b border-t border-gray-400 py-2 text-sm">
+                              {/* <hr className='my-4 border-gray-400' /> */}
+                              <div className="flex items-start gap-2 mb-2 px-4">
+                                <MapPin size={16} className="text-gray-600 mt-0.5 flex-shrink-0" />
+                                <span className="font-medium">{schedule.location}</span>
+                                <span className="text-gray-400">|</span>
+                                <User size={16} className="text-gray-600 mt-0.5 flex-shrink-0" />
+                                <span>{schedule.assessor.full_name}</span>
+                              </div>
+                              <div className="flex flex-row justify-between gap-2 px-4">
+                                <button
+                                  className="text-[#E77D35] text-sm cursor-pointer flex items-center gap-2 py-1"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(paths.admin.resultAssessment.dashboard(assessment.id, String(schedule.assessor.id)));
+                                  }}
+                                >
+                                  Lihat Detail Asesmen <ArrowRight size={16} />
+                                </button>
+
+                                <button
+                                  className="text-blue-500 text-sm cursor-pointer flex items-center gap-2 py-1"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id)));
+                                  }}
+                                >
+                                  Lihat Berita Acara <ArrowRight size={16} />
+                                </button>
+                              </div>
+                              {/* <hr className='my-4 border-gray-400'/> */}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </main>
