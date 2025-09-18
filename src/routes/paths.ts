@@ -28,6 +28,9 @@ const routes = {
 		root: "/admin",
 		kelolaUser: "/admin/kelola-user",
 		kelolaAkunAsesi: "/admin/kelola-akun-asesi",
+		recapAssessmentAdmin: (scheduleDetailId: string | number, id_asesor: string | number) => 
+			`/admin/recap-assessment/${scheduleDetailId}/${id_asesor}`,
+		recapAssessmentAdminPattern: "/admin/recap-assessment/:scheduleDetailId/:id_asesor",
 		resultAssessment: {
 			root: "/admin/result-assessment",
 			dashboard: (id_assessment: string | number, id_asesor: string | number) =>

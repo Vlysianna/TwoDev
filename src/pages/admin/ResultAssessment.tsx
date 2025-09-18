@@ -242,7 +242,7 @@ const ResultAssessment: React.FC = () => {
                                       <button
                                         className="px-2 text-[#E77D35] rounded hover:text-orange-600 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                         onClick={() =>
-                                          navigate(paths.admin.detailAssessmentAdmin(assessment.id, String(schedule.assessor.id)))
+                                          navigate(paths.admin.resultAssessment.dashboard(assessment.id, String(schedule.assessor.id)))
                                         }
                                       >
                                         Lihat Detail Asesmen <ArrowRight size={16} />
