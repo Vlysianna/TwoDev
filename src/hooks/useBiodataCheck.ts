@@ -62,7 +62,9 @@ export const useBiodataCheck = () => {
         setIsCheckingBiodata(false);
         return;
       }
+      setIsCheckingBiodata(true);
 
+      console.log("Tes");
       try {
         // Get assessor by user id
         let assessor: AssessorData | null = null;
@@ -95,6 +97,9 @@ export const useBiodataCheck = () => {
           }
         }
 
+        console.log("Assessor", assessor);
+        console.log("Detail", assessorDetail);
+
         const isComplete = checkBiodataCompleteness(assessor, assessorDetail);
         setBiodataComplete(isComplete);
 
@@ -126,7 +131,7 @@ export const useBiodataCheck = () => {
       } catch (error) {
         console.error('Error checking biodata:', error);
         // If error occurs, allow access but set biodata as incomplete
-        setBiodataComplete(false);
+        // setBiodataComplete(false);
       } finally {
         setIsCheckingBiodata(false);
       }

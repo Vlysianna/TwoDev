@@ -34,14 +34,14 @@ const SidebarAsesor: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuth();
-    const { biodataComplete, refreshBiodataCheck } = useBiodataCheck();
+    const { isCheckingBiodata, biodataComplete, refreshBiodataCheck } = useBiodataCheck();
 
     // Refresh biodata check when navigating to dashboard routes
-    useEffect(() => {
-        if (location.pathname.includes('/asesor/dashboard') && refreshBiodataCheck) {
-            refreshBiodataCheck();
-        }
-    }, [location.pathname, refreshBiodataCheck]);
+    // useEffect(() => {
+    //     if (location.pathname.includes('/asesor/dashboard') && refreshBiodataCheck) {
+    //         refreshBiodataCheck();
+    //     }
+    // }, [location.pathname, refreshBiodataCheck]);
 
     const getMenuItems = (): MenuItem[] => {
         const baseItems: MenuItem[] = [];
@@ -129,7 +129,7 @@ const SidebarAsesor: React.FC = () => {
             {/* Main Menu Items */}
             <div className="flex-1 flex flex-col ">
                 <div className="py-3">
-                    {menuItems.map((item) => (
+                    {isCheckingBiodata || menuItems.map((item) => (
                         <MenuItem
                             key={item.name}
                             item={item}
@@ -140,7 +140,7 @@ const SidebarAsesor: React.FC = () => {
                 </div>
 
                 {/* Informative message when biodata is incomplete */}
-                {!biodataComplete && (
+                {isCheckingBiodata || !biodataComplete && (
                     <div className="mx-4 mb-4 p-3 bg-[#ffffff20] rounded-lg border border-[#ffffff40]">
                         <div className="flex items-center space-x-2 mb-2">
                             <AlertCircle size={16} className="text-yellow-300" />
