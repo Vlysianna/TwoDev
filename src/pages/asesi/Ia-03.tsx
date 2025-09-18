@@ -14,7 +14,7 @@ export default function Ia03() {
 			<div className="mx-auto">
 				<div className="bg-white rounded-lg shadow-sm">
 					<NavbarAsesi
-						title="Asesmen Mandiri"
+						title="Pertanyaan Untuk Mendukung Observasi - FR.IA.03"
 						icon={
 							<Link
 								to={routes.asesi.dashboard}

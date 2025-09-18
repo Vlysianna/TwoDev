@@ -139,7 +139,7 @@ export default function Ia02() {
       <div className="mx-auto">
         <div className="bg-white rounded-lg shadow-sm">
           <NavbarAsesi
-            title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02"
+            title="Tugas Praktik Demonstrasi - FR.IA.02"
             icon={
               <Link
                 to={paths.asesi.dashboard}

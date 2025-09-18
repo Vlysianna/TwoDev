@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NotepadText, ChevronLeft, AlertCircle, Clock } from "lucide-react";
+import { NotepadText, ChevronLeft, AlertCircle, Clock, Save } from "lucide-react";
 import NavbarAsesor from "@/components/NavAsesor";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -99,16 +99,17 @@ export default function CekAk05() {
     try {
       setLoading(true);
 
+      // Otomatis isi "-" jika field kosong
       const payload = {
         result_id: Number(id_result),
         items: [
           {
             is_competent: isCompetent,
             description: deskripsi,
-            negative_positive_aspects: negatifPositif,
-            rejection_notes: penolakan || null,
-            improvement_suggestions: saran,
-            notes: catatan,
+            negative_positive_aspects: negatifPositif.trim() === "" ? "-" : negatifPositif,
+            rejection_notes: penolakan.trim() === "" ? "-" : penolakan,
+            improvement_suggestions: saran.trim() === "" ? "-" : saran,
+            notes: catatan.trim() === "" ? "-" : catatan,
           },
         ],
       };
@@ -116,16 +117,14 @@ export default function CekAk05() {
       const response = await api.post("/assessments/ak-05", payload);
 
       if (response.data.success) {
-        console.log("Data saved successfully:", response.data);
-        setDataSaved(true); // Tandai bahwa data sudah tersimpan
+        setDataSaved(true);
         setError(null);
-        // Bisa tambahkan toast/alert sukses
+        fetchData(); // refresh data untuk status approved
       } else {
         setError("Gagal menyimpan data");
         setDataSaved(false);
       }
     } catch (err) {
-      console.error("Error saving data:", err);
       setError("Terjadi kesalahan saat menyimpan data");
       setDataSaved(false);
     } finally {
@@ -408,13 +407,15 @@ export default function CekAk05() {
               {/* Tombol Simpan dengan modal konfirmasi */}
               <button
                 onClick={handleSaveClick}
-                disabled={loading}
-                className={`w-full text-white py-2 rounded-lg ${loading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-[#E77D35] hover:bg-orange-600"
-                  }`}
+                disabled={loading || data?.result?.result_ak05?.approved_assessor}
+                className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                  loading || data?.result?.result_ak05?.approved_assessor
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-green-700 cursor-pointer"
+                }`}
               >
-                {loading ? "Menyimpan..." : "Simpan Data"}
+                <Save size={18} className="mr-2" />
+                {loading ? "Menyimpan..." : "Simpan Rekomendasi"}
               </button>
             </div>
 
@@ -452,36 +453,55 @@ export default function CekAk05() {
                 />
               </div>
 
-              <div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 mb-3 h-40">
+              <div className="flex flex-col items-center justify-center border rounded-lg py-10 bg-gray-50 mb-3">
                 {qrValue ? (
                   <QRCodeCanvas value={qrValue} size={100} />
                 ) : (
                   <p className="text-gray-400 text-sm">Belum Generate QR</p>
                 )}
                 {qrValue && (
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-sm font-semibold text-gray-800 mt-2 text-center">
                     {data.result.assessor.name || "Nama Asesor"}
+                  </p>
+                )}
+                {/* Jika sudah approve asesor, munculkan pesan */}
+                {data?.result?.result_ak05?.approved_assessor && (
+                  <p className="text-green-600 text-sm font-semibold mt-2 text-center">
+                    Sebagai Asesor, Anda sudah setuju
                   </p>
                 )}
               </div>
 
-              <button
-                onClick={handleGenerateQRCode}
-                disabled={!dataSaved || generatingQR || isCompetent === null}
-                className={`w-full text-white py-2 rounded-lg ${!dataSaved || generatingQR || isCompetent === null
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-[#E77D35] hover:bg-orange-600"
-                  }`}
-              >
-                {generatingQR ? "Memproses..." : "Generate QR"}
-              </button>
-
               {/* Pesan error jika belum disimpan */}
               {!dataSaved && (
                 <p className="text-red-500 text-sm mt-2">
-                  Harap simpan data terlebih dahulu sebelum generate QR
+                  Harap simpan rekomendasi terlebih dahulu sebelum generate QR
                 </p>
               )}
+
+              <button
+                onClick={handleGenerateQRCode}
+                disabled={
+                  !dataSaved ||
+                  generatingQR ||
+                  isCompetent === null ||
+                  data?.result?.result_ak05?.approved_assessor
+                }
+                className={`w-full text-white py-2 rounded-lg bg-[#E77D35] ${
+                  !dataSaved ||
+                  generatingQR ||
+                  isCompetent === null ||
+                  data?.result?.result_ak05?.approved_assessor
+                    ? "opacity-50 cursor-not-allowed"
+                    : "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
+                }`}
+              >
+                {generatingQR
+                  ? "Memproses..."
+                  : data?.result?.result_ak05?.approved_assessor
+                  ? "QR Sudah Digenerate"
+                  : "Generate QR"}
+              </button>              
             </div>
           </section>
 

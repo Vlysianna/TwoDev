@@ -657,7 +657,7 @@ export default function Ia01() {
                       {resultData?.assessee?.name || "-"}
                     </span>
                     {resultData?.ia01_header?.approved_assessee && (
-                      <span className="text-green-600 font-semibold text-sm mt-2">
+                      <span className="text-green-600 text-center font-semibold text-sm mt-2">
                         Sudah disetujui asesi
                       </span>
                     )}
@@ -682,7 +682,7 @@ export default function Ia01() {
                       {resultData?.assessor?.name || "-"}
                     </span>
                     {resultData?.ia01_header?.approved_assessor === true && (
-                      <span className="text-green-600 font-semibold text-sm mt-2">
+                      <span className="text-green-600 font-semibold text-center text-sm mt-2">
                         Sebagai Asesor, Anda sudah setuju
                       </span>
                     )}

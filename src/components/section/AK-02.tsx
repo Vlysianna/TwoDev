@@ -354,34 +354,6 @@ export default function AK02({
 		}
 	};
 
-	const validateForm = () => {
-		if (!assessmentResult) {
-			alert("Pilih hasil asesmen: Kompeten atau Belum Kompeten");
-			return false;
-		}
-
-		if (!assessorComments.trim()) {
-			alert("Komentar asesor wajib diisi");
-			return false;
-		}
-
-		if (assessmentResult === "belum-kompeten" && !followUp.trim()) {
-			alert('Tindak lanjut wajib diisi untuk hasil "Belum Kompeten"');
-			return false;
-		}
-
-		// Only check for evidence if units exist
-		if (units.length > 0) {
-			const hasSelectedEvidence = Object.values(selectedOptions).some(Boolean);
-			if (!hasSelectedEvidence) {
-				alert("Pilih minimal satu bukti untuk unit kompetensi");
-				return false;
-			}
-		}
-
-		return true;
-	};
-
 	// Handler tombol simpan: buka modal dulu
 	const handleSaveClick = () => {
 		setPendingValue(
@@ -399,6 +371,123 @@ export default function AK02({
 		setShowConfirmModal(false);
 		await handleSubmit();
 	};
+
+	// Fungsi untuk memeriksa apakah setiap unit memiliki minimal satu bukti
+	const validateAllUnitsHaveEvidence = (): boolean => {
+		// Untuk setiap unit, periksa apakah ada minimal satu bukti yang dicentang
+		for (let unitIndex = 0; unitIndex < units.length; unitIndex++) {
+			let hasEvidence = false;
+
+			// Periksa semua evidence types untuk unit ini
+			for (let evidenceIndex = 0; evidenceIndex < evidenceTypes.length; evidenceIndex++) {
+				const key = `${unitIndex}-${evidenceIndex}`;
+				if (selectedOptions[key]) {
+					hasEvidence = true;
+					break;
+				}
+			}
+
+			// Jika tidak ada bukti untuk unit ini, return false
+			if (!hasEvidence) {
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	// Modifikasi fungsi validateForm
+	const validateForm = () => {
+		if (!assessmentResult) {
+			alert("Pilih hasil asesmen: Kompeten atau Belum Kompeten");
+			return false;
+		}
+
+		if (!assessorComments.trim()) {
+			alert("Komentar asesor wajib diisi");
+			return false;
+		}
+
+		if (assessmentResult === "belum-kompeten" && !followUp.trim()) {
+			alert('Tindak lanjut wajib diisi untuk hasil "Belum Kompeten"');
+			return false;
+		}
+
+		// Validasi bahwa setiap unit memiliki minimal satu bukti
+		if (units.length > 0) {
+			// Periksa apakah semua unit memiliki minimal satu bukti
+			if (!validateAllUnitsHaveEvidence()) {
+				alert("Setiap unit kompetensi harus memiliki minimal satu bukti yang dipilih");
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	// Opsi: Tambahkan juga fungsi untuk menandai unit yang belum memiliki bukti
+	// (ini akan berguna untuk memberikan visual feedback)
+	const getUnitValidationStatus = (unitIndex: number): { isValid: boolean, message: string } => {
+		let hasEvidence = false;
+
+		for (let evidenceIndex = 0; evidenceIndex < evidenceTypes.length; evidenceIndex++) {
+			const key = `${unitIndex}-${evidenceIndex}`;
+			if (selectedOptions[key]) {
+				hasEvidence = true;
+				break;
+			}
+		}
+
+		return {
+			isValid: hasEvidence,
+			message: hasEvidence ? "" : "Pilih minimal satu bukti untuk unit ini"
+		};
+	};
+
+	{
+		units.map((unit, unitIndex) => {
+			const validationStatus = getUnitValidationStatus(unitIndex);
+
+			return (
+				<tr
+					key={unit.id}
+					className={`border-b border-gray-100 hover:bg-gray-50 ${!validationStatus.isValid ? "bg-red-50" : ""
+						}`}
+				>
+					<td className="py-4 px-4 text-gray-800 font-medium">
+						<div className="text-sm text-gray-500 mb-1">
+							{unit.code}
+						</div>
+						<div>{unit.title}</div>
+						{!validationStatus.isValid && (
+							<div className="text-red-500 text-xs mt-1">
+								{validationStatus.message}
+							</div>
+						)}
+					</td>
+					{evidenceTypes.map((_, evidenceIndex) => (
+						<td key={evidenceIndex} className="py-4 px-3 text-center">
+							<label className="inline-flex items-center cursor-pointer">
+								<input
+									type="checkbox"
+									checked={isChecked(unitIndex, evidenceIndex)}
+									onChange={() => handleCheckboxChange(unitIndex, evidenceIndex)}
+									disabled={isAssessee}
+									className="hidden peer"
+								/>
+								<span
+									className="w-5 h-5 flex items-center justify-center rounded border-2 border-gray-300 
+               peer-checked:bg-[#E77D35] peer-checked:border-[#E77D35] transition"
+								>
+									<Check className={`w-4 h-4 text-white ${isChecked(unitIndex, evidenceIndex) ? 'block' : 'hidden'}`} />
+								</span>
+							</label>
+						</td>
+					))}
+				</tr>
+			);
+		})
+	}
 
 	if (loading) {
 		return (

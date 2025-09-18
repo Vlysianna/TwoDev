@@ -175,16 +175,23 @@ export default function Apl02Detail() {
     setSelectedProof(newProof);
   };
 
-  // Fungsi untuk mendapatkan daftar elemen yang belum dinilai
-  const getUnassessedElements = () => {
-    const unassessed: number[] = [];
+  // Fungsi untuk mendapatkan daftar elemen yang belum dinilai atau belum ada bukti
+  const getUnfilledElements = () => {
+    const formValues = getValues();
+    const unfilled: number[] = [];
     elements.forEach(el => {
-      if (!pencapaian[el.id] ||
-        (pencapaian[el.id] !== 'kompeten' && pencapaian[el.id] !== 'belum')) {
-        unassessed.push(el.id);
+      const pencapaian = formValues.elements?.[el.id]?.is_competent;
+      const evidence = formValues.elements?.[el.id]?.evidence;
+      if (
+        pencapaian === null ||
+        pencapaian === undefined ||
+        !evidence ||
+        evidence.length === 0
+      ) {
+        unfilled.push(el.id);
       }
     });
-    return unassessed;
+    return unfilled;
   };
 
   const filteredData = elements.filter((item) => {
@@ -239,11 +246,10 @@ export default function Apl02Detail() {
   };
 
   const onSubmit = async (data: FormValues) => {
-    // Validasi apakah semua elemen sudah dinilai
-    const unassessed = getUnassessedElements();
-    if (unassessed.length > 0) {
-      setUnassessedElements(unassessed);
-      setSaveError('Harap isi penilaian untuk semua elemen');
+    // Validasi apakah semua elemen sudah diisi pencapaian dan bukti relevan
+    const unfilled = getUnfilledElements();
+    if (unfilled.length > 0) {
+      setSaveError('Harap isi pencapaian dan bukti relevan untuk semua elemen');
       return;
     }
 
@@ -295,7 +301,7 @@ export default function Apl02Detail() {
   };
 
   // Hitung jumlah elemen yang belum dinilai
-  const unassessedCount = getUnassessedElements().length;
+  const unfilledCount = getUnfilledElements().length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -448,10 +454,10 @@ export default function Apl02Detail() {
               </div>
 
               {/* Status info */}
-              {unassessedCount > 0 && (
+              {unfilledCount > 0 && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
                   <p className="text-red-600 text-sm">
-                    <strong>{unassessedCount} elemen</strong> belum dinilai. Harap beri penilaian Kompeten/Belum Kompeten untuk semua elemen sebelum menyimpan.
+                    <strong>{unfilledCount} elemen</strong> belum diisi pencapaian <u>dan</u> bukti relevan. Harap isi <b>Kompeten/Belum Kompeten</b> dan pilih <b>Bukti Relevan</b> untuk semua elemen sebelum menyimpan.
                   </p>
                 </div>
               )}
@@ -608,7 +614,7 @@ export default function Apl02Detail() {
                                         >
                                           {values.length > 0
                                             ? `${values.length} bukti terpilih`
-                                            : "Select evidences..."}
+                                            : "Pilih bukti relevan"}
                                         </button>
                                       </PopoverTrigger>
                                       <PopoverContent className="w-[250px] p-0">
@@ -675,11 +681,11 @@ export default function Apl02Detail() {
               {saveError && <span className="text-red-500 text-sm">{saveError}</span>}
               <motion.button
                 type="submit"
-                className="bg-[#E77D35] hover:bg-[#E77D35] text-white font-bold py-2 mb-6 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-60 cursor-pointer hover:bg-orange-600"
+                className="bg-[#E77D35] hover:bg-[#E77D35] text-white font-bold py-2 mb-6 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer hover:bg-orange-600"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                disabled={saving || unassessedCount > 0}
+                disabled={saving || unfilledCount > 0}
               >
                 {saving ? 'Menyimpan...' : 'Simpan'}
               </motion.button>

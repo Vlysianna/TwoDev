@@ -135,7 +135,7 @@ export default function Ia02Assessor() {
 		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto">
 				<div className="bg-white rounded-lg shadow-sm">
-					<NavbarAsesor title='Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02'
+					<NavbarAsesor title='Tugas Praktik Demonstrasi - FR.IA.02'
 						icon={<Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)} className="text-gray-500 hover:text-gray-600">
 							<ChevronLeft size={20} />
 						</Link>

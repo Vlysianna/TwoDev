@@ -287,7 +287,7 @@ export default function CekAk05() {
 								/>
 							</div>
 
-							<div className="flex flex-col items-center justify-center border rounded-lg p-4 bg-gray-50 mb-3 h-40">
+							<div className="flex flex-col items-center justify-center border rounded-lg py-10 bg-gray-50 mb-3">
 								{qrValue ? (
 									<>
 										<QRCodeCanvas value={qrValue} size={100} />
@@ -298,32 +298,36 @@ export default function CekAk05() {
 								) : (
 									<p className="text-gray-400 text-sm">Belum Generate QR</p>
 								)}
+								{data?.result?.result_ak05?.approved_assessor && (
+									<p className="text-green-600 text-sm font-semibold mt-2 text-center">
+										Sudah disetujui asesor
+									</p>
+								)}
 							</div>
-							{/* Tambahkan tombol simpan jika QR sudah ada */}
-							{qrValue && (
-								<>
-									<button
-										onClick={handleSaveClick}
-										disabled={saving}
-										className={`w-full text-white py-2 rounded-lg mt-2 cursor-pointer ${saving
+							
+							<>
+								<button
+									onClick={handleSaveClick}
+									disabled={saving || !qrValue}
+									className={`w-full text-white py-2 rounded-lg mt-2 ${saving || !qrValue
 											? "bg-gray-400 cursor-not-allowed"
 											: "bg-[#E77D35] hover:bg-orange-600"
 										}`}
-									>
-										{saving ? "Menyimpan..." : "Simpan"}
-									</button>
-									<ConfirmModal
-										isOpen={showConfirmModal}
-										onClose={() => setShowConfirmModal(false)}
-										onConfirm={handleConfirmSave}
-										title="Konfirmasi Selesai"
-										message="Apakah Anda yakin ingin menyelesaikan asesmen ini? Setelah disimpan, Anda tidak dapat mengubah data lagi."
-										confirmText="Oke"
-										cancelText="Batal"
-										type="warning"
-									/>
-								</>
-							)}
+								>
+									{saving ? "Menyimpan..." : "Selesai"}
+								</button>
+
+								<ConfirmModal
+									isOpen={showConfirmModal}
+									onClose={() => setShowConfirmModal(false)}
+									onConfirm={handleConfirmSave}
+									title="Konfirmasi Selesai"
+									message="Apakah Anda yakin ingin menyelesaikan asesmen ini? Setelah disimpan, Anda tidak dapat mengubah data lagi."
+									confirmText="Oke"
+									cancelText="Batal"
+									type="warning"
+								/>
+							</>
 						</div>
 					</section>
 				</main>
