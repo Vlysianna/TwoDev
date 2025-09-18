@@ -217,17 +217,8 @@ export default function Apl02() {
 												{/* Left */}
 												<div>
 													<h2 className="text-lg font-semibold text-gray-800 mb-1">
-														Skema Sertifikasi
+														Skema Sertifikasi {assessments?.occupation?.name?.replace(/Sertifikasi/gi, "").trim()}
 													</h2>
-													<p className="text-sm text-gray-600">Okupasi</p>
-												</div>
-
-												{/* Right */}
-												<div className="lg:text-right sm:text-start">
-													<h3 className="font-medium text-gray-800 mb-2">
-														{assessments?.occupation?.name ||
-															"Pemrogram Junior ( Junior Coder )"}
-													</h3>
 													<span className="bg-[#E77D3533] text-[#E77D35] text-sm px-3 py-1 rounded-md font-sm">
 														{assessments?.code || "SKMLRPLPJR/LSPSMK24/2023"}
 													</span>

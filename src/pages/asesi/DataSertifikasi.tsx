@@ -340,7 +340,7 @@ export default function DataSertifikasi() {
 											<button
 												type="submit"
 												disabled={loading || isLocked}
-												className="w-full bg-[#E77D35] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 rounded-md transition duration-200"
+												className="w-full bg-[#E77D35] cursor-pointer hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 rounded-md transition duration-200"
 											>
 												{loading ? "Menyimpan..." : "Simpan"}
 											</button>
@@ -414,7 +414,7 @@ const FileUploadArea = ({
 									? "Lepaskan file di sini..."
 									: "Pilih file atau seret & lepas di sini"}
 							</p>
-							<p className="text-gray-400 text-xs">PNG, JPEG, JPG, GIF, BMP</p>
+							<p className="text-gray-400 text-xs">PNG, JPEG, JPG, PDF, up to 5MB</p>
 						</>
 					)}
 				</div>

@@ -97,7 +97,7 @@ export default function BiodataAsesor() {
           console.error('Error loading assessor data:', error);
         }
       }
-      
+
       // Load additional data from localStorage
       const savedAdditionalData = localStorage.getItem(`assessor_additional_${user.id}`);
       if (savedAdditionalData) {
@@ -112,7 +112,7 @@ export default function BiodataAsesor() {
           // ignore parsing errors
         }
       }
-      
+
       setInitialLoading(false);
     };
 
@@ -158,17 +158,51 @@ export default function BiodataAsesor() {
     }
   }, [location.state]);
 
+  const REQUIRED_FIELDS = [
+    'nama',
+    'alamat',
+    'tempatLahir',
+    'tanggalLahir',
+    'email',
+    'noRegMET',
+    'noTelp'
+  ];
+
+  const OPTIONAL_FIELDS = [
+    'catatan'
+  ];
+
+  const isFormValid = () => {
+    return REQUIRED_FIELDS.every(field => formData[field].trim() !== '');
+  };
+
   const handleSubmit = async () => {
     if (!user) return;
     setSaving(true);
     setSuccessMessage(null);
     setErrorMessage(null);
+
+    // Validasi kolom wajib
+    if (!isFormValid()) {
+      setErrorMessage('Mohon lengkapi semua kolom yang wajib diisi.');
+      setSaving(false);
+      return;
+    }
+
+    // Isi otomatis kolom opsional jika kosong
+    const filledFormData = { ...formData };
+    OPTIONAL_FIELDS.forEach(field => {
+      if (!filledFormData[field] || filledFormData[field].trim() === '') {
+        filledFormData[field] = '-';
+      }
+    });
+
     try {
       // 1) Prepare file uploads
       const uploaded: Record<string, string> = {};
       const fileMapping = {
         npwp: 'tax_id_number',
-        coverBuku: 'bank_book_cover', 
+        coverBuku: 'bank_book_cover',
         sertifikatAsesor: 'certificate',
         ktp: 'national_id',
         pasFoto: 'id_card'
@@ -187,35 +221,32 @@ export default function BiodataAsesor() {
             }
           } catch (uploadError) {
             console.error(`Failed to upload ${frontendKey}:`, uploadError);
-            // Continue with other files even if one fails
           }
         }
       }
 
       // 2) Create or update assessor basic data
       let assessorId = assessor?.id;
-      
+
       if (assessorId) {
-        // Update existing assessor
         await api.put(`/assessor/${assessorId}`, {
           user_id: user.id,
-          scheme_id: (assessor?.scheme_id as number) ?? 1, // default scheme_id if not set
-          address: formData.alamat,
-          phone_no: formData.noTelp,
-          birth_date: formData.tanggalLahir,
-          no_reg_met: formData.noRegMET,
+          scheme_id: (assessor?.scheme_id as number) ?? 1,
+          address: filledFormData.alamat,
+          phone_no: filledFormData.noTelp,
+          birth_date: filledFormData.tanggalLahir,
+          no_reg_met: filledFormData.noRegMET,
         });
       } else {
-        // Create new assessor if doesn't exist
         const createResp = await api.post('/assessor', {
           user_id: user.id,
-          scheme_id: 1, // default scheme_id
-          address: formData.alamat,
-          phone_no: formData.noTelp,
-          birth_date: formData.tanggalLahir,
-          no_reg_met: formData.noRegMET,
+          scheme_id: 1,
+          address: filledFormData.alamat,
+          phone_no: filledFormData.noTelp,
+          birth_date: filledFormData.tanggalLahir,
+          no_reg_met: filledFormData.noRegMET,
         });
-        
+
         if (createResp.data?.success) {
           assessorId = createResp.data.data.id;
           setAssessor(createResp.data.data);
@@ -234,37 +265,29 @@ export default function BiodataAsesor() {
           });
         } catch (detailError: any) {
           console.error('Error saving assessor detail:', detailError);
-          // Continue with saving even if detail fails
         }
       }
 
-      // refresh local detail
       try {
         const det = await api.get(`/assessor-detail/${assessorId}`);
         if (det.data?.success) setAssessorDetail(det.data.data);
-      } catch {
-        // ignore
-      }
+      } catch {}
 
-      // Save additional data to localStorage (data not in database schema)
+      // Save additional data to localStorage
       const additionalData = {
-        tempatLahir: formData.tempatLahir,
-        catatan: formData.catatan
+        tempatLahir: filledFormData.tempatLahir,
+        catatan: filledFormData.catatan
       };
       localStorage.setItem(`assessor_additional_${user.id}`, JSON.stringify(additionalData));
 
       setSuccessMessage('Data berhasil disimpan');
-      
-      // Refresh biodata check to update sidebar
       await refreshBiodataCheck();
-      
-      // If came from redirect, navigate back to original page after 2 seconds
+
       if (location.state && (location.state as any).from) {
         setTimeout(() => {
           navigate((location.state as any).from, { replace: true });
         }, 2000);
       } else {
-        // Navigate to dashboard after 2 seconds
         setTimeout(() => {
           navigate(paths.asesor.dashboardAsesor, { replace: true });
         }, 2000);
@@ -326,7 +349,7 @@ export default function BiodataAsesor() {
                   {!assessor || !assessorDetail ? (
                     <>
                       <p className="text-blue-800 text-sm mb-3">
-                        Untuk mengakses Dashboard dan fitur-fitur asesor lainnya, Anda perlu melengkapi biodata terlebih dahulu. 
+                        Untuk mengakses Dashboard dan fitur-fitur asesor lainnya, Anda perlu melengkapi biodata terlebih dahulu.
                         Hal ini diperlukan untuk memastikan proses sertifikasi yang akurat dan sesuai standar.
                       </p>
                       <div className="flex items-center space-x-2 text-blue-700">
@@ -376,6 +399,7 @@ export default function BiodataAsesor() {
                     <input type="text" name="nama" value={formData.nama} onChange={handleInputChange}
                       placeholder="Masukkan nama anda"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base" />
+                    <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom nama wajib diisi</label>
                   </div>
 
                   {/* Alamat */}
@@ -384,6 +408,7 @@ export default function BiodataAsesor() {
                     <input type="text" name="alamat" value={formData.alamat} onChange={handleInputChange}
                       placeholder="Masukkan alamat anda"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base" />
+                    <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom alamat wajib diisi</label>
                   </div>
                 </div>
 
@@ -395,6 +420,7 @@ export default function BiodataAsesor() {
                     <input type="text" name="tempatLahir" value={formData.tempatLahir}
                       onChange={handleInputChange} placeholder="Masukkan tempat lahir anda"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base" />
+                    <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom tempat lahir wajib diisi</label>
                   </div>
 
                   {/* Pilih tanggal - full width on mobile, 2 cols on desktop */}
@@ -404,6 +430,7 @@ export default function BiodataAsesor() {
                       <input type="date" name="tanggalLahir" value={formData.tanggalLahir}
                         onChange={handleInputChange} placeholder="Pilih tanggal"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base" />
+                      <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom tanggal lahir wajib diisi</label>
                     </div>
                   </div>
 
@@ -413,6 +440,7 @@ export default function BiodataAsesor() {
                     <input type="email" name="email" value={formData.email} onChange={handleInputChange}
                       placeholder="Masukkan email anda"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base" />
+                    <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom email wajib diisi</label>
                   </div>
                 </div>
 
@@ -424,6 +452,7 @@ export default function BiodataAsesor() {
                     <input type="text" name="noRegMET" value={formData.noRegMET} onChange={handleInputChange}
                       placeholder="Masukkan no. reg anda"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base" />
+                    <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom No. Reg. MET wajib diisi, contoh <span className='text-blue-500 underline'>MET.000.71824.2025</span></label>
                   </div>
 
                   {/* No. Telp */}
@@ -432,6 +461,7 @@ export default function BiodataAsesor() {
                     <input type="tel" name="noTelp" value={formData.noTelp} onChange={handleInputChange}
                       placeholder="Masukkan no. telp anda"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base" />
+                    <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom No. Telp wajib diisi</label>
                   </div>
                 </div>
               </div>
@@ -457,8 +487,8 @@ export default function BiodataAsesor() {
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-700">Choose a file or drag & drop it
                           here</p>
-                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up
-                          to 50MB</p>
+                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, and PDF, formats up
+                          to 5MB</p>
                       </div>
                     </div>
                     <label
@@ -620,6 +650,7 @@ export default function BiodataAsesor() {
                   <textarea name="catatan" value={formData.catatan} onChange={handleInputChange}
                     placeholder="Catatan" rows={6}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm sm:text-base" />
+                  <label className="block text-sm font-medium text-gray-500 mb-2 italic">*Kolom catatan opsional untuk diisi</label>
                 </div>
               </div>
             </div>
@@ -627,8 +658,8 @@ export default function BiodataAsesor() {
 
           {/* Submit Button - Responsive width */}
           <div className="mt-6 flex justify-end">
-            <button onClick={handleSubmit} disabled={saving} className={`w-full sm:w-auto sm:px-60 px-8 py-3 ${saving
-              ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white font-medium
+            <button onClick={handleSubmit} disabled={saving} className={`w-full sm:w-auto sm:px-60 px-8 py-3 cursor-pointer ${saving
+              ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#E77D35] hover:bg-orange-600'} text-white font-medium
                     rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500
                     focus:ring-offset-2`}>
               {saving ? 'Menyimpan...' : 'Lanjut'}
