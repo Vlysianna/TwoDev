@@ -3,6 +3,9 @@ import {
 	LayoutDashboard,
 	ChevronLeft,
 	ChevronRight,
+	SquareCheck,
+	CheckCircle,
+	SquareX,
 } from "lucide-react";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavAsesor from "@/components/NavAsesor";
@@ -90,6 +93,7 @@ export default function DashboardAsesmenMandiri() {
 				`/dashboard/assessor/${id_asesor}/${id_assessment}/${tab}`
 			);
 			if (response.data.success) {
+				console.log(response.data.data);
 				setAssesseeData(response.data.data);
 			} else {
 				setError(response.data.message);
@@ -295,6 +299,9 @@ export default function DashboardAsesmenMandiri() {
 										<th className="px-4 py-3 border-b text-left text-sm font-medium text-gray-700 min-w-[200px]">
 											Nama Asesi
 										</th>
+										<th className="px-4 py-3 border-b text-left text-sm font-medium text-gray-700 min-w-[100px]">
+											Status
+										</th>
 										<th className="px-4 py-3 border-b text-center text-sm font-medium text-gray-700 min-w-[120px]">
 											Action
 										</th>
@@ -339,6 +346,21 @@ export default function DashboardAsesmenMandiri() {
 												</td>
 												<td className="px-4 py-3 text-sm text-gray-900">
 													{asesi.assessee_name}
+												</td>
+												<td className="px-4 py-3 text-sm text-gray-700">
+													{asesi.status ? 
+														(
+															<span className="flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+																<SquareCheck size={18} />
+																Selesai
+															</span>
+														) : (
+															<span className="flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+																<SquareX size={14} className="mr-1" />
+																Sedang Berlangsung
+															</span>
+														)
+													}
 												</td>
 												<td className="px-4 py-3 text-center">
 													<button
