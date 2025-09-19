@@ -76,6 +76,7 @@ import DashboardAsesmenMandiriAdmin from "@/pages/admin/DashboardAsesmenMandiri"
 import AssessmentAdminProvider from "@/components/AssessmentAdminProvider";
 import BiodataProtectedRoute from "@/components/BiodataProtectedRoute";
 import AsesorIndexRoute from "@/components/AsesorIndexRoute";
+import ResultAsesiAssessmentAdmin from "@/pages/admin/ResultAsesiAssessment";
 
 const router = createBrowserRouter(
 	[
@@ -159,6 +160,10 @@ const router = createBrowserRouter(
 								{
 									path: paths.admin.resultAssessment.dashboardPattern,
 									element: <DashboardAsesmenMandiriAdmin />
+								},
+								{
+									path: paths.admin.resultAssessment.resultAsesiPattern,
+									element: <ResultAsesiAssessmentAdmin />
 								}
 							],
 						},
