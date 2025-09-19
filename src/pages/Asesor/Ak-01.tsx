@@ -137,7 +137,7 @@ export default function CekAk01() {
   const handleOnSubmit = async () => {
     // Validasi TUK
     if (!selectedTUK) {
-      setTukError("TUK harus dipilih");
+      setTukError("Lokasi harus dipilih");
       return;
     }
 
@@ -312,11 +312,11 @@ export default function CekAk01() {
                         value={selectedTUK}
                         onChange={handleTUKChange}
                         onBlur={() => {
-                          if (!selectedTUK) setTukError("TUK harus dipilih");
+                          if (!selectedTUK) setTukError("Lokasi harus dipilih");
                         }}
                         disabled={!!assessorQrValue} // Disable jika QR sudah digenerate
                       >
-                        <option value="">Pilih TUK</option>
+                        <option value="">Pilih Lokasi</option>
                         {data.locations &&
                           Array.from(new Set(data.locations))
                             .sort()
@@ -330,7 +330,7 @@ export default function CekAk01() {
                         <p className="text-red-500 text-xs mt-1">{tukError}</p>
                       )}
                       <p className="text-red-400 text-xs mt-1 italic">
-                        *Anda harus memilih TUK sebelum melanjutkan
+                        *Anda harus memilih lokasi sebelum melanjutkan
                       </p>
                     </div>
                   </div>
