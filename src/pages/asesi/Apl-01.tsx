@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, CheckCircle, ChevronLeft } from "lucide-react";
+import { AlertCircle, CheckCircle, ChevronLeft, House } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -9,6 +9,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import type { AssesseeRequest } from "@/model/assessee-model";
 import useToast from "@/components/ui/useToast";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function AplZeroOne() {
 	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
@@ -117,6 +118,8 @@ export default function AplZeroOne() {
 		fetchAssesseeData();
 	}, []);
 
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto">
@@ -124,13 +127,26 @@ export default function AplZeroOne() {
 					<NavbarAsesi
 						title="Permohonan Sertifikasi Kompetensi"
 						icon={
-							<Link
-								to={paths.asesi.dashboard}
+							<Link to={paths.asesi.dashboard} onClick={(e) => {
+								e.preventDefault(); // cegah auto navigasi
+								setIsConfirmOpen(true);
+							}}
 								className="text-gray-500 hover:text-gray-600"
 							>
-								<ChevronLeft size={20} />
+								<House size={20} />
 							</Link>
 						}
+					/>
+					<ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+						onConfirm={() => {
+							setIsConfirmOpen(false);
+							navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+						}}
+						title="Konfirmasi"
+						message="Apakah Anda yakin ingin kembali ke Dashboard?"
+						confirmText="Ya, kembali"
+						cancelText="Batal"
+						type="warning"
 					/>
 				</div>
 

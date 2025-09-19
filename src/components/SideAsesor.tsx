@@ -162,7 +162,7 @@ const SidebarAsesor: React.FC = () => {
         <>
             {/* Mobile Menu Button - Hidden on desktop */}
             <button
-                className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-orange-500 text-white rounded-md shadow-lg"
+                className="lg:hidden fixed top-6 left-4 z-[60] p-2 bg-orange-500 text-white rounded-md shadow-lg"
                 onClick={toggleMobileMenu}
             >
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}

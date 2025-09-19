@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Monitor, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Monitor, ChevronLeft, ChevronRight, AlertCircle, House } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +8,7 @@ import api from "@/helper/axios";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Apl02() {
 	const { id_assessment, id_asesor, id_result, id_asesi } =
@@ -173,6 +174,9 @@ export default function Apl02() {
 		? getAssessorUrl(Number(id_asesor))
 		: "";
 
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+	const navigate = useNavigate();
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="mx-auto">
@@ -180,13 +184,26 @@ export default function Apl02() {
 					<NavbarAsesi
 						title="Asesmen Mandiri"
 						icon={
-							<Link
-								to={paths.asesi.dashboard}
+							<Link to={paths.asesi.dashboard} onClick={(e) => {
+								e.preventDefault(); // cegah auto navigasi
+								setIsConfirmOpen(true);
+							}}
 								className="text-gray-500 hover:text-gray-600"
 							>
-								<ChevronLeft size={20} />
+								<House size={20} />
 							</Link>
 						}
+					/>
+					<ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+						onConfirm={() => {
+							setIsConfirmOpen(false);
+							navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+						}}
+						title="Konfirmasi"
+						message="Apakah Anda yakin ingin kembali ke Dashboard?"
+						confirmText="Ya, kembali"
+						cancelText="Batal"
+						type="warning"
 					/>
 				</div>
 
@@ -255,10 +272,10 @@ export default function Apl02() {
 															<div className="flex items-center justify-between">
 																{unit.finished ? (
 																	<span className="px-3 py-1 bg-[#E77D3533] text-[#E77D35] text-xs rounded">
-																		Finished
+																		Selesai
 																	</span>
 																) : (
-																	<div></div>
+																	<span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">Belum selesai</span>
 																)}
 
 																<Link
@@ -356,17 +373,18 @@ export default function Apl02() {
 																checked={resultData.is_continue === true}
 																onChange={() => { }}
 																disabled
-																className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+																className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35] disabled:cursor-not-allowed"
 															/>
 															<span
-																className={`text-sm text-gray-700 leading-relaxed ${resultData.is_continue === false
+																className={`text-sm leading-relaxed ${resultData.is_continue === false
 																	? "line-through opacity-50"
-																	: ""
-																	}`}
+																	: "text-gray-700"
+																	} cursor-not-allowed text-gray-400`}
 															>
 																Assessment <strong>dapat dilanjutkan</strong>
 															</span>
 														</div>
+
 														<div className="flex items-start space-x-3">
 															<input
 																type="radio"
@@ -374,15 +392,15 @@ export default function Apl02() {
 																checked={resultData.is_continue === false}
 																onChange={() => { }}
 																disabled
-																className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+																className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35] disabled:cursor-not-allowed"
 															/>
 															<span
-																className={`text-sm text-gray-700 leading-relaxed ${resultData.is_continue === true
+																className={`text-sm leading-relaxed ${resultData.is_continue === true
 																	? "line-through opacity-50"
-																	: ""
-																	}`}
+																	: "text-gray-700"
+																	} cursor-not-allowed text-gray-400`}
 															>
-																Assessment <strong>tidak dapat dilanjutkan</strong>
+																Assessment <strong className="text-red-600">tidak dapat dilanjutkan</strong>
 															</span>
 														</div>
 													</>

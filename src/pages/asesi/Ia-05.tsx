@@ -4,6 +4,7 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
+  House,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
@@ -13,6 +14,7 @@ import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import api from "@/helper/axios";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Ia05() {
   const { id_asesor, id_result, id_assessment } = useAssessmentParams();
@@ -219,6 +221,8 @@ export default function Ia05() {
   );
   const allAnswered = totalQuestions > 0 && answeredCount === totalQuestions;
 
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto">
@@ -227,13 +231,26 @@ export default function Ia05() {
           <NavbarAsesi
             title="Lembar Jawaban Pilihan Ganda"
             icon={
-              <Link
-                to={paths.asesi.dashboard}
+              <Link to={paths.asesi.dashboard} onClick={(e) => {
+                e.preventDefault(); // cegah auto navigasi
+                setIsConfirmOpen(true);
+              }}
                 className="text-gray-500 hover:text-gray-600"
               >
-                <ChevronLeft size={20} />
+                <House size={20} />
               </Link>
             }
+          />
+          <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+            onConfirm={() => {
+              setIsConfirmOpen(false);
+              navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+            }}
+            title="Konfirmasi"
+            message="Apakah Anda yakin ingin kembali ke Dashboard?"
+            confirmText="Ya, kembali"
+            cancelText="Batal"
+            type="warning"
           />
         </div>
 

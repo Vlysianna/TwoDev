@@ -1,12 +1,16 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, House } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import AK03 from "@/components/section/AK-03";
-import routes from "@/routes/paths";
+import paths from "@/routes/paths";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useState } from "react";
 
 export default function Ak03() {
 	const { id_result } = useAssessmentParams();
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+	const navigate = useNavigate();
 
 	if (!id_result)
 		return (
@@ -20,15 +24,28 @@ export default function Ak03() {
 			<div className="mx-auto">
 				<div className="bg-white rounded-lg shadow-sm">
 					<NavbarAsesi
-						title="Umpan balik dan catatan asesmen"
+						title="Umpan Balik dan Catatan Asesmen - FR.AK.03"
 						icon={
-							<Link
-								to={routes.asesi.dashboard}
+							<Link to={paths.asesi.dashboard} onClick={(e) => {
+								e.preventDefault(); // cegah auto navigasi
+								setIsConfirmOpen(true);
+							}}
 								className="text-gray-500 hover:text-gray-600"
 							>
-								<ChevronLeft size={20} />
+								<House size={20} />
 							</Link>
 						}
+					/>
+					<ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+						onConfirm={() => {
+							setIsConfirmOpen(false);
+							navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+						}}
+						title="Konfirmasi"
+						message="Apakah Anda yakin ingin kembali ke Dashboard?"
+						confirmText="Ya, kembali"
+						cancelText="Batal"
+						type="warning"
 					/>
 				</div>
 

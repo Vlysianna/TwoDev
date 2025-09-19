@@ -269,8 +269,8 @@ export default function DashboardAsesmenMandiri() {
 												: tab.status === "Completed"
 													? "border-green-500 text-green-700 font-medium"
 													: tab.status === "Waiting"
-														? "border-yellow-500 text-yellow-600 font-medium"
-														: "border-blue-300 text-blue-600"
+														? "border-blue-500 text-blue-600 font-medium"
+														: "border-yellow-300 text-yellow-600"
 											}`}
 									>
 										{tab.name}
@@ -306,10 +306,10 @@ export default function DashboardAsesmenMandiri() {
 										<th className="px-4 py-3 border-b text-left text-sm font-medium text-gray-700 min-w-[200px]">
 											Nama Asesi
 										</th>
-										<th className="px-4 py-3 border-b text-left text-sm font-medium text-gray-700 min-w-[100px]">
+										<th className="px-4 py-3 border-b text-center text-sm font-medium text-gray-700 min-w-[200px]">
 											Status
 										</th>
-										<th className="px-4 py-3 border-b text-center text-sm font-medium text-gray-700 min-w-[120px]">
+										<th className="px-4 py-3 border-b text-center text-sm font-medium text-gray-700 min-w-[180px]">
 											Action
 										</th>
 									</tr>
@@ -357,13 +357,13 @@ export default function DashboardAsesmenMandiri() {
 												<td className="px-4 py-3 text-sm text-gray-700">
 													{asesi.status ? 
 														(
-															<span className="flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+															<span className="flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-green-100 text-green-700">
 																<SquareCheck size={18} />
 																Selesai
 															</span>
 														) : (
-															<span className="flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-																<SquareX size={14} className="mr-1" />
+															<span className="flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-700">
+																<SquareX size={18} className="mr-1" />
 																Sedang Berlangsung
 															</span>
 														)

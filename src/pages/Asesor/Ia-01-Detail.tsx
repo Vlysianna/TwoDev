@@ -540,7 +540,7 @@ export default function Ia01Detail() {
             onClick={handleSave}
             disabled={saving || unassessedCount > 0}
           >
-            {saving ? 'Menyimpan...' : 'Save'}
+            {saving ? 'Menyimpan...' : 'Simpan'}
           </button>
         </div>
       </div>

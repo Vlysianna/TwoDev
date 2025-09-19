@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, Clock, Monitor } from 'lucide-react';
+import { ArrowLeft, Calendar, ChevronLeft, ChevronRight, Clock, House, Monitor } from 'lucide-react';
 import NavbarAsesor from '@/components/NavAsesor';
 import api from '@/helper/axios';
 import { useAssessmentParams } from '@/components/AssessmentAsesiProvider';
@@ -8,6 +8,7 @@ import { getAssesseeUrl, getAssessorUrl } from '@/lib/hashids';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import paths from "@/routes/paths";
 import NavbarAsesi from '@/components/NavbarAsesi';
+import ConfirmModal from '@/components/ConfirmModal';
 
 export default function Ia01Asesi() {
     const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams();
@@ -157,6 +158,8 @@ export default function Ia01Asesi() {
         })
         : "";
 
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="mx-auto">
@@ -164,13 +167,26 @@ export default function Ia01Asesi() {
                     <NavbarAsesi
                         title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR-IA-01"
                         icon={
-                            <Link
-                                to={paths.asesi.dashboard}
+                            <Link to={paths.asesi.dashboard} onClick={(e) => {
+                                e.preventDefault(); // cegah auto navigasi
+                                setIsConfirmOpen(true);
+                            }}
                                 className="text-gray-500 hover:text-gray-600"
                             >
-                                <ChevronLeft size={20} />
+                                <House size={20} />
                             </Link>
                         }
+                    />
+                    <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+                        onConfirm={() => {
+                            setIsConfirmOpen(false);
+                            navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+                        }}
+                        title="Konfirmasi"
+                        message="Apakah Anda yakin ingin kembali ke Dashboard?"
+                        confirmText="Ya, kembali"
+                        cancelText="Batal"
+                        type="warning"
                     />
                 </div>
 
@@ -258,9 +274,9 @@ export default function Ia01Asesi() {
 
                                         <div className="flex items-center justify-between mt-3">
                                             {unit.finished ? (
-                                                <span className="bg-[#E77D3533] text-[#E77D35] px-2 py-1 rounded text-xs font-medium">Finished</span>
+                                                <span className="bg-[#E77D3533] text-[#E77D35] px-2 py-1 rounded text-xs font-medium">Selesai</span>
                                             ) : (
-                                                <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">In Progress</span>
+                                                <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">Belum Selesai</span>
                                             )}
                                             <Link
                                                 to={paths.asesi.assessment.ia01AsesiDetail(

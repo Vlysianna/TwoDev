@@ -10,6 +10,7 @@ import {
 	MapPin,
 	Calendar,
 	Award,
+	FileText,
 } from "lucide-react";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavbarAsesor from "@/components/NavAsesor";
@@ -145,7 +146,7 @@ const RecapAssessment: React.FC = () => {
 					<div className="sticky top-0 z-10 bg-white shadow-sm">
 						<NavbarAsesor
 							title="Rekap Asesmen"
-							icon={<LayoutDashboard size={25} />}
+							icon={<FileText size={25} />}
 						/>
 					</div>
 					<main className="p-4">
@@ -168,7 +169,7 @@ const RecapAssessment: React.FC = () => {
 					<div className="sticky top-0 z-10 bg-white shadow-sm">
 						<NavbarAsesor
 							title="Rekap Asesmen"
-							icon={<LayoutDashboard size={25} />}
+							icon={<FileText size={25} />}
 						/>
 					</div>
 					<main className="p-4">
@@ -191,7 +192,7 @@ const RecapAssessment: React.FC = () => {
 					<div className="sticky top-0 z-10 bg-white shadow-sm">
 						<NavbarAsesor
 							title="Rekap Asesmen"
-							icon={<LayoutDashboard size={25} />}
+							icon={<FileText size={25} />}
 						/>
 					</div>
 					<main className="p-4">
@@ -219,7 +220,7 @@ const RecapAssessment: React.FC = () => {
 				<div className="sticky top-0 z-10 bg-white shadow-sm">
 					<NavbarAsesor
 						title="Rekap Asesmen"
-						icon={<LayoutDashboard size={25} />}
+						icon={<FileText size={25} />}
 					/>
 				</div>
 

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Monitor, ChevronLeft, Search, X, ChevronUp, ChevronDown, Calendar, Replace, AlertCircle, Check } from 'lucide-react';
+import { Monitor, ChevronLeft, Search, X, ChevronUp, ChevronDown, Calendar, Replace, AlertCircle, Check, House } from 'lucide-react';
 import NavbarAsesi from '@/components/NavbarAsesi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAssessmentParams } from '@/components/AssessmentAsesiProvider';
 import api from '@/helper/axios';
 import { QRCodeCanvas } from 'qrcode.react';
 import { getAssesseeUrl } from '@/lib/hashids';
+import ConfirmModal from '@/components/ConfirmModal';
 
 export default function Ak04() {
     // Menggunakan default empty object jika useAssessmentParams undefined
@@ -181,6 +182,8 @@ export default function Ak04() {
 
     // Cek apakah semua pertanyaan sudah dijawab dan alasan sudah diisi
     const isFormComplete = Object.values(answers).every(answer => answer !== '') && reason.trim() !== '';
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const navigate = useNavigate();
 
     // Tampilkan loading indicator saat data sedang dimuat
     if (loading) {
@@ -202,10 +205,26 @@ export default function Ak04() {
                     <NavbarAsesi
                         title='Umpan balik dan catatan asesmen'
                         icon={
-                            <Link to={paths.asesi.dashboard} className="text-gray-500 hover:text-gray-600">
-                                <ChevronLeft size={20} />
+                            <Link to={paths.asesi.dashboard} onClick={(e) => {
+                                e.preventDefault(); // cegah auto navigasi
+                                setIsConfirmOpen(true);
+                            }}
+                                className="text-gray-500 hover:text-gray-600"
+                            >
+                                <House size={20} />
                             </Link>
                         }
+                    />
+                    <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+                        onConfirm={() => {
+                            setIsConfirmOpen(false);
+                            navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+                        }}
+                        title="Konfirmasi"
+                        message="Apakah Anda yakin ingin kembali ke Dashboard?"
+                        confirmText="Ya, kembali"
+                        cancelText="Batal"
+                        type="warning"
                     />
                 </div>
                 <div className="m-5">
@@ -232,10 +251,26 @@ export default function Ak04() {
                     <NavbarAsesi
                         title='Umpan balik dan catatan asesmen'
                         icon={
-                            <Link to={paths.asesi.dashboard} className="text-gray-500 hover:text-gray-600">
-                                <ChevronLeft size={20} />
+                            <Link to={paths.asesi.dashboard} onClick={(e) => {
+                                e.preventDefault(); // cegah auto navigasi
+                                setIsConfirmOpen(true);
+                            }}
+                                className="text-gray-500 hover:text-gray-600"
+                            >
+                                <House size={20} />
                             </Link>
                         }
+                    />
+                    <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+                        onConfirm={() => {
+                            setIsConfirmOpen(false);
+                            navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+                        }}
+                        title="Konfirmasi"
+                        message="Apakah Anda yakin ingin kembali ke Dashboard?"
+                        confirmText="Ya, kembali"
+                        cancelText="Batal"
+                        type="warning"
                     />
                 </div>
 

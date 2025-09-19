@@ -54,6 +54,7 @@ export default function IA03({
 	const [selectedGroup, setSelectedGroup] = useState(0);
 	const [assesseeQrValue, setAssesseeQrValue] = useState("");
 	const [assessorQrValue, setAssessorQrValue] = useState("");
+	const [isApprovedByAssessor, setIsApprovedByAssessor] = useState(false);
 
 	const [questions, setQuestions] = useState<Question[]>([]);
 
@@ -145,12 +146,12 @@ export default function IA03({
 			const response = await api.get(`/assessments/ia-03/result/${id_result}`);
 			if (response.data.success) {
 				setResult(response.data.data);
+				setIsApprovedByAssessor(response.data.data.ia03_header.approved_assessor);
 
 				// Set QR values jika sudah approved
 				if (response.data.data.ia03_header.approved_assessee) {
 					setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
 				}
-
 				if (response.data.data.ia03_header.approved_assessor) {
 					setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
 				}
@@ -231,25 +232,12 @@ export default function IA03({
 				payload
 			);
 			if (response.data.success) {
-				setSuccess("Jawaban berhasil disimpan");
-				fetchUnits(id_result);
-				toast.show({
-					title: "Berhasil",
-					description: "Berhasil menyimpan jawaban",
-					type: "success",
-					duration: 3000
-				});
+				// Hapus setSuccess di sini karena akan ditangani di handleSaveAllQuestions
 				return response.data.data;
 			}
 		} catch (error: any) {
 			console.log("Error saving question answer:", error);
-			setError("Gagal menyimpan jawaban");
-			toast.show({
-				title: "Gagal",
-				description: "Gagal menyimpan jawaban",
-				type: "error",
-				duration: 3000
-			});
+			// Hapus setError di sini karena akan ditangani di handleSaveAllQuestions
 			return null;
 		}
 	};
@@ -285,6 +273,7 @@ export default function IA03({
 			);
 			if (response.data.success) {
 				setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+				setIsApprovedByAssessor(true); // Tambahkan ini
 				setSuccess("Hasil berhasil disetujui asesor");
 
 				// Refresh result untuk update approval status
@@ -336,6 +325,11 @@ export default function IA03({
 
 			if (hasError) {
 				setError("Tanggapan harus diisi pada semua pertanyaan");
+				toast.show({
+					title: "Gagal",
+					description: "Tanggapan harus diisi pada semua pertanyaan",
+					type: "error",
+				});
 				setLoading(false);
 				return;
 			}
@@ -346,12 +340,27 @@ export default function IA03({
 			});
 
 			await Promise.all(promises);
-			showNotification("Jawaban berhasil disimpan");
-			setSuccess(null); // Tidak tampilkan pesan success di UI
+
+			// TAMPILKAN TOAST HANYA SEKALI UNTUK SELURUH GRUP
+			toast.show({
+				title: "Berhasil",
+				description: `Semua jawaban untuk grup "${groups[selectedGroup]?.name}" berhasil disimpan`,
+				type: "success",
+			});
+
+			setSuccess(`Semua jawaban untuk grup "${groups[selectedGroup]?.name}" berhasil disimpan`);
 			setError(null);
+
+			// Refresh data
+			fetchUnits(id_result);
 		} catch (error: any) {
 			console.log("Error saving all questions:", error);
 			setError("Gagal menyimpan jawaban");
+			toast.show({
+				title: "Gagal",
+				description: "Gagal menyimpan jawaban",
+				type: "error",
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -478,14 +487,14 @@ export default function IA03({
 						</div>
 					</div>
 				) : (
-					<div className="flex gap-2 mb-6 overflow-x-auto">
+					<div className="flex flex-wrap gap-2 mb-6">
 						{tabs.map((tab, index) => (
 							<button
 								key={tab.id}
 								onClick={() => handleTabClick(index)}
-								className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer whitespace-nowrap ${tab.active
-									? "bg-[#E77D35] text-white"
-									: "text-gray-600 hover:text-gray-800"
+								className={`px-3 lg:px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition-colors ${tab.active
+									? "bg-[#E77D35] text-white shadow-sm"
+									: "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
 									}`}
 							>
 								{tab.label}
@@ -564,7 +573,7 @@ export default function IA03({
 					</div>
 				) : (
 					<div className="overflow-x-auto">
-						<table className="min-w-[500px] table-auto border-collapse">
+						<table className="min-w-[700px] table-auto border-collapse">
 							<thead className="bg-gray-50">
 								<tr className="border-b">
 									<th className="w-[5%] text-center text-gray-700 font-medium py-3 px-2 text-sm">No</th>
@@ -589,8 +598,9 @@ export default function IA03({
 											<div className="flex justify-center items-center gap-4 flex-wrap">
 												{/* Kompeten */}
 												<label
-													className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer text-sm ${question.pencapaian === "kompeten" ? "bg-[#E77D3533]" : ""
-														}`}
+													className={`flex items-center gap-2 px-2 py-1 rounded text-sm ${question.pencapaian === "kompeten" ? "bg-[#E77D3533]" : ""
+														}
+														${isAssessee || isApprovedByAssessor ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 												>
 													<input
 														type="radio"
@@ -599,12 +609,12 @@ export default function IA03({
 														checked={question.pencapaian === "kompeten"}
 														onChange={(e) => updatePencapaian(question.id, e.target.value)}
 														className="hidden"
-														disabled={isAssessee}
+														disabled={isAssessee || isApprovedByAssessor}
 													/>
 													<span
-														className={`w-4 aspect-square flex items-center justify-center rounded-full border-2
+														className={`w-4 h-4 flex items-center justify-center rounded-full border-2
                   ${question.pencapaian === "kompeten" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}
-                  ${isAssessee && "opacity-50 cursor-not-allowed"}`}
+                  ${isAssessee || isApprovedByAssessor && "opacity-50 cursor-not-allowed"}`}
 													>
 														{question.pencapaian === "kompeten" && (
 															<Check className="w-4 h-4 text-white" />
@@ -617,8 +627,9 @@ export default function IA03({
 
 												{/* Belum Kompeten */}
 												<label
-													className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer text-sm ${question.pencapaian === "belum" ? "bg-[#E77D3533]" : ""
-														}`}
+													className={`flex items-center gap-2 px-2 py-1 rounded text-sm ${question.pencapaian === "belum" ? "bg-[#E77D3533]" : ""
+														}
+														${isAssessee || isApprovedByAssessor ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 												>
 													<input
 														type="radio"
@@ -627,12 +638,12 @@ export default function IA03({
 														checked={question.pencapaian === "belum"}
 														onChange={(e) => updatePencapaian(question.id, e.target.value)}
 														className="hidden"
-														disabled={isAssessee}
+														disabled={isAssessee || isApprovedByAssessor}
 													/>
 													<span
-														className={`w-4 aspect-square flex items-center justify-center rounded-full border-2
+														className={`w-4 h-4 flex items-center justify-center rounded-full border-2
                   ${question.pencapaian === "belum" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}
-                  ${isAssessee && "opacity-50 cursor-not-allowed"}`}
+                  ${isAssessee || isApprovedByAssessor && "opacity-50 cursor-not-allowed"}`}
 													>
 														{question.pencapaian === "belum" && (
 															<Check className="w-4 h-4 text-white" />
@@ -657,9 +668,11 @@ export default function IA03({
 													}));
 												}}
 												placeholder="Tanggapan"
-												className={`w-full min-h-[70px] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm resize-y ${tanggapanErrors[question.id] ? "border-red-500" : ""
-													}`}
-												disabled={isAssessee}
+												className={`w-full min-h-[70px] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm resize-y 
+													${tanggapanErrors[question.id] ? "border-red-500" : ""}
+													${(isAssessee || isApprovedByAssessor) ? "bg-gray-100 cursor-not-allowed" : ""}
+													`}
+												disabled={isAssessee || isApprovedByAssessor}
 											/>
 											{tanggapanErrors[question.id] && (
 												<span className="text-xs text-red-500 mt-1">{tanggapanErrors[question.id]}</span>
@@ -675,8 +688,12 @@ export default function IA03({
 				<div className="flex w-full justify-end mt-2">
 					<button
 						onClick={handleSaveAllQuestions}
-						disabled={loading || isAssessee}
-						className="flex items-center justify-center gap-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded text-sm transition-colors disabled:opacity-50 w-full sm:w-auto cursor-pointer disabled:cursor-not-allowed"
+						disabled={loading || isAssessee || isApprovedByAssessor} // Tambahkan kondisi ini
+						className={`flex items-center justify-center gap-1 bg-green-600 text-white px-6 py-3 rounded text-sm transition-colors w-full sm:w-auto 
+    								${loading || isAssessee || isApprovedByAssessor ? 
+										"opacity-50 cursor-not-allowed" : 
+										"hover:bg-green-700 cursor-pointer"}
+									`}
 					>
 						<CheckCircle size={16} />
 						{loading ? "Menyimpan..." : "Simpan"}
@@ -782,7 +799,7 @@ export default function IA03({
 								) : (
 									<div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
 										<span className="text-gray-400 text-xs text-center">
-											Menunggu persetujuan Asesi
+											QR Code Asesi
 										</span>
 									</div>
 								)}
@@ -825,7 +842,6 @@ export default function IA03({
 								) : (
 									<div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
 										<span className="text-gray-400 text-xs text-center">QR Code Asesor</span>
-										<span className="text-gray-400 text-xs text-center">Klik tombol "Generate QR"</span>
 									</div>
 								)}
 
@@ -839,7 +855,7 @@ export default function IA03({
 										disabled={completionPercent < 100}
 										className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${completionPercent < 100
 											? "opacity-50 cursor-not-allowed"
-											: "hover:bg-orange-600"
+											: "hover:bg-orange-600 cursor-pointer"
 											}`}
 									>
 										Setujui

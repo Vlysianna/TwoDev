@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, AlertCircle, Clock } from "lucide-react";
+import { ChevronLeft, AlertCircle, Clock, House } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +30,7 @@ export default function CekAk05() {
 
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const [saving, setSaving] = useState(false);
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
 	useEffect(() => {
 		fetchData();
@@ -118,13 +119,26 @@ export default function CekAk05() {
 					<NavbarAsesi
 						title="Laporan Asesmen - FR.AK.05"
 						icon={
-							<Link
-								to={paths.asesi.dashboard}
+							<Link to={paths.asesi.dashboard} onClick={(e) => {
+								e.preventDefault(); // cegah auto navigasi
+								setIsConfirmOpen(true);
+							}}
 								className="text-gray-500 hover:text-gray-600"
 							>
-								<ChevronLeft size={20} />
+								<House size={20} />
 							</Link>
 						}
+					/>
+					<ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+						onConfirm={() => {
+							setIsConfirmOpen(false);
+							navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+						}}
+						title="Konfirmasi"
+						message="Apakah Anda yakin ingin kembali ke Dashboard?"
+						confirmText="Ya, kembali"
+						cancelText="Batal"
+						type="warning"
 					/>
 				</div>
 				<main className='m-4'>
@@ -311,7 +325,7 @@ export default function CekAk05() {
 									disabled={saving || !qrValue}
 									className={`w-full text-white py-2 rounded-lg mt-2 ${saving || !qrValue
 											? "bg-gray-400 cursor-not-allowed"
-											: "bg-[#E77D35] hover:bg-orange-600"
+											: "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
 										}`}
 								>
 									{saving ? "Menyimpan..." : "Selesai"}

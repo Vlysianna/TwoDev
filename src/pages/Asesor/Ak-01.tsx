@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { FileCheck2, ChevronLeft, AlertCircle, Check } from "lucide-react";
+import { FileCheck2, ChevronLeft, AlertCircle, Check, Save, QrCode } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
@@ -10,6 +10,7 @@ import type { ResultAK01 } from "@/model/ak01-model";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
 import NavbarAsesor from "@/components/NavAsesor";
+import useToast from "@/components/ui/useToast";
 
 export default function CekAk01() {
   const { id_assessment, id_result, id_asesi, id_asesor } =
@@ -18,6 +19,8 @@ export default function CekAk01() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tukError, setTukError] = useState<string | null>(null);
+  const [isDataSaved, setIsDataSaved] = useState(false); // State baru untuk melacak apakah data sudah disimpan
 
   const [data, setData] = useState<ResultAK01>({
     id: 0,
@@ -64,6 +67,9 @@ export default function CekAk01() {
   const [assessorQrValue, setAssessorQrValue] = useState("");
   const [selectedTime, setSelectedTime] = useState("07:00");
 
+  const navigate = useNavigate();
+  const toast = useToast();
+
   useEffect(() => {
     fetchData();
   }, [user]);
@@ -82,9 +88,9 @@ export default function CekAk01() {
             rawData.data.ak01_header.rows.flatMap((row: any) => row.evidence)
           );
           setSelectedTUK(
-            rawData.data.locations[response.data.data.locations.length - 1] ||
-            ""
+            rawData.data.locations[rawData.data.locations.length - 1] || ""
           );
+          setIsDataSaved(true); // Set state menjadi true jika data sudah ada
         }
 
         if (rawData.data.ak01_header.approved_assessor) {
@@ -112,9 +118,59 @@ export default function CekAk01() {
       );
       if (response.data.success) {
         setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+        toast.show({
+          title: "Berhasil",
+          description: "QR Code Asesor berhasil digenerate",
+          type: "success",
+        });
       }
     } catch (error) {
       console.log("Error Generating QR Code:", error);
+      toast.show({
+        title: "Gagal",
+        description: "Gagal generate QR Code",
+        type: "error",
+      });
+    }
+  };
+
+  const handleOnSubmit = async () => {
+    // Validasi TUK
+    if (!selectedTUK) {
+      setTukError("TUK harus dipilih");
+      return;
+    }
+
+    setTukError(null);
+
+    const requestData = {
+      result_id: id_result,
+      evidences: selectedEvidences,
+    };
+
+    try {
+      const response = await api.post(`/assessments/ak-01/`, requestData);
+      if (response.data.success) {
+        setIsDataSaved(true); // Set state menjadi true setelah berhasil menyimpan
+        toast.show({
+          title: "Berhasil",
+          description: "Berhasil menyimpan data",
+          type: "success",
+        });
+      } else {
+        toast.show({
+          title: "Gagal",
+          description: "Gagal menyimpan data",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.log("Error saving data:", error);
+      toast.show({
+        title: "Gagal",
+        description: "Terjadi kesalahan saat menyimpan data",
+        type: "error",
+      });
     }
   };
 
@@ -137,6 +193,13 @@ export default function CekAk01() {
         return [...prev, evidence];
       }
     });
+  };
+
+  const handleTUKChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTUK(e.target.value);
+    if (tukError) {
+      setTukError(null);
+    }
   };
 
   if (loading) {
@@ -195,7 +258,6 @@ export default function CekAk01() {
             </div>
 
             <div className="pt-6">
-              {/* Top grid 2 columns */}
               {/* Top grid responsive */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
                 {/* Left column */}
@@ -235,35 +297,42 @@ export default function CekAk01() {
                       type="date"
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
                       value={new Date().toISOString().split("T")[0]}
-                      onChange={() => { }}
                       readOnly
                     />
                     <input
                       type="time"
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
                       value={selectedTime}
-                      disabled
-                      onChange={(e) => {
-                        setSelectedTime(e.target.value);
-                        console.log(selectedTime);
-                      }}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      disabled={!!assessorQrValue} // Disable jika QR sudah digenerate
                     />
-                    <select
-                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-                      value={selectedTUK}
-                      disabled
-                      onChange={(e) => setSelectedTUK(e.target.value)}
-                    >
-                      <option value="">TUK</option>
-                      {data.locations &&
-                        Array.from(new Set(data.locations))
-                          .sort()
-                          .map((location, index) => (
-                            <option key={index} value={location}>
-                              {location}
-                            </option>
-                          ))}
-                    </select>
+                    <div>
+                      <select
+                        className={`w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500 cursor-pointer ${tukError ? "border border-red-500" : ""}`}
+                        value={selectedTUK}
+                        onChange={handleTUKChange}
+                        onBlur={() => {
+                          if (!selectedTUK) setTukError("TUK harus dipilih");
+                        }}
+                        disabled={!!assessorQrValue} // Disable jika QR sudah digenerate
+                      >
+                        <option value="">Pilih TUK</option>
+                        {data.locations &&
+                          Array.from(new Set(data.locations))
+                            .sort()
+                            .map((location, index) => (
+                              <option key={index} value={location}>
+                                {location}
+                              </option>
+                            ))}
+                      </select>
+                      {tukError && (
+                        <p className="text-red-500 text-xs mt-1">{tukError}</p>
+                      )}
+                      <p className="text-red-400 text-xs mt-1 italic">
+                        *Anda harus memilih TUK sebelum melanjutkan
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -279,15 +348,15 @@ export default function CekAk01() {
                       return (
                         <label
                           key={option}
-                          className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition
+                          className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
                                     ${checked ? "bg-orange-100 " : ""}`}
                         >
                           <input
                             type="checkbox"
-                            className="hidden cursor-not-allowed"
+                            className="hidden cursor-pointer"
                             checked={checked}
-                            disabled
                             onChange={() => handleCheckboxChange(option)}
+                            disabled={!!assessorQrValue} // Disable jika QR sudah digenerate
                           />
                           <span
                             className={`w-4 h-4 flex items-center justify-center rounded-xs border-2
@@ -388,19 +457,55 @@ export default function CekAk01() {
                         </div>
                       )}
                       <span className="text-sm font-semibold text-gray-800 text-center">{data.assessor.name}</span>
-
-                      {!assessorQrValue && (
-                        <button
-                          disabled={assessorQrValue !== ""}
-                          onClick={() => {
-                            if (!assessorQrValue) handleGenerateQRCode();
-                          }}
-                          className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assessorQrValue ? "hover:bg-orange-600" : "cursor-not-allowed opacity-50"
-                            }`}
-                        >
-                          Setujui
-                        </button>
+                    </div>
+                    {/* Submit Button */}
+                    <div className="sm:col-span-2 mt-4 border-t border-gray-200 pt-6 space-y-2">
+                      <button
+                        type="submit"
+                        className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${!selectedTUK ||
+                          !selectedTime ||
+                          !selectedEvidences ||
+                          selectedEvidences.length === 0 ||
+                          assessorQrValue // Disable jika QR sudah digenerate
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-green-700 cursor-pointer"
+                          }`}
+                        onClick={(e) => {
+                          if (
+                            !selectedTUK ||
+                            !selectedTime ||
+                            !selectedEvidences ||
+                            selectedEvidences.length === 0 ||
+                            assessorQrValue // Disable jika QR sudah digenerate
+                          )
+                            e.preventDefault();
+                          handleOnSubmit();
+                        }}
+                        disabled={
+                          !selectedTUK ||
+                          !selectedTime ||
+                          !selectedEvidences ||
+                          selectedEvidences.length === 0 ||
+                          !!assessorQrValue // Disable jika QR sudah digenerate
+                        }
+                      >
+                        <Save size={18} className="mr-2" />
+                        {isDataSaved ? "Perbarui Persetujuan" : "Simpan Persetujuan"}
+                      </button>
+                      {tukError && (
+                        <p className="text-red-500 text-xs mt-2">{tukError}</p>
                       )}
+                      <button
+                        disabled={!isDataSaved || !!assessorQrValue} // Disable jika data belum disimpan atau QR sudah digenerate
+                        onClick={() => {
+                          if (isDataSaved && !assessorQrValue) handleGenerateQRCode();
+                        }}
+                        className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!isDataSaved || assessorQrValue ? "cursor-not-allowed opacity-50" : "hover:bg-orange-600 cursor-pointer"
+                          }`}
+                      >
+                        <QrCode size={18} className="mr-2" />
+                        Generate QR
+                      </button>
                     </div>
                   </div>
                 </div>
