@@ -240,7 +240,7 @@ export default function Ia01Asesi() {
                             </div>
                             <div className="flex flex-col items-end gap-1">
                                 <div className="flex items-center justify-between w-full min-w-[220px]">
-                                    <span className="text-sm text-gray-600">Completion</span>
+                                    <span className="text-sm text-gray-600">Penyelesaian</span>
                                     <span className="text-sm font-medium text-gray-900">{unitData.length > 0 ? `${Math.round((completedUnits / unitData.length) * 100)}%` : '0%'}</span>
                                 </div>
                                 <div className="w-full">

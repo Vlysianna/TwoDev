@@ -547,7 +547,7 @@ export default function IA03({
 					<div>
 						<div className="flex items-center gap-2">
 							<span className="text-sm font-medium">
-								Completion: {completionCount} / {groups.length} grup ({completionPercent}%)
+								Penyelesaian: {completionCount} / {groups.length} grup ({completionPercent}%)
 							</span>
 							<div className="flex-1 h-2 bg-gray-200 rounded w-32">
 								<div

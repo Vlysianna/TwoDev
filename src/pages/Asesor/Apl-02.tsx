@@ -279,7 +279,7 @@ export default function CekApl02() {
                                                         <div className="flex items-center justify-between">
                                                             {unit.finished ? (
                                                                 <span className="px-3 py-1 bg-[#E77D3533] text-[#E77D35] text-xs rounded">
-                                                                    Finished
+                                                                    Selesai
                                                                 </span>
                                                             ) : (
                                                                 <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">Belum selesai</span>
@@ -313,7 +313,7 @@ export default function CekApl02() {
                                             <h3 className="text-xl font-medium text-gray-900 mb-4">Progress Asesmen</h3>
                                             <div className="flex justify-between items-center mb-2">
                                                 <span className="text-sm font-medium text-gray-700">
-                                                    Completion
+                                                    Penyelesaian
                                                 </span>
                                                 <span className="text-sm font-medium text-[#E77D35]">
                                                     {completedUnits > 0 && unitCompetencies.length > 0

@@ -315,7 +315,7 @@ export default function Apl02() {
 											</h3>
 											<div className="flex justify-between items-center mb-2">
 												<span className="text-sm font-medium text-gray-700">
-													Completion
+													Penyelesaian
 												</span>
 												<span className="text-sm font-medium text-[#E77D35]">
 													{completedUnits > 0 && unitCompetencies.length > 0
