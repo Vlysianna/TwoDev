@@ -12,7 +12,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Ak01() {
-	const { id_result, id_assessment, id_asesi, id_asesor } =
+	const { id_result, id_assessment, id_asesi, id_asesor, mutateNavigation } =
 		useAssessmentParams();
 
 	const { user } = useAuth();
@@ -111,6 +111,7 @@ export default function Ak01() {
 			);
 			if (response.data.success) {
 				setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+				mutateNavigation();
 			}
 		} catch (error) {
 			console.log("Error Generating QR Code:", error);

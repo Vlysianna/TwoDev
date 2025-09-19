@@ -40,12 +40,14 @@ export default function IA03({
 	id_result,
 	id_asesi,
 	id_asesor,
+	mutateNavigation,
 }: {
 	isAssessee: boolean;
 	id_assessment: string;
 	id_result: string;
 	id_asesi: string;
 	id_asesor: string;
+	mutateNavigation?: () => void;
 }) {
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
@@ -257,6 +259,7 @@ export default function IA03({
 				if (id_result) {
 					fetchResult(id_result);
 				}
+				if (mutateNavigation) mutateNavigation();
 			}
 		} catch (error: any) {
 			console.log("Error approving by assessee:", error);
@@ -280,6 +283,7 @@ export default function IA03({
 				if (id_result) {
 					fetchResult(id_result);
 				}
+				if (mutateNavigation) mutateNavigation();
 			}
 		} catch (error: any) {
 			console.log("Error approving by assessor:", error);

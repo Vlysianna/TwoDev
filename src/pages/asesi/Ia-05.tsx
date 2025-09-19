@@ -17,7 +17,7 @@ import api from "@/helper/axios";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Ia05() {
-  const { id_asesor, id_result, id_assessment } = useAssessmentParams();
+  const { id_asesor, id_result, id_assessment, mutateNavigation } = useAssessmentParams();
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -167,6 +167,7 @@ export default function Ia05() {
       await api.post("/assessments/ia-05/result/assessee/send", payload);
       setSuccess("Jawaban berhasil dikirimkan.");
       navigate(paths.asesi.assessment.Ia05CAssessee(id_assessment, id_asesor));
+      mutateNavigation();
     } catch (error: unknown) {
       let message = "Gagal menyimpan jawaban. Silakan coba lagi.";
       if (typeof error === "object" && error && "response" in error) {

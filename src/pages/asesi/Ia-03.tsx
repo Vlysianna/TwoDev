@@ -8,7 +8,7 @@ import { useState } from "react";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Ia03() {
-	const { id_assessment, id_asesor, id_result, id_asesi } =
+	const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } =
 		useAssessmentParams();
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const navigate = useNavigate();
@@ -50,6 +50,7 @@ export default function Ia03() {
 						id_result={id_result}
 						id_asesi={id_asesi}
 						id_asesor={id_asesor}
+						mutateNavigation={mutateNavigation}
 					/>
 				</main>
 			</div>

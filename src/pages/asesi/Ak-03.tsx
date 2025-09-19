@@ -8,7 +8,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import { useState } from "react";
 
 export default function Ak03() {
-	const { id_result } = useAssessmentParams();
+	const { id_result, mutateNavigation } = useAssessmentParams();
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const navigate = useNavigate();
 
@@ -50,7 +50,7 @@ export default function Ak03() {
 				</div>
 
 				<main className='m-4'>
-					<AK03 isAssessee={true} id_result={id_result} />
+					<AK03 isAssessee={true} id_result={id_result} mutateNavigation={mutateNavigation} />
 				</main>
 			</div>
 		</div>

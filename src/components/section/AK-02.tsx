@@ -28,12 +28,14 @@ export default function AK02({
 	id_result,
 	id_asesi,
 	id_asesor,
+	mutateNavigation,
 }: {
 	isAssessee: boolean;
 	id_assessment: string;
 	id_result: string;
 	id_asesi: string;
 	id_asesor: string;
+	mutateNavigation?: () => void;
 }) {
 	const { user } = useAuth();
 	const navigate = useNavigate();
@@ -330,6 +332,7 @@ export default function AK02({
 			);
 			if (response.data.success) {
 				setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+				if (mutateNavigation) mutateNavigation();
 				// Reload data but preserve form state
 				await loadAK02Data(true);
 			}
@@ -346,6 +349,7 @@ export default function AK02({
 			);
 			if (response.data.success) {
 				setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+				if (mutateNavigation) mutateNavigation();
 				// Reload data but preserve form state
 				await loadAK02Data(true);
 			}

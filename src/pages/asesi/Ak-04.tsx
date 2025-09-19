@@ -11,7 +11,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 
 export default function Ak04() {
     // Menggunakan default empty object jika useAssessmentParams undefined
-    const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams ? useAssessmentParams() : {};
+    const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
     const [resultData, setResultData] = useState<any>(null);
     const [valueQr, setValueQr] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -52,6 +52,7 @@ export default function Ak04() {
 
             if (response.data.success) {
                 setResultData(response.data.data);
+                mutateNavigation();
 
                 // PERBAIKAN: Pastikan path yang benar untuk mengakses data
                 const ak04Data = response.data.data.result_ak04 || response.data.data.ak04_assessee;

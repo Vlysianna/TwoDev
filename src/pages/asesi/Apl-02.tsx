@@ -11,7 +11,7 @@ import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Apl02() {
-	const { id_assessment, id_asesor, id_result, id_asesi } =
+	const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } =
 		useAssessmentParams();
 
 	console.log("Assessment params:", {
@@ -141,6 +141,7 @@ export default function Apl02() {
 					is_continue: response.data.data.is_continue,
 					assessee: response.data.data.assessee,
 				}));
+				mutateNavigation();
 			} else {
 				setQrError(response.data.message || "Gagal menghasilkan QR Code");
 			}

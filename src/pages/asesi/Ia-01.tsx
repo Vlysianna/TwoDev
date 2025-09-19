@@ -11,7 +11,7 @@ import NavbarAsesi from '@/components/NavbarAsesi';
 import ConfirmModal from '@/components/ConfirmModal';
 
 export default function Ia01Asesi() {
-    const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams();
+    const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
     const [selectedKPekerjaan, setSelectedKPekerjaan] = useState('');
     const [groupList, setGroupList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -38,6 +38,7 @@ export default function Ia01Asesi() {
             console.log("Response approve:", response.data);
             setValueQr(getAssesseeUrl(Number(id_asesi)));
             fetchResultData();
+            mutateNavigation();
         } catch (e) {
             console.error("Gagal generate QR:", e);
             setError('Gagal generate QR Code');

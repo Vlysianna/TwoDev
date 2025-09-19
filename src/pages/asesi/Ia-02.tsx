@@ -17,7 +17,7 @@ import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Ia02() {
-  const { id_result, id_assessment, id_asesi, id_asesor } =
+  const { id_result, id_assessment, id_asesi, id_asesor, mutateNavigation } =
     useAssessmentParams();
 
   const { user } = useAuth();
@@ -123,6 +123,7 @@ export default function Ia02() {
       );
       if (response.data.success) {
         setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+        mutateNavigation();
       }
     } catch (error) {
       console.log("Error fetching unit competencies:", error);

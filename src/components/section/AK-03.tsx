@@ -82,9 +82,11 @@ const defaultQuestions: AK03Question[] = [
 export default function AK03({
 	isAssessee,
 	id_result,
+	mutateNavigation,
 }: {
 	isAssessee: boolean;
 	id_result: string;
+	mutateNavigation: () => void;
 }) {
 	const { user } = useAuth();
 
@@ -220,6 +222,7 @@ export default function AK03({
 				setIsSubmitted(true);
 				setTimeout(() => setShowNotif(false), 2500);
 				setErrorMessage("");
+				if (mutateNavigation) mutateNavigation();
 			} else {
 				setErrorMessage(response.data.message || "Gagal menyimpan data.");
 			}

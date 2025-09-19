@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Ak02() {
-	const { id_assessment, id_asesor, id_result, id_asesi } =
+	const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } =
 		useAssessmentParams();
 
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -51,6 +51,7 @@ export default function Ak02() {
 						id_result={id_result}
 						id_asesi={id_asesi}
 						id_asesor={id_asesor}
+						mutateNavigation={mutateNavigation}
 					/>
 				</main>
 			</div>

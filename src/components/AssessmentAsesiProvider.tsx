@@ -9,7 +9,7 @@ import {
 	type JSX,
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { CheckCircle, ChevronLeft, ChevronRight, Circle, CircleAlert, CircleDashed, Clock, FileCheck, Loader, XCircle } from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight, Circle, CircleAlert, Clock, FileCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import useSWR from "swr";
 
@@ -18,6 +18,7 @@ type AssessmentParams = {
 	id_asesor: string;
 	id_asesi: string;
 	id_result: string;
+	mutateNavigation: () => void;
 };
 
 export interface AssessmentRoute {
@@ -188,7 +189,7 @@ export default function AssessmentAsesiProvider({
 		setIsTabsOpen(!isTabsOpen);
 	};
 
-	const { data: navigation, isLoading: loadingNavigation, error: errorNavigation } = useSWR(
+	const { data: navigation, isLoading: loadingNavigation, error: errorNavigation, mutate: mutateNavigation } = useSWR(
 		`/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`,
 		fetcherTabs
 	);
@@ -196,7 +197,7 @@ export default function AssessmentAsesiProvider({
 	// console.log(id_assessment, id_asesor, result?.assessee?.id, navigation);
 
 	// tab items
-	const tabItems: AssessmentRoute[] = [
+	const tabItems: AssessmentRoute[] = useMemo(() => [
 		{
 			value: routes.asesi.assessment.apl01(
 				id_assessment ?? "",
@@ -287,7 +288,7 @@ export default function AssessmentAsesiProvider({
 			disabled: false,
 			to: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
 		},
-	];
+	], []);
 
 	const filteredTabItems: AssessmentRoute[] = useMemo(() => {
 		if (!navigation?.tabs) return [];
@@ -333,6 +334,7 @@ export default function AssessmentAsesiProvider({
 						id_asesor: id_asesor!,
 						id_result: result?.id,
 						id_asesi: result?.assessee.id,
+						mutateNavigation,
 					}}
 				>
 					<div className="relative w-full min-h-screen">
