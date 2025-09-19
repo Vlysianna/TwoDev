@@ -33,7 +33,7 @@ interface TabResponse {
 
 interface Tab {
 	name: string;
-	status: 'Belum Tuntas' | 'Menunggu Asesi' | 'Tuntas';
+	status: 'Belum Tuntas' | 'Menunggu Asesi' | 'Tuntas' | 'Butuh Persetujuan';
 }
 
 export default function DashboardAsesmenMandiri() {
@@ -230,12 +230,14 @@ export default function DashboardAsesmenMandiri() {
 		"Belum Tuntas": "text-red-500",
 		"Menunggu Asesi": "text-blue-500",
 		"Tuntas": "text-green-500",
+		"Butuh Persetujuan": "text-yellow-500",
 	};
 
 	const statusIcons: Record<string, JSX.Element> = {
 		"Belum Tuntas": <SquareX size={14} />,
 		"Menunggu Asesi": <Loader size={14} />,
 		"Tuntas": <CheckCircle size={14} />,
+		"Butuh Persetujuan": <SquareCheck size={14} />,
 	};
 
 	return (
@@ -304,7 +306,9 @@ export default function DashboardAsesmenMandiri() {
 													? "border-green-500 text-green-700 font-medium"
 													: tab.status === "Menunggu Asesi"
 														? "border-blue-500 text-blue-600 font-medium"
-														: "border-gray-300 text-gray-600"
+														: tab.status === "Butuh Persetujuan"
+															? "border-yellow-500 text-yellow-600 font-medium"
+															: "border-red-500 text-red-600 font-medium"
 											}`}
 									>
 										{tab.name}

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "@/helper/axios";
+import paths from '@/routes/paths';
+
 import {
 	LayoutDashboard,
 	Users,
@@ -226,6 +228,15 @@ const RecapAssessment: React.FC = () => {
 
 				{/* Main Body */}
 				<main className="p-4 space-y-6">
+					<div className="mb-6">
+						<nav className="flex text-sm text-gray-500">
+							<Link to={paths.asesor.dashboardAsesor} className="hover:underline">
+								Dashboard
+							</Link>
+							<span className="mx-2">/</span>
+							<span className="text-[#000000]">Rekap Asesmen</span>
+						</nav>
+					</div>
 					{/* Assessment Header Information */}
 					<div className="bg-white rounded-lg shadow-sm border p-6">
 						<div className="grid grid-cols-1 sm:grid-cols-2 items-center mb-4">
