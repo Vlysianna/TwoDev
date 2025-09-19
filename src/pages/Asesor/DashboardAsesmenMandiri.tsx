@@ -22,7 +22,7 @@ interface AssesseeData {
 	assessment_id: number;
 	assessee_id: number;
 	assessee_name: string;
-	status: 'Belum Selesai' | 'Menunggu Asesi' | 'Selesai';
+	status: 'Belum Tuntas' | 'Menunggu Asesi' | 'Tuntas';
 }
 
 interface TabResponse {
@@ -49,8 +49,17 @@ export default function DashboardAsesmenMandiri() {
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [tabData, setTabData] = useState<TabResponse | null>();
-	const [selectedTab, setSelectedTab] = useState<string>("apl-02");
+	// const [selectedTab, setSelectedTab] = useState<string>("apl-02");
+	const [selectedTab, setSelectedTab] = useState<string>(() => {
+		// Coba ambil dari localStorage saat inisialisasi
+		const savedTab = localStorage.getItem(`selectedTab-${id_assessment}`);
+		return savedTab || "apl-02"; // Default ke "apl-02" jika tidak ada
+	});
 	const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
+	
+	useEffect(() => {
+		localStorage.setItem(`selectedTab-${id_assessment}`, selectedTab);
+	}, [selectedTab, id_assessment]);
 
 	useEffect(() => {
 		fetchAssesseeData(selectedTab.toLowerCase());
@@ -98,9 +107,9 @@ export default function DashboardAsesmenMandiri() {
 				setAssesseeData(
 					response.data.data.sort((a: AssesseeData, b: AssesseeData) => {
 						const order = {
-							"Belum Selesai": 0,
+							"Belum Tuntas": 0,
 							"Menunggu Asesi": 1,
-							"Selesai": 2,
+							"Tuntas": 2,
 						};
 
 						// Bandingkan status dulu
@@ -218,17 +227,16 @@ export default function DashboardAsesmenMandiri() {
 	};
 
 	const statusClasses: Record<string, string> = {
-		"Belum Selesai": "text-red-500",
+		"Belum Tuntas": "text-red-500",
 		"Menunggu Asesi": "text-blue-500",
-		"Selesai": "text-green-500",
+		"Tuntas": "text-green-500",
 	};
 
 	const statusIcons: Record<string, JSX.Element> = {
-		"Belum Selesai": <SquareX size={14} />,
+		"Belum Tuntas": <SquareX size={14} />,
 		"Menunggu Asesi": <Loader size={14} />,
-		"Selesai": <CheckCircle size={14} />,
+		"Tuntas": <CheckCircle size={14} />,
 	};
-
 
 	return (
 		<div className="flex min-h-screen bg-gray-50">
