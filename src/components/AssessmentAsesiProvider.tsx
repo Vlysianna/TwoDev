@@ -47,16 +47,16 @@ const StatusIndicator = ({ status }: { status: string }) => {
 	let icon = null;
 
 	switch (status) {
-		case "Selesai":
+		case "Tuntas":
 			icon = <CheckCircle className="w-4 h-4 text-green-500" />;
 			break;
-		case "Belum Selesai":
+		case "Belum Tuntas":
 			icon = <CircleAlert className="w-4 h-4 text-red-500" />;
 			break;
 		case "Menunggu":
 			icon = <Clock className="w-4 h-4 text-blue-500" />;
 			break;
-		case "Setujui":
+		case "Butuh Persetujuan":
 			icon = <FileCheck className="w-4 h-4 text-yellow-500" />;
 			break;
 		default:
@@ -438,7 +438,7 @@ export default function AssessmentAsesiProvider({
 
 														<div className="flex items-center gap-2">
 															<CircleAlert className="w-4 h-4 text-red-500" />
-															<span className="text-xs text-slate-600">Belum Selesai</span>
+															<span className="text-xs text-slate-600">Belum Tuntas</span>
 														</div>
 
 														<div className="flex items-center gap-2">
@@ -448,12 +448,12 @@ export default function AssessmentAsesiProvider({
 
 														<div className="flex items-center gap-2">
 															<FileCheck className="w-4 h-4 text-yellow-500" />
-															<span className="text-xs text-slate-600">Setujui</span>
+															<span className="text-xs text-slate-600">Butuh Persetujuan</span>
 														</div>
 
 														<div className="flex items-center gap-2">
 															<CheckCircle className="w-4 h-4 text-green-500" />
-															<span className="text-xs text-slate-600">Selesai</span>
+															<span className="text-xs text-slate-600">Tuntas</span>
 														</div>
 													</div>
 													{/* <p className="text-xs text-slate-500">

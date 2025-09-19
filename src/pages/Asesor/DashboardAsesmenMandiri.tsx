@@ -33,7 +33,7 @@ interface TabResponse {
 
 interface Tab {
 	name: string;
-	status: 'Not Started' | 'Waiting' | 'Completed';
+	status: 'Belum Tuntas' | 'Menunggu Asesi' | 'Tuntas';
 }
 
 export default function DashboardAsesmenMandiri() {
@@ -219,7 +219,7 @@ export default function DashboardAsesmenMandiri() {
 
 	const statusClasses: Record<string, string> = {
 		"Belum Selesai": "text-red-500",
-		"Menunggu Asesi": "text-yellow-400",
+		"Menunggu Asesi": "text-blue-500",
 		"Selesai": "text-green-500",
 	};
 
@@ -292,11 +292,11 @@ export default function DashboardAsesmenMandiri() {
 										className={`flex-shrink-0 px-3 py-2 cursor-pointer rounded-md border-b-2 transition-all duration-200
     ${selectedTab.toLowerCase() === tab.name.toLowerCase()
 												? "border-orange-800 bg-[#E77D35] text-white font-semibold"
-												: tab.status === "Completed"
+												: tab.status === "Tuntas"
 													? "border-green-500 text-green-700 font-medium"
-													: tab.status === "Waiting"
+													: tab.status === "Menunggu Asesi"
 														? "border-blue-500 text-blue-600 font-medium"
-														: "border-yellow-300 text-yellow-600"
+														: "border-gray-300 text-gray-600"
 											}`}
 									>
 										{tab.name}
