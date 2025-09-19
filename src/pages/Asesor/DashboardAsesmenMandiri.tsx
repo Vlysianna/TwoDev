@@ -6,10 +6,11 @@ import {
 	SquareCheck,
 	CheckCircle,
 	SquareX,
+	Loader,
 } from "lucide-react";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavAsesor from "@/components/NavAsesor";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, type JSX } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "@/helper/axios";
 import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
@@ -95,11 +96,23 @@ export default function DashboardAsesmenMandiri() {
 			if (response.data.success) {
 				console.log(response.data.data);
 				setAssesseeData(
-					 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-					 response.data.data.sort((a: any, b: any) => {
-						if (a.status === false && b.status === true) return -1;
-						if (a.status === true && b.status === false) return 1;
-						return a.assessee_name.localeCompare(b.assessee_name);
+					response.data.data.sort((a: AssesseeData, b: AssesseeData) => {
+						const order = {
+							"Belum Selesai": 0,
+							"Menunggu Asesi": 1,
+							"Selesai": 2,
+						};
+
+						// Bandingkan status dulu
+						const statusDiff = order[a.status] - order[b.status];
+						if (statusDiff !== 0) return statusDiff;
+
+						// Kalau status sama, bandingkan huruf pertama dari nama asesi
+						const nameA = a.assessee_name.toUpperCase();
+						const nameB = b.assessee_name.toUpperCase();
+						if (nameA < nameB) return -1;
+						if (nameA > nameB) return 1;
+						return 0;
 					})
 				);
 			} else {
@@ -203,6 +216,19 @@ export default function DashboardAsesmenMandiri() {
 				break;
 		}
 	};
+
+	const statusClasses: Record<string, string> = {
+		"Belum Selesai": "text-red-500",
+		"Menunggu Asesi": "text-yellow-400",
+		"Selesai": "text-green-500",
+	};
+
+	const statusIcons: Record<string, JSX.Element> = {
+		"Belum Selesai": <SquareX size={14} />,
+		"Menunggu Asesi": <Loader size={14} />,
+		"Selesai": <CheckCircle size={14} />,
+	};
+
 
 	return (
 		<div className="flex min-h-screen bg-gray-50">
@@ -354,8 +380,13 @@ export default function DashboardAsesmenMandiri() {
 												<td className="px-4 py-3 text-sm text-gray-900">
 													{asesi.assessee_name}
 												</td>
-												<td className="px-4 py-3 text-sm text-gray-700">
-													{asesi.status}
+												<td className="px-4 py-3 text-sm text-gray-700 text-center">
+													<span
+														className={`inline-flex items-center gap-1 px-2 py-1 text-center rounded-full text-xs font-medium ${statusClasses[asesi.status]}`}
+													>
+														{statusIcons[asesi.status]}
+														{asesi.status}
+													</span>
 												</td>
 												<td className="px-4 py-3 text-center">
 													<button

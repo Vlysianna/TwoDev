@@ -451,7 +451,7 @@ export default function AK03({
 				<form onSubmit={handleSubmit(onSubmit)}>
 					{/* Table */}
 					<div className="w-full overflow-x-auto border border-gray-200 rounded-sm">
-						<div className="max-h-96 overflow-y-auto">
+						<div className="max-h-[400px]">
 							<table className="w-full min-w-[600px] lg:min-w-[800px] table-auto border-collapse">
 								<thead className="bg-gray-50 sticky top-0 z-10">
 									<tr>
