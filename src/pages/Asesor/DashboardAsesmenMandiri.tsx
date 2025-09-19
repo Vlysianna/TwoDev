@@ -21,7 +21,7 @@ interface AssesseeData {
 	assessment_id: number;
 	assessee_id: number;
 	assessee_name: string;
-	status: boolean;
+	status: 'Belum Selesai' | 'Menunggu Asesi' | 'Selesai';
 }
 
 interface TabResponse {
@@ -355,19 +355,7 @@ export default function DashboardAsesmenMandiri() {
 													{asesi.assessee_name}
 												</td>
 												<td className="px-4 py-3 text-sm text-gray-700">
-													{asesi.status ? 
-														(
-															<span className="flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-green-100 text-green-700">
-																<SquareCheck size={18} />
-																Selesai
-															</span>
-														) : (
-															<span className="flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-700">
-																<SquareX size={18} className="mr-1" />
-																Sedang Berlangsung
-															</span>
-														)
-													}
+													{asesi.status}
 												</td>
 												<td className="px-4 py-3 text-center">
 													<button
