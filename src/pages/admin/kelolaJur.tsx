@@ -172,7 +172,7 @@ const KelolaJurusan = () => {
 								<input
 									type="text"
 									{...register("code", { required: true })}
-									placeholder="Masukkan Kode Jurusan"
+									placeholder="Contoh: RPL, TBS, ULP"
 									className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-500"
 								/>
 							</div>
@@ -183,7 +183,7 @@ const KelolaJurusan = () => {
 								<input
 									type="text"
 									{...register("name", { required: true })}
-									placeholder="Masukkan Nama Jurusan"
+									placeholder="Contoh: Rekayasa Perangkat Lunak, Tata Busana, Usaha Layanan Pariwisata"
 									className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-500"
 								/>
 							</div>

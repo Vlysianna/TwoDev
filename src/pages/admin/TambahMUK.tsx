@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { File, Filter } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
-import { type MukTypeInput, type Scheme } from "@/lib/types";
+import { type MukTypeInput, type Occupation, type Scheme } from "@/lib/types";
 import api from "@/helper/axios";
 import { useNavigate } from "react-router-dom";
 import routes from "@/routes/paths";
@@ -26,16 +26,37 @@ const TambahMUK: React.FC = () => {
 	const { handleSubmit } = form;
 
 	const [schemes, setSchemes] = useState<Scheme[]>([]);
+	const [occupations, setOccupations] = useState<Occupation[]>([]);
 	const [submitting, setSubmitting] = useState(false);
 
 	const [idAssessment, setIdAssessment] = useState<number | null>(null);
 
 	useEffect(() => {
-		api
-			.get("/schemes")
-			.then((res) => setSchemes(res.data.data || []))
-			.catch(() => setSchemes([]));
+		fetchSchemes();
+		fetchOccupations();
 	}, []);
+
+	const fetchSchemes = async () => {
+		try {
+			const res = await api.get("/schemes");
+			if (res?.data?.success) {
+				setSchemes(res.data.data);
+			}
+		} catch (err: unknown) {
+			console.error(err);
+		}
+	};
+
+	const fetchOccupations = async () => {
+		try {
+			const res = await api.get("/occupations");
+			if (res?.data?.success) {
+				setOccupations(res.data.data);
+			}
+		} catch (err: unknown) {
+			console.error(err);
+		}
+	};
 
 	const onSubmit = async (data: MukTypeInput) => {
 		try {
@@ -88,23 +109,6 @@ const TambahMUK: React.FC = () => {
 											Isi data unit dan elemen, atau import dari .docx
 										</p>
 									</div>
-
-									<div className="flex gap-3">
-										<button
-											type="button"
-											onClick={() => console.log("filter")}
-											className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-										>
-											<Filter size={16} className="text-[#E77D35]" /> Filter
-										</button>
-										<button
-											type="button"
-											onClick={() => console.log("export")}
-											className="bg-[#E77D35] text-white rounded-md text-sm px-4 py-2 hover:bg-orange-600 transition-colors"
-										>
-											Export ke Excel
-										</button>
-									</div>
 								</div>
 							</div>
 
@@ -114,6 +118,7 @@ const TambahMUK: React.FC = () => {
 							{/* Body */}
 							<FormMuk
 								schemes={schemes}
+								occupations={occupations}
 								form={form}
 								submitting={submitting}
 								id_assessment={idAssessment ?? ""}

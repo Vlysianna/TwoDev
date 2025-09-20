@@ -247,7 +247,7 @@ const KelolaOkupasi: React.FC = () => {
 									name="name"
 									value={formData.name}
 									onChange={handleFormChange}
-									placeholder="Masukkan nama okupasi"
+									placeholder="Contoh: Junior Programmer, Junior Custom Made, Booker"
 									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
 								/>
 							</div>
