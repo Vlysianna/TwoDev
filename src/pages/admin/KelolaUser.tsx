@@ -23,6 +23,20 @@ interface Role {
   name: string;
 }
 
+interface PaginationMeta {
+  current_page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  meta: PaginationMeta;
+}
+
 interface UserData {
   id: number;
   email: string;
@@ -77,6 +91,11 @@ const KelolaUser: React.FC = () => {
     search: ''
   });
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -88,36 +107,46 @@ const KelolaUser: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // Initial data fetch
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [users, filters]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch users using existing endpoint
-      const usersResponse = await api.get('/user');
+      // Fetch users with pagination parameters
+      const response = await api.get<ApiResponse<UserData[]>>('/user', {
+        params: {
+          page: currentPage,
+          limit: itemsPerPage,
+          ...(filters.role && { role: filters.role }),
+          ...(filters.search && { search: filters.search })
+        }
+      });
 
-      if (usersResponse.data.success) {
-        setUsers(usersResponse.data.data);
+      if (response.data.success) {
+        setUsers(response.data.data);
+        setFilteredUsers(response.data.data);
+        
+        // Update pagination state from API response
+        setCurrentPage(response.data.meta.current_page);
+        setTotalPages(response.data.meta.total_pages);
+        setItemsPerPage(response.data.meta.limit);
         
         // Extract unique roles from users data
         const uniqueRoles = Array.from(
           new Map(
-            usersResponse.data.data
+            response.data.data
               .map((user: UserData) => user.role)
               .map((role: Role) => [role.id, role])
           ).values()
-        );
+        ) as Role[];
         setRoles(uniqueRoles);
       } else {
-        setError(usersResponse.data.message || 'Gagal memuat data pengguna');
+        setError(response.data.message || 'Gagal memuat data pengguna');
       }
     } catch (err) {
       console.error('Failed to fetch data:', err);
@@ -128,33 +157,25 @@ const KelolaUser: React.FC = () => {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...users];
-
-    // Filter by role
-    if (filters.role) {
-      filtered = filtered.filter(user => user.role.name === filters.role);
-    }
-
-    // Filter by search term
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(user =>
-        user.full_name.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower) ||
-        user.role.name.toLowerCase().includes(searchLower)
-      );
-    }
-
-    setFilteredUsers(filtered);
-  };
+  // Removed client-side filtering since we're using server-side pagination
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, itemsPerPage, filters]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters(prev => ({ ...prev, search: e.target.value }));
+    setCurrentPage(1); // Reset to first page when search changes
   };
 
   const handleRoleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilters(prev => ({ ...prev, role: e.target.value }));
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newItemsPerPage = parseInt(e.target.value);
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when items per page changes
   };
 
   const handleCreateUser = () => {
@@ -355,10 +376,27 @@ const KelolaUser: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Items per page selector */}
+                <div className="relative">
+                  <select
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                    className="w-full sm:w-32 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E77D35] focus:border-transparent text-sm"
+                  >
+                    <option value={10}>10 / page</option>
+                    <option value={25}>25 / page</option>
+                    <option value={50}>50 / page</option>
+                    <option value={100}>100 / page</option>
+                  </select>
+                </div>
+
                 {/* Clear Filters */}
                 {(filters.search || filters.role) && (
                   <button
-                    onClick={() => setFilters({ role: '', search: '' })}
+                    onClick={() => {
+                      setFilters({ role: '', search: '' });
+                      setCurrentPage(1); // Reset to first page when clearing filters
+                    }}
                     className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
                   >
                     Reset Filter
@@ -495,6 +533,83 @@ const KelolaUser: React.FC = () => {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                <div className="flex flex-1 justify-between sm:hidden">
+                  <button
+                    onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                    disabled={currentPage === totalPages}
+                    className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Menampilkan{' '}
+                      <span className="font-medium">
+                        {filteredUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}
+                      </span>{' '}
+                      sampai{' '}
+                      <span className="font-medium">
+                        {(currentPage - 1) * itemsPerPage + filteredUsers.length}
+                      </span>{' '}
+                      dari{' '}
+                      <span className="font-medium">{users.length}</span>{' '}
+                      hasil
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                      <button
+                        onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                        disabled={currentPage === 1}
+                        className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      {[...Array(totalPages)].map((_, index) => {
+                        const pageNumber = index + 1;
+                        return (
+                          <button
+                            key={pageNumber}
+                            onClick={() => setCurrentPage(pageNumber)}
+                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                              currentPage === pageNumber
+                                ? 'z-10 bg-[#E77D35] text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E77D35]'
+                                : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                            }`}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      })}
+                      <button
+                        onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                        disabled={currentPage === totalPages}
+                        className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                      >
+                        <span className="sr-only">Next</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
