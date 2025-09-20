@@ -73,6 +73,12 @@ const Sidebar: React.FC = () => {
       section: 'admin',
       path: paths.admin.resultAssessment.root,
     },
+      {
+        name: 'Verifikasi',
+        icon: FileText,
+        section: 'admin',
+        path: paths.admin.verifikasi,
+      },
   ];
 
   const managementItems: MenuItem[] = [
