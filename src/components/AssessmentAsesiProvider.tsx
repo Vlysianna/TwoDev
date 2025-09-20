@@ -9,9 +9,10 @@ import {
 	type JSX,
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { CheckCircle, ChevronLeft, ChevronRight, Circle, CircleAlert, Clock, FileCheck } from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight, Circle, CircleAlert, Clock, FileCheck, Info } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import useSWR from "swr";
+import StatusDetailModal from "./StatusDetailModal";
 
 type AssessmentParams = {
 	id_assessment: string;
@@ -30,7 +31,6 @@ export interface AssessmentRoute {
 }
 
 const AssessmentContext = createContext<AssessmentParams | null>(null);
-
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAssessmentParams() {
 	const ctx = useContext(AssessmentContext);
@@ -321,6 +321,8 @@ export default function AssessmentAsesiProvider({
 		return filtered;
 	}, [navigation, tabItems]);
 
+	const [showStatusModal, setShowStatusModal] = useState(false);
+
 	return (
 		<>
 			{loading || (loadingResult && !errorResult) || (loadingNavigation && !errorNavigation) ? (
@@ -457,6 +459,23 @@ export default function AssessmentAsesiProvider({
 															<CheckCircle className="w-4 h-4 text-green-500" />
 															<span className="text-xs text-slate-600">Tuntas</span>
 														</div>
+													</div>
+													<div className="mt-2">
+														<p className="text-xs font-medium text-slate-500">
+															<button
+																onClick={() => setShowStatusModal(true)}
+																className="underline flex items-center gap-1 cursor-pointer hover:text-slate-600"
+															>
+																<Info className="w-4 h-4" />
+																<span>Lihat Detail Status</span>
+															</button>
+														</p>
+
+														{/* Modal */}
+														<StatusDetailModal
+															open={showStatusModal}
+															onClose={() => setShowStatusModal(false)}
+														/>
 													</div>
 													{/* <p className="text-xs text-slate-500">
 														Assessment ID: {id_assessment}
