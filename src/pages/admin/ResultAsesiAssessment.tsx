@@ -1,20 +1,28 @@
 import {
-	Search,
 	LayoutDashboard,
 	ChevronLeft,
 	ChevronRight,
-	CheckCircle,
-	SquareX,
-	Loader,
 } from "lucide-react";
-import { useEffect, useState, useRef, type JSX } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { Link } from "react-router-dom";
 import api from "@/helper/axios";
 import paths from "@/routes/paths";
-import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentParams } from "@/components/AssessmentAdminProvider";
 import NavAdmin from "@/components/NavAdmin";
 import Sidebar from "@/components/SideAdmin";
+import APL02 from "@/components/section/admin/APL-02";
+import APL01 from "@/components/section/admin/APL-01";
+import useSWR from "swr";
+import DataSertifikasi from "@/components/section/admin/DataSertifikasi";
+import AK01 from "@/components/section/admin/AK-01";
+import IA02 from "@/components/section/admin/IA-02";
+import IA01 from "@/components/section/admin/IA-01";
+import IA03 from "@/components/section/admin/IA-03";
+import IA05 from "@/components/section/admin/IA-05";
+import AK02 from "@/components/section/admin/AK-02";
+import AK03 from "@/components/section/admin/AK-03";
+import AK05 from "@/components/section/admin/AK-05";
+import APL02Detail from "@/components/section/admin/APL-02-Detail";
 
 interface TabResponse {
 	assessment_id: number;
@@ -24,58 +32,27 @@ interface TabResponse {
 
 interface Tab {
 	name: string;
-	status: 'Belum Tuntas' | 'Menunggu Asesi' | 'Tuntas';
+	status: "Belum Tuntas" | "Menunggu Asesi" | "Tuntas";
 }
 
+const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
+
 export default function ResultAsesiAssessment() {
-	const { user } = useAuth();
 	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
-	const navigate = useNavigate();
 	const tabsContainerRef = useRef<HTMLDivElement>(null);
 
 	const [showLeftScroll, setShowLeftScroll] = useState(false);
 	const [showRightScroll, setShowRightScroll] = useState(true);
-
-	const [loading, setLoading] = useState<boolean>(false);
-	const [error, setError] = useState<string | null>(null);
-	const [searchTerm, setSearchTerm] = useState<string>("");
-	const [tabData, setTabData] = useState<TabResponse | null>();
-	const [selectedTab, setSelectedTab] = useState<string>("apl-02");
+	const [selectedTab, setSelectedTab] = useState<string>(localStorage.getItem("selectedTab") || "apl-01");
 
 	useEffect(() => {
 		// fetchAssesseeData(selectedTab.toLowerCase());
+		localStorage.setItem("selectedTab", selectedTab);
 	}, [selectedTab]);
 
-	useEffect(() => {
-		// assesseeData.filter((assessee) => {
-		// 	return assessee.assessee_name
-		// 		.toLowerCase()
-		// 		.includes(searchTerm.toLowerCase());
-		// });
-	}, [searchTerm]);
-
-	useEffect(() => {
-		fetchTabs();
-	}, [user]);
-
-	const fetchTabs = async () => {
-		try {
-			setLoading(true);
-			const response = await api.get(
-				`/assessments/navigation/admin/${id_result}`
-			);
-			if (response.data.success) {
-				setTabData(response.data.data);
-			} else {
-				setError(response.data.message);
-			}
-		} catch (error) {
-			console.error("Failed to fetch tabs:", error);
-			setError("Gagal memuat data tab");
-		} finally {
-			setLoading(false);
-		}
-	};
+	const {
+    data: tabData
+  } = useSWR<TabResponse>(`/assessments/navigation/admin/${id_result}`, fetcher);
 
 	useEffect(() => {
 		const checkScroll = () => {
@@ -94,6 +71,7 @@ export default function ResultAsesiAssessment() {
 
 		return () => {
 			if (tabsContainerRef.current) {
+				// eslint-disable-next-line react-hooks/exhaustive-deps
 				tabsContainerRef.current.removeEventListener("scroll", checkScroll);
 			}
 		};
@@ -109,110 +87,93 @@ export default function ResultAsesiAssessment() {
 		}
 	};
 
-	const getActionText = () => {
+	const tabsPage = useMemo(() => {
+		if (!id_result || !id_assessment) return <></>;
 		switch (selectedTab.toLowerCase()) {
 			case "apl-01":
-				return "Cek APL-01 >";
+				return <APL01 id_result={id_result} />;
+			case "data sertifikasi":
+				return <DataSertifikasi id_result={id_result} />;
 			case "apl-02":
-				return "Cek APL-02 >";
+				return <APL02 id_result={id_result} />;
 			case "ia-01":
-				return "Cek IA-01 >";
-			case "ia-02":
-				return "Cek IA-02 >";
-			case "ia-03":
-				return "Cek IA-03 >";
-			case "ia-05":
-				return "Cek IA-05 >";
-			case "ia-07":
-				return "Cek IA-07 >";
-			case "ak-01":
-				return "Cek AK-01 >";
-			case "ak-02":
-				return "Cek AK-02 >";
-			case "ak-03":
-				return "Cek AK-03 >";
-			case "ak-05":
-				return "Cek AK-05 >";
-			default:
-				return "Cek >";
-		}
-	};
-
-	const handleActionClick = (assesseeId: number) => {
-		switch (selectedTab.toLowerCase()) {
-			case "apl-02":
-				navigate(paths.asesor.assessment.cekApl02(id_assessment, assesseeId));
-				break;
-			case "ia-01":
-				navigate(paths.asesor.assessment.ia01(id_assessment, assesseeId.toString()));
+				return <IA01 id_result={id_result} />;
 				break;
 			case "ia-02":
-				navigate(paths.asesor.assessment.ia02(id_assessment, assesseeId));
+				return <IA02 id_result={id_result} />;
 				break;
 			case "ia-03":
-				navigate(paths.asesor.assessment.ia03(id_assessment, assesseeId));
+				return <IA03 id_result={id_result} />;
 				break;
 			case "ia-05":
-				navigate(paths.asesor.assessment.ia05(id_assessment, assesseeId));
+				return <IA05 id_result={id_result} />;
 				break;
 			case "ak-01":
-				navigate(paths.asesor.assessment.ak01(id_assessment, assesseeId));
+				return <AK01 id_result={id_result} />;
 				break;
 			case "ak-02":
-				navigate(paths.asesor.assessment.ak02(id_assessment, assesseeId));
+				return <AK02 id_result={id_result} />;
 				break;
 			case "ak-03":
-				navigate(paths.asesor.assessment.ak03(id_assessment, assesseeId));
+				return <AK03 id_result={id_result} />;
 				break;
 			case "ak-05":
-				navigate(paths.asesor.assessment.ak05(id_assessment, assesseeId));
+				return <AK05 id_result={id_result} />;
 				break;
 		}
-	};
+	}, [selectedTab, id_result, id_assessment]);
 
-	const statusClasses: Record<string, string> = {
-		"Belum Selesai": "text-red-500",
-		"Menunggu Asesi": "text-blue-500",
-		"Selesai": "text-green-500",
-	};
+	// const statusClasses: Record<string, string> = {
+	// 	"Belum Selesai": "text-red-500",
+	// 	"Menunggu Asesi": "text-blue-500",
+	// 	Selesai: "text-green-500",
+	// };
 
-	const statusIcons: Record<string, JSX.Element> = {
-		"Belum Selesai": <SquareX size={14} />,
-		"Menunggu Asesi": <Loader size={14} />,
-		"Selesai": <CheckCircle size={14} />,
-	};
-
+	// const statusIcons: Record<string, JSX.Element> = {
+	// 	"Belum Selesai": <SquareX size={14} />,
+	// 	"Menunggu Asesi": <Loader size={14} />,
+	// 	Selesai: <CheckCircle size={14} />,
+	// };
 
 	return (
 		<div className="flex min-h-screen bg-gray-50">
-				{/* Sidebar */}
+			{/* Sidebar */}
 			<div className="inset-y-0 left-0 lg:w-64 md:w-0 bg-white shadow-md flex-shrink-0">
-					<Sidebar />
+				<Sidebar />
 			</div>
 
 			{/* Main Content */}
 			<div className="flex-1 min-w-0">
-					{/* Navbar */}
+				{/* Navbar */}
 				<div className="sticky top-0 z-10 bg-white shadow-sm">
-						<NavAdmin
-								title="Asesmen Mandiri"
-								icon={<LayoutDashboard size={25} />}
-						/>
+					<NavAdmin
+						title="Asesmen Mandiri"
+						icon={<LayoutDashboard size={25} />}
+					/>
 				</div>
 
 				{/* Breadcrumb + Content */}
 				<div className="p-4">
 					<div className="p-4">
 						<div className="text-sm text-gray-500 mb-4">
-								<Link to={paths.admin.resultAssessment.root} className="hover:underline">
-										Hasil Asesmen
-								</Link>
-								<span className="mx-2">/</span>
-								<Link to={paths.admin.resultAssessment.dashboard(id_assessment, id_asesor!)} className="hover:underline">
-										Asesmen Mandiri
-								</Link>
-								<span className="mx-2">/</span>
-								<span className="text-gray-700">Asesi</span>
+							<Link
+								to={paths.admin.resultAssessment.root}
+								className="hover:underline"
+							>
+								Hasil Asesmen
+							</Link>
+							<span className="mx-2">/</span>
+							<Link
+								to={paths.admin.resultAssessment.dashboard(
+									id_assessment,
+									id_asesor!
+								)}
+								className="hover:underline"
+							>
+								Asesmen Mandiri
+							</Link>
+							<span className="mx-2">/</span>
+							<span className="text-gray-700">Asesi</span>
 						</div>
 					</div>
 
@@ -249,14 +210,15 @@ export default function ResultAsesiAssessment() {
 										key={tab.name}
 										onClick={() => setSelectedTab(tab.name)}
 										className={`flex-shrink-0 px-3 py-2 cursor-pointer rounded-md border-b-2 transition-all duration-200
-		${selectedTab.toLowerCase() === tab.name.toLowerCase()
+										${
+											selectedTab.toLowerCase() === tab.name.toLowerCase()
 												? "border-orange-800 bg-[#E77D35] text-white font-semibold"
 												: tab.status === "Tuntas"
-													? "border-green-500 text-green-700 font-medium"
-													: tab.status === "Menunggu Asesi"
-														? "border-blue-500 text-blue-600 font-medium"
-														: "border-gray-300 text-gray-600"
-											}`}
+												? "border-green-500 text-green-700 font-medium"
+												: tab.status === "Menunggu Asesi"
+												? "border-blue-500 text-blue-600 font-medium"
+												: "border-gray-300 text-gray-600"
+										}`}
 									>
 										{tab.name}
 									</button>
@@ -264,88 +226,11 @@ export default function ResultAsesiAssessment() {
 						</div>
 					</div>
 
-					{/* Tabel Responsif - Fixed Container */}
+					<div className="text-gray-800 font-semibold text-lg mb-2">Nama Asesi: {localStorage.getItem("assessee_name")}</div>
+
+					{/* Content */}
 					<div className="bg-white rounded-md shadow">
-						<div className="overflow-x-auto">
-							<table className="w-full border-collapse">
-								<thead className="bg-gray-50">
-									{/* <tr>
-										<th className="px-4 py-3 border-b text-left text-sm font-medium text-gray-700 min-w-[60px]">
-											No
-										</th>
-										<th className="px-4 py-3 border-b text-left text-sm font-medium text-gray-700 min-w-[200px]">
-											Nama Asesi
-										</th>
-										<th className="px-4 py-3 border-b text-center text-sm font-medium text-gray-700 min-w-[200px]">
-											Status
-										</th>
-										<th className="px-4 py-3 border-b text-center text-sm font-medium text-gray-700 min-w-[180px]">
-											Action
-										</th>
-									</tr> */}
-								</thead>
-								{/* <tbody>
-									{loading ? (
-										<tr>
-											<td
-												colSpan={3}
-												className="px-4 py-6 text-center text-sm text-gray-500"
-											>
-												Loading...
-											</td>
-										</tr>
-									) : error ? (
-										<tr>
-											<td
-												colSpan={3}
-												className="px-4 py-6 text-center text-sm text-red-500"
-											>
-												{error}
-											</td>
-										</tr>
-									) : assesseeData.length === 0 ? (
-										<tr>
-											<td
-												colSpan={3}
-												className="px-4 py-6 text-center text-sm text-gray-500"
-											>
-												Tidak ada data
-											</td>
-										</tr>
-									) : (
-										assesseeData.map((asesi, index) => (
-											<tr
-												key={asesi.assessee_id}
-												className="hover:bg-gray-50 border-b border-gray-200"
-											>
-												<td className="px-4 py-3 text-sm text-gray-700">
-													{index + 1}
-												</td>
-												<td className="px-4 py-3 text-sm text-gray-900">
-													{asesi.assessee_name}
-												</td>
-												<td className="px-4 py-3 text-sm text-gray-700 text-center">
-													<span
-														className={`inline-flex items-center gap-1 px-2 py-1 text-center rounded-full text-xs font-medium ${statusClasses[asesi.status]}`}
-													>
-														{statusIcons[asesi.status]}
-														{asesi.status}
-													</span>
-												</td>
-												<td className="px-4 py-3 text-center">
-													<button
-														onClick={() => handleActionClick(asesi.assessee_id)}
-														className="text-[#E77D35] underline text-sm hover:text-orange-600 cursor-pointer"
-													>
-														{getActionText()}
-													</button>
-												</td>
-											</tr>
-										))
-									)}
-								</tbody> */}
-							</table>
-						</div>
+						{tabsPage}
 					</div>
 				</div>
 			</div>

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
 import { useAuth } from "@/contexts/AuthContext";
-import type { ResultIA05C, AssesseeAnswer } from "@/model/ia05c-model";
+import type { ResultIA05, AssesseeAnswer } from "@/model/ia05c-model";
 import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
@@ -27,7 +27,7 @@ export default function Ia05C() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [result, setResult] = useState<ResultIA05C | null>(null);
+  const [result, setResult] = useState<ResultIA05 | null>(null);
   const [assesseeAnswers, setAssesseeAnswers] = useState<AssesseeAnswer[]>([]);
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
@@ -80,7 +80,7 @@ export default function Ia05C() {
       ]);
 
       if (resultResponse.data.success) {
-        const rawData: ResultIA05C = resultResponse.data.data;
+        const rawData: ResultIA05 = resultResponse.data.data;
         setResult(rawData);
         setFeedbackResult(rawData.ia05_header.is_achieved);
         setUnitField(rawData.ia05_header.unit || "");

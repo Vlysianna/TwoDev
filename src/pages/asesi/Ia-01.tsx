@@ -55,6 +55,7 @@ export default function Ia01Asesi() {
 
     useEffect(() => {
         if (unitData && unitData.length > 0) {
+            console.log(unitData)
             const completed = unitData.filter((unit: any) => unit.finished);
             setCompletedUnits(completed.length);
         }
@@ -103,6 +104,7 @@ export default function Ia01Asesi() {
                         group_name: group.name,
                     }))
                 );
+                console.log(flattenedUnits);
 
                 setUnitData(flattenedUnits);
 

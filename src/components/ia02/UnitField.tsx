@@ -10,7 +10,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "../ui/accordion";
-import type { MukTypeInput } from "@/lib/types";
+import type { MukTypeInput } from "@/model/muk-model";
 import { useState } from "react";
 
 export default function UnitField({

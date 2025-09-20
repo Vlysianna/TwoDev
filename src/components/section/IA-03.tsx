@@ -1,13 +1,13 @@
 import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { Clock, AlertCircle, CheckCircle, Monitor, Check } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { GroupIA03, ResultIA03, QuestionIA03 } from "@/model/ia03-model";
 import { QRCodeCanvas } from "qrcode.react";
 import useToast from "../ui/useToast";
 
 // Static data
-export const header = {
+const header = {
 	asesi: "Ananda Keizha Oktavian",
 	asesor: "Eva Yeprilianti, S.Kom",
 	tanggalMulai: "24 Oktober 2025",
@@ -18,7 +18,7 @@ export const header = {
 	kodeSkema: "SKM.RPL.PJ/LSPMK24/2023",
 };
 
-export const panduanList = [
+const panduanList = [
 	"Formulir ini di isi oleh asesor kompetensi dapat sebelum, pada saat atau setelah melakukan asesmen dengan metode observasi demonstrasi.",
 	"Pertanyaan dibuat dengan tujuan untuk menggali jawaban yang berkaitan dengan dimensi Kompetensi, batasan variabel dan aspek kritis yang relevan dengan skenario tugas dan praktik demonstrasi.",
 	"Jika pertanyaan disampaikan sebelum asesi melakukan praktik demonstrasi, maka pertanyaan dibuat berkaitan dengan aspek K3, SOP, penggunaan peralatan dan perlengkapan.",
@@ -34,19 +34,16 @@ interface Question {
 	tanggapan: string;
 }
 
+
 export default function IA03({
 	isAssessee,
-	id_assessment,
+	isAdmin,
 	id_result,
-	id_asesi,
-	id_asesor,
 	mutateNavigation,
 }: {
 	isAssessee: boolean;
-	id_assessment: string;
+	isAdmin?: boolean;
 	id_result: string;
-	id_asesi: string;
-	id_asesor: string;
 	mutateNavigation?: () => void;
 }) {
 	const [error, setError] = useState<string | null>(null);
@@ -128,21 +125,8 @@ export default function IA03({
 			}))
 			: [];
 
-	// Effect untuk fetch data saat komponen dimount
-	useEffect(() => {
-		console.log("Component mounted, fetching data...");
-		console.log("id_result:", id_result, "id_assessment:", id_assessment);
-
-		if (id_result && id_assessment) {
-			fetchResult(id_result);
-			fetchUnits(id_result); // PERBAIKAN: Ganti fetchGroups dengan fetchUnits
-		} else {
-			console.log("Missing required IDs");
-		}
-	}, [id_result, id_assessment]);
-
 	// Fetch Result IA03 (data utama assessment)
-	const fetchResult = async (id_result: string) => {
+	const fetchResult = useCallback(async (id_result: string) => {
 		try {
 			setLoading(true);
 			const response = await api.get(`/assessments/ia-03/result/${id_result}`);
@@ -152,10 +136,10 @@ export default function IA03({
 
 				// Set QR values jika sudah approved
 				if (response.data.data.ia03_header.approved_assessee) {
-					setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+					setAssesseeQrValue(getAssesseeUrl(Number(result?.assessee.id)));
 				}
 				if (response.data.data.ia03_header.approved_assessor) {
-					setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+					setAssessorQrValue(getAssessorUrl(Number(result?.assessor.id)));
 				}
 			}
 		} catch (error: any) {
@@ -164,10 +148,10 @@ export default function IA03({
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [result?.assessee.id, result?.assessor.id]);
 
 	// PERBAIKAN: Ganti fetchGroups dengan fetchUnits
-	const fetchUnits = async (id_result: string) => {
+	const fetchUnits = useCallback(async (id_result: string) => {
 		try {
 			setLoading(true);
 			const response = await api.get(`/assessments/ia-03/units/${id_result}`);
@@ -188,7 +172,7 @@ export default function IA03({
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [selectedGroup]);
 
 	// PERBAIKAN: Fungsi untuk load questions berdasarkan group
 	const loadQuestionsForGroup = (group: GroupIA03) => {
@@ -216,7 +200,7 @@ export default function IA03({
 		answer: string,
 		approved: boolean
 	) => {
-		if (isAssessee) return;
+		if (isAssessee || isAdmin) return;
 		try {
 			const payload = {
 				result_id: result.id,
@@ -246,13 +230,13 @@ export default function IA03({
 
 	// Approve hasil oleh Asesi
 	const approveByAssessee = async () => {
-		if (!isAssessee) return;
+		if (!isAssessee || isAdmin) return;
 		try {
 			const response = await api.put(
 				`/assessments/ia-03/result/assessee/${id_result}/approve`
 			);
 			if (response.data.success) {
-				setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+				setAssesseeQrValue(getAssesseeUrl(Number(result?.assessee.id)));
 				setSuccess("Hasil berhasil disetujui asesi");
 
 				// Refresh result untuk update approval status
@@ -269,13 +253,13 @@ export default function IA03({
 
 	// Approve hasil oleh Asesor
 	const approveByAssessor = async () => {
-		if (isAssessee) return;
+		if (isAssessee || isAdmin) return;
 		try {
 			const response = await api.put(
 				`/assessments/ia-03/result/assessor/${id_result}/approve`
 			);
 			if (response.data.success) {
-				setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+				setAssessorQrValue(getAssessorUrl(Number(result?.assessor.id)));
 				setIsApprovedByAssessor(true); // Tambahkan ini
 				setSuccess("Hasil berhasil disetujui asesor");
 
@@ -313,10 +297,10 @@ export default function IA03({
 
 	// Simpan semua perubahan pertanyaan
 	const handleSaveAllQuestions = async () => {
-		if (isAssessee) return;
+		if (isAssessee || isAdmin) return;
 		try {
 			setLoading(true);
-			let errors: { [key: number]: string } = {};
+			const errors: { [key: number]: string } = {};
 			let hasError = false;
 
 			questions.forEach((question) => {
@@ -397,6 +381,19 @@ export default function IA03({
 			(q) => q.result && q.result.answer && q.result.approved !== undefined
 		);
 	};
+
+	// Effect untuk fetch data saat komponen dimount
+	useEffect(() => {
+		// console.log("Component mounted, fetching data...");
+		// console.log("id_result:", id_result, "id_assessment:", id_assessment);
+
+		if (id_result) {
+			fetchResult(id_result);
+			fetchUnits(id_result); // PERBAIKAN: Ganti fetchGroups dengan fetchUnits
+		} else {
+			console.log("Missing required IDs");
+		}
+	}, [id_result, fetchUnits, fetchResult]);
 
 	// Helper untuk cek completion semua grup
 	const isAllGroupsComplete = groups.length > 0 && groups.every(isGroupComplete);
@@ -604,7 +601,7 @@ export default function IA03({
 												<label
 													className={`flex items-center gap-2 px-2 py-1 rounded text-sm ${question.pencapaian === "kompeten" ? "bg-[#E77D3533]" : ""
 														}
-														${isAssessee || isApprovedByAssessor ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+														${isAssessee || isApprovedByAssessor || isAdmin ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 												>
 													<input
 														type="radio"
@@ -613,12 +610,12 @@ export default function IA03({
 														checked={question.pencapaian === "kompeten"}
 														onChange={(e) => updatePencapaian(question.id, e.target.value)}
 														className="hidden"
-														disabled={isAssessee || isApprovedByAssessor}
+														disabled={isAssessee || isApprovedByAssessor || isAdmin}
 													/>
 													<span
 														className={`w-4 h-4 flex items-center justify-center rounded-full border-2
                   ${question.pencapaian === "kompeten" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}
-                  ${isAssessee || isApprovedByAssessor && "opacity-50 cursor-not-allowed"}`}
+                  ${isAssessee || isApprovedByAssessor || isAdmin && "opacity-50 cursor-not-allowed"}`}
 													>
 														{question.pencapaian === "kompeten" && (
 															<Check className="w-4 h-4 text-white" />
@@ -633,7 +630,7 @@ export default function IA03({
 												<label
 													className={`flex items-center gap-2 px-2 py-1 rounded text-sm ${question.pencapaian === "belum" ? "bg-[#E77D3533]" : ""
 														}
-														${isAssessee || isApprovedByAssessor ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+														${isAssessee || isApprovedByAssessor || isAdmin ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 												>
 													<input
 														type="radio"
@@ -642,12 +639,12 @@ export default function IA03({
 														checked={question.pencapaian === "belum"}
 														onChange={(e) => updatePencapaian(question.id, e.target.value)}
 														className="hidden"
-														disabled={isAssessee || isApprovedByAssessor}
+														disabled={isAssessee || isApprovedByAssessor || isAdmin}
 													/>
 													<span
 														className={`w-4 h-4 flex items-center justify-center rounded-full border-2
                   ${question.pencapaian === "belum" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}
-                  ${isAssessee || isApprovedByAssessor && "opacity-50 cursor-not-allowed"}`}
+                  ${isAssessee || isApprovedByAssessor || isAdmin && "opacity-50 cursor-not-allowed"}`}
 													>
 														{question.pencapaian === "belum" && (
 															<Check className="w-4 h-4 text-white" />
@@ -674,9 +671,9 @@ export default function IA03({
 												placeholder="Tanggapan"
 												className={`w-full min-h-[70px] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm resize-y 
 													${tanggapanErrors[question.id] ? "border-red-500" : ""}
-													${(isAssessee || isApprovedByAssessor) ? "bg-gray-100 cursor-not-allowed" : ""}
+													${(isAssessee || isApprovedByAssessor || isAdmin) ? "bg-gray-100 cursor-not-allowed" : ""}
 													`}
-												disabled={isAssessee || isApprovedByAssessor}
+												disabled={isAssessee || isApprovedByAssessor || isAdmin}
 											/>
 											{tanggapanErrors[question.id] && (
 												<span className="text-xs text-red-500 mt-1">{tanggapanErrors[question.id]}</span>
@@ -689,20 +686,23 @@ export default function IA03({
 					</div>
 				)}
 
-				<div className="flex w-full justify-end mt-2">
-					<button
-						onClick={handleSaveAllQuestions}
-						disabled={loading || isAssessee || isApprovedByAssessor} // Tambahkan kondisi ini
-						className={`flex items-center justify-center gap-1 bg-green-600 text-white px-6 py-3 rounded text-sm transition-colors w-full sm:w-auto 
-    								${loading || isAssessee || isApprovedByAssessor ? 
-										"opacity-50 cursor-not-allowed" : 
-										"hover:bg-green-700 cursor-pointer"}
-									`}
-					>
-						<CheckCircle size={16} />
-						{loading ? "Menyimpan..." : "Simpan"}
-					</button>
-				</div>
+				{!isAdmin && (
+					<div className="flex w-full justify-end mt-2">
+						<button
+							onClick={handleSaveAllQuestions}
+							disabled={loading || isAssessee || isApprovedByAssessor || isAdmin} // Tambahkan kondisi ini
+							className={`flex items-center justify-center gap-1 bg-green-600 text-white px-6 py-3 rounded text-sm transition-colors w-full sm:w-auto 
+											${loading || isAssessee || isApprovedByAssessor || isAdmin ? 
+											"opacity-50 cursor-not-allowed" : 
+											"hover:bg-green-700 cursor-pointer"}
+										`}
+						>
+							<CheckCircle size={16} />
+							{loading ? "Menyimpan..." : "Simpan"}
+						</button>
+					</div>
+				)}
+				
 			</div>
 
 			{/* Umpan Balik untuk asesi */}
@@ -812,7 +812,7 @@ export default function IA03({
 									{result.assessee.name}
 								</span>
 
-								{isAssessee &&
+								{isAssessee || !isAdmin &&
 									result.ia03_header.approved_assessor &&
 									!result.ia03_header.approved_assessee && (
 										<button
@@ -853,7 +853,7 @@ export default function IA03({
 									{result.assessor.name}
 								</span>
 
-								{!isAssessee && !result.ia03_header.approved_assessor && (
+								{!isAssessee && !result.ia03_header.approved_assessor || !isAdmin && (
 									<button
 										onClick={approveByAssessor}
 										disabled={completionPercent < 100}
