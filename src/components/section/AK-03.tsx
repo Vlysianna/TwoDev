@@ -81,12 +81,14 @@ const defaultQuestions: AK03Question[] = [
 
 export default function AK03({
 	isAssessee,
+	isAdmin,
 	id_result,
 	mutateNavigation,
 }: {
 	isAssessee: boolean;
+	isAdmin?: boolean;
 	id_result: string;
-	mutateNavigation: () => void;
+	mutateNavigation?: () => void;
 }) {
 	const { user } = useAuth();
 
@@ -191,7 +193,7 @@ export default function AK03({
 	};
 
 	const onSubmit = async (data: any) => {
-		if (!isAssessee || isSubmitted) return;
+		if (!isAssessee || isAdmin || isSubmitted) return;
 
 		// Validasi apakah semua pertanyaan sudah dijawab
 		const hasUnanswered = data.answers.some((a: any) => !a.answer);
@@ -235,7 +237,7 @@ export default function AK03({
 	};
 
 	const handleFilterChange = (value: string) => {
-		if (!isAssessee || isSubmitted) return;
+		if (!isAssessee || isAdmin || isSubmitted) return;
 		setFilterKompeten(value);
 		if (value === "ya" || value === "tidak") {
 			questions.forEach((_q, idx) => setValue(`answers.${idx}.answer`, value));
@@ -413,7 +415,8 @@ export default function AK03({
 								<label
 									key={opt.value}
 									className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition disabled:opacity-50
-										${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""}`}
+										${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""}
+										${isAdmin ? "text-gray-400 cursor-not-allowed opacity-50" : "text-gray-700 cursor-pointer"}`}
 								>
 									<input
 										type="radio"
@@ -422,7 +425,7 @@ export default function AK03({
 										checked={filterKompeten === opt.value}
 										onChange={(e) => handleFilterChange(e.target.value)}
 										className="hidden"
-										disabled={!isAssessee}
+										disabled={!isAssessee || isAdmin}
 									/>
 									<span
 										className={`w-4 h-4 flex items-center justify-center rounded-full border-2
@@ -491,7 +494,7 @@ export default function AK03({
 														render={({ field }) => (
 															<>
 																{["Ya", "Tidak"].map((val) => {
-																	const isDisabled = !isAssessee || isSubmitted;
+																	const isDisabled = !isAssessee || isAdmin || isSubmitted;
 																	const isSelected = field.value === val.toLowerCase();
 
 																	return (
@@ -541,9 +544,9 @@ export default function AK03({
 													field }) => (
 													<textarea className={`w-full px-3 py-2 border border-gray-300
                                                         rounded focus:outline-none focus:ring-2 focus:ring-blue-500
-                                                        text-xs sm:text-sm ${!isAssessee || isSubmitted
+                                                        text-xs sm:text-sm ${!isAssessee || isAdmin || isSubmitted
 															? "cursor-not-allowed bg-gray-100" : ""}`} {...field}
-														placeholder="Masukkan catatan..." rows={3} disabled={!isAssessee
+														placeholder="Masukkan catatan..." rows={3} disabled={!isAssessee || isAdmin
 															|| isSubmitted} />
 												)}
 												/>
@@ -563,13 +566,13 @@ export default function AK03({
 
 						<Controller control={control} name="catatanUmum" render={({ field }) => (
 							<textarea className={`w-full px-3 py-2 border border-gray-300 rounded-md
-                                    focus:outline-none focus:ring-2 focus:ring-[#E77D35] text-sm ${!isAssessee ||
+                                    focus:outline-none focus:ring-2 focus:ring-[#E77D35] text-sm ${!isAssessee || isAdmin ||
 									isSubmitted ? "cursor-not-allowed bg-gray-100" : ""}`} placeholder="Catatan"
-								rows={4} {...field} disabled={!isAssessee || isSubmitted} />
+								rows={4} {...field} disabled={!isAssessee || isAdmin || isSubmitted} />
 						)}
 						/>
 
-						{isAssessee && (
+						{isAssessee || isAdmin && (
 							<div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 w-full">
 								<button type="submit" disabled={loading || isSubmitting || isSubmitted}
 									className="w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-sm text-white rounded hover:bg-orange-600 transition cursor-pointer disabled:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed">

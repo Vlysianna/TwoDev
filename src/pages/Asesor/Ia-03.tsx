@@ -6,7 +6,7 @@ import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
 import IA03 from "@/components/section/IA-03";
 
 export default function Ia03() {
-	const { id_result, id_assessment, id_asesi, id_asesor } =
+	const { id_result, id_assessment } =
 		useAssessmentParams();
 
 	return (
@@ -29,10 +29,7 @@ export default function Ia03() {
 				<main className='m-4'>
 					<IA03
 						isAssessee={false}
-						id_assessment={id_assessment}
 						id_result={id_result!}
-						id_asesi={id_asesi!}
-						id_asesor={id_asesor!}
 					/>
 				</main>
 			</div>

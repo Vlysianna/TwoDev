@@ -1,3 +1,5 @@
+import type { ResultTemplate } from "@/lib/types";
+
 export interface GroupIA {
     id: number;
     name: string;
@@ -18,46 +20,8 @@ interface Tool {
     name: string;
 }
 
-export interface ResultIA02 {
-    id: number;
-    assessment: Assessment;
-    assessee: Assessee;
-    assessor: Assessor;
-    tuk: string;
-    is_competent: boolean;    
-    created_at: string;
+export interface ResultIA02 extends ResultTemplate {
     ia02_header: IA02Header;
-}
-
-interface Assessment {
-    id: number;
-    code: string;
-    occupation: Occupation;
-}
-
-interface Occupation {
-    id: number;
-    name: string;
-    scheme: Scheme;
-}
-
-interface Scheme {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface Assessee {
-    id: number;
-    name: string;
-    email: string;
-}
-
-interface Assessor {
-    id: number;
-    name: string;
-    email: string;
-    no_reg_met: string;
 }
 
 interface IA02Header {

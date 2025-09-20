@@ -6,7 +6,7 @@ import {
 	type UseFormRegister,
 } from "react-hook-form";
 import ElementField from "./ElementField";
-import type { MukTypeInput } from "@/lib/types";
+import type { MukTypeInput } from "@/model/muk-model";
 
 export default function UnitField({
 	unitFields,

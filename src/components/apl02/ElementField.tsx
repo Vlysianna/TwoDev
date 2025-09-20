@@ -1,4 +1,4 @@
-import type { MukTypeInput } from "@/lib/types";
+import type { MukTypeInput } from "@/model/muk-model";
 import {
 	useFieldArray,
 	type Control,
