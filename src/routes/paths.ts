@@ -36,6 +36,9 @@ const routes = {
 			dashboard: (id_assessment: string | number, id_asesor: string | number) =>
 				`/admin/result-assessment/${id_assessment}/${id_asesor}`,
 			dashboardPattern: "/admin/result-assessment/:id_assessment/:id_asesor",
+			resultAsesi: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}`,
+			resultAsesiPattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi",
 			apl01: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
 				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/apl-01`,
 			apl01Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/apl-01",

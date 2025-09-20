@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileCheck2, ChevronLeft, AlertCircle, Check } from "lucide-react";
+import { FileCheck2, ChevronLeft, AlertCircle, Check, House } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -9,16 +9,15 @@ import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import type { ResultAK01 } from "@/model/ak01-model";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
-import useToast from "@/components/ui/useToast";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Ak01() {
-	const { id_result, id_assessment, id_asesi, id_asesor } =
+	const { id_result, id_assessment, id_asesi, id_asesor, mutateNavigation } =
 		useAssessmentParams();
 
 	const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [tukError, setTukError] = useState<string | null>(null); // State untuk error TUK
 
 	const [data, setData] = useState<ResultAK01>({
 		id: 0,
@@ -112,44 +111,10 @@ export default function Ak01() {
 			);
 			if (response.data.success) {
 				setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+				mutateNavigation();
 			}
 		} catch (error) {
-			console.log("Error fetching unit competencies:", error);
-		}
-	};
-
-	const navigate = useNavigate();
-	const handleOnSubmit = async () => {
-		// Validasi TUK
-		if (!selectedTUK) {
-			setTukError("TUK harus dipilih");
-			return;
-		}
-
-		setTukError(null); // Hapus error jika validasi berhasil
-
-		const requestData = {
-			result_id: id_result,
-			evidences: selectedEvidences,
-		};
-
-		try {
-			const response = await api.post(`/assessments/ak-01/`, requestData);
-			if (response.data.success) {
-				toast.show({
-					title: "Berhasil",
-					description: "Berhasil menyimpan data",
-					type: "success",
-				});
-			} else {
-				toast.show({
-					title: "Gagal",
-					description: "Gagal menyimpan data",
-					type: "error",
-				});
-			}
-		} catch (error) {
-			console.log("Error fetching unit competencies:", error);
+			console.log("Error Generating QR Code:", error);
 		}
 	};
 
@@ -164,25 +129,8 @@ export default function Ak01() {
 		"Lainnya",
 	];
 
-	const toast = useToast();
-
-	const handleCheckboxChange = (evidence: string) => {
-		setSelectedEvidences((prev) => {
-			if (prev.includes(evidence)) {
-				return prev.filter((item) => item !== evidence);
-			} else {
-				return [...prev, evidence];
-			}
-		});
-	};
-
-	const handleTUKChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setSelectedTUK(e.target.value);
-		// Hapus error ketika pengguna mulai memilih TUK
-		if (tukError) {
-			setTukError(null);
-		}
-	};
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+	const navigate = useNavigate();
 
 	if (loading) {
 		return (
@@ -219,11 +167,29 @@ export default function Ak01() {
 						icon={
 							<Link
 								to={paths.asesi.dashboard}
+								onClick={(e) => {
+									e.preventDefault(); // cegah auto navigasi
+									setIsConfirmOpen(true);
+								}}
 								className="text-gray-500 hover:text-gray-600"
 							>
-								<ChevronLeft size={20} />
+								<House size={20} />
 							</Link>
 						}
+					/>
+
+					<ConfirmModal
+						isOpen={isConfirmOpen}
+						onClose={() => setIsConfirmOpen(false)}
+						onConfirm={() => {
+							setIsConfirmOpen(false);
+							navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+						}}
+						title="Konfirmasi"
+						message="Apakah Anda yakin ingin kembali ke Dashboard?"
+						confirmText="Ya, kembali"
+						cancelText="Batal"
+						type="warning"
 					/>
 				</div>
 
@@ -244,7 +210,6 @@ export default function Ak01() {
 						</div>
 
 						<div className="pt-6">
-							{/* Top grid 2 columns */}
 							{/* Top grid responsive */}
 							<div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 								{/* Left column */}
@@ -290,39 +255,14 @@ export default function Ak01() {
 											type="time"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
 											value={selectedTime}
-											readOnly // Kolom jam dibuat read-only
+											readOnly
 										/>
-										<div>
-											<select
-												className={`w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500 cursor-pointer ${tukError ? "border border-red-500" : ""
-													}`}
-												value={selectedTUK}
-												onChange={handleTUKChange}
-												onBlur={() => {
-													if (!selectedTUK) setTukError("TUK harus dipilih");
-												}}
-											>
-												<option value="">Pilih TUK</option>
-												{data.locations &&
-													Array.from(new Set(data.locations))
-														.sort()
-														.map((location, index) => (
-															<option key={index} value={location}>
-																{location}
-															</option>
-														))}
-											</select>
-
-											{/* Pesan error */}
-											{tukError && (
-												<p className="text-red-500 text-xs mt-1">{tukError}</p>
-											)}
-
-											{/* Keterangan wajib memilih */}
-											<p className="text-gray-400 text-xs mt-1 italic">
-												*Anda harus memilih TUK sebelum melanjutkan
-											</p>
-										</div>
+										<input
+											type="text"
+											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
+											value={selectedTUK}
+											readOnly
+										/>
 									</div>
 								</div>
 
@@ -338,14 +278,15 @@ export default function Ak01() {
 											return (
 												<label
 													key={option}
-													className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
+													className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition
                                     ${checked ? "bg-orange-100 " : ""}`}
 												>
 													<input
 														type="checkbox"
-														className="hidden"
+														className="hidden cursor-not-allowed"
 														checked={checked}
-														onChange={() => handleCheckboxChange(option)}
+														disabled
+														readOnly
 													/>
 													<span
 														className={`w-4 h-4 flex items-center justify-center rounded-xs border-2
@@ -376,11 +317,9 @@ export default function Ak01() {
 							<div className="mt-8 border-t border-gray-200 pt-6">
 								<div className="flex flex-col lg:flex-row justify-between gap-6">
 									{/* Kiri: isi teks */}
-									<div className="flex-1 space-y-6">
+									<div className="w-full lg:w-1/2 space-y-6">
 										<div>
-											<h3 className="font-semibold text-gray-900 mb-2">
-												Asesi :
-											</h3>
+											<h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
 											<p className="text-gray-700 leading-relaxed">
 												Bahwa saya telah mendapatkan penjelasan terkait hak dan
 												prosedur banding asesmen dari asesor.
@@ -388,9 +327,7 @@ export default function Ak01() {
 										</div>
 
 										<div>
-											<h3 className="font-semibold text-gray-900 mb-2">
-												Asesor :
-											</h3>
+											<h3 className="font-semibold text-gray-900 mb-2">Asesor :</h3>
 											<p className="text-gray-700 leading-relaxed">
 												Menyatakan tidak akan membuka hasil pekerjaan yang saya
 												peroleh karena penugasan saya sebagai Asesor dalam
@@ -401,9 +338,7 @@ export default function Ak01() {
 										</div>
 
 										<div>
-											<h3 className="font-semibold text-gray-900 mb-2">
-												Asesi :
-											</h3>
+											<h3 className="font-semibold text-gray-900 mb-2">Asesi :</h3>
 											<p className="text-gray-700 leading-relaxed">
 												Saya setuju mengikuti asesmen dengan pemahaman bahwa
 												informasi yang dikumpulkan hanya digunakan untuk
@@ -413,87 +348,84 @@ export default function Ak01() {
 										</div>
 									</div>
 
-									{/* QR Code Section */}
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-										<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-											{assesseeQrValue && (
-												<QRCodeCanvas
-													value={assesseeQrValue}
-													size={156}
-													className="w-40 h-40 object-contain"
-												>
-													{assesseeQrValue}
-												</QRCodeCanvas>
+									{/* Kanan: QR Code Section */}
+									<div className="w-full lg:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+										{/* QR Code Asesi */}
+										<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+											<h4 className="text-sm font-semibold text-gray-800 text-center">
+												QR Code Asesi
+											</h4>
+											{assesseeQrValue ? (
+												<>
+													<QRCodeCanvas
+														value={assesseeQrValue}
+														size={120}
+														className="w-40 h-40 object-contain"
+													/>
+													<div className="text-green-600 font-semibold text-xs text-center">
+														Sebagai Asesi, Anda sudah setuju
+													</div>
+												</>
+											) : (
+												<div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+													<span className="text-gray-400 text-xs text-center">
+														QR Code Asesi
+													</span>
+													<span className="text-gray-400 text-xs text-center">
+														Klik tombol "Setujui"
+													</span>
+												</div>
 											)}
-											<span className="text-sm font-semibold text-gray-800">
+											<span className="text-sm font-semibold text-gray-800 text-center">
 												{data.assessee.name}
 											</span>
+
+											{/* Tombol Setujui */}
 											{!assesseeQrValue && (
 												<button
-													disabled={assesseeQrValue !== ""}
+													disabled={!assessorQrValue} // Diubah: tombol dinonaktifkan jika belum ada QR asesor
 													onClick={() => {
-														if (!assesseeQrValue && assessorQrValue)
-															handleGenerateQRCode();
+														if (assessorQrValue && !assesseeQrValue) handleGenerateQRCode(); // Diubah: tambah kondisi
 													}}
-													className={`block text-center cursor-pointer bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assesseeQrValue && assessorQrValue
-														? "hover:bg-orange-600"
-														: "cursor-not-allowed opacity-50"
+													className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${assessorQrValue && !assesseeQrValue
+															? "hover:bg-orange-600 cursor-pointer"
+															: "cursor-not-allowed opacity-50"
 														}`}
 												>
 													Setujui
 												</button>
 											)}
 										</div>
-										<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-											{assessorQrValue && (
-												<QRCodeCanvas
-													value={assessorQrValue}
-													size={156}
-													className="w-40 h-40 object-contain"
-												>
-													{assessorQrValue}
-												</QRCodeCanvas>
+
+										{/* QR Code Asesor */}
+										<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+											<h4 className="text-sm font-semibold text-gray-800 text-center">
+												QR Code Asesor
+											</h4>
+											{assessorQrValue ? (
+												<>
+													<QRCodeCanvas
+														value={assessorQrValue}
+														size={120}
+														className="w-40 h-40 object-contain"
+													/>
+													<div className="text-green-600 font-semibold text-xs text-center">
+														Sudah disetujui Asesor
+													</div>
+												</>
+											) : (
+												<div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+													<span className="text-gray-400 text-xs text-center">
+														Menunggu persetujuan asesor
+													</span>
+												</div>
 											)}
-											<span className="text-sm font-semibold text-gray-800">
+											<span className="text-sm font-semibold text-gray-800 text-center">
 												{data.assessor.name}
 											</span>
 										</div>
 									</div>
 								</div>
-							</div>
-
-							<div className="mt-10 border-t border-gray-200 pt-6 flex flex-col items-center sm:items-end">
-								<button
-									type="submit"
-									className={`w-full sm:w-auto bg-[#E77D35] text-white py-2 px-30 rounded transition-colors ${!selectedTUK ||
-										!selectedTime ||
-										!selectedEvidences ||
-										selectedEvidences.length === 0
-										? "opacity-50 cursor-not-allowed"
-										: "hover:bg-orange-600 cursor-pointer"
-										}`}
-									onClick={(e) => {
-										if (
-											!selectedTUK ||
-											!selectedTime ||
-											!selectedEvidences ||
-											selectedEvidences.length === 0
-										)
-											e.preventDefault();
-										handleOnSubmit();
-									}}
-									disabled={
-										!selectedTUK ||
-										!selectedTime ||
-										!selectedEvidences ||
-										selectedEvidences.length === 0
-									}
-								>
-									Simpan
-								</button>
-								{tukError && (
-									<p className="text-red-500 text-xs mt-2">{tukError}</p>
-								)}
 							</div>
 						</div>
 					</div>

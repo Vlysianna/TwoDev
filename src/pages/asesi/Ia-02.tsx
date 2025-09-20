@@ -2,10 +2,11 @@ import {
   ChevronLeft,
   Clock,
   AlertCircle,
+  House,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
@@ -13,9 +14,10 @@ import type { ResultIA02 } from "@/model/ia02-model";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Ia02() {
-  const { id_result, id_assessment, id_asesi, id_asesor } =
+  const { id_result, id_assessment, id_asesi, id_asesor, mutateNavigation } =
     useAssessmentParams();
 
   const { user } = useAuth();
@@ -121,6 +123,7 @@ export default function Ia02() {
       );
       if (response.data.success) {
         setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+        mutateNavigation();
       }
     } catch (error) {
       console.log("Error fetching unit competencies:", error);
@@ -134,6 +137,9 @@ export default function Ia02() {
     "Seluruh proses kerja mengacu kepada SOP/WI yang dipersyaratkan (Jika Ada)",
   ];
 
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto">
@@ -141,13 +147,26 @@ export default function Ia02() {
           <NavbarAsesi
             title="Tugas Praktik Demonstrasi - FR.IA.02"
             icon={
-              <Link
-                to={paths.asesi.dashboard}
+              <Link to={paths.asesi.dashboard} onClick={(e) => {
+                e.preventDefault(); // cegah auto navigasi
+                setIsConfirmOpen(true);
+              }}
                 className="text-gray-500 hover:text-gray-600"
               >
-                <ChevronLeft size={20} />
+                <House size={20} />
               </Link>
             }
+          />
+          <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+            onConfirm={() => {
+              setIsConfirmOpen(false);
+              navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+            }}
+            title="Konfirmasi"
+            message="Apakah Anda yakin ingin kembali ke Dashboard?"
+            confirmText="Ya, kembali"
+            cancelText="Batal"
+            type="warning"
           />
         </div>
 

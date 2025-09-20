@@ -12,7 +12,7 @@ export default function NavbarAsesi({ title, icon }: NavbarAsesiProps) {
       <div className="flex items-center justify-between w-full gap-4">
         {/* Left: Icon + Title */}
         <div className="flex items-center flex-1 min-w-0 space-x-3">
-          {icon && <div className="text-black-500 hover:text-black-600 shrink-0">{icon}</div>}
+          {icon && <div className="text-black-500 hover:text-black-600 shrink-0 cursor-pointer">{icon}</div>}
           <h1 className="text-base sm:text-lg font-semibold text-gray-800 leading-snug break-words whitespace-normal">
             {title}
           </h1>

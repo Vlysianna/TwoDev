@@ -12,44 +12,44 @@ const NavLanding: React.FC = () => {
   const [activeItem, setActiveItem] = useState<string>('');
   const { isAuthenticated, user } = useAuth();
 
-	const location = useLocation();
+  const location = useLocation();
 
-	useEffect(() => {
-		const path = location.pathname;
-		if (path === paths.root) {
-			setActiveItem("home");
-		} else if (
-			path.includes(paths.dashboard.about) ||
-			path.includes(paths.dashboard.struktur)
-		) {
-			setActiveItem("profil");
-		} else if (
-			path.includes(paths.dashboard.skema) ||
-			path.includes(paths.dashboard.tempatUji) ||
-			path.includes(paths.dashboard.asesor) ||
-			path.includes(paths.dashboard.prosedurPendaftaran)
-		) {
-			setActiveItem("layanan");
-		} else if (path.includes(paths.dashboard.berita)) {
-			setActiveItem("berita");
-		} else if (path.includes(paths.dashboard.galeri)) {
-			setActiveItem("galeri");
-		} else if (path.includes(paths.dashboard.contact)) {
-			setActiveItem("dokumen");
-		}
-	}, [location.pathname]);
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === paths.root) {
+      setActiveItem("home");
+    } else if (
+      path.includes(paths.dashboard.about) ||
+      path.includes(paths.dashboard.struktur)
+    ) {
+      setActiveItem("profil");
+    } else if (
+      path.includes(paths.dashboard.skema) ||
+      path.includes(paths.dashboard.tempatUji) ||
+      path.includes(paths.dashboard.asesor) ||
+      path.includes(paths.dashboard.prosedurPendaftaran)
+    ) {
+      setActiveItem("layanan");
+    } else if (path.includes(paths.dashboard.berita)) {
+      setActiveItem("berita");
+    } else if (path.includes(paths.dashboard.galeri)) {
+      setActiveItem("galeri");
+    } else if (path.includes(paths.dashboard.contact)) {
+      setActiveItem("dokumen");
+    }
+  }, [location.pathname]);
 
-	useEffect(() => {
-		document.body.style.overflow = isMobileMenuOpen ? "hidden" : "auto";
-		return () => {
-			document.body.style.overflow = "auto";
-		};
-	}, [isMobileMenuOpen]);
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isMobileMenuOpen]);
 
-	const toggleMobileMenu = () => {
-		setIsMobileMenuOpen(!isMobileMenuOpen);
-		setActiveDropdown(null);
-	};
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+    setActiveDropdown(null);
+  };
 
   const getDashboardPath = (roleId: number) => {
     switch (roleId) {
@@ -75,72 +75,69 @@ const NavLanding: React.FC = () => {
     { name: 'Contact', path: paths.dashboard.contact },
   ];
 
-	return (
-		<nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex justify-between items-center h-16">
-					{/* Logo */}
-					<div className="flex items-center">
-						<img src={getAssetPath('/twodev-teks.svg')} alt="Wodev" className="h-8" />
-					</div>
+  return (
+    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <img src={getAssetPath('/twodev-teks.svg')} alt="Wodev" className="h-8" />
+          </div>
 
-					{/* Desktop Navigation */}
-					<div className="hidden md:flex items-center space-x-8">
-						{menuItems.map((item) => (
-							<Link
-								key={item.name}
-								to={item.path}
-								className={`relative px-3 py-2 text-sm font-medium transition-colors ${
-									activeItem === item.name.toLowerCase()
-										? "text-blue-600"
-										: "text-gray-700 hover:text-gray-900"
-								}`}
-							>
-								{item.name}
-								{activeItem === item.name.toLowerCase() && (
-									<span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full" />
-								)}
-							</Link>
-						))}
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {menuItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`relative px-3 py-2 text-sm font-medium transition-colors ${activeItem === item.name.toLowerCase()
+                    ? "text-blue-600"
+                    : "text-gray-700 hover:text-gray-900"
+                  }`}
+              >
+                {item.name}
+                {activeItem === item.name.toLowerCase() && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full" />
+                )}
+              </Link>
+            ))}
 
-						{/* Profil Dropdown */}
-						<div className="relative">
-							<button
-								onClick={() => toggleDropdown("profil")}
-								className={`relative px-3 py-2 text-sm font-medium flex items-center transition-colors ${
-									activeItem === "profil"
-										? "text-blue-600"
-										: "text-gray-700 hover:text-gray-900"
-								}`}
-							>
-								Profil
-								<ChevronDown
-									size={16}
-									className={`ml-1 transition-transform ${
-										activeDropdown === "profil" ? "rotate-180" : ""
-									}`}
-								/>
-								{activeItem === "profil" && (
-									<span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full" />
-								)}
-							</button>
-							{activeDropdown === "profil" && (
-								<div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg border rounded-md z-50 py-2">
-									<Link
-										to={paths.dashboard.about}
-										className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-									>
-										Tentang LSP
-									</Link>
-									<Link
-										to={paths.dashboard.struktur}
-										className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-									>
-										Struktur Organisasi
-									</Link>
-								</div>
-							)}
-						</div>
+            {/* Profil Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => toggleDropdown("profil")}
+                className={`relative px-3 py-2 text-sm font-medium flex items-center transition-colors ${activeItem === "profil"
+                    ? "text-blue-600"
+                    : "text-gray-700 hover:text-gray-900"
+                  }`}
+              >
+                Profil
+                <ChevronDown
+                  size={16}
+                  className={`ml-1 transition-transform ${activeDropdown === "profil" ? "rotate-180" : ""
+                    }`}
+                />
+                {activeItem === "profil" && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full" />
+                )}
+              </button>
+              {activeDropdown === "profil" && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg border rounded-md z-50 py-2">
+                  <Link
+                    to={paths.dashboard.about}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Tentang LSP
+                  </Link>
+                  <Link
+                    to={paths.dashboard.struktur}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Struktur Organisasi
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Layanan Dropdown */}
             <div className="relative">
@@ -181,7 +178,7 @@ const NavLanding: React.FC = () => {
           <div className="hidden md:block">
             {isAuthenticated && user ? (
               <div className="flex items-center space-x-4">
-                <Link 
+                <Link
                   to={getDashboardPath(user.role_id)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                 >
@@ -196,17 +193,17 @@ const NavLanding: React.FC = () => {
             )}
           </div>
 
-					{/* Mobile Menu Toggle */}
-					<div className="md:hidden">
-						<button
-							onClick={toggleMobileMenu}
-							className="text-gray-700 hover:text-gray-900"
-						>
-							{isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-						</button>
-					</div>
-				</div>
-			</div>
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden">
+            <button
+              onClick={toggleMobileMenu}
+              className="text-gray-700 hover:text-gray-900"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
@@ -216,37 +213,36 @@ const NavLanding: React.FC = () => {
               Home
             </Link>
 
-						{/* Profil Mobile */}
-						<div>
-							<button
-								onClick={() => toggleDropdown("mobile-profil")}
-								className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
-							>
-								Profil
-								<ChevronDown
-									size={16}
-									className={`transition-transform ${
-										activeDropdown === "mobile-profil" ? "rotate-180" : ""
-									}`}
-								/>
-							</button>
-							{activeDropdown === "mobile-profil" && (
-								<div className="pl-4 space-y-1">
-									<Link
-										to={paths.dashboard.about}
-										className="block text-sm text-gray-600 hover:text-blue-600"
-									>
-										Tentang LSP
-									</Link>
-									<Link
-										to={paths.dashboard.struktur}
-										className="block text-sm text-gray-600 hover:text-blue-600"
-									>
-										Struktur Organisasi
-									</Link>
-								</div>
-							)}
-						</div>
+            {/* Profil Mobile */}
+            <div>
+              <button
+                onClick={() => toggleDropdown("mobile-profil")}
+                className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
+              >
+                Profil
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${activeDropdown === "mobile-profil" ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+              {activeDropdown === "mobile-profil" && (
+                <div className="pl-4 space-y-1">
+                  <Link
+                    to={paths.dashboard.about}
+                    className="block text-sm text-gray-600 hover:text-blue-600"
+                  >
+                    Tentang LSP
+                  </Link>
+                  <Link
+                    to={paths.dashboard.struktur}
+                    className="block text-sm text-gray-600 hover:text-blue-600"
+                  >
+                    Struktur Organisasi
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Layanan Mobile */}
             <div>
@@ -290,20 +286,18 @@ const NavLanding: React.FC = () => {
 
             {/* Mobile Authentication Section */}
             {isAuthenticated && user ? (
-              <div className="space-y-2 mt-4">
-                <Link 
+              <div className="mt-4 flex items-center justify-between gap-2">
+                <Link
                   to={getDashboardPath(user.role_id)}
-                  className="w-full bg-[#E77D35] hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm"
+                  className="bg-[#E77D35] hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
-                <div className="px-2">
-                  <UserMenu />
-                </div>
+                <UserMenu />
               </div>
             ) : (
-              <Link 
+              <Link
                 to={paths.auth.login}
                 className="w-full bg-[#E77D35] hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm mt-4"
                 onClick={() => setIsMobileMenuOpen(false)}

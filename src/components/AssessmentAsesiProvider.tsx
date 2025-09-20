@@ -9,7 +9,7 @@ import {
 	type JSX,
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight, Circle, CircleAlert, Clock, FileCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import useSWR from "swr";
 
@@ -18,6 +18,7 @@ type AssessmentParams = {
 	id_asesor: string;
 	id_asesi: string;
 	id_result: string;
+	mutateNavigation: () => void;
 };
 
 export interface AssessmentRoute {
@@ -25,6 +26,7 @@ export interface AssessmentRoute {
 	label: string;
 	disabled?: boolean;
 	to: string;
+	status?: string;
 }
 
 const AssessmentContext = createContext<AssessmentParams | null>(null);
@@ -41,6 +43,30 @@ export function useAssessmentParams() {
 
 const fetcherTabs = (url: string) => api.get(url).then((res) => res.data.data);
 const fetcherResult = (url: string) => api.get(url).then((res) => res.data.data[0]);
+
+const StatusIndicator = ({ status }: { status: string }) => {
+	let icon = null;
+
+	switch (status) {
+		case "Tuntas":
+			icon = <CheckCircle className="w-4 h-4 text-green-500" />;
+			break;
+		case "Belum Tuntas":
+			icon = <CircleAlert className="w-4 h-4 text-red-500" />;
+			break;
+		case "Menunggu":
+			icon = <Clock className="w-4 h-4 text-blue-500" />;
+			break;
+		case "Butuh Persetujuan":
+			icon = <FileCheck className="w-4 h-4 text-yellow-500" />;
+			break;
+		default:
+			icon = <Circle className="w-4 h-4 text-gray-400" />;
+	}
+
+	return <div title={status}>{icon}</div>;
+};
+
 
 export default function AssessmentAsesiProvider({
 	children,
@@ -163,13 +189,15 @@ export default function AssessmentAsesiProvider({
 		setIsTabsOpen(!isTabsOpen);
 	};
 
-  const { data: navigation } = useSWR(
-    `/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`,
-    fetcherTabs
-  );
+	const { data: navigation, isLoading: loadingNavigation, error: errorNavigation, mutate: mutateNavigation } = useSWR(
+		`/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`,
+		fetcherTabs
+	);
+
+	// console.log(id_assessment, id_asesor, result?.assessee?.id, navigation);
 
 	// tab items
-	const tabItems: AssessmentRoute[] = [
+	const tabItems: AssessmentRoute[] = useMemo(() => [
 		{
 			value: routes.asesi.assessment.apl01(
 				id_assessment ?? "",
@@ -213,6 +241,12 @@ export default function AssessmentAsesiProvider({
 			to: routes.asesi.assessment.ak01(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
+			value: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
+			label: "IA-02",
+			disabled: false,
+			to: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
+		},
+		{
 			value: routes.asesi.assessment.ia01Asesi(
 				id_assessment ?? "",
 				id_asesor ?? ""
@@ -223,12 +257,6 @@ export default function AssessmentAsesiProvider({
 				id_assessment ?? "",
 				id_asesor ?? ""
 			),
-		},
-		{
-			value: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
-			label: "IA-02",
-			disabled: false,
-			to: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
@@ -260,16 +288,29 @@ export default function AssessmentAsesiProvider({
 			disabled: false,
 			to: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
 		},
-	];
+	], []);
 
 	const filteredTabItems: AssessmentRoute[] = useMemo(() => {
 		if (!navigation?.tabs) return [];
 
+		// Dapatkan daftar nama tab yang tersedia dari API
+		const availableTabNames = navigation.tabs.map((tab: { name: string; status: string }) => tab.name);
+
+		// Filter tabItems berdasarkan nama yang ada di API
 		let filtered = tabItems.filter((tab) =>
-			navigation?.tabs.includes(tab.label)
+			availableTabNames.includes(tab.label)
 		);
 
-  	const apl02Index = filtered.findIndex((tab) => tab.label === "APL-02");
+		// Tambahkan status ke setiap tab
+		filtered = filtered.map(tab => {
+			const tabData = navigation.tabs.find((t: { name: string }) => t.name === tab.label);
+			return {
+				...tab,
+				status: tabData?.status || "Menunggu"
+			};
+		});
+
+		const apl02Index = filtered.findIndex((tab) => tab.label === "APL-02");
 
 		if (apl02Index !== -1 && navigation?.enable_other_route === false) {
 			filtered = filtered.map((tab, idx) =>
@@ -278,11 +319,11 @@ export default function AssessmentAsesiProvider({
 		}
 
 		return filtered;
-	}, [navigation]);
+	}, [navigation, tabItems]);
 
 	return (
 		<>
-			{loading || (loadingResult && !errorResult) ? (
+			{loading || (loadingResult && !errorResult) || (loadingNavigation && !errorNavigation) ? (
 				<div className="min-h-screen flex items-center justify-center">
 					<div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
 				</div>
@@ -293,11 +334,12 @@ export default function AssessmentAsesiProvider({
 						id_asesor: id_asesor!,
 						id_result: result?.id,
 						id_asesi: result?.assessee.id,
+						mutateNavigation,
 					}}
 				>
 					<div className="relative w-full min-h-screen">
 						{/* Floating Tabs */}
-						<div className="fixed top-25 left-3 z-100">
+						<div className="fixed top-25 left-3 z-200">
 							{/* Toggle Button */}
 							<motion.button
 								onClick={toggleTabs}
@@ -336,7 +378,7 @@ export default function AssessmentAsesiProvider({
 
 											{/* Tab Items */}
 											<div
-												className="overflow-y-auto space-y-2
+												className="overflow-y-auto space-y-2 max-h-96
 													pr-2
 													[scrollbar-width:thin] 
 													[scrollbar-color:#f97316_transparent] 
@@ -356,22 +398,29 @@ export default function AssessmentAsesiProvider({
 																if (tab.disabled) e.preventDefault();
 																else setIsTabsOpen(false);
 															}}
-															className={`group relative flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-300 
+															className={`group relative flex items-center justify-between space-x-3 px-3 py-2 rounded-xl transition-all duration-300 
 																${isActive
-																? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/25"
-																: tab.disabled
-																	? "text-slate-400 cursor-not-allowed bg-slate-100/50" // style disabled
-																	: "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
-															}`}
+																	? "bg-gradient-to-r from-orange-500 to-orange-300 text-white shadow-lg shadow-orange-500/25"
+																	: tab.disabled
+																		? "text-slate-400 cursor-not-allowed bg-slate-100/50" // style disabled
+																		: "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
+																}`}
 														>
-															{/* Active indicator */}
-															{isActive && (
-																<div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-full"></div>
-															)}
+															<div className="flex items-center">
+																{/* Active indicator */}
+																{isActive && (
+																	<div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-full"></div>
+																)}
 
-															<span className="font-medium text-sm whitespace-nowrap">
-																{tab.label}
-															</span>
+																<span className="font-medium text-sm whitespace-nowrap">
+																	{tab.label}
+																</span>
+															</div>
+
+															{/* Status indicator */}
+															<div className="bg-white p-2 rounded-full flex items-center justify-center">
+																{tab.status && <StatusIndicator status={tab.status} />}
+															</div>
 
 															{/* Hover effect */}
 															{!isActive && (
@@ -383,18 +432,43 @@ export default function AssessmentAsesiProvider({
 											</div>
 
 											{/* Footer info */}
-											<div className="mt-4 pt-3 border-t border-slate-100">
-												<div className="px-2">
-													<p className="text-xs text-slate-500">
+											<div className="mt-3 pt-3 border-t border-gray-200">
+												<div className="px-2 space-y-2">
+													{/* Status Legend */}
+													<div className="space-y-1 mb-1">
+														<p className="text-xs font-semibold text-slate-700">Keterangan Status:</p>
+
+														<div className="flex items-center gap-2">
+															<CircleAlert className="w-4 h-4 text-red-500" />
+															<span className="text-xs text-slate-600">Belum Tuntas</span>
+														</div>
+
+														<div className="flex items-center gap-2">
+															<Clock className="w-4 h-4 text-blue-500" />
+															<span className="text-xs text-slate-600">Menunggu</span>
+														</div>
+
+														<div className="flex items-center gap-2">
+															<FileCheck className="w-4 h-4 text-yellow-500" />
+															<span className="text-xs text-slate-600">Butuh Persetujuan</span>
+														</div>
+
+														<div className="flex items-center gap-2">
+															<CheckCircle className="w-4 h-4 text-green-500" />
+															<span className="text-xs text-slate-600">Tuntas</span>
+														</div>
+													</div>
+													{/* <p className="text-xs text-slate-500">
 														Assessment ID: {id_assessment}
 													</p>
 													{result?.id && (
 														<p className="text-xs text-slate-500">
 															Result ID: {result.id}
 														</p>
-													)}
+													)} */}
 												</div>
 											</div>
+
 										</div>
 									</motion.div>
 								)}
@@ -402,7 +476,7 @@ export default function AssessmentAsesiProvider({
 						</div>
 
 						{/* Konten dengan padding biar gak ketutup tabs */}
-						<div className="">{children}</div>
+						<div>{children}</div>
 					</div>
 				</AssessmentContext.Provider>
 			)}

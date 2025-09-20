@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Monitor, ChevronLeft, Search, X, ChevronUp, ChevronDown, Calendar, Replace, AlertCircle, Check } from 'lucide-react';
+import { Monitor, ChevronLeft, Search, X, ChevronUp, ChevronDown, Calendar, Replace, AlertCircle, Check, House } from 'lucide-react';
 import NavbarAsesi from '@/components/NavbarAsesi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAssessmentParams } from '@/components/AssessmentAsesiProvider';
 import api from '@/helper/axios';
 import { QRCodeCanvas } from 'qrcode.react';
 import { getAssesseeUrl } from '@/lib/hashids';
+import ConfirmModal from '@/components/ConfirmModal';
 
 export default function Ak04() {
     // Menggunakan default empty object jika useAssessmentParams undefined
-    const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams ? useAssessmentParams() : {};
+    const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
     const [resultData, setResultData] = useState<any>(null);
     const [valueQr, setValueQr] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -51,6 +52,7 @@ export default function Ak04() {
 
             if (response.data.success) {
                 setResultData(response.data.data);
+                mutateNavigation();
 
                 // PERBAIKAN: Pastikan path yang benar untuk mengakses data
                 const ak04Data = response.data.data.result_ak04 || response.data.data.ak04_assessee;
@@ -181,6 +183,8 @@ export default function Ak04() {
 
     // Cek apakah semua pertanyaan sudah dijawab dan alasan sudah diisi
     const isFormComplete = Object.values(answers).every(answer => answer !== '') && reason.trim() !== '';
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const navigate = useNavigate();
 
     // Tampilkan loading indicator saat data sedang dimuat
     if (loading) {
@@ -202,10 +206,26 @@ export default function Ak04() {
                     <NavbarAsesi
                         title='Umpan balik dan catatan asesmen'
                         icon={
-                            <Link to={paths.asesi.dashboard} className="text-gray-500 hover:text-gray-600">
-                                <ChevronLeft size={20} />
+                            <Link to={paths.asesi.dashboard} onClick={(e) => {
+                                e.preventDefault(); // cegah auto navigasi
+                                setIsConfirmOpen(true);
+                            }}
+                                className="text-gray-500 hover:text-gray-600"
+                            >
+                                <House size={20} />
                             </Link>
                         }
+                    />
+                    <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+                        onConfirm={() => {
+                            setIsConfirmOpen(false);
+                            navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+                        }}
+                        title="Konfirmasi"
+                        message="Apakah Anda yakin ingin kembali ke Dashboard?"
+                        confirmText="Ya, kembali"
+                        cancelText="Batal"
+                        type="warning"
                     />
                 </div>
                 <div className="m-5">
@@ -232,10 +252,26 @@ export default function Ak04() {
                     <NavbarAsesi
                         title='Umpan balik dan catatan asesmen'
                         icon={
-                            <Link to={paths.asesi.dashboard} className="text-gray-500 hover:text-gray-600">
-                                <ChevronLeft size={20} />
+                            <Link to={paths.asesi.dashboard} onClick={(e) => {
+                                e.preventDefault(); // cegah auto navigasi
+                                setIsConfirmOpen(true);
+                            }}
+                                className="text-gray-500 hover:text-gray-600"
+                            >
+                                <House size={20} />
                             </Link>
                         }
+                    />
+                    <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+                        onConfirm={() => {
+                            setIsConfirmOpen(false);
+                            navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+                        }}
+                        title="Konfirmasi"
+                        message="Apakah Anda yakin ingin kembali ke Dashboard?"
+                        confirmText="Ya, kembali"
+                        cancelText="Batal"
+                        type="warning"
                     />
                 </div>
 

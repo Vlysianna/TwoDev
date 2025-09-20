@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "@/helper/axios";
+import paths from '@/routes/paths';
+
 import {
 	LayoutDashboard,
 	Users,
@@ -10,6 +12,7 @@ import {
 	MapPin,
 	Calendar,
 	Award,
+	FileText,
 } from "lucide-react";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavbarAsesor from "@/components/NavAsesor";
@@ -145,7 +148,7 @@ const RecapAssessment: React.FC = () => {
 					<div className="sticky top-0 z-10 bg-white shadow-sm">
 						<NavbarAsesor
 							title="Rekap Asesmen"
-							icon={<LayoutDashboard size={25} />}
+							icon={<FileText size={25} />}
 						/>
 					</div>
 					<main className="p-4">
@@ -168,7 +171,7 @@ const RecapAssessment: React.FC = () => {
 					<div className="sticky top-0 z-10 bg-white shadow-sm">
 						<NavbarAsesor
 							title="Rekap Asesmen"
-							icon={<LayoutDashboard size={25} />}
+							icon={<FileText size={25} />}
 						/>
 					</div>
 					<main className="p-4">
@@ -191,7 +194,7 @@ const RecapAssessment: React.FC = () => {
 					<div className="sticky top-0 z-10 bg-white shadow-sm">
 						<NavbarAsesor
 							title="Rekap Asesmen"
-							icon={<LayoutDashboard size={25} />}
+							icon={<FileText size={25} />}
 						/>
 					</div>
 					<main className="p-4">
@@ -214,24 +217,33 @@ const RecapAssessment: React.FC = () => {
 			</div>
 
 			{/* Main Content */}
-			<div className="flex-1">
+			<div className="flex-1 flex flex-col min-w-0">
 				{/* Navbar */}
 				<div className="sticky top-0 z-10 bg-white shadow-sm">
 					<NavbarAsesor
 						title="Rekap Asesmen"
-						icon={<LayoutDashboard size={25} />}
+						icon={<FileText size={25} />}
 					/>
 				</div>
 
 				{/* Main Body */}
 				<main className="p-4 space-y-6">
+					<div className="mb-6">
+						<nav className="flex text-sm text-gray-500">
+							<Link to={paths.asesor.dashboardAsesor} className="hover:underline">
+								Dashboard
+							</Link>
+							<span className="mx-2">/</span>
+							<span className="text-[#000000]">Rekap Asesmen</span>
+						</nav>
+					</div>
 					{/* Assessment Header Information */}
 					<div className="bg-white rounded-lg shadow-sm border p-6">
-						<div className="flex items-center justify-between mb-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 items-center mb-4">
 							<h2 className="text-xl font-semibold text-gray-900">
 								Informasi Asesmen
 							</h2>
-							<div className="flex items-center space-x-2">
+							<div className="flex items-center justify-start sm:justify-end space-x-2 mt-2 sm:mt-0">
 								<Award className="w-5 h-5 text-orange-500" />
 								<span className="text-sm font-medium text-orange-600">
 									{assessment.code}

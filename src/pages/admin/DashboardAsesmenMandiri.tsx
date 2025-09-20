@@ -11,29 +11,17 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "@/helper/axios";
 import { useAssessmentParams } from "@/components/AssessmentAdminProvider";
 import paths from "@/routes/paths";
-import { useAuth } from "@/contexts/AuthContext";
+import routes from "@/routes/paths";
 
 interface AssesseeData {
     result_id: number;
-    assessment_id: number;
     assessee_id: number;
-    assessee_name: string;
+    full_name: string;
     status: boolean;
-}
-
-interface TabResponse {
-    assessment_id: number;
-    assessment_code: string;
-    tabs: Tab[];
-}
-
-interface Tab {
-    name: string;
-    status: 'Not Started' | 'Waiting' | 'Completed';
+    created_at: string;
 }
 
 export default function DashboardAsesmenMandiriAdmin() {
-    const { user } = useAuth();
     const { id_assessment, id_asesor } = useAssessmentParams();
     const navigate = useNavigate();
     const tabsContainerRef = useRef<HTMLDivElement>(null);
@@ -44,50 +32,27 @@ export default function DashboardAsesmenMandiriAdmin() {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [tabData, setTabData] = useState<TabResponse | null>();
-    const [selectedTab, setSelectedTab] = useState<string>("apl-02");
     const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
 
     useEffect(() => {
-        fetchAssesseeData(selectedTab.toLowerCase());
-    }, [selectedTab]);
+        fetchAssesseeData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         assesseeData.filter((assessee) => {
-            return assessee.assessee_name
+            return assessee.full_name
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase());
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm]);
 
-    useEffect(() => {
-        fetchTabs();
-    }, [user]);
-
-    const fetchTabs = async () => {
+    const fetchAssesseeData = async () => {
         try {
             setLoading(true);
             const response = await api.get(
-                `/assessments/navigation/admin/${id_assessment}/${id_asesor}`
-            );
-            if (response.data.success) {
-                setTabData(response.data.data);
-            } else {
-                setError(response.data.message);
-            }
-        } catch (error) {
-            console.error("Failed to fetch tabs:", error);
-            setError("Gagal memuat data tab");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchAssesseeData = async (tab: string) => {
-        try {
-            setLoading(true);
-            const response = await api.get(
-                `/dashboard/assessor/${id_asesor}/${id_assessment}/${tab}`
+                `/assessments/results/status/admin/assessees/${id_assessment}/${id_asesor}`
             );
             if (response.data.success) {
                 setAssesseeData(response.data.data);
@@ -119,6 +84,7 @@ export default function DashboardAsesmenMandiriAdmin() {
 
         return () => {
             if (tabsContainerRef.current) {
+                // eslint-disable-next-line react-hooks/exhaustive-deps
                 tabsContainerRef.current.removeEventListener("scroll", checkScroll);
             }
         };
@@ -131,65 +97,6 @@ export default function DashboardAsesmenMandiriAdmin() {
                 left: direction === "right" ? scrollAmount : -scrollAmount,
                 behavior: "smooth",
             });
-        }
-    };
-
-    const getActionText = () => {
-        switch (selectedTab.toLowerCase()) {
-            case "apl-02":
-                return "Cek APL-02 >";
-            case "ia-01":
-                return "Cek IA-01 >";
-            case "ia-02":
-                return "Cek IA-02 >";
-            case "ia-03":
-                return "Cek IA-03 >";
-            case "ia-05":
-                return "Cek IA-05 >";
-            case "ia-07":
-                return "Cek IA-07 >";
-            case "ak-01":
-                return "Cek AK-01 >";
-            case "ak-02":
-                return "Cek AK-02 >";
-            case "ak-03":
-                return "Cek AK-03 >";
-            case "ak-05":
-                return "Cek AK-05 >";
-            default:
-                return "Cek >";
-        }
-    };
-
-    const handleActionClick = (assesseeId: number) => {
-        switch (selectedTab.toLowerCase()) {
-            case "apl-02":
-                navigate(paths.asesor.assessment.cekApl02(id_assessment, assesseeId));
-                break;
-            case "ia-01":
-                navigate(paths.asesor.assessment.ia01(id_assessment, assesseeId));
-                break;
-            case "ia-02":
-                navigate(paths.asesor.assessment.ia02(id_assessment, assesseeId));
-                break;
-            case "ia-03":
-                navigate(paths.asesor.assessment.ia03(id_assessment, assesseeId));
-                break;
-            case "ia-05":
-                navigate(paths.asesor.assessment.ia05(id_assessment, assesseeId));
-                break;
-            case "ak-01":
-                navigate(paths.asesor.assessment.ak01(id_assessment, assesseeId));
-                break;
-            case "ak-02":
-                navigate(paths.asesor.assessment.ak02(id_assessment, assesseeId));
-                break;
-            case "ak-03":
-                navigate(paths.asesor.assessment.ak03(id_assessment, assesseeId));
-                break;
-            case "ak-05":
-                navigate(paths.asesor.assessment.ak05(id_assessment, assesseeId));
-                break;
         }
     };
 
@@ -240,32 +147,6 @@ export default function DashboardAsesmenMandiriAdmin() {
                                 <ChevronRight size={20} />
                             </button>
                         )}
-
-                        {/* Container tab dengan scroll horizontal */}
-                        <div
-                            ref={tabsContainerRef}
-                            className="flex overflow-x-auto scrollbar-hide space-x-2 pb-2"
-                            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-                        >
-                            {tabData &&
-                                tabData.tabs.map((tab) => (
-                                    <button
-                                        key={tab.name}
-                                        onClick={() => setSelectedTab(tab.name)}
-                                        className={`flex-shrink-0 px-3 py-2 cursor-pointer rounded-md border-b-2 transition-all duration-200
-    ${selectedTab.toLowerCase() === tab.name.toLowerCase()
-                                                ? "border-orange-800 bg-[#E77D35] text-white font-semibold"
-                                                : tab.status === "Completed"
-                                                    ? "border-green-500 text-green-700 font-medium"
-                                                    : tab.status === "Waiting"
-                                                        ? "border-yellow-500 text-yellow-600 font-medium"
-                                                        : "border-blue-300 text-blue-600"
-                                            }`}
-                                    >
-                                        {tab.name}
-                                    </button>
-                                ))}
-                        </div>
                     </div>
 
                     {/* Search + Generate */}
@@ -338,14 +219,14 @@ export default function DashboardAsesmenMandiriAdmin() {
                                                     {index + 1}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-gray-900">
-                                                    {asesi.assessee_name}
+                                                    {asesi.full_name}
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <button
-                                                        onClick={() => handleActionClick(asesi.assessee_id)}
+                                                        onClick={() => navigate(routes.admin.resultAssessment.resultAsesi(id_assessment, id_asesor!, asesi.assessee_id))}
                                                         className="text-[#E77D35] underline text-sm hover:text-orange-600 cursor-pointer"
                                                     >
-                                                        {getActionText()}
+                                                        {"Lihat Hasil >"}
                                                     </button>
                                                 </td>
                                             </tr>

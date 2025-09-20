@@ -13,7 +13,7 @@ export default function Ak03() {
 			<div className="mx-auto">
 				<div className="bg-white rounded-lg shadow-sm">
 					<NavbarAsesor
-						title="Rekaman Asesmen Kompetensi - FR.AK.03"
+						title="Umpan Balik dan Catatan Asesmen - FR.AK.03"
 						icon={
 							<Link
 								to={paths.asesor.assessment.dashboardAsesmenMandiri(

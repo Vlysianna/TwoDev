@@ -4,6 +4,7 @@ import api from "@/helper/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AK03Question, AssessmentData } from "@/model/ak03-model";
 import { Controller, useForm } from "react-hook-form";
+import ConfirmModal from "../ConfirmModal";
 
 const defaultQuestions: AK03Question[] = [
 	{
@@ -81,9 +82,11 @@ const defaultQuestions: AK03Question[] = [
 export default function AK03({
 	isAssessee,
 	id_result,
+	mutateNavigation,
 }: {
 	isAssessee: boolean;
 	id_result: string;
+	mutateNavigation: () => void;
 }) {
 	const { user } = useAuth();
 
@@ -96,6 +99,9 @@ export default function AK03({
 	const [filterKompeten, setFilterKompeten] = useState("all");
 	const [catatanUmum, setCatatanUmum] = useState("");
 	const [showNotif, setShowNotif] = useState(false);
+	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [isSubmitted, setIsSubmitted] = useState(false); 
+	const [pendingSubmitData, setPendingSubmitData] = useState<any>(null); 
 
 	const {
 		control,
@@ -147,6 +153,7 @@ export default function AK03({
 					answers,
 					catatanUmum: rawData.data.result_ak03?.comment || "",
 				});
+				setIsSubmitted(rawData.data.result_ak03?.answers.length > 0);
 			}
 		} catch (error: any) {
 			setErrorMessage(
@@ -171,39 +178,64 @@ export default function AK03({
 		);
 	}, [questions, searchTerm, filterKompeten, getValues]);
 
+	const prepareSubmitData = (data: any) => {
+		return {
+			result_id: parseInt(id_result),
+			comment: (data.catatanUmum || "").trim() || "-", // Perbaikan di sini
+			items: data.answers.map((a: any, i: number) => ({
+				question: questions[i]?.question || defaultQuestions[i]?.question || "",
+				answer: a.answer === "ya",
+				comment: (a.comment || "").trim() || "-", // Perbaikan di sini
+			})),
+		};
+	};
+
 	const onSubmit = async (data: any) => {
-		if (!isAssessee) return;
+		if (!isAssessee || isSubmitted) return;
+
+		// Validasi apakah semua pertanyaan sudah dijawab
+		const hasUnanswered = data.answers.some((a: any) => !a.answer);
+		if (hasUnanswered) {
+			setErrorMessage("Harap jawab semua pertanyaan sebelum menyimpan");
+			return;
+		}
+
 		try {
-			const unanswered = data.answers.filter((a: any) => !a.answer);
-			if (unanswered.length > 0) {
-				setErrorMessage("Harap jawab semua pertanyaan sebelum menyimpan");
-				return;
-			}
+			// Siapkan payload
+			const payload = prepareSubmitData(data);
 
-			const payload = {
-				result_id: parseInt(id_result),
-				comment: data.catatanUmum,
-				items: data.answers.map((a: any, i: number) => ({
-					question: questions[i].question,
-					answer: a.answer === "ya",
-					comment: a.comment || "-",
-				})),
-			};
+			// Tampilkan modal konfirmasi dan simpan data pending
+			setPendingSubmitData(payload);
+			setShowConfirmModal(true);
+		} catch (error: any) {
+			setErrorMessage("Terjadi kesalahan dalam mempersiapkan data");
+		}
+	};
 
-			const response = await api.post("/assessments/ak-03/answer", payload);
-			if (!response.data.success) {
-				setErrorMessage(response.data.message || "Gagal menyimpan data.");
+	const handleConfirmSubmit = async () => {
+		if (!pendingSubmitData) return;
+
+		try {
+			const response = await api.post("/assessments/ak-03/answer", pendingSubmitData);
+			if (response.data.success) {
+				setShowNotif(true);
+				setIsSubmitted(true);
+				setTimeout(() => setShowNotif(false), 2500);
+				setErrorMessage("");
+				if (mutateNavigation) mutateNavigation();
 			} else {
-				setShowNotif(true); // Tampilkan notifikasi
-				setTimeout(() => setShowNotif(false), 2500); // Sembunyikan setelah 2.5 detik
+				setErrorMessage(response.data.message || "Gagal menyimpan data.");
 			}
 		} catch (error: any) {
 			setErrorMessage(error.response?.data?.message || "Gagal menyimpan data.");
+		} finally {
+			setShowConfirmModal(false);
+			setPendingSubmitData(null);
 		}
 	};
 
 	const handleFilterChange = (value: string) => {
-		if (!isAssessee) return;
+		if (!isAssessee || isSubmitted) return;
 		setFilterKompeten(value);
 		if (value === "ya" || value === "tidak") {
 			questions.forEach((_q, idx) => setValue(`answers.${idx}.answer`, value));
@@ -234,6 +266,17 @@ export default function AK03({
 					Data berhasil disimpan!
 				</div>
 			)}
+
+			<ConfirmModal
+				isOpen={showConfirmModal}
+				onClose={() => setShowConfirmModal(false)}
+				onConfirm={handleConfirmSubmit}
+				title="Konfirmasi Simpan"
+				message="Apakah Anda yakin ingin menyimpan data ini?"
+				confirmText="Ya, Simpan"
+				cancelText="Batal"
+				type="warning"
+			/>
 
 			{errorMessage && (
 				<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
@@ -411,7 +454,7 @@ export default function AK03({
 				<form onSubmit={handleSubmit(onSubmit)}>
 					{/* Table */}
 					<div className="w-full overflow-x-auto border border-gray-200 rounded-sm">
-						<div className="max-h-96 overflow-y-auto">
+						<div>
 							<table className="w-full min-w-[600px] lg:min-w-[800px] table-auto border-collapse">
 								<thead className="bg-gray-50 sticky top-0 z-10">
 									<tr>
@@ -433,82 +476,76 @@ export default function AK03({
 									{filteredData.map((item, idx) => (
 										<tr key={item.id} className="border-t border-gray-200">
 											<td className="px-2 py-2 text-xs sm:text-sm text-gray-900 text-center">
-												{item.id}
+												{idx + 1}
 											</td>
 											<td className="px-2 py-2 text-xs sm:text-sm text-gray-900 break-words">
 												{item.question}
 											</td>
 											<td className="px-2 py-2 text-center">
-												<div className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-2 sm:gap-4">
+												<div
+													className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-2 sm:gap-4">
 													{/* Radio Ya/Tidak */}
 													<Controller
 														control={control}
 														name={`answers.${idx}.answer`}
 														render={({ field }) => (
 															<>
-																{["Ya", "Tidak"].map((val) => (
-																	<label
-																		className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-xs sm:text-sm 
-																			${!isAssessee ? "text-gray-400" : "text-gray-700"}
-																			${field.value === val.toLowerCase() ? "bg-[#E77D3533]" : ""}`}
-																		key={val.toLowerCase()}
-																	>
-																		<input
-																			type="radio"
-																			value={val.toLowerCase()}
-																			checked={
-																				field.value === val.toLowerCase()
-																			}
-																			onChange={() =>
-																				field.onChange(val.toLowerCase())
-																			}
-																			className="hidden"
-																			disabled={!isAssessee}
-																		/>
-																		<span
-																			className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-																				!isAssessee &&
-																				"opacity-50 cursor-not-allowed"
-																			}
-																			${
-																				field.value === val.toLowerCase()
-																					? "bg-[#E77D35] border-[#E77D35]"
-																					: "border-[#E77D35]"
-																			}`}
+																{["Ya", "Tidak"].map((val) => {
+																	const isDisabled = !isAssessee || isSubmitted;
+																	const isSelected = field.value === val.toLowerCase();
+
+																	return (
+																		<label
+																			key={val.toLowerCase()}
+																			className={`flex items-center gap-2 px-2 py-1 rounded-sm transition text-xs sm:text-sm
+              ${isDisabled ? "text-gray-400 cursor-not-allowed opacity-50" : "text-gray-700 cursor-pointer"}
+              ${isSelected ? "bg-[#E77D3533]" : ""}`}
 																		>
-																			{field.value === val.toLowerCase() && (
-																				<Check className="w-4 h-4 text-white" />
-																			)}
-																		</span>
-																		<span
-																			className={
-																				field.value === val.toLowerCase()
-																					? "text-gray-900"
-																					: "text-gray-500"
-																			}
-																		>
-																			{val}
-																		</span>
-																	</label>
-																))}
+																			<input
+																				type="radio"
+																				value={val.toLowerCase()}
+																				checked={isSelected}
+																				onChange={() => !isDisabled && field.onChange(val.toLowerCase())}
+																				className="hidden"
+																				disabled={isDisabled}
+																			/>
+
+																			{/* bulatan radio */}
+																			<span
+																				className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+                ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"}
+                ${isSelected ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+																			>
+																				{isSelected && <Check className="w-4 h-4 text-white" />}
+																			</span>
+
+																			{/* teks Ya / Tidak */}
+																			<span
+																				className={`
+                ${isDisabled ? "cursor-not-allowed text-gray-400" : "cursor-pointer text-gray-700"}
+                ${isSelected ? "font-semibold text-gray-900" : ""}
+              `}
+																			>
+																				{val}
+																			</span>
+																		</label>
+																	);
+																})}
 															</>
 														)}
 													/>
 												</div>
 											</td>
 											<td className="px-2 py-2">
-												<Controller
-													control={control}
-													name={`answers.${idx}.comment`}
-													render={({ field }) => (
-														<textarea
-															className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-															{...field}
-															placeholder="Masukkan catatan..."
-															rows={3}
-															disabled={!isAssessee}
-														/>
-													)}
+												<Controller control={control} name={`answers.${idx}.comment`} render={({
+													field }) => (
+													<textarea className={`w-full px-3 py-2 border border-gray-300
+                                                        rounded focus:outline-none focus:ring-2 focus:ring-blue-500
+                                                        text-xs sm:text-sm ${!isAssessee || isSubmitted
+															? "cursor-not-allowed bg-gray-100" : ""}`} {...field}
+														placeholder="Masukkan catatan..." rows={3} disabled={!isAssessee
+															|| isSubmitted} />
+												)}
 												/>
 											</td>
 										</tr>
@@ -524,29 +561,22 @@ export default function AK03({
 							Catatan/komentar lainnya (apabila ada) :
 						</label>
 
-						<Controller
-							control={control}
-							name="catatanUmum"
-							render={({ field }) => (
-								<textarea
-									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E77D35] text-sm"
-									placeholder="Catatan"
-									rows={4}
-									{...field}
-									disabled={!isAssessee}
-								/>
-							)}
+						<Controller control={control} name="catatanUmum" render={({ field }) => (
+							<textarea className={`w-full px-3 py-2 border border-gray-300 rounded-md
+                                    focus:outline-none focus:ring-2 focus:ring-[#E77D35] text-sm ${!isAssessee ||
+									isSubmitted ? "cursor-not-allowed bg-gray-100" : ""}`} placeholder="Catatan"
+								rows={4} {...field} disabled={!isAssessee || isSubmitted} />
+						)}
 						/>
 
-						<div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 w-full">
-							<button
-								type="submit"
-								disabled={loading || isSubmitting || !isAssessee}
-								className="w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-sm text-white rounded hover:bg-orange-600 transition cursor-pointer disabled:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{isSubmitting ? "Menyimpan..." : "Simpan"}
-							</button>
-						</div>
+						{isAssessee && (
+							<div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 w-full">
+								<button type="submit" disabled={loading || isSubmitting || isSubmitted}
+									className="w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-sm text-white rounded hover:bg-orange-600 transition cursor-pointer disabled:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed">
+									{isSubmitting ? "Menyimpan..." : isSubmitted ? "Tersimpan" : "Simpan"}
+								</button>
+							</div>
+						)}
 					</div>
 				</form>
 			</div>

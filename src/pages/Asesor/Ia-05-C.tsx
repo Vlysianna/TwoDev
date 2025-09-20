@@ -48,6 +48,13 @@ export default function Ia05C() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingValue, setPendingValue] = useState<string>("");
 
+  // State untuk validasi form
+  const [formErrors, setFormErrors] = useState({
+    unit: false,
+    element: false,
+    kuk: false
+  });
+
   // Format date for display
   const formattedDate = result?.ia05_header.updated_at
     ? new Date(result.ia05_header.updated_at).toLocaleDateString("id-ID", {
@@ -110,8 +117,44 @@ export default function Ia05C() {
     }
   };
 
+  // Fungsi validasi form
+  const validateForm = () => {
+    const errors = {
+      unit: false,
+      element: false,
+      kuk: false
+    };
+
+    let isValid = true;
+
+    // Jika memilih "Belum Tercapai", validasi field unit, element, dan kuk
+    if (!feedbackResult) {
+      if (!unitField.trim()) {
+        errors.unit = true;
+        isValid = false;
+      }
+      if (!elementField.trim()) {
+        errors.element = true;
+        isValid = false;
+      }
+      if (!kukField.trim()) {
+        errors.kuk = true;
+        isValid = false;
+      }
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
   // Ubah handleSubmit agar hanya simpan, tidak generate QR
   const handleSaveFeedback = async () => {
+    // Validasi form sebelum menyimpan
+    if (!validateForm()) {
+      setProcessError("Harap isi semua field yang wajib diisi untuk status Belum Tercapai");
+      return;
+    }
+
     setSaveProcessing(true);
     setProcessError(null);
     setProcessSuccess(null);
@@ -119,9 +162,9 @@ export default function Ia05C() {
       const submissionData = {
         result_id: Number(id_result),
         is_achieved: feedbackResult,
-        unit: feedbackResult ? null : unitField,
-        element: feedbackResult ? null : elementField,
-        kuk: feedbackResult ? null : kukField,
+        unit: feedbackResult ? "-" : unitField,
+        element: feedbackResult ? "-" : elementField,
+        kuk: feedbackResult ? "-" : kukField,
         results: assesseeAnswers.map((answer) => ({
           option_id: answer.answers.id,
           approved: selectedAnswers[answer.id] === "Ya",
@@ -201,9 +244,19 @@ export default function Ia05C() {
   };
 
   const handleFeedbackRadioChange = (value: string) => {
-    setFeedbackResult(value === "tercapai");
-    // Clear unit/element/kuk fields if "Tercapai" is selected
-    if (value === "tercapai") {
+    const isAchieved = value === "tercapai";
+    setFeedbackResult(isAchieved);
+
+    // Clear validation errors when switching options
+    if (isAchieved) {
+      setFormErrors({ unit: false, element: false, kuk: false });
+
+      // Set nilai default "-" ketika memilih "Tercapai"
+      setUnitField("-");
+      setElementField("-");
+      setKukField("-");
+    } else {
+      // Kosongkan field jika memilih "Belum Tercapai"
       setUnitField("");
       setElementField("");
       setKukField("");
@@ -262,6 +315,12 @@ export default function Ia05C() {
 
   // Handler tombol simpan: buka modal dulu
   const handleSaveFeedbackClick = () => {
+    // Validasi form sebelum membuka modal
+    if (!validateForm()) {
+      setProcessError("Harap isi semua field yang wajib diisi untuk status Belum Tercapai");
+      return;
+    }
+
     setPendingValue(
       feedbackResult ? "Tercapai (Kompeten)" : "Belum Tercapai (Belum Kompeten)"
     );
@@ -465,7 +524,7 @@ export default function Ia05C() {
             <div className="flex flex-col">
               {/* Radio buttons in one row */}
               <h3 className="text-xl font-medium text-gray-900 mb-4">
-                Umpan Balik
+                Umpan Balik Untuk Asesi
               </h3>
               <div className="flex flex-col gap-4 mb-6">
                 {feedbackOptions.map((option) => (
@@ -519,7 +578,7 @@ export default function Ia05C() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Unit
+                          Unit {!feedbackResult && <span className="text-red-500">*</span>}
                         </label>
                         <input
                           type="text"
@@ -529,13 +588,18 @@ export default function Ia05C() {
                           className={`w-full rounded-lg px-3 py-2 text-sm transition-all
                   ${feedbackResult || !!assessorQrValue
                               ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                              : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
+                              : formErrors.unit
+                                ? 'bg-red-50 border border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500'
+                                : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
                 `}
                         />
+                        {formErrors.unit && (
+                          <p className="mt-1 text-xs text-red-600">Unit harus diisi</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Elemen
+                          Elemen {!feedbackResult && <span className="text-red-500">*</span>}
                         </label>
                         <input
                           type="text"
@@ -545,14 +609,19 @@ export default function Ia05C() {
                           className={`w-full rounded-lg px-3 py-2 text-sm transition-all
                   ${feedbackResult || !!assessorQrValue
                               ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                              : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
+                              : formErrors.element
+                                ? 'bg-red-50 border border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500'
+                                : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
                 `}
                         />
+                        {formErrors.element && (
+                          <p className="mt-1 text-xs text-red-600">Elemen harus diisi</p>
+                        )}
                       </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        KUK
+                        KUK {!feedbackResult && <span className="text-red-500">*</span>}
                       </label>
                       <input
                         type="text"
@@ -562,10 +631,15 @@ export default function Ia05C() {
                         className={`w-full rounded-lg px-3 py-2 text-sm transition-all
                 ${feedbackResult || !!assessorQrValue
                             ? "bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-                            : "bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]"
+                            : formErrors.kuk
+                              ? 'bg-red-50 border border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500'
+                              : "bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]"
                           }
               `}
                       />
+                      {formErrors.kuk && (
+                        <p className="mt-1 text-xs text-red-600">KUK harus diisi</p>
+                      )}
                     </div>
                   </div>
 
@@ -630,6 +704,9 @@ export default function Ia05C() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* QR Asesi */}
                     <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
+                      <span className="text-sm font-semibold text-gray-800">
+                        QR Code Asesi
+                      </span>
                       {result?.ia05_header?.approved_assessee && assesseeQrValue ? (
                         <QRCodeCanvas
                           value={assesseeQrValue}
@@ -657,6 +734,9 @@ export default function Ia05C() {
 
                     {/* QR Asesor */}
                     <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+                      <span className="text-sm font-semibold text-gray-800">
+                        QR Code Asesor
+                      </span>
                       {assessorQrValue ? (
                         <QRCodeCanvas
                           value={assessorQrValue}
@@ -706,7 +786,7 @@ export default function Ia05C() {
                         }`}
                     >
                       <Save size={18} className="mr-2" />
-                      {saveProcessing ? "Menyimpan..." : "Simpan Umpan Balik"}
+                      {saveProcessing ? "Menyimpan..." : "Simpan Rekomendasi"}
                     </button>
 
                     {/* Generate QR Button - Full width */}
@@ -744,6 +824,30 @@ export default function Ia05C() {
             <>
               <div>Anda akan menyimpan pilihan berikut:</div>
               <div className="mt-2 font-bold">{pendingValue}</div>
+              {!feedbackResult && (
+                <div className="mt-4">
+                  <div className="text-sm font-medium">Detail yang akan disimpan:</div>
+                  <div className="mt-2 text-sm flex justify-center">
+                    <table>
+                      <tr>
+                        <td className="pr-2 align-top text-start">Unit</td>
+                        <td className="pr-2 align-top">:</td>
+                        <td className="text-start">{unitField}</td>
+                      </tr>
+                      <tr>
+                        <td className="pr-2 align-top text-start">Elemen</td>
+                        <td className="pr-2 align-top">:</td>
+                        <td className="text-start">{elementField}</td>
+                      </tr>
+                      <tr>
+                        <td className="pr-2 align-top text-start">KUK</td>
+                        <td className="pr-2 align-top">:</td>
+                        <td className="text-start">{kukField}</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              )}
             </>
           }
           confirmText="Simpan"

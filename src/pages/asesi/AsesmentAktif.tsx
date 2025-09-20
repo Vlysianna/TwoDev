@@ -64,7 +64,7 @@ export default function AsessmentAktif() {
       <div className="flex-1 lg:ml-0 md:ml-0">
         {/* Navbar */}
         <div className="sticky top-0 z-10 bg-white shadow-sm">
-          <NavbarAsesi title="Riwayat" icon={<ListCheck size={25} />} />
+          <NavbarAsesi title="Riwayat Asesmen" icon={<ListCheck size={25} />} />
         </div>
 
         <div className="p-6">
@@ -129,15 +129,18 @@ export default function AsessmentAktif() {
                       {/* Status Badge */}
                       <div className="absolute top-4 right-4">
                         <span
-                          className={`${
-                            assessment.status === "Competent"
+                          className={`${assessment.status === "Competent"
                               ? "bg-green-300 text-green-800"
                               : assessment.status === "On Going"
-                              ? "bg-yellow-200 text-yellow-800"
-                              : "bg-red-300 text-red-800"
-                          } text-xs px-3 py-1 rounded-full font-medium`}
+                                ? "bg-yellow-200 text-yellow-800"
+                                : "bg-red-300 text-red-800"
+                            } text-xs px-3 py-1 rounded-full font-medium`}
                         >
-                          {assessment.status}
+                          {assessment.status === "Competent"
+                            ? "Kompeten"
+                            : assessment.status === "On Going"
+                              ? "Sedang Berlangsung"
+                              : "Belum Kompeten"}
                         </span>
                       </div>
                     </div>

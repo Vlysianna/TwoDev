@@ -80,6 +80,7 @@ const Dashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; action?: 'delete' | 'approve' | 'reject'; id?: number; message?: string }>({ open: false });
+    const [filter, setFilter] = useState<'pending' | 'approved'>('pending');
 
     const [verificationData, setVerificationData] = useState<VerificationData[]>([]);
 
@@ -97,21 +98,33 @@ const Dashboard: React.FC = () => {
 
     const loadPendingVerifications = React.useCallback(async () => {
         try {
-            const res = await api.get('/assessments/apl-01/results/unapproved');
+            const res = await api.get(`/assessments/verification/${filter === 'pending' ? 'pending' : 'approved'}`);
             if (res.data && res.data.success) {
-                const docs = res.data.data as PendingDoc[];
-                const mapped = docs.map((d) => ({
-                    id: d.id,
-                    username: d.assessee.name || d.assessee.email || 'Unknown',
-                    buktiUpload: d.purpose || 'Bukti Upload',
-                    tanggalKirim: new Date(d.created_at || '').toLocaleString('id-ID'),
-                }));
+                const docs = res.data.data;
+
+                // Map data sesuai dengan struktur yang diharapkan
+                const mapped = docs.map((d: any) => {
+                    console.log(d.result);
+                    // Ambil nama asesi dari result.assessee jika ada
+                    const assesseeName = d.result?.assessee?.user?.full_name ||
+                        d.result?.assessee?.email ||
+                        'Unknown';
+
+                    return {
+                        id: d.id,
+                        username: assesseeName,
+                        buktiUpload: d.purpose || 'Bukti Upload',
+                        tanggalKirim: new Date(d.created_at || '').toLocaleString('id-ID'),
+                    };
+                });
+
                 setVerificationData(mapped);
             }
         } catch (err) {
             console.error('Failed to fetch verification pending', err);
+            setVerificationData([]); // Set empty array on error
         }
-    }, []);
+    }, [filter]);
 
     useEffect(() => {
         void fetchDashboardData();
@@ -248,7 +261,7 @@ const Dashboard: React.FC = () => {
                                 <h3 className="text-lg font-semibold text-gray-900">Konfirmasi {confirmModal.action === 'delete' ? 'Hapus' : 'Verifikasi'}</h3>
                                 <p className="text-sm text-gray-600 mt-1">{confirmModal.message}</p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setConfirmModal({ open: false })}
                                 className="text-gray-400 hover:text-gray-600 p-1"
                             >
@@ -256,8 +269,8 @@ const Dashboard: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex justify-end gap-3 mt-6">
-                            <button 
-                                onClick={() => setConfirmModal({ open: false })} 
+                            <button
+                                onClick={() => setConfirmModal({ open: false })}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors"
                             >
                                 Batal
@@ -295,11 +308,10 @@ const Dashboard: React.FC = () => {
                                         toast.show({ title: 'Error', description: 'Terjadi error', type: 'error' });
                                     }
                                 }}
-                                className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-all ${
-                                    confirmModal.action === 'delete' 
-                                        ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' 
+                                className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-all ${confirmModal.action === 'delete'
+                                        ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
                                         : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
-                                }`}
+                                    }`}
                             >
                                 {confirmModal.action === 'delete' ? 'Hapus' : 'Ya, Lanjutkan'}
                             </button>
@@ -334,8 +346,8 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
                             <div className="mt-4 pt-4 border-t border-gray-100">
-                                <button 
-                                    onClick={() => navigate(paths.admin.kelolaJurusan)} 
+                                <button
+                                    onClick={() => navigate(paths.admin.kelolaJurusan)}
                                     className="text-sm text-gray-500 hover:text-orange-600 flex items-center justify-between w-full group-hover:text-orange-500 transition-colors"
                                 >
                                     <span>Lihat Detail</span>
@@ -407,8 +419,8 @@ const Dashboard: React.FC = () => {
                                     <h2 className="text-xl font-semibold text-gray-900 mb-1">Jadwal Assasmen</h2>
                                     <p className="text-sm text-gray-500">Daftar jadwal assessment yang akan datang</p>
                                 </div>
-                                <button 
-                                    onClick={() => navigate(paths.admin.kelolaJadwal)} 
+                                <button
+                                    onClick={() => navigate(paths.admin.kelolaJadwal)}
                                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all"
                                 >
                                     Lihat Semua
@@ -522,8 +534,8 @@ const Dashboard: React.FC = () => {
                                     <h2 className="text-xl font-semibold text-gray-900 mb-1">Verifikasi Approval</h2>
                                     <p className="text-sm text-gray-500">Daftar pengajuan yang membutuhkan verifikasi</p>
                                 </div>
-                                <button 
-                                    onClick={() => navigate(paths.admin.verifikasi)} 
+                                <button
+                                    onClick={() => navigate(paths.admin.verifikasi)}
                                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all"
                                 >
                                     Lihat Semua

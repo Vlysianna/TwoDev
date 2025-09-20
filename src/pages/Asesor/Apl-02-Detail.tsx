@@ -337,8 +337,8 @@ export default function CekApl02Detail() {
                                                                         disabled
                                                                     >
                                                                         {selectedProofs.length > 0
-                                                                            ? `${selectedProofs.length} selected`
-                                                                            : "Select evidences..."}
+                                                                            ? `${selectedProofs.length} bukti terpilih`
+                                                                            : "Pilih bukti relevan"}
                                                                     </button>
                                                                 </PopoverTrigger>
                                                                 <PopoverContent className="w-[200px] p-0">

@@ -30,6 +30,7 @@ export default function CekApl02() {
     // Tambahkan state modal
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingValue, setPendingValue] = useState<string>('');
+    const isComplete = completedUnits === unitCompetencies.length && unitCompetencies.length > 0;
 
     useEffect(() => {
         fetchAssessment();
@@ -278,10 +279,10 @@ export default function CekApl02() {
                                                         <div className="flex items-center justify-between">
                                                             {unit.finished ? (
                                                                 <span className="px-3 py-1 bg-[#E77D3533] text-[#E77D35] text-xs rounded">
-                                                                    Finished
+                                                                    Selesai
                                                                 </span>
                                                             ) : (
-                                                                <div></div>
+                                                                <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">Belum selesai</span>
                                                             )}
                                                             <Link
                                                                 to={paths.asesor.assessment.cekApl02Detail(
@@ -312,7 +313,7 @@ export default function CekApl02() {
                                             <h3 className="text-xl font-medium text-gray-900 mb-4">Progress Asesmen</h3>
                                             <div className="flex justify-between items-center mb-2">
                                                 <span className="text-sm font-medium text-gray-700">
-                                                    Completion
+                                                    Penyelesaian
                                                 </span>
                                                 <span className="text-sm font-medium text-[#E77D35]">
                                                     {completedUnits > 0 && unitCompetencies.length > 0
@@ -341,7 +342,7 @@ export default function CekApl02() {
                                                 ) : (
                                                     <>
                                                         <label
-                                                            className={`flex items-start space-x-3 cursor-pointer ${isQrGenerated ? "opacity-70" : ""
+                                                            className={`flex items-start space-x-3 ${isQrGenerated || !isComplete ? "cursor-not-allowed opacity-70" : "cursor-pointer"
                                                                 }`}
                                                         >
                                                             <input
@@ -349,21 +350,21 @@ export default function CekApl02() {
                                                                 name="recommendation"
                                                                 checked={recommendation === "continue"}
                                                                 onChange={() => handleRecommendationChange("continue")}
-                                                                disabled={isQrGenerated}
-                                                                className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+                                                                disabled={isQrGenerated || !isComplete}
+                                                                className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35] disabled:cursor-not-allowed"
                                                             />
                                                             <span
                                                                 className={`text-sm leading-relaxed ${recommendation === "stop" || recommendation === undefined || recommendation === null
                                                                     ? "line-through opacity-50"
                                                                     : ""
-                                                                    }`}
+                                                                    } ${isQrGenerated || !isComplete ? "cursor-not-allowed text-gray-400" : "cursor-pointer text-gray-700"}`}
                                                             >
                                                                 Assessment <strong>dapat dilanjutkan</strong>
                                                             </span>
                                                         </label>
 
                                                         <label
-                                                            className={`flex items-start space-x-3 cursor-pointer ${isQrGenerated ? "opacity-70" : ""
+                                                            className={`flex items-start space-x-3 ${isQrGenerated || !isComplete ? "cursor-not-allowed opacity-70" : "cursor-pointer"
                                                                 }`}
                                                         >
                                                             <input
@@ -371,16 +372,16 @@ export default function CekApl02() {
                                                                 name="recommendation"
                                                                 checked={recommendation === "stop"}
                                                                 onChange={() => handleRecommendationChange("stop")}
-                                                                disabled={isQrGenerated}
-                                                                className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+                                                                disabled={isQrGenerated || !isComplete}
+                                                                className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35] disabled:cursor-not-allowed"
                                                             />
                                                             <span
                                                                 className={`text-sm leading-relaxed ${recommendation === "continue" || recommendation === undefined || recommendation === null
                                                                     ? "line-through opacity-50"
                                                                     : ""
-                                                                    }`}
+                                                                    } ${isQrGenerated || !isComplete ? "cursor-not-allowed text-gray-400" : "cursor-pointer text-gray-700"}`}
                                                             >
-                                                                Assessment <strong className='text-red-600'>tidak dapat dilanjutkan</strong>
+                                                                Assessment <strong className="text-red-600">tidak dapat dilanjutkan</strong>
                                                             </span>
                                                         </label>
                                                     </>
@@ -443,16 +444,18 @@ export default function CekApl02() {
                                         {/* TOMBOL SIMPAN REKOMENDASI */}
                                         <div className="mb-4">
                                             <div className="text-gray-500 text-xs mb-2 text-center">
-                                                {!recommendation
-                                                    ? "Pilih rekomendasi terlebih dahulu"
-                                                    : isQrGenerated
-                                                        ? "Setelah generate QR, rekomendasi tidak dapat diubah"
-                                                        : "Simpan rekomendasi sebelum generate QR"}
+                                                {!isComplete
+                                                    ? "Semua unit kompetensi harus diselesaikan terlebih dahulu (100%)"
+                                                    : !recommendation
+                                                        ? "Pilih rekomendasi terlebih dahulu"
+                                                        : isQrGenerated
+                                                            ? "Setelah generate QR, rekomendasi tidak dapat diubah"
+                                                            : "Simpan rekomendasi sebelum generate QR"}
                                             </div>
                                             <button
                                                 onClick={handleSaveRecommendationClick}
-                                                disabled={saveProcessing || !recommendation || isQrGenerated}
-                                                className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${saveProcessing || !recommendation || isQrGenerated
+                                                disabled={saveProcessing || !recommendation || isQrGenerated || !isComplete}
+                                                className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${saveProcessing || !recommendation || isQrGenerated || !isComplete
                                                     ? "cursor-not-allowed opacity-50"
                                                     : "hover:bg-green-700 cursor-pointer"
                                                     }`}

@@ -415,7 +415,7 @@ export default function Ia01() {
               </div>
               <div className="flex flex-col items-end gap-1">
                 <div className="flex items-center justify-between w-full min-w-[220px]">
-                  <span className="text-sm text-gray-600">Completion</span>
+                  <span className="text-sm text-gray-600">Penyelesaian</span>
                   <span className="text-sm font-medium text-gray-900">{unitData.length > 0 ? `${Math.round((completedUnits / unitData.length) * 100)}%` : '0%'}</span>
                 </div>
                 <div className="w-full">
@@ -444,9 +444,9 @@ export default function Ia01() {
 
                   <div className="flex items-center justify-between mt-3">
                     {unit.finished ? (
-                      <span className="bg-[#E77D3533] text-[#E77D35] px-2 py-1 rounded text-xs font-medium">Finished</span>
+                      <span className="bg-[#E77D3533] text-[#E77D35] px-2 py-1 rounded text-xs font-medium">Selesai</span>
                     ) : (
-                      <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">In Progress</span>
+                      <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">Belum selesai</span>
                     )}
                     <Link
                       to={paths.asesor.assessment.ia01Detail(

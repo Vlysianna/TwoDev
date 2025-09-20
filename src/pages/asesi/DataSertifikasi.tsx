@@ -18,7 +18,7 @@ type FormValues = {
 };
 
 export default function DataSertifikasi() {
-	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
+	const { id_assessment, id_asesor, id_result, mutateNavigation } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
 
 	const [loading, setLoading] = useState(false);
@@ -122,6 +122,7 @@ export default function DataSertifikasi() {
 							description: "Berhasil menyimpan data",
 							type: "success",
 						});
+						mutateNavigation();
 					} else {
 						toast.show({
 							title: "Gagal",

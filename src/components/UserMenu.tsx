@@ -61,14 +61,14 @@ const UserMenu: React.FC = () => {
           className="w-10 h-10 rounded-full"
         />
         <div className="hidden md:block text-start text-sm">
-          <p className="font-medium text-gray-800">{getRoleName(user.role_id)}</p>
+          <p className="font-medium text-gray-800">{user.full_name} ({getRoleName(user.role_id)})</p>
           <p className="text-xs text-gray-500">{user.email}</p>
         </div>
       </button>
 
       {/* Dropdown Profile */}
       {isProfileOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+        <div className="absolute right-0 mt-2 w-max bg-white rounded-md shadow-lg border border-gray-200 z-50">
           {/* User Info */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
@@ -78,7 +78,9 @@ const UserMenu: React.FC = () => {
                 className="w-8 h-8 rounded-full"
               />
               <div className="text-start">
-                <p className="font-medium text-gray-800">{getRoleName(user.role_id)}</p>
+                <p className="font-medium text-gray-800">
+                  {user.full_name} ({getRoleName(user.role_id)})
+                </p>
                 <p className="text-xs text-gray-500">{user.email}</p>
               </div>
             </div>
@@ -89,7 +91,7 @@ const UserMenu: React.FC = () => {
             <button
               type="button"
               onClick={handleLogoutClick}
-              className="w-full flex items-center justify-center text-red-500 hover:bg-gray-100 p-2 rounded transition cursor-pointer"
+              className="w-full flex justify-center items-center text-red-500 hover:bg-gray-100 px-3 py-2 rounded transition cursor-pointer"
             >
               <LogOut size={18} className="mr-2" />
               Logout
