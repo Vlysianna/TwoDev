@@ -1,11 +1,6 @@
-export interface ResultAK02 {
-    id: number;
-    assessment: Assessment;
-    assessee: Assessee;
-    assessor: Assessor;
-    tuk: string;
-    is_competent: boolean;
-    created_at: string;
+import type { ResultTemplate } from "@/lib/types";
+
+export interface ResultAK02 extends ResultTemplate {
     ak02_headers: AK02Header;
 }
 

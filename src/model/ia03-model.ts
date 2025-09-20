@@ -1,5 +1,8 @@
 // ========================
 // Group IA03 (Get Units + Questions)
+
+import type { Assessee, ResultTemplate } from "@/lib/types";
+
 // ========================
 export interface GroupIA03 {
   id: number;
@@ -34,52 +37,8 @@ export interface QuestionResultIA03 {
 // ========================
 // Result IA03 (Get Result)
 // ========================
-export interface ResultIA03 {
-  id: number;
-  assessment: AssessmentIA03;
-  assessee: AssesseeIA03;
-  assessor: AssessorIA03;
-  tuk: string;
-  is_competent: boolean;
-  created_at: string;
+export interface ResultIA03 extends ResultTemplate {
   ia03_header: IA03Header;
-}
-
-export interface AssessmentIA03 {
-  id: number;
-  code: string;
-  occupation: OccupationIA03;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface OccupationIA03 {
-  id: number;
-  name: string;
-  scheme: SchemeIA03;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SchemeIA03 {
-  id: number;
-  code: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AssesseeIA03 {
-  id: number;
-  name: string;
-  email: string;
-}
-
-export interface AssessorIA03 {
-  id: number;
-  name: string;
-  email: string;
-  no_reg_met: string;
 }
 
 export interface IA03Header {
@@ -110,7 +69,7 @@ export interface SendResultIA03 {
 export interface ApproveIA03 {
   id: number;
   result_id: number;
-  assessee?: AssesseeIA03; // opsional tergantung role
+  assessee?: Assessee; // opsional tergantung role
   approved_assessee: boolean;
   approved_assessor: boolean;
 }
