@@ -9,57 +9,72 @@ import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import AssesseeModal from '@/components/AssesseeModal';
 import api from '@/helper/axios';
+import useDebounce from '@/hooks/useDebounce';
 
-interface UserData {
+interface AssesseeItem {
   id: number;
-  email: string;
-  full_name?: string;
-  role: {
-    id: number;
-    name: string;
-  };
-  assessee?: {
-    id: number;
-    full_name: string;
-    phone_no: string;
-    identity_number: string;
-    birth_date: string;
-    birth_location: string;
-    gender: string;
-    nationality: string;
-    house_phone_no?: string;
-    office_phone_no?: string;
-    address: string;
-    postal_code?: string;
-    educational_qualifications: string;
-  };
+  user_id?: number;
+  name: string;
+  identity_number?: string;
+  birth_date?: string;
+  birth_location?: string;
+  gender?: string;
+  nationality?: string;
+  phone_no?: string;
+  house_phone_no?: string | null;
+  office_phone_no?: string | null;
+  address?: string;
+  postal_code?: string | null;
+  educational_qualifications?: string;
+  job?: any;
+  results?: any[];
+  email?: string; // optional if joined
 }
 
 const KelolaAkunAsesi: React.FC = () => {
-  const [users, setUsers] = useState<UserData[]>([]);
+  const [users, setUsers] = useState<AssesseeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   // Detail modal state (for view only)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedAssessee, setSelectedAssessee] = useState<UserData | null>(null);
+  const [selectedAssessee, setSelectedAssessee] = useState<AssesseeItem | null>(null);
+
+  // pagination
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
+  const [total, setTotal] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const debouncedSearch = useDebounce(searchTerm, 350);
 
   useEffect(() => {
-    fetchAssessees();
-  }, []);
+    // reset to first page when search changes
+    setPage(1);
+  }, [debouncedSearch]);
 
-  const fetchAssessees = async () => {
+  useEffect(() => {
+    fetchAssessees(page, limit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit, debouncedSearch]);
+
+  const fetchAssessees = async (p = 1, l = 10) => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch all users and filter for assessees (role_id = 3)
-      const response = await api.get('/user');
+      // Fetch assessee paginated data
+  const params: any = { page: p, limit: l };
+  if (debouncedSearch && debouncedSearch.trim() !== '') params.q = debouncedSearch.trim();
+  const response = await api.get('/assessee', { params });
       if (response?.data?.success) {
-        // Filter for assessee users only
         const data = Array.isArray(response.data.data) ? response.data.data : [];
-        const assesseeUsers = data.filter((user: UserData) => user.role && user.role.id === 3);
-        setUsers(assesseeUsers);
+        setUsers(data);
+        const meta = response.data.meta || {};
+        setTotal(meta.total || data.length);
+        setTotalPages(meta.total_pages || 1);
+        setPage(meta.current_page || p);
+        setLimit(meta.limit || l);
       } else {
         setError(response?.data?.message || 'Gagal memuat data asesi');
       }
@@ -77,7 +92,8 @@ const KelolaAkunAsesi: React.FC = () => {
 
   const handleView = async (id: number) => {
     try {
-      const res = await api.get(`/user/${id}`);
+      // fetch assessee detail
+      const res = await api.get(`/assessee/${id}`);
       if (res?.data?.success) {
         setSelectedAssessee(res.data.data);
         setIsDetailModalOpen(true);
@@ -85,7 +101,7 @@ const KelolaAkunAsesi: React.FC = () => {
         setError(res?.data?.message || 'Gagal memuat data pengguna');
       }
     } catch (err) {
-      console.error('Failed to fetch user detail:', err);
+      console.error('Failed to fetch assessee detail:', err);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any)?.response?.data?.message || 'Gagal memuat detail pengguna');
     }
@@ -145,6 +161,15 @@ const KelolaAkunAsesi: React.FC = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[26px] font-semibold text-[#000000]">Akun Asesi</h2>
+                <div className="ml-4 flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Cari nama, email, atau no. HP"
+                    className="px-3 py-2 border rounded-md text-sm w-64"
+                  />
+                </div>
               </div>
               {/* Full width border line */}
               <div className="border-b border-gray-200"></div>
@@ -156,24 +181,12 @@ const KelolaAkunAsesi: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-[#E77D35] text-white">
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Nama Lengkap
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Phone
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                        Role
-                      </th>
-                        <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
-                          Verifikasi
+                      {['Nama Lengkap','NIK','Tanggal Lahir','Tempat Lahir','Nomor HP','Pendidikan'].map((label) => (
+                        <th key={label} className="px-6 py-4 text-left text-sm font-semibold tracking-wide">
+                          {label}
                         </th>
-                      <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
-                        Actions
-                      </th>
+                      ))}
+                      <th className="px-6 py-4 text-center text-sm font-semibold tracking-wide">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -183,26 +196,22 @@ const KelolaAkunAsesi: React.FC = () => {
                         className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.assessee?.full_name || user.full_name || '-'}
+                          {user.name || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.email}
+                          {user.identity_number || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.assessee?.phone_no || '-'}
+                          {user.birth_date ? new Date(user.birth_date).toLocaleDateString() : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.role.name}
+                          {user.birth_location || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {(() => {
-                            type ResultDoc = { approved?: boolean };
-                            type AssesseeResult = { docs?: ResultDoc[] };
-                            const assessee = user.assessee as { results?: AssesseeResult[] } | undefined;
-                            if (!assessee || !assessee.results || assessee.results.length === 0) return 'Belum';
-                            const hasApproved = assessee.results.some((r) => Array.isArray(r.docs) && (r.docs as ResultDoc[]).some((d) => d.approved));
-                            return hasApproved ? 'Terverifikasi' : 'Belum';
-                          })()}
+                          {user.phone_no || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {user.educational_qualifications || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
@@ -219,6 +228,39 @@ const KelolaAkunAsesi: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              {/* Pagination controls */}
+              <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-gray-600">
+                  Menampilkan halaman {page} dari {totalPages} — total {total} data
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    className="px-3 py-1 bg-white border rounded disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    className="px-3 py-1 bg-white border rounded disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                  <select
+                    value={limit}
+                    onChange={(e) => setLimit(Number(e.target.value))}
+                    className="ml-2 px-2 py-1 border rounded"
+                    aria-label="Items per page"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>

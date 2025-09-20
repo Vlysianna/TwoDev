@@ -54,11 +54,27 @@ const AssesseeModal: React.FC<AssesseeModalProps> = ({ isOpen, onClose, onSucces
 
   useEffect(() => {
     if (assessee && (mode === 'edit' || mode === 'show')) {
+      // support both shapes:
+      // 1) { id, name, identity_number, ... } (assessee detail)
+      // 2) { id, email, assessee: { full_name, ... } } (user wrapper)
+      const nested = (assessee as any).assessee ? (assessee as any).assessee : assessee;
+      // normalize birth_date to YYYY-MM-DD for date input
+      const rawBirth = nested?.birth_date || '';
+      const birth_date = rawBirth ? new Date(rawBirth).toISOString().split('T')[0] : '';
+      // normalize gender for select display
+      let genderVal = nested?.gender || '';
+      if (typeof genderVal === 'string') {
+        const gv = genderVal.toLowerCase();
+        if (gv === 'male' || gv === 'laki-laki' || gv.includes('laki')) genderVal = 'Laki-laki';
+        else if (gv === 'female' || gv === 'perempuan' || gv.includes('perempuan')) genderVal = 'Perempuan';
+      }
       setForm({
         ...initialForm,
-        ...assessee.assessee,
-        full_name: assessee.full_name || '',
-        email: assessee.email || '',
+        ...nested,
+        birth_date,
+        gender: genderVal,
+        full_name: (assessee as any).name || (assessee as any).full_name || nested.full_name || '',
+        email: (assessee as any).email || nested.email || '',
       });
     } else {
       setForm(initialForm);
@@ -75,10 +91,17 @@ const AssesseeModal: React.FC<AssesseeModalProps> = ({ isOpen, onClose, onSucces
     setLoading(true);
     setError(null);
     try {
+      // map gender back to API expected value ('male'|'female')
+      const payload = { ...form } as any;
+      if (payload.gender) {
+        const g = String(payload.gender).toLowerCase();
+        if (g.includes('laki')) payload.gender = 'male';
+        else if (g.includes('perempuan') || g.includes('perempuan')) payload.gender = 'female';
+      }
       if (mode === 'create') {
-        await api.post('/user/assessee', form);
+        await api.post('/user/assessee', payload);
       } else if (mode === 'edit' && assessee) {
-        await api.put(`/user/assessee/${assessee.id}`, form);
+        await api.put(`/user/assessee/${assessee.id}`, payload);
       }
       onSuccess();
       onClose();

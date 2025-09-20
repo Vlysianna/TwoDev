@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useCallback } from 'react';
 import api from '@/helper/axios';
+import { useLocation } from 'react-router-dom';
 import { useToast } from '@/components/ui/useToast';
 
 type ResultDoc = {
@@ -53,12 +54,24 @@ export default function VerifikasiPage() {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toast = useToast();
+  const location = useLocation();
+  // optional query params from ResultAssessment when opening per-schedule
+  const searchParams = new URLSearchParams(location.search);
+  const queryAssessor = searchParams.get('assessor');
+  const querySchedule = searchParams.get('schedule');
 
   const fetchPending = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get(`/assessments/verification/${filter === 'pending' ? 'pending' : 'approved'}`);
-      if (res.data.success) setItems(res.data.data || []);
+      if (res.data.success) {
+        let all = res.data.data || [];
+        if (queryAssessor) {
+          const assessorIdNum = Number(queryAssessor);
+          all = all.filter((i: any) => Number(i.result?.assessor?.id) === assessorIdNum);
+        }
+        setItems(all);
+      }
     } catch (err) {
       console.error(err);
       toast.show({ title: 'Error', description: 'Gagal memuat data verifikasi', type: 'error' });

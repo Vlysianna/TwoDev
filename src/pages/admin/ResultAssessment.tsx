@@ -261,7 +261,16 @@ const ResultAssessment: React.FC = () => {
                                         >
                                           Lihat Detail Asesmen <ArrowRight size={16} />
                                         </button>
-
+                                        
+                                        <button
+                                          className="px-2 text-green-600 rounded hover:text-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(schedule.assessor.id))}&schedule=${encodeURIComponent(String(schedule.id))}`);
+                                          }}
+                                        >
+                                          Verifikasi Assesi <ArrowRight size={16} />
+                                        </button>
                                         <button
                                           className="px-2 text-blue-500 rounded hover:text-blue-700 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {
@@ -349,7 +358,16 @@ const ResultAssessment: React.FC = () => {
                                 >
                                   Lihat Detail Asesmen <ArrowRight size={16} />
                                 </button>
-
+                                
+                                <button
+                                  className="text-green-600 text-sm cursor-pointer flex items-center gap-2 py-1"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(schedule.assessor.id))}&schedule=${encodeURIComponent(String(schedule.id))}`);
+                                  }}
+                                >
+                                  Verifikasi Per Jadwal <ArrowRight size={16} />
+                                </button>
                                 <button
                                   className="text-blue-500 text-sm cursor-pointer flex items-center gap-2 py-1"
                                   onClick={(e) => {
