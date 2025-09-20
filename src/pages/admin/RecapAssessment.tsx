@@ -15,6 +15,8 @@ import {
     Calendar,
     Award,
     FileText,
+    Printer,
+    Download,
 } from "lucide-react";
 
 interface Assessee {
@@ -141,6 +143,61 @@ const RecapAssessmentAdmin: React.FC = () => {
         }
     };
 
+    const handlePDF = async () => {
+        try {
+            const response = await api.get(
+                `/assessments/recap/${scheduleDetailId}/pdf`,
+                {
+                    responseType: "blob", // supaya terima file PDF
+                }
+            );
+
+            // bikin object URL untuk blob PDF
+            const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = fileURL;
+
+            // kasih nama file
+            link.setAttribute("download", `rekap_assessment_${scheduleDetailId}.pdf`);
+
+            // trigger klik untuk download
+            document.body.appendChild(link);
+            link.click();
+
+            // bersihkan
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(fileURL);
+        } catch (error) {
+            console.error("Gagal export PDF:", error);
+            alert("Gagal export PDF, coba lagi!");
+        }
+    };
+
+    const handlePrint = async () => {
+        try {
+            const response = await api.get(
+                `/assessments/recap/${scheduleDetailId}/pdf`,
+                {
+                    responseType: "blob",
+                }
+            );
+
+            const fileURL = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = fileURL;
+            document.body.appendChild(iframe);
+            iframe.contentWindow?.focus();
+            iframe.contentWindow?.print();
+        } catch (error) {
+            console.error("Gagal print PDF:", error);
+            alert("Gagal print, coba lagi!");
+        }
+    };
+
+
+
+
     if (loading) {
         return (
             <div className="min-h-screen bg-[#F7FAFC] flex">
@@ -191,20 +248,73 @@ const RecapAssessmentAdmin: React.FC = () => {
 
     const { assessment } = data;
 
+    // cek apakah masih ada status "On Going"
+    const hasOngoing = assessment.assessees.some(
+        (assessee) => assessee.status === "On Going"
+    );
+
     return (
         <div className="min-h-screen bg-[#F7FAFC] flex">
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0">
                 <NavAdmin title="Rekap Assessment" icon={<FileText size={20} />} />
                 <main className="flex-1 overflow-auto p-6 space-y-6">
-                    <div className="mb-6">
+                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        {/* Breadcrumb */}
                         <nav className="flex text-sm text-gray-500">
-                            <Link to={paths.admin.resultAssessment.root} className="hover:underline">
+                            <Link
+                                to={paths.admin.resultAssessment.root}
+                                className="hover:underline"
+                            >
                                 Hasil Asesmen
                             </Link>
                             <span className="mx-2">/</span>
                             <span className="text-[#000000]">Rekap Asesmen</span>
                         </nav>
+
+                        {/* Buttons */}
+                        <div className="flex flex-col w-full sm:w-auto">
+                            <div className="flex flex-col sm:flex-row gap-3 w-full justify-end">
+                                {/* Button Print */}
+                                <div className="flex flex-col items-start w-full sm:w-auto">
+                                    <button
+                                        type="button"
+                                        onClick={handlePrint}
+                                        disabled={hasOngoing}
+                                        className={`flex items-center justify-center text-white text-sm px-6 py-2 rounded-md transition w-full sm:w-auto ${hasOngoing
+                                                ? "bg-gray-300 cursor-not-allowed"
+                                                : "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
+                                            }`}
+                                    >
+                                        <Printer className="w-4 h-4 mr-2" />
+                                        Print
+                                    </button>
+                                </div>
+
+                                {/* Button PDF */}
+                                <div className="flex flex-col items-start w-full sm:w-auto">
+                                    <button
+                                        type="button"
+                                        onClick={handlePDF}
+                                        disabled={hasOngoing}
+                                        className={`flex items-center justify-center text-white text-sm px-6 py-2 rounded-md transition w-full sm:w-auto ${hasOngoing
+                                                ? "bg-gray-300 cursor-not-allowed"
+                                                : "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
+                                            }`}
+                                    >
+                                        <Download className="w-4 h-4 mr-2" />
+                                        Export to PDF
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Pesan peringatan */}
+                            {hasOngoing && (
+                                <div className="flex flex-col mt-2 text-xs text-red-500">
+                                    <p>Asesmen sedang berlangsung, belum bisa melakukan aksi</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     {/* Assessment Header Information */}
                     <div className="bg-white rounded-lg shadow-sm border p-6">
