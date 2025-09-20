@@ -349,22 +349,6 @@ export default function VerifikasiPage() {
                                   </a>
                                 </div>
                               </div>
-                              <div className="relative aspect-[4/3] bg-gray-100">
-                                {imageErrors.has(docDetails[field.key]!) ? (
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 p-4">
-                                    <FileX size={24} className="mb-2" />
-                                    <p className="text-sm font-medium">Gambar tidak dapat dimuat</p>
-                                    <p className="text-xs mt-1 truncate max-w-[200px]">{docDetails[field.key]}</p>
-                                  </div>
-                                ) : (
-                                  <img
-                                    src={docDetails[field.key]!}
-                                    alt={field.label}
-                                    className="w-full h-full object-contain"
-                                    onError={() => handleImageError(docDetails[field.key]!)}
-                                  />
-                                )}
-                              </div>
                             </div>
                           ) : (
                             <div key={field.key} className="bg-gray-50 border rounded-xl p-4 flex items-center justify-center">
