@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useDebounce from '@/hooks/useDebounce';
 import {
   Search,
   Plus,
@@ -122,8 +123,8 @@ const KelolaUser: React.FC = () => {
         params: {
           page: currentPage,
           limit: itemsPerPage,
-          ...(filters.role && { role: filters.role }),
-          ...(filters.search && { search: filters.search })
+          role_name: filters.role, // Menggunakan role_name sesuai API
+          keyword: filters.search // Menggunakan keyword untuk search
         }
       });
 
@@ -158,12 +159,22 @@ const KelolaUser: React.FC = () => {
   };
 
   // Removed client-side filtering since we're using server-side pagination
+  // Menghapus debounce effect yang tidak diperlukan karena kita sudah handle di handleSearchChange
+
   useEffect(() => {
     fetchData();
   }, [currentPage, itemsPerPage, filters]);
+  
+  // Debug untuk melihat nilai filters saat berubah
+  useEffect(() => {
+    console.log('Current filters:', filters);
+  }, [filters]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters(prev => ({ ...prev, search: e.target.value }));
+    const value = e.target.value;
+    setSearchValue(value);
+    // Hanya set filter jika ada nilai, jika kosong set ke string kosong
+    setFilters(prev => ({ ...prev, search: value }));
     setCurrentPage(1); // Reset to first page when search changes
   };
 
@@ -269,22 +280,7 @@ const KelolaUser: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F7FAFC] flex">
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Navbar title="Kelola Pengguna" icon={<Users size={20} />} />
-          <main className="flex-1 overflow-auto p-6 flex items-center justify-center">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-[#E77D35]" />
-              <p className="text-gray-600">Memuat data pengguna...</p>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
+  // Remove initial loading screen since we're showing loading state in the table
 
   if (error) {
     return (
@@ -461,10 +457,19 @@ const KelolaUser: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredUsers.length === 0 ? (
+                    {loading ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-8 text-center">
+                          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#E77D35]" />
+                          <p className="text-sm text-gray-500">Memuat data...</p>
+                        </td>
+                      </tr>
+                    ) : filteredUsers.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                          {filters.search || filters.role ? 'Tidak ada pengguna yang sesuai dengan filter' : 'Belum ada data pengguna'}
+                          {filters.search ? `Tidak ditemukan pengguna dengan kata kunci "${filters.search}"` :
+                           filters.role ? `Tidak ditemukan pengguna dengan role "${getRoleDisplayName(filters.role)}"` :
+                           'Belum ada data pengguna'}
                         </td>
                       </tr>
                     ) : (

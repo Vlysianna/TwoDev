@@ -47,6 +47,8 @@ const initialForm = {
   educational_qualifications: '',
   email: '',
   scheme_id: '',
+  no_reg_met: '',
+  documents: undefined,
 };
 
 const AssessorModal: React.FC<AssessorModalProps> = ({ isOpen, onClose, onSuccess, assessor, mode }) => {
@@ -55,18 +57,101 @@ const AssessorModal: React.FC<AssessorModalProps> = ({ isOpen, onClose, onSucces
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (assessor && (mode === 'edit' || mode === 'show')) {
-      setForm({
-        ...initialForm,
-        ...assessor.assessor,
-        full_name: assessor.full_name || '',
-        email: assessor.email || '',
-        scheme_id: assessor.assessor?.scheme_id ? String(assessor.assessor.scheme_id) : '',
-      });
-    } else {
-      setForm(initialForm);
-    }
-    setError(null);
+    // When modal opens in edit/show mode, try to populate the form.
+    // The parent may pass: a full user object with nested `assessor`, a partial assessor object
+    // or only an id. To be robust we will fetch missing pieces from the API:
+    // - try `/assessor/:id` and `/assessor-detail/:id` when we have an assessor id
+    // - fallback to using provided data
+    let cancelled = false;
+
+    const load = async () => {
+      setError(null);
+      if (!assessor || (mode !== 'edit' && mode !== 'show')) {
+        setForm(initialForm);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // start from nested assessor if present, otherwise from top-level assessor prop
+        let nested: any = (assessor as any).assessor ? (assessor as any).assessor : assessor;
+
+        // If nested is missing or has no assessor id, attempt to resolve using user id
+        let assessorId: number | undefined = nested?.id;
+        if (!assessorId) {
+          const userId = (assessor as any).id;
+          if (userId) {
+            try {
+              const res = await api.get(`/assessor/user/${userId}`);
+              if (res?.data?.success) {
+                nested = res.data.data;
+                assessorId = nested?.id;
+              }
+            } catch (e) {
+              // ignore and continue with whatever data we have
+            }
+          }
+        }
+
+        // If we have an assessor id, fetch base and detail records to enrich data
+        if (assessorId) {
+          try {
+            const baseRes = await api.get(`/assessor/${assessorId}`);
+            if (baseRes?.data?.success) {
+              nested = { ...(nested || {}), ...baseRes.data.data };
+            }
+          } catch (e) {
+            // ignore fetch error and continue
+          }
+
+          try {
+            const detailRes = await api.get(`/assessor-detail/${assessorId}`);
+            if (detailRes?.data?.success) {
+              nested = { ...(nested || {}), ...detailRes.data.data };
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        const rawBirth = nested?.birth_date || '';
+        const birth_date = rawBirth ? new Date(rawBirth).toISOString().split('T')[0] : '';
+
+        // normalize gender for display
+        let genderVal = nested?.gender || '';
+        if (typeof genderVal === 'string') {
+          const gv = genderVal.toLowerCase();
+          if (gv === 'male' || gv === 'laki-laki' || gv.includes('laki')) genderVal = 'Laki-laki';
+          else if (gv === 'female' || gv === 'perempuan' || gv.includes('perempuan')) genderVal = 'Perempuan';
+        }
+
+        if (!cancelled) {
+          setForm({
+            ...initialForm,
+            ...nested,
+            birth_date,
+            gender: genderVal,
+            full_name: (assessor as any).name || (assessor as any).full_name || nested.full_name || '',
+            email: (assessor as any).email || nested.email || '',
+            scheme_id: (assessor as any).scheme_id ? String((assessor as any).scheme_id) : (nested?.scheme_id ? String(nested.scheme_id) : ''),
+            no_reg_met: (assessor as any).no_reg_met || nested?.no_reg_met || '',
+            documents: (assessor as any).documents || nested?.documents || undefined,
+          });
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError('Gagal memuat data asesor');
+          setForm(initialForm);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [assessor, mode, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -78,10 +163,18 @@ const AssessorModal: React.FC<AssessorModalProps> = ({ isOpen, onClose, onSucces
     setLoading(true);
     setError(null);
     try {
+      const payload: any = { ...form };
+      // map gender to API expected value
+      if (payload.gender) {
+        const g = String(payload.gender).toLowerCase();
+        if (g.includes('laki')) payload.gender = 'male';
+        else if (g.includes('perempuan')) payload.gender = 'female';
+      }
+      payload.scheme_id = Number(form.scheme_id);
       if (mode === 'create') {
-        await api.post('/user/assessor', { ...form, scheme_id: Number(form.scheme_id) });
+        await api.post('/user/assessor', payload);
       } else if (mode === 'edit' && assessor) {
-        await api.put(`/user/assessor/${assessor.id}`, { ...form, scheme_id: Number(form.scheme_id) });
+        await api.put(`/user/assessor/${assessor.id}`, payload);
       }
       onSuccess();
       onClose();
@@ -94,6 +187,48 @@ const AssessorModal: React.FC<AssessorModalProps> = ({ isOpen, onClose, onSucces
   };
 
   const isReadOnly = mode === 'show';
+
+  // Open document via authenticated request to avoid hitting JSON auth error responses
+  const previewDocument = async (rawValue: any) => {
+    if (!rawValue) return;
+    setError(null);
+    try {
+      let url = '';
+      const val = String(rawValue).trim();
+      if (val.startsWith('http://') || val.startsWith('https://')) url = val;
+      else if (val.startsWith('/')) url = `${import.meta.env.VITE_API_URL}${val}`;
+      else url = `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/uploads/${val}`;
+
+      // Use axios to fetch with Authorization header and as blob
+      const response = await api.get(url, { responseType: 'blob' });
+
+      // If the server replied with JSON (e.g., auth error) the content-type may be application/json
+      const contentType = response.headers['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        // read blob as text and try to parse message
+        const text = await response.data.text();
+        let parsedMsg = 'Gagal memuat dokumen';
+        try {
+          const obj = JSON.parse(text);
+          parsedMsg = obj?.message || JSON.stringify(obj);
+        } catch (e) {
+          parsedMsg = text;
+        }
+        setError(parsedMsg);
+        return;
+      }
+
+      const blob = new Blob([response.data], { type: contentType || undefined });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+      // optionally revoke after a timeout
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (err: any) {
+      // If axios throws and provides response with JSON, try to surface its message
+      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat dokumen';
+      setError(msg);
+    }
+  };
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} widthClass="max-w-lg w-full">
@@ -168,6 +303,50 @@ const AssessorModal: React.FC<AssessorModalProps> = ({ isOpen, onClose, onSucces
             <div className="mt-6 flex justify-end gap-2">
               <button type="button" onClick={onClose} className="btn btn-ghost">Tutup</button>
             </div>
+              {form.documents && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-semibold mb-2">Dokumen</h3>
+                  {(() => {
+                    const entries = Object.entries(form.documents as Record<string, any>);
+                    const filtered = entries.filter(([k, v]) => {
+                      if (['id', 'assessor_id', 'created_at', 'updated_at'].includes(k)) return false;
+                      if (v === null || v === undefined) return false;
+                      if (typeof v === 'string' && v.trim() === '') return false;
+                      return true;
+                    });
+
+                    if (filtered.length === 0) {
+                      return <div className="text-sm text-gray-500">Tidak ada dokumen</div>;
+                    }
+
+                    return (
+                      <ul className="list-disc list-inside text-sm space-y-1">
+                        {filtered.map(([k, v]) => {
+                          const label = k.replace(/_/g, ' ');
+                          if (typeof v === 'string' && v.trim() !== '') {
+                            const val = v.trim();
+                            return (
+                              <li key={k} className="flex items-center gap-2">
+                                <span className="capitalize">{label}:</span>
+                                <button type="button" onClick={() => previewDocument(val)} className="font-medium text-blue-600 underline">
+                                  Preview
+                                </button>
+                                <span className="text-gray-500 text-xs">{`(${val.split('/').pop()})`}</span>
+                              </li>
+                            );
+                          }
+
+                          return (
+                            <li key={k}>
+                              <span className="capitalize">{label}:</span> <span className="font-medium">{String(v)}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    );
+                  })()}
+                </div>
+              )}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6">

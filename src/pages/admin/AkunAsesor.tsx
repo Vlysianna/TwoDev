@@ -43,21 +43,32 @@ const KelolaAkunAsesor: React.FC = () => {
   // Detail modal state (for view only)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAssessor, setSelectedAssessor] = useState<User | null>(null);
+  // pagination
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
+  const [total, setTotal] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
   
 
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(page, limit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (p = 1, l = 10) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/assessor/user/status');
+      const response = await api.get('/assessor/user/status', { params: { page: p, limit: l } });
       if (response?.data?.success) {
         const data = Array.isArray(response.data.data) ? response.data.data : [];
         setUsers(data);
+        const meta = response.data.meta || {};
+        setTotal(meta.total || data.length);
+        setTotalPages(meta.total_pages || 1);
+        setPage(meta.current_page || p);
+        setLimit(meta.limit || l);
       } else {
         setError(response?.data?.message || 'Gagal memuat data pengguna');
       }
@@ -316,6 +327,39 @@ const KelolaAkunAsesor: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              {/* Pagination controls */}
+              <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-gray-600">
+                  Menampilkan halaman {page} dari {totalPages} — total {total} data
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    className="px-3 py-1 bg-white border rounded disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    className="px-3 py-1 bg-white border rounded disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                  <select
+                    value={limit}
+                    onChange={(e) => setLimit(Number(e.target.value))}
+                    className="ml-2 px-2 py-1 border rounded"
+                    aria-label="Items per page"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
