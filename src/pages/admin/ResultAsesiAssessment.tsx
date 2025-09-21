@@ -1,8 +1,4 @@
-import {
-	LayoutDashboard,
-	ChevronLeft,
-	ChevronRight,
-} from "lucide-react";
+import { LayoutDashboard, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import api from "@/helper/axios";
@@ -43,16 +39,21 @@ export default function ResultAsesiAssessment() {
 
 	const [showLeftScroll, setShowLeftScroll] = useState(false);
 	const [showRightScroll, setShowRightScroll] = useState(true);
-	const [selectedTab, setSelectedTab] = useState<string>(localStorage.getItem("selectedTab") || "apl-01");
+	const [selectedTab, setSelectedTab] = useState<string>(
+		localStorage.getItem("selectedTab") || "apl-01"
+	);
+	const [selectedDetailTab, setSelectedDetailTab] = useState<string>("");
+	const [idUnit, setIdUnit] = useState<string>("");
 
 	useEffect(() => {
 		// fetchAssesseeData(selectedTab.toLowerCase());
 		localStorage.setItem("selectedTab", selectedTab);
 	}, [selectedTab]);
 
-	const {
-    data: tabData
-  } = useSWR<TabResponse>(`/assessments/navigation/admin/${id_result}`, fetcher);
+	const { data: tabData } = useSWR<TabResponse>(
+		`/assessments/navigation/admin/${id_result}`,
+		fetcher
+	);
 
 	useEffect(() => {
 		const checkScroll = () => {
@@ -77,6 +78,11 @@ export default function ResultAsesiAssessment() {
 		};
 	}, []);
 
+	const handleDetail = (name: string, id: string) => {
+		setSelectedDetailTab(name);
+		setIdUnit(id);
+	};
+
 	const scrollTabs = (direction: "left" | "right") => {
 		if (tabsContainerRef.current) {
 			const scrollAmount = 200;
@@ -87,7 +93,8 @@ export default function ResultAsesiAssessment() {
 		}
 	};
 
-	const tabsPage = useMemo(() => {
+	const tabPage = useMemo(() => {
+		setSelectedDetailTab("");
 		if (!id_result || !id_assessment) return <></>;
 		switch (selectedTab.toLowerCase()) {
 			case "apl-01":
@@ -95,7 +102,7 @@ export default function ResultAsesiAssessment() {
 			case "data sertifikasi":
 				return <DataSertifikasi id_result={id_result} />;
 			case "apl-02":
-				return <APL02 id_result={id_result} />;
+				return <APL02 id_result={id_result} handleDetail={handleDetail} />;
 			case "ia-01":
 				return <IA01 id_result={id_result} />;
 				break;
@@ -122,6 +129,19 @@ export default function ResultAsesiAssessment() {
 				break;
 		}
 	}, [selectedTab, id_result, id_assessment]);
+
+	const tabDetailPage = useMemo(() => {
+		if (!idUnit || !id_result) return <></>;
+		switch (selectedDetailTab.toLowerCase()) {
+			case "apl-02-detail":
+				return <APL02Detail id_unit={idUnit} id_result={id_result} />;
+			case "ia-01-detail":
+				// return <IA01Detail id_unit={idUnit} />;
+				return <></>;
+			default:
+				<></>;
+		}
+	}, [selectedDetailTab, idUnit, id_result]);
 
 	// const statusClasses: Record<string, string> = {
 	// 	"Belum Selesai": "text-red-500",
@@ -226,12 +246,15 @@ export default function ResultAsesiAssessment() {
 						</div>
 					</div>
 
-					<div className="text-gray-800 font-semibold text-lg mb-2">Nama Asesi: {localStorage.getItem("assessee_name")}</div>
+					<div className="text-gray-800 font-semibold text-lg mb-2">
+						Nama Asesi: {localStorage.getItem("assessee_name")}
+					</div>
 
 					{/* Content */}
-					<div className="bg-white rounded-md shadow">
-						{tabsPage}
-					</div>
+					<div className="bg-white rounded-md shadow">{tabPage}</div>
+
+					{/* Detail Content */}
+					<div className="bg-white rounded-md shadow mt-4">{tabDetailPage}</div>
 				</div>
 			</div>
 		</div>
