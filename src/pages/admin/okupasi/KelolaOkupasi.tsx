@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Edit, Eye, Trash2, X, ChevronDown, Calendar } from "lucide-react";
+import { Edit, Eye, Trash2, X, ChevronDown, Calendar, FileText } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
 import NavAdmin from "@/components/NavAdmin";
@@ -7,6 +7,7 @@ import NavAdmin from "@/components/NavAdmin";
 interface OkupasiData {
 	id: number;
 	name: string;
+	uploaded_file?: string | null;
 	scheme?: { id: number; name: string; code?: string } | null;
 	tanggalMulai?: string;
 	tanggalSelesai?: string;
@@ -22,7 +23,7 @@ const KelolaOkupasi: React.FC = () => {
 
 	// form stores name and selected scheme id as string
 	const [formData, setFormData] = useState({ name: "", schemeId: "" });
-	const [editFormData, setEditFormData] = useState({ name: "", schemeId: "" });
+	const [editFormData, setEditFormData] = useState({ name: "", schemeId: "", file: null });
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const [isEditDropdownOpen, setIsEditDropdownOpen] = useState(false);
 
@@ -70,19 +71,41 @@ const KelolaOkupasi: React.FC = () => {
 	const handleEdit = (id: number) => {
 		const occ = okupasiData.find((o: any) => o.id === id);
 		if (!occ) return;
+
 		setEditingOkupasi(occ);
 		setEditFormData({
 			name: occ.name,
 			schemeId: occ.scheme?.id ? String(occ.scheme.id) : "",
+			file: null, // file selalu null waktu buka modal
 		});
 		setIsEditModalOpen(true);
 	};
 
-	const handleView = (id: number) => {
-		console.log("View okupasi:", id);
-		// Navigate to view/detail page
-		// navigate(`/detail-okupasi/${id}`);
+
+	const handleView = async (id: number) => {
+		try {
+			const response = await axiosInstance.get(
+				`/occupations/${id}/pdf`,
+				{
+					responseType: "blob",
+				}
+			);
+
+			// Create blob and open in new tab
+			const blob = new Blob([response.data], { type: "application/pdf" });
+			const url = window.URL.createObjectURL(blob);
+			window.open(url, "_blank");
+
+			// Clean up after a delay
+			setTimeout(() => {
+				window.URL.revokeObjectURL(url);
+			}, 100);
+		} catch (error) {
+			console.error("Error viewing PDF:", error);
+			setError("Gagal membuka PDF");
+		}
 	};
+
 
 	const handleDelete = (id: number) => {
 		if (!window.confirm("Apakah Anda yakin ingin menghapus okupasi ini?"))
@@ -96,22 +119,36 @@ const KelolaOkupasi: React.FC = () => {
 			.catch(() => setError("Gagal menghapus okupasi"));
 	};
 
-	const handleSaveEdit = () => {
+	const handleSaveEdit = async () => {
 		if (!editingOkupasi) return;
 		setError(null);
-		axiosInstance
-			.put(`/occupations/${editingOkupasi.id}`, {
-				name: editFormData.name,
-				scheme_id: Number(editFormData.schemeId),
-			})
-			.then(() => {
-				fetchOccupations();
-				setIsEditModalOpen(false);
-				setEditingOkupasi(null);
-				setEditFormData({ name: "", schemeId: "" });
-			})
-			.catch(() => setError("Gagal memperbarui okupasi"));
+
+		try {
+			const formData = new FormData();
+			formData.append("name", editFormData.name);
+			formData.append("scheme_id", String(editFormData.schemeId));
+
+			// kalau ada file PDF yang dipilih user
+			if (editFormData.file) {
+				formData.append("pdf", editFormData.file);
+			}
+
+			await axiosInstance.put(`/occupations/${editingOkupasi.id}`, formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			});
+
+			fetchOccupations();
+			setIsEditModalOpen(false);
+			setEditingOkupasi(null);
+			setEditFormData({ name: "", schemeId: "", file: null });
+		} catch (e) {
+			console.error("Error updating occupation:", e);
+			setError("Gagal memperbarui okupasi");
+		}
 	};
+
 
 	const fetchOccupations = async () => {
 		setError(null);
@@ -153,6 +190,7 @@ const KelolaOkupasi: React.FC = () => {
 			setError("Gagal mengekspor data");
 		}
 	};
+
 
 	useEffect(() => {
 		fetchOccupations();
@@ -215,9 +253,8 @@ const KelolaOkupasi: React.FC = () => {
 												</span>
 											)}
 											<ChevronDown
-												className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${
-													isDropdownOpen ? "rotate-180" : ""
-												}`}
+												className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${isDropdownOpen ? "rotate-180" : ""
+													}`}
 											/>
 										</div>
 									</button>
@@ -254,11 +291,10 @@ const KelolaOkupasi: React.FC = () => {
 						</div>
 						<button
 							onClick={handleTambahOkupasi}
-							className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${
-								!formData.name || !formData.schemeId
-									? "bg-[#E77D35] text-white hover:bg-gray-400 hover:cursor-not-allowed"
-									: "bg-[#E77D35] hover:bg-[#E77D35]/90 text-white hover:shadow-md"
-							}`}
+							className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${!formData.name || !formData.schemeId
+								? "bg-[#E77D35] text-white hover:bg-gray-400 hover:cursor-not-allowed"
+								: "bg-[#E77D35] hover:bg-[#E77D35]/90 text-white hover:shadow-md"
+								}`}
 						>
 							Tambah Okupasi
 						</button>
@@ -280,9 +316,7 @@ const KelolaOkupasi: React.FC = () => {
 							{okupasiData.map((item, index) => (
 								<div
 									key={item.id}
-									className={`p-4 border-b ${
-										index % 2 === 0 ? "bg-white" : "bg-gray-50"
-									}`}
+									className={`p-4 border-b ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
 								>
 									<div className="flex justify-between items-start mb-2">
 										<div className="flex-1 min-w-0">
@@ -294,6 +328,8 @@ const KelolaOkupasi: React.FC = () => {
 											</p>
 										</div>
 									</div>
+
+									{/* Tombol aksi utama */}
 									<div className="flex justify-end gap-1 mt-3">
 										<button
 											onClick={() => handleEdit(item.id)}
@@ -303,19 +339,30 @@ const KelolaOkupasi: React.FC = () => {
 											<Edit size={16} />
 										</button>
 										<button
-											onClick={() => handleView(item.id)}
-											className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-											title="View"
-										>
-											<Eye size={16} />
-										</button>
-										<button
 											onClick={() => handleDelete(item.id)}
 											className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
 											title="Delete"
 										>
 											<Trash2 size={16} />
 										</button>
+									</div>
+
+									{/* PDF Section */}
+									<div className="mt-3 text-right">
+										{item.uploaded_file ? (
+											<button
+												onClick={() => handleView(item.id)}
+												className="inline-flex items-center gap-2 px-3 py-2 text-gray-600 hover:bg-blue-100 rounded-lg transition-colors"
+												title="Lihat PDF"
+											>
+												<FileText size={16} className="text-gray-600" />
+												<span className="text-sm">Lihat PDF</span>
+											</button>
+										) : (
+											<span className="text-gray-400 italic text-sm">
+												Tidak ada file
+											</span>
+										)}
 									</div>
 								</div>
 							))}
@@ -334,15 +381,17 @@ const KelolaOkupasi: React.FC = () => {
 										<th className="px-4 lg:px-6 py-4 text-center font-semibold">
 											Aksi
 										</th>
+										<th className="px-4 lg:px-6 py-4 text-center font-semibold">
+											File
+										</th>
 									</tr>
 								</thead>
 								<tbody>
 									{okupasiData.map((item, index) => (
 										<tr
 											key={item.id}
-											className={`${
-												index % 2 === 0 ? "bg-white" : "bg-gray-50"
-											} hover:bg-[#E77D35]/10 transition-colors`}
+											className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+												} hover:bg-[#E77D35]/10 transition-colors`}
 										>
 											<td className="px-4 lg:px-6 py-4">
 												<span className="font-medium text-gray-900">
@@ -354,19 +403,13 @@ const KelolaOkupasi: React.FC = () => {
 											</td>
 											<td className="px-4 lg:px-6 py-4">
 												<div className="flex justify-center gap-1">
+													{/* Tombol Edit & Delete */}
 													<button
 														onClick={() => handleEdit(item.id)}
 														className="p-2 text-[#E77D35] hover:bg-[#E77D35]/10 rounded-lg transition-colors"
 														title="Edit"
 													>
 														<Edit size={16} />
-													</button>
-													<button
-														onClick={() => handleView(item.id)}
-														className="p-2 text-gray-600 hover:bg-blue-100 rounded-lg transition-colors"
-														title="View"
-													>
-														<Eye size={16} />
 													</button>
 													<button
 														onClick={() => handleDelete(item.id)}
@@ -376,6 +419,22 @@ const KelolaOkupasi: React.FC = () => {
 														<Trash2 size={16} />
 													</button>
 												</div>
+											</td>
+
+											{/* Kolom baru untuk PDF */}
+											<td className="px-4 lg:px-6 py-4 text-center">
+												{item.uploaded_file ? (
+													<button
+														onClick={() => handleView(item.id)}
+														className="inline-flex items-center gap-2 px-3 py-2 text-gray-600 hover:bg-blue-100 rounded-lg transition-colors"
+														title="Lihat PDF"
+													>
+														<FileText size={16} className="text-gray-600" />
+														<span className="text-sm">Lihat PDF</span>
+													</button>
+												) : (
+													<span className="text-gray-400 italic text-sm">Tidak ada file</span>
+												)}
 											</td>
 										</tr>
 									))}
@@ -389,7 +448,7 @@ const KelolaOkupasi: React.FC = () => {
 			{isEditModalOpen && (
 				<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
 					<div className="absolute inset-0 bg-black/40 pointer-events-auto" />
-					<div className="bg-white rounded-xl shadow-2xl w-full max-w-md relative z-10 max-h-[90vh] overflow-y-auto">
+					<div className="bg-white rounded-xl shadow-2xl w-full max-w-xl relative z-10 max-h-[90vh] overflow-y-auto">
 						<div className="p-4 sm:p-6">
 							<div className="flex justify-between items-center mb-4 sm:mb-6">
 								<h3 className="text-lg sm:text-xl font-semibold text-gray-900">
@@ -429,9 +488,8 @@ const KelolaOkupasi: React.FC = () => {
 													</span>
 												)}
 												<ChevronDown
-													className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${
-														isEditDropdownOpen ? "rotate-180" : ""
-													}`}
+													className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${isEditDropdownOpen ? "rotate-180" : ""
+														}`}
 												/>
 											</div>
 										</button>
@@ -467,26 +525,61 @@ const KelolaOkupasi: React.FC = () => {
 										className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] transition-all duration-200"
 									/>
 								</div>
+								<div>
+									<label className="block text-sm font-medium mb-2 text-gray-700">
+										Upload PDF
+									</label>
+									{/* Input File */}
+									<div className="w-full sm:w-auto px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm">
+										<input
+											type="file"
+											accept="application/pdf"
+											onChange={(e) => {
+												const file = e.target.files?.[0] || null;
+												setEditFormData((prev: any) => ({
+													...prev,
+													file,
+												}));
+											}}
+											className="block w-full text-sm text-gray-600
+                 file:mr-4 file:py-2.5 file:px-4
+                 file:rounded-lg file:border-0
+                 file:text-sm file:font-medium
+                 file:bg-gray-100 file:text-gray-700
+                 hover:file:bg-gray-200
+                 cursor-pointer"
+										/>
+									</div>
+								</div>
 							</div>
 
-							<div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 sm:mt-6">
+							<div className="flex flex-col sm:flex-row justify-end items-center gap-3 mt-4 sm:mt-6">
+								{/* Tombol Batal */}
 								<button
 									onClick={() => setIsEditModalOpen(false)}
-									className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium order-2 sm:order-1"
+									className="w-full sm:w-auto px-4 sm:px-6 py-2.5 
+               bg-gray-100 hover:bg-gray-200 text-gray-700 
+               rounded-lg transition-colors font-medium 
+               flex items-center justify-center"
 								>
 									Batal
 								</button>
+
+								{/* Tombol Simpan */}
 								<button
 									onClick={handleSaveEdit}
-									className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors order-1 sm:order-2 ${
-										!editFormData.name || !editFormData.schemeId
+									className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 
+                rounded-lg font-medium shadow-sm transition-colors 
+                flex items-center justify-center
+                ${!editFormData.name || !editFormData.schemeId
 											? "bg-[#E77D35] text-white hover:bg-gray-400 hover:cursor-not-allowed"
 											: "bg-[#E77D35] hover:bg-[#E77D35]/90 text-white hover:shadow-md"
-									}`}
+										}`}
 								>
 									Simpan Perubahan
 								</button>
 							</div>
+
 						</div>
 					</div>
 				</div>

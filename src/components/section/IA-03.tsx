@@ -812,7 +812,7 @@ export default function IA03({
 									{result.assessee.name}
 								</span>
 
-								{isAssessee || !isAdmin &&
+								{isAssessee && !isAdmin &&
 									result.ia03_header.approved_assessor &&
 									!result.ia03_header.approved_assessee && (
 										<button
@@ -853,7 +853,7 @@ export default function IA03({
 									{result.assessor.name}
 								</span>
 
-								{!isAssessee && !result.ia03_header.approved_assessor || !isAdmin && (
+								{!isAssessee && !result.ia03_header.approved_assessor && !isAdmin && (
 									<button
 										onClick={approveByAssessor}
 										disabled={completionPercent < 100}

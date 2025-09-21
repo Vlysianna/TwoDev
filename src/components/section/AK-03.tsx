@@ -572,7 +572,7 @@ export default function AK03({
 						)}
 						/>
 
-						{isAssessee || isAdmin && (
+						{isAssessee && !isAdmin && (
 							<div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 w-full">
 								<button type="submit" disabled={loading || isSubmitting || isSubmitted}
 									className="w-full sm:w-auto px-30 py-2 bg-[#E77D35] text-sm text-white rounded hover:bg-orange-600 transition cursor-pointer disabled:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed">

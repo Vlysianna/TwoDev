@@ -865,7 +865,7 @@ export default function AK02({
 									</span>
 								)}
 								{/* Tambahkan tombol approval untuk asesi */}
-								{isAssessee || !isAdmin && !data?.ak02_headers?.approved_assessee && (
+								{isAssessee && !isAdmin && !data?.ak02_headers?.approved_assessee && (
 									<button
 										onClick={handleAssesseeApproval}
 										disabled={!data?.ak02_headers?.approved_assessor}
@@ -907,7 +907,7 @@ export default function AK02({
 							</div>
 
 							{/* Section bawah tombol (full width, col-span-2) */}
-							{!isAssessee || !isAdmin && (
+							{!isAssessee && !isAdmin && (
 								<div className="col-span-1 sm:col-span-2 mt-8 flex flex-col items-center gap-4">
 									{saveHeaderError && (
 										<span className="text-red-500 text-sm text-center">{saveHeaderError}</span>

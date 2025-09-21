@@ -612,15 +612,6 @@ export default function BiodataAsesor() {
                       'Belum ada file terpilih'}
                   </div>
                 </div>
-
-                {/* Catatan */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Catatan</label>
-                  <textarea name="catatan" value={formData.catatan} onChange={handleInputChange}
-                    placeholder="Catatan" rows={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm sm:text-base" />
-                  <label className="block text-sm font-medium text-gray-500 mb-2 italic">*Kolom catatan opsional untuk diisi</label>
-                </div>
               </div>
             </div>
           </div>

@@ -379,8 +379,10 @@ export default function AssessmentAsesiProvider({
 											</div>
 
 											{/* Tab Items */}
-											<div
-												className="overflow-y-auto space-y-2 max-h-96
+											{result?.id ? (
+												<div>
+													<div
+														className="overflow-y-auto space-y-2 max-h-96
 													pr-2
 													[scrollbar-width:thin] 
 													[scrollbar-color:#f97316_transparent] 
@@ -389,95 +391,95 @@ export default function AssessmentAsesiProvider({
 													[&::-webkit-scrollbar-thumb]:rounded-full 
 													[&::-webkit-scrollbar-thumb]:bg-orange-400/80
 												"
-											>
-												{filteredTabItems.map((tab: AssessmentRoute, index) => {
-													const isActive = location.pathname === tab.value;
-													return (
-														<Link
-															key={index}
-															to={tab.to}
-															onClick={(e) => {
-																if (tab.disabled) e.preventDefault();
-																else setIsTabsOpen(false);
-															}}
-															className={`group relative flex items-center justify-between space-x-3 px-3 py-2 rounded-xl transition-all duration-300 
+													>
+														{filteredTabItems.map((tab: AssessmentRoute, index) => {
+															const isActive = location.pathname === tab.value;
+															return (
+																<Link
+																	key={index}
+																	to={tab.to}
+																	onClick={(e) => {
+																		if (tab.disabled) e.preventDefault();
+																		else setIsTabsOpen(false);
+																	}}
+																	className={`group relative flex items-center justify-between space-x-3 px-3 py-2 rounded-xl transition-all duration-300 
 																${isActive
-																	? "bg-gradient-to-r from-orange-500 to-orange-300 text-white shadow-lg shadow-orange-500/25"
-																	: tab.disabled
-																		? "text-slate-400 cursor-not-allowed bg-slate-100/50" // style disabled
-																		: "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
-																}`}
-														>
-															<div className="flex items-center">
-																{/* Active indicator */}
-																{isActive && (
-																	<div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-full"></div>
-																)}
+																			? "bg-gradient-to-r from-orange-500 to-orange-300 text-white shadow-lg shadow-orange-500/25"
+																			: tab.disabled
+																				? "text-slate-400 cursor-not-allowed bg-slate-100/50" // style disabled
+																				: "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
+																		}`}
+																>
+																	<div className="flex items-center">
+																		{/* Active indicator */}
+																		{isActive && (
+																			<div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-full"></div>
+																		)}
 
-																<span className="font-medium text-sm whitespace-nowrap">
-																	{tab.label}
-																</span>
-															</div>
+																		<span className="font-medium text-sm whitespace-nowrap">
+																			{tab.label}
+																		</span>
+																	</div>
 
-															{/* Status indicator */}
-															<div className="bg-white p-2 rounded-full flex items-center justify-center">
-																{tab.status && <StatusIndicator status={tab.status} />}
-															</div>
+																	{/* Status indicator */}
+																	<div className="bg-white p-2 rounded-full flex items-center justify-center">
+																		{tab.status && <StatusIndicator status={tab.status} />}
+																	</div>
 
-															{/* Hover effect */}
-															{!isActive && (
-																<div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/10 to-orange-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-															)}
-														</Link>
-													);
-												})}
-											</div>
-
-											{/* Footer info */}
-											<div className="mt-3 pt-3 border-t border-gray-200">
-												<div className="px-2 space-y-2">
-													{/* Status Legend */}
-													<div className="space-y-1 mb-1">
-														<p className="text-xs font-semibold text-slate-700">Keterangan Status:</p>
-
-														<div className="flex items-center gap-2">
-															<CircleAlert className="w-4 h-4 text-red-500" />
-															<span className="text-xs text-slate-600">Belum Tuntas</span>
-														</div>
-
-														<div className="flex items-center gap-2">
-															<Clock className="w-4 h-4 text-blue-500" />
-															<span className="text-xs text-slate-600">Menunggu</span>
-														</div>
-
-														<div className="flex items-center gap-2">
-															<FileCheck className="w-4 h-4 text-yellow-500" />
-															<span className="text-xs text-slate-600">Butuh Persetujuan</span>
-														</div>
-
-														<div className="flex items-center gap-2">
-															<CheckCircle className="w-4 h-4 text-green-500" />
-															<span className="text-xs text-slate-600">Tuntas</span>
-														</div>
+																	{/* Hover effect */}
+																	{!isActive && (
+																		<div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/10 to-orange-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+																	)}
+																</Link>
+															);
+														})}
 													</div>
-													<div className="mt-2">
-														<p className="text-xs font-medium text-slate-500">
-															<button
-																onClick={() => setShowStatusModal(true)}
-																className="underline flex items-center gap-1 cursor-pointer hover:text-slate-600"
-															>
-																<Info className="w-4 h-4" />
-																<span>Lihat Detail Status</span>
-															</button>
-														</p>
 
-														{/* Modal */}
-														<StatusDetailModal
-															open={showStatusModal}
-															onClose={() => setShowStatusModal(false)}
-														/>
-													</div>
-													{/* <p className="text-xs text-slate-500">
+													{/* Footer info */}
+													<div className="mt-3 pt-3 border-t border-gray-200">
+														<div className="px-2 space-y-2">
+															{/* Status Legend */}
+															<div className="space-y-1 mb-1">
+																<p className="text-xs font-semibold text-slate-700">Keterangan Status:</p>
+
+																<div className="flex items-center gap-2">
+																	<CircleAlert className="w-4 h-4 text-red-500" />
+																	<span className="text-xs text-slate-600">Belum Tuntas</span>
+																</div>
+
+																<div className="flex items-center gap-2">
+																	<Clock className="w-4 h-4 text-blue-500" />
+																	<span className="text-xs text-slate-600">Menunggu</span>
+																</div>
+
+																<div className="flex items-center gap-2">
+																	<FileCheck className="w-4 h-4 text-yellow-500" />
+																	<span className="text-xs text-slate-600">Butuh Persetujuan</span>
+																</div>
+
+																<div className="flex items-center gap-2">
+																	<CheckCircle className="w-4 h-4 text-green-500" />
+																	<span className="text-xs text-slate-600">Tuntas</span>
+																</div>
+															</div>
+															<div className="mt-2">
+																<p className="text-xs font-medium text-slate-500">
+																	<button
+																		onClick={() => setShowStatusModal(true)}
+																		className="underline flex items-center gap-1 cursor-pointer hover:text-slate-600"
+																	>
+																		<Info className="w-4 h-4" />
+																		<span>Lihat Detail Status</span>
+																	</button>
+																</p>
+
+																{/* Modal */}
+																<StatusDetailModal
+																	open={showStatusModal}
+																	onClose={() => setShowStatusModal(false)}
+																/>
+															</div>
+															{/* <p className="text-xs text-slate-500">
 														Assessment ID: {id_assessment}
 													</p>
 													{result?.id && (
@@ -485,9 +487,16 @@ export default function AssessmentAsesiProvider({
 															Result ID: {result.id}
 														</p>
 													)} */}
+														</div>
+													</div>
 												</div>
-											</div>
-
+												) : (
+													<div className="p-4 text-center text-sm text-slate-600">
+														<p className="font-medium text-red-500">
+															Lengkapi data diri Anda terlebih dahulu.
+														</p>
+													</div>
+												)}
 										</div>
 									</motion.div>
 								)}
