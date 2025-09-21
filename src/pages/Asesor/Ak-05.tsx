@@ -241,8 +241,8 @@ export default function CekAk05() {
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
                   {/* Kiri */}
                   <div className="flex items-center space-x-3 flex-wrap">
-                    <h2 className="text-sm font-medium text-gray-800">
-                      Skema Sertifikasi (Okupasi)
+                    <h2 className="text-lg font-bold text-gray-800">
+                      Skema Sertifikasi {data.result.assessment.occupation.name}
                     </h2>
                     <div className="flex items-center space-x-2">
                       <Clock className="w-5 h-5 text-gray-400" />
@@ -254,9 +254,6 @@ export default function CekAk05() {
 
                   {/* Kanan */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
-                    <span className="text-sm text-gray-700">
-                      {data.result.assessment.occupation.name}
-                    </span>
                     <span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
                       {data.result.assessment.code}
                     </span>
@@ -306,6 +303,7 @@ export default function CekAk05() {
                             type="radio"
                             name="rekom"
                             value="true"
+                            disabled={data?.result?.result_ak05?.approved_assessor}
                             checked={isCompetent === true}
                             onChange={() => handleCompetentChange(true)}
                           />
@@ -316,6 +314,7 @@ export default function CekAk05() {
                             type="radio"
                             name="rekom"
                             value="false"
+                            disabled={data?.result?.result_ak05?.approved_assessor}
                             checked={isCompetent === false}
                             onChange={() => handleCompetentChange(false)}
                           />
@@ -353,6 +352,7 @@ export default function CekAk05() {
                 className="w-full border rounded-lg p-2"
                 rows={2}
                 placeholder="Aspek negatif dan positif"
+                disabled={data?.result?.result_ak05?.approved_assessor}
                 value={negatifPositif}
                 onChange={(e) => {
                   setNegatifPositif(e.target.value);
@@ -367,6 +367,7 @@ export default function CekAk05() {
                 rows={2}
                 placeholder="Pencatatan penolakan"
                 value={penolakan}
+                disabled={data?.result?.result_ak05?.approved_assessor}
                 onChange={(e) => {
                   setPenolakan(e.target.value);
                   setDataSaved(false); // Reset status saved ketika data berubah
@@ -379,6 +380,7 @@ export default function CekAk05() {
                 className="w-full border rounded-lg p-2"
                 rows={2}
                 placeholder="Saran perbaikan"
+                disabled={data?.result?.result_ak05?.approved_assessor}
                 value={saran}
                 onChange={(e) => {
                   setSaran(e.target.value);
@@ -390,6 +392,7 @@ export default function CekAk05() {
                 className="w-full border rounded-lg p-2"
                 rows={3}
                 placeholder="Catatan..."
+                disabled={data?.result?.result_ak05?.approved_assessor}
                 value={catatan}
                 onChange={(e) => {
                   setCatatan(e.target.value);
