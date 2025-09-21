@@ -221,8 +221,9 @@ export default function BiodataAsesor() {
 
       // Append semua data form ke FormData
       formDataToSend.append('user_id', user.id.toString());
-      formDataToSend.append('scheme_id', filledFormData.kompetensiKeahlian);
       formDataToSend.append('name', filledFormData.nama);
+      formDataToSend.append('email', filledFormData.email);
+      formDataToSend.append('scheme_id', filledFormData.kompetensiKeahlian);
       formDataToSend.append('birth_location', filledFormData.tempatLahir);
       formDataToSend.append('birth_date', filledFormData.tanggalLahir);
       formDataToSend.append('no_reg_met', filledFormData.noRegMET);
@@ -247,6 +248,9 @@ export default function BiodataAsesor() {
 
       if (response.data?.success) {
         setAssessor(response.data.data);
+
+        // Save biodata to localStorage
+        localStorage.setItem('assessor_biodata', JSON.stringify(response.data.data));
 
         // Save additional data to localStorage
         const additionalData = {

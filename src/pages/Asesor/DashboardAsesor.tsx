@@ -246,7 +246,7 @@ const DashboardAsesor: React.FC = () => {
 							<div className="flex items-center space-x-2">
 								<span className="text-gray-600">Selamat datang,</span>
 								<span className="font-semibold text-gray-900">
-									{user?.email || "Asesor"}
+									{user?.full_name || "Asesor"} !
 								</span>
 							</div>
 
