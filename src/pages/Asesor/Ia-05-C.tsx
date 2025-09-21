@@ -386,23 +386,20 @@ export default function Ia05C() {
               {/* Top Row */}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4 mb-3 md:mb-4">
                 {/* Left */}
-                <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-3">
-                  <h2 className="text-sm font-medium text-gray-800">
-                    Skema Sertifikasi (Okupasi)
+                <div className="flex flex-col lg:flex-row lg:items-center gap-3 flex-wrap">
+                  <h2 className="text-lg font-bold text-gray-800">
+                    Skema Sertifikasi {result?.assessment?.occupation?.name}
                   </h2>
-                  <div className="flex items-center text-xs md:text-sm text-gray-500">
-                    <Clock size={16} className="text-gray-500 mr-2" />
-                    <span className="text-gray-600 capitalize">
-                      {result?.tuk ?? "N/A"}
+                  <div className="flex items-center space-x-2 mt-1 lg:mt-0">
+                    <Clock className="w-5 h-5 text-gray-400" />
+                    <span className="text-sm text-gray-600 capitalize">
+                      {result?.tuk || "Sewaktu"}
                     </span>
                   </div>
                 </div>
 
                 {/* Right */}
                 <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-2">
-                  <div className="text-sm text-gray-700">
-                    {result?.assessment.occupation.name ?? "N/A"}
-                  </div>
                   <div className="px-2 md:px-3 py-1 rounded text-xs md:text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
                     {result?.assessment.code ?? "N/A"}
                   </div>

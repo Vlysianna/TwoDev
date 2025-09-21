@@ -3,7 +3,7 @@ import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import type { ResultAK02, UnitCompetensi } from "@/model/ak02-model";
 import routes from "@/routes/paths";
-import { AlertCircle, Calendar, Check, FileText, QrCode, Save } from "lucide-react";
+import { AlertCircle, Calendar, Check, Clock, FileText, QrCode, Save } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -537,20 +537,19 @@ export default function AK02({
 			{/* Header Info Section */}
 			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
 				<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-					<div className="flex items-center space-x-3 flex-wrap">
-						<h2 className="text-sm font-medium text-gray-800">
-							Skema Sertifikasi (Okupasi)
+					<div className="flex flex-col lg:flex-row lg:items-center gap-3 flex-wrap">
+						<h2 className="text-lg font-bold text-gray-800">
+							Skema Sertifikasi {data?.assessment?.occupation?.name}
 						</h2>
-						<div className="flex items-center space-x-2">
-							<FileText className="w-5 h-5 text-gray-400" />
-							<span className="text-sm text-gray-600">Sewaktu</span>
+						<div className="flex items-center space-x-2 mt-1 lg:mt-0">
+							<Clock className="w-5 h-5 text-gray-400" />
+							<span className="text-sm text-gray-600 capitalize">
+								{data?.tuk || "Sewaktu"}
+							</span>
 						</div>
 					</div>
 
 					<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
-						<div className="text-sm text-gray-700">
-							{data.assessment.occupation.name}
-						</div>
 						<div className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] sm:ml-5">
 							{data.assessment.code}
 						</div>
@@ -571,8 +570,7 @@ export default function AK02({
 
 					<div className="flex flex-col xl:flex-row xl:items-center space-y-1 xl:space-y-0 xl:space-x-2 text-gray-600 text-sm lg:ml-auto">
 						<span className="whitespace-nowrap">
-							{new Date(data.created_at).toLocaleDateString("id-ID")} | TUK:{" "}
-							{data.tuk}
+							{new Date(data.created_at).toLocaleDateString("id-ID")}
 						</span>
 					</div>
 				</div>
@@ -865,7 +863,7 @@ export default function AK02({
 									</span>
 								)}
 								{/* Tambahkan tombol approval untuk asesi */}
-								{isAssessee || !isAdmin && !data?.ak02_headers?.approved_assessee && (
+								{isAssessee && !isAdmin && !data?.ak02_headers?.approved_assessee && (
 									<button
 										onClick={handleAssesseeApproval}
 										disabled={!data?.ak02_headers?.approved_assessor}
@@ -907,7 +905,7 @@ export default function AK02({
 							</div>
 
 							{/* Section bawah tombol (full width, col-span-2) */}
-							{!isAssessee || !isAdmin && (
+							{!isAssessee && !isAdmin && (
 								<div className="col-span-1 sm:col-span-2 mt-8 flex flex-col items-center gap-4">
 									{saveHeaderError && (
 										<span className="text-red-500 text-sm text-center">{saveHeaderError}</span>

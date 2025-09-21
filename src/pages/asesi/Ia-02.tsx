@@ -182,42 +182,39 @@ export default function Ia02() {
           <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Header Info */}
             <div className="mb-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
                 {/* Kiri */}
-                <div className="flex-1">
-                  <h2 className="text-sm font-medium text-gray-800 flex items-center gap-2">
-                    Skema Sertifikasi ( Okupasi )
-                    <span className="text-gray-400 text-xs flex items-center gap-1">
-                      <Clock size={14} />
-                      {result.tuk}
-                    </span>
+                <div className="flex items-center space-x-3 flex-wrap">
+                  <h2 className="text-lg font-bold text-gray-800">
+                    Skema Sertifikasi {result.assessment.occupation.name}
                   </h2>
-
-                  {/* Asesi & Asesor */}
-                  <div className="text-sm text-gray-500 mt-1">
-                    Asesi:{" "}
-                    <span className="text-gray-800">
-                      {result.assessee.name}
-                    </span>{" "}
-                    &nbsp;|&nbsp; Asesor:{" "}
-                    <span className="text-gray-800">
-                      {result.assessor.name}
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-5 h-5 text-gray-400" />
+                    <span className="text-sm text-gray-600 capitalize">
+                      {result.tuk || "Sewaktu"}
                     </span>
                   </div>
                 </div>
 
                 {/* Kanan */}
-                <div className="flex-1 text-left sm:text-right">
-                  <div className="flex flex-col sm:items-end gap-1">
-                    {/* Skema + kode */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
-                      <p className="text-sm text-gray-800 font-medium">
-                        {result.assessment.occupation.name}
-                      </p>
-                      <p className="text-xs text-[#E77D35] bg-[#E77D3533] px-2 py-0.5 rounded w-fit">
-                        {result.assessment.code}
-                      </p>
-                    </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
+                  <span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
+                    {result.assessment.code}
+                  </span>
+                </div>
+              </div>
+
+              {/* Detail Asesi - Asesor - Waktu */}
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
+                {/* Asesi & Asesor */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                  <div className="flex flex-wrap">
+                    <span className="xs-text mr-1">Asesi:</span>
+                    <span>{result.assessee.name || "N/A"}</span>
+                  </div>
+                  <div className="flex flex-wrap">
+                    <span className="xs-text mr-1">Asesor:</span>
+                    <span>{result.assessor.name || "N/A"}</span>
                   </div>
                 </div>
               </div>
@@ -247,10 +244,10 @@ export default function Ia02() {
           </div>
 
           {/* Validasi */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mt-4">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 items-start">
               {/* Bagian kiri (2 kolom) */}
-              <div className="lg:col-span-4 space-y-4">
+              <div className="lg:col-span-3 space-y-4">
                 {/* Asesi */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -310,16 +307,27 @@ export default function Ia02() {
               </div>
 
               {/* QR Code Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:col-span-2">
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:col-span-3 gap-4">
                 <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                  {assesseeQrValue && (
-                    <QRCodeCanvas
-                      value={assesseeQrValue}
-                      size={156}
-                      className="w-40 h-40 object-contain"
-                    >
-                      {assesseeQrValue}
-                    </QRCodeCanvas>
+                  <h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesi</h4>
+                  {assesseeQrValue ? (
+                    <>
+                      <QRCodeCanvas
+                        value={assesseeQrValue}
+                        size={156}
+                        className="w-40 h-40 object-contain"
+                      >
+                        {assesseeQrValue}
+                      </QRCodeCanvas>
+                      <div className="text-green-600 font-semibold text-xs text-center">
+                        Sebagai Asesi, Anda sudah setuju
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+                      <span className="text-gray-400 text-xs text-center">QR Code Asesi</span>
+                      <span className="text-gray-400 text-xs text-center">Klik tombol "Generate QR"</span>
+                    </div>
                   )}
                   <span className="text-sm font-semibold text-gray-800">
                     {result.assessee.name}
@@ -341,14 +349,24 @@ export default function Ia02() {
                   )}
                 </div>
                 <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                  {assessorQrValue && (
-                    <QRCodeCanvas
-                      value={assessorQrValue}
-                      size={156}
-                      className="w-40 h-40 object-contain"
-                    >
-                      {assessorQrValue}
-                    </QRCodeCanvas>
+                  <h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesor</h4>
+                  {assessorQrValue ? (
+                    <>
+                      <QRCodeCanvas
+                        value={assessorQrValue}
+                        size={156}
+                        className="w-40 h-40 object-contain"
+                      >
+                        {assessorQrValue}
+                      </QRCodeCanvas>
+                      <div className="text-green-600 font-semibold text-xs text-center">
+                        Sebagai Asesor, Anda sudah setuju
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+                      <span className="text-gray-400 text-xs text-center">Menunggu persetujuan asesi</span>
+                    </div>
                   )}
                   <span className="text-sm font-semibold text-gray-800">
                     {result.assessor.name}

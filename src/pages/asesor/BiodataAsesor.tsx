@@ -221,8 +221,9 @@ export default function BiodataAsesor() {
 
       // Append semua data form ke FormData
       formDataToSend.append('user_id', user.id.toString());
-      formDataToSend.append('scheme_id', filledFormData.kompetensiKeahlian);
       formDataToSend.append('name', filledFormData.nama);
+      formDataToSend.append('email', filledFormData.email);
+      formDataToSend.append('scheme_id', filledFormData.kompetensiKeahlian);
       formDataToSend.append('birth_location', filledFormData.tempatLahir);
       formDataToSend.append('birth_date', filledFormData.tanggalLahir);
       formDataToSend.append('no_reg_met', filledFormData.noRegMET);
@@ -247,6 +248,9 @@ export default function BiodataAsesor() {
 
       if (response.data?.success) {
         setAssessor(response.data.data);
+
+        // Save biodata to localStorage
+        localStorage.setItem('assessor_biodata', JSON.stringify(response.data.data));
 
         // Save additional data to localStorage
         const additionalData = {
@@ -611,15 +615,6 @@ export default function BiodataAsesor() {
                       <a href={filePreviews.national_id} target="_blank" rel="noreferrer" className="text-blue-600 underline">Lihat file terupload</a> :
                       'Belum ada file terpilih'}
                   </div>
-                </div>
-
-                {/* Catatan */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Catatan</label>
-                  <textarea name="catatan" value={formData.catatan} onChange={handleInputChange}
-                    placeholder="Catatan" rows={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm sm:text-base" />
-                  <label className="block text-sm font-medium text-gray-500 mb-2 italic">*Kolom catatan opsional untuk diisi</label>
                 </div>
               </div>
             </div>

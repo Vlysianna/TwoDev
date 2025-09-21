@@ -36,14 +36,23 @@ const AssessorDocumentsModal: React.FC<AssessorDocumentsModalProps> = ({
 
     const viewFile = async (url: string) => {
         try {
-            const response = await api.get(url, { responseType: 'blob' });
-            const blob = new Blob([response.data]);
-            const fileUrl = window.URL.createObjectURL(blob);
-            window.open(fileUrl, '_blank');
-            setTimeout(() => window.URL.revokeObjectURL(fileUrl), 60000);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Gagal fetch file");
+
+            // ambil blob dari response
+            const blob = await response.blob();
+
+            // bikin object URL dari blob
+            const blobUrl = URL.createObjectURL(blob);
+
+            // buka di tab baru
+            window.open(blobUrl);
+
+            // opsional: revoke setelah beberapa waktu supaya nggak leak memory
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
         } catch (error) {
-            console.error('Error viewing file:', error);
-            setError('Gagal membuka file');
+            console.error("Error viewing file:", error);
+            setError("Gagal membuka file");
         }
     };
 

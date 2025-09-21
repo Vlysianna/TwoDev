@@ -364,37 +364,49 @@ export default function Ia01() {
 
         <main className='m-4'>
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-0">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <h2 className="text-lg font-medium whitespace-nowrap">Skema Sertifikasi (Okupasi)</h2>
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-5 h-5 text-gray-400" />
-                  <span className="text-sm text-gray-600">
-                    <span className="capitalize">
-                      {resultData?.tuk || '-'}
-                    </span>
+            <div className="mb-6">
+              <div className="flex flex-col lg:flex-row lg:justify-between gap-4 mb-4">
+                {/* Kiri */}
+                <div className="flex flex-col gap-4">
+                  {/* Judul + Clock */}
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-3 flex-wrap">
+                    <h2 className="text-lg font-bold text-gray-800">
+                      Skema Sertifikasi {assessment?.occupation?.name}
+                    </h2>
+                    <div className="flex items-center space-x-2 mt-1 lg:mt-0">
+                      <Clock className="w-5 h-5 text-gray-400" />
+                      <span className="text-sm text-gray-600 capitalize">
+                        {resultData?.tuk || "Sewaktu"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Asesi & Asesor */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm text-gray-600">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="xs-text mr-1">Asesi:</span>
+                      <span>{resultData?.assessee?.name || "N/A"}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="xs-text mr-1">Asesor:</span>
+                      <span>{resultData?.assessor?.name || "N/A"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Kanan */}
+                <div className="flex flex-col justify-between items-end gap-4">
+                  {/* Kode */}
+                  <span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
+                    {assessment?.code || "N/A"}
+                  </span>
+
+                  {/* Tanggal */}
+                  <span className="text-sm text-gray-500">
+                    {assessment?.date || '24 Oktober 2025 | 07:00 - 15:00'}
                   </span>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <span className="text-sm text-gray-600">{assessment?.occupation?.name || 'Pemrogram Junior ( Junior Coder )'}</span>
-                <div className="bg-[#E77D3533] text-[#E77D35] px-3 py-1 rounded text-sm font-medium w-fit">
-                  {assessment?.code || 'SMK RPL PJ/SPSMK24/2023'}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-6 gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <span className="text-sm text-gray-500">
-                  <span className="font-bold">Asesi:</span> {resultData?.assessee?.name || '-'}
-                </span>
-                <span className="text-sm text-gray-500">
-                  <span className="font-bold">Asesor:</span> {resultData?.assessor?.name || '-'}
-                </span>
-              </div>
-              <span className="text-sm text-gray-500">
-                {assessment?.date || '24 Oktober 2025 | 07:00 - 15:00'}
-              </span>
             </div>
           </div>
           <div className="bg-white mt-4 rounded-lg shadow-sm border p-6">
