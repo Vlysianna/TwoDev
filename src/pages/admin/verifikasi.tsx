@@ -1,19 +1,20 @@
 import Navbar from '../../components/NavAdmin';
 import Sidebar from '../../components/SideAdmin';
-import { 
-  Eye, 
-  SquareCheck, 
-  Download, 
-  X, 
-  Menu, 
-  Bell, 
+import {
+  Eye,
+  SquareCheck,
+  Download,
+  X,
+  Menu,
+  Bell,
   Check,
   Clock,
   CheckCircle,
   Calendar,
   RefreshCw,
   FileText,
-  FileX
+  FileX,
+  ZoomIn
 } from "lucide-react";
 import { useEffect, useState, useCallback } from 'react';
 import api from '@/helper/axios';
@@ -53,6 +54,7 @@ export default function VerifikasiPage() {
   const [docDetails, setDocDetails] = useState<ResultDoc | any>(null);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const toast = useToast();
   const location = useLocation();
   // optional query params from ResultAssessment when opening per-schedule
@@ -112,6 +114,7 @@ export default function VerifikasiPage() {
         fetchPending();
         setSelected(null);
         setDocDetails(null);
+        setSelectedImage(null);
         toast.show({ title: 'Berhasil', description: 'Verifikasi disetujui', type: 'success' });
       }
     } catch (err) {
@@ -122,6 +125,24 @@ export default function VerifikasiPage() {
 
   const handleImageError = (url: string) => {
     setImageErrors(prev => new Set(prev).add(url));
+  };
+
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await api.get(url, { responseType: 'blob' });
+      const blob = new Blob([response.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast.show({ title: 'Error', description: 'Gagal mengunduh file', type: 'error' });
+    }
   };
 
   // Daftar field dokumen yang akan ditampilkan
@@ -173,10 +194,10 @@ export default function VerifikasiPage() {
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <div className="flex p-1 rounded-lg bg-gray-100/80 shadow-sm">
-                    <button 
-                      onClick={() => setFilter('pending')} 
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${filter === 'pending' 
-                        ? 'bg-white text-orange-600 shadow-sm ring-1 ring-orange-100' 
+                    <button
+                      onClick={() => setFilter('pending')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${filter === 'pending'
+                        ? 'bg-white text-orange-600 shadow-sm ring-1 ring-orange-100'
                         : 'text-gray-600 hover:text-orange-600'}`}
                     >
                       <div className="flex items-center gap-2">
@@ -189,10 +210,10 @@ export default function VerifikasiPage() {
                         )}
                       </div>
                     </button>
-                    <button 
-                      onClick={() => setFilter('approved')} 
-                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${filter === 'approved' 
-                        ? 'bg-white text-orange-600 shadow-sm ring-1 ring-orange-100' 
+                    <button
+                      onClick={() => setFilter('approved')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${filter === 'approved'
+                        ? 'bg-white text-orange-600 shadow-sm ring-1 ring-orange-100'
                         : 'text-gray-600 hover:text-orange-600'}`}
                     >
                       <div className="flex items-center gap-2">
@@ -206,8 +227,8 @@ export default function VerifikasiPage() {
                       </div>
                     </button>
                   </div>
-                  <button 
-                    onClick={fetchPending} 
+                  <button
+                    onClick={fetchPending}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all shadow-sm"
                   >
                     <RefreshCw size={16} className="animate-spin" />
@@ -258,17 +279,17 @@ export default function VerifikasiPage() {
                           </td>
                           <td className="px-4 py-4 lg:px-6">
                             <div className="flex items-center justify-center space-x-2">
-                              <button 
-                                onClick={() => { const id = row.result_id || row.result?.id; if (id) openDetail(id); }} 
-                                className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-100 rounded-lg transition-colors" 
+                              <button
+                                onClick={() => { const id = row.result_id || row.result?.id; if (id) openDetail(id); }}
+                                className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-100 rounded-lg transition-colors"
                                 title="Lihat Detail"
                               >
                                 <Eye size={18} />
                               </button>
                               {filter === 'pending' ? (
-                                <button 
-                                  onClick={() => { const id = row.result_id || row.result?.id; if (id) approve(id); }} 
-                                  className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-100 rounded-lg transition-colors" 
+                                <button
+                                  onClick={() => { const id = row.result_id || row.result?.id; if (id) approve(id); }}
+                                  className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-100 rounded-lg transition-colors"
                                   title="Setujui Verifikasi"
                                 >
                                   <SquareCheck size={18} />
@@ -304,6 +325,7 @@ export default function VerifikasiPage() {
                             setSelected(null);
                             setDocDetails(null);
                             setImageErrors(new Set());
+                            setSelectedImage(null);
                           }}
                           className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-all"
                         >
@@ -332,22 +354,50 @@ export default function VerifikasiPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                         {documentFields.map((field) => (
                           docDetails[field.key] ? (
-                            <div key={field.key} className="group bg-white border rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                            <div key={field.key} className="group bg-white border rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all">
                               <div className="flex justify-between items-center p-4 border-b bg-gray-50">
                                 <div className="flex items-center space-x-2">
                                   <FileText size={16} className="text-orange-500" />
                                   <p className="text-sm font-medium text-gray-700">{field.label}</p>
                                 </div>
-                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <a
-                                    href={docDetails[field.key]}
-                                    download
+                                <div className="flex items-center space-x-1">
+                                  <button
+                                    onClick={() => setSelectedImage(docDetails[field.key])}
+                                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    title="Lihat gambar"
+                                  >
+                                    <ZoomIn size={16} />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const url = docDetails[field.key];
+                                      if (!url) return;
+
+                                      // Ambil nama file dari URL, fallback ke key
+                                      const filename = url.split('/').pop() || `${field.key}`;
+                                      handleDownload(url, filename);
+                                    }}
                                     className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                                     title="Download"
                                   >
                                     <Download size={16} />
-                                  </a>
+                                  </button>
                                 </div>
+                              </div>
+                              <div className="p-4 h-48 overflow-hidden flex items-center justify-center bg-gray-50">
+                                {!imageErrors.has(docDetails[field.key]) ? (
+                                  <img
+                                    src={docDetails[field.key]}
+                                    alt={field.label}
+                                    className="max-h-full max-w-full object-contain"
+                                    onError={() => handleImageError(docDetails[field.key])}
+                                  />
+                                ) : (
+                                  <div className="text-center p-4">
+                                    <FileX size={32} className="text-gray-400 mx-auto mb-2" />
+                                    <p className="text-sm text-gray-500">Gagal memuat gambar</p>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -378,6 +428,37 @@ export default function VerifikasiPage() {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Modal Gambar Besar */}
+              {selectedImage && (
+                <div className="fixed inset-0 flex items-center justify-center backdrop-blur bg-black/80 z-50 p-4">
+                  <div className="relative max-w-[90vw] max-h-full">
+                    <button
+                      onClick={() => setSelectedImage(null)}
+                      className="absolute -top-10 right-0 p-2 text-white hover:text-orange-400 transition-colors"
+                    >
+                      <X size={24} />
+                    </button>
+                    <div className="bg-black rounded-lg overflow-hidden">
+                      <img
+                        src={selectedImage}
+                        alt="Preview dokumen"
+                        className="max-w-full max-h-[80vh] object-contain"
+                      />
+                    </div>
+                    <div className="mt-4 flex justify-center">
+                      <a
+                        href={selectedImage}
+                        download
+                        className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                      >
+                        <Download size={18} className="mr-2" />
+                        Download Gambar
+                      </a>
+                    </div>
                   </div>
                 </div>
               )}

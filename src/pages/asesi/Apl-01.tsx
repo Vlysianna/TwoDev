@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, CheckCircle, ChevronLeft, House } from "lucide-react";
+import { AlertCircle, CheckCircle, ChevronLeft, House, Info } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -183,11 +183,11 @@ export default function AplZeroOne() {
 										<div className="flex flex-col md:flex-[3] gap-2">
 											<div className="w-full">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													Nama
+													Nama <span className="text-red-500">*</span>
 												</label>
 												<input
 													{...register("full_name", { required: true })}
-													placeholder="Masukkan nama anda"
+													placeholder="Contoh: Ahmad Rizki"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.full_name && (
@@ -197,11 +197,11 @@ export default function AplZeroOne() {
 											<div className="flex md:flex-row w-full gap-4">
 												<div className="flex-[2]">
 													<label className="block text-sm font-medium text-gray-700 mb-2">
-														Tempat Lahir
+														Tempat Lahir <span className="text-red-500">*</span>
 													</label>
 													<input
 														{...register("birth_location", { required: true })}
-														placeholder="Masukkan tempat lahir"
+														placeholder="Contoh: Jakarta"
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													/>
 													{errors.birth_location && (
@@ -210,12 +210,12 @@ export default function AplZeroOne() {
 												</div>
 												<div className="flex-1">
 													<label className="block text-sm font-medium text-gray-700 mb-2">
-														Tanggal Lahir
+														Tanggal Lahir <span className="text-red-500">*</span>
 													</label>
 													<input
 														type="date"
 														{...register("birth_date", { required: true })}
-														placeholder="Masukkan tanggal lahir"
+														placeholder="Contoh: 15/08/1990"
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													/>
 													{errors.birth_date && (
@@ -225,11 +225,11 @@ export default function AplZeroOne() {
 											</div>
 											<div className="w-full">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													Kewarganegaraan
+													Kewarganegaraan <span className="text-red-500">*</span>
 												</label>
 												<input
 													{...register("nationality", { required: true })}
-													placeholder="Masukkan kewarganegaraan"
+													placeholder="Contoh: Indonesia"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.nationality && (
@@ -238,11 +238,11 @@ export default function AplZeroOne() {
 											</div>
 											<div className="w-full">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													Alamat
+													Alamat <span className="text-red-500">*</span>
 												</label>
 												<textarea
 													{...register("address", { required: true })}
-													placeholder="Masukkan alamat"
+													placeholder="Contoh: Jl. Merdeka No. 123, Jakarta Selatan"
 													rows={3}
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
@@ -252,35 +252,67 @@ export default function AplZeroOne() {
 											</div>
 											<div className="w-full">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													No. HP
+													No. HP <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("phone_no", { required: true })}
-													placeholder="Masukkan no. HP"
+													{...register("phone_no", {
+														required: true,
+														pattern: {
+															value: /^\d+$/,
+															message: "Harus berupa angka",
+														},
+														maxLength: {
+															value: 13,
+															message: "No HP maksimal 13 digit",
+														},
+														minLength: {
+															value: 13,
+															message: "No HP harus 13 digit",
+														}
+													})}
+													maxLength={13}
+													placeholder="Contoh: 0812345678901"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.phone_no && (
-													<span className="text-red-500 text-sm">Wajib diisi</span>
+													<span className="text-red-500 text-sm">{errors.phone_no.message || "Wajib diisi"}</span>
 												)}
 											</div>
 										</div>
 										<div className="flex flex-col flex-2 gap-2">
 											<div className="w-full">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													No. KTP/NIK
+													No. KTP/NIK <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("identity_number", { required: true })}
-													placeholder="Masukkan no. KTP/NIK"
+													{...register("identity_number", {
+														required: "Wajib diisi",
+														maxLength: {
+															value: 16,
+															message: "NIK maksimal 16 digit",
+														},
+														minLength: {
+															value: 16,
+															message: "NIK harus 16 digit",
+														},
+														pattern: {
+															value: /^\d+$/,
+															message: "NIK hanya boleh angka",
+														},
+													})}
+													maxLength={16}
+													placeholder="Contoh: 3174031508900001"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.identity_number && (
-													<span className="text-red-500 text-sm">Wajib diisi</span>
+													<span className="text-red-500 text-sm">
+														{errors.identity_number.message}
+													</span>
 												)}
 											</div>
 											<div className="mb-3">
 												<label className="block text-sm font-medium text-gray-700 py-2">
-													Jenis Kelamin
+													Jenis Kelamin <span className="text-red-500">*</span>
 												</label>
 												<Controller
 													name="gender"
@@ -328,48 +360,95 @@ export default function AplZeroOne() {
 											</div>
 											<div className="">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													No. Telp Rumah
+													No. Telp Rumah <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("house_phone_no")}
-													placeholder="Masukkan no. telp rumah"
+													{...register("house_phone_no", {
+														required: "Wajib diisi",
+														pattern: {
+															value: /^\d+$/,
+															message: "No. telp rumah hanya boleh angka",
+														},
+														maxLength: {
+															value: 13,
+															message: "No. telp rumah maksimal 13 digit",
+														},
+														minLength: {
+															value: 13,
+															message: "No. telp rumah harus 13 digit",
+														},
+													})}
+													maxLength={13}
+													placeholder="Contoh: 0217654321"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.house_phone_no && (
-													<span className="text-red-500 text-sm">Wajib diisi</span>
+													<span className="text-red-500 text-sm">{errors.house_phone_no.message || "Wajib diisi"}</span>
 												)}
 											</div>
 											<div className="">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													No. Telp Kantor
+													No. Telp Kantor <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("office_phone_no")}
-													placeholder="Masukkan no. telp kantor"
+													{...register("office_phone_no",
+														{
+															required: "Wajib diisi",
+															pattern: {
+																value: /^\d+$/,
+																message: "No. telp kantor hanya boleh angka",
+															},
+															maxLength: {
+																value: 13,
+																message: "No. telp kantor maksimal 13 digit",
+															},
+															minLength: {
+																value: 13,
+																message: "No. telp kantor harus 13 digit",
+															},
+														}
+													)}
+													maxLength={13}
+													placeholder="Contoh: 0217890123"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.office_phone_no && (
-													<span className="text-red-500 text-sm">Wajib diisi</span>
+													<span className="text-red-500 text-sm">{errors.office_phone_no.message || "Wajib diisi"}</span>
 												)}
 											</div>
 											<div className="">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													Kode Pos
+													Kode Pos <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("postal_code", { required: true })}
-													placeholder="Masukkan kode pos"
+													{...register("postal_code", {
+														required: true,
+														maxLength: {
+															value: 5,
+															message: "Kode Pos maksimal 5 digit",
+														},
+														minLength: {
+															value: 5,
+															message: "Kode Pos harus 5 digit",
+														},
+														pattern: {
+															value: /^\d+$/,
+															message: "Kode Pos hanya boleh angka",
+														},
+													})}
+													maxLength={5}
+													placeholder="Contoh: 12190"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.postal_code && (
-													<span className="text-red-500 text-sm">Wajib diisi</span>
+													<span className="text-red-500 text-sm">{errors.postal_code.message || "Wajib diisi"}</span>
 												)}
 											</div>
 										</div>
 									</div>
 									<div className="">
 										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Kualifikasi Pendidikan
+											Kualifikasi Pendidikan <span className="text-red-500">*</span>
 										</label>
 										<select
 											{...register("educational_qualifications", {
@@ -389,7 +468,7 @@ export default function AplZeroOne() {
 								</div>
 
 								{/* Data Pekerjaan */}
-								<div>
+								<div className="mt-8">
 									<h2 className="text-2xl font-semibold text-gray-900 mb-2">
 										Data Pekerjaan
 									</h2>
@@ -401,11 +480,11 @@ export default function AplZeroOne() {
 										<div className="flex flex-col md:flex-[3] gap-2">
 											<div>
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													Nama Institusi
+													Nama Institusi <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("jobs.0.institution_name")}
-													placeholder="Masukkan nama institusi"
+													{...register("jobs.0.institution_name", { required: true })}
+													placeholder="Contoh: PT. Teknologi Maju Indonesia"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.jobs?.[0]?.institution_name && (
@@ -415,11 +494,11 @@ export default function AplZeroOne() {
 											<div className="flex flex-col md:flex-row gap-2">
 												<div className="flex-1">
 													<label className="block text-sm font-medium text-gray-700 mb-2">
-														Jabatan
+														Jabatan <span className="text-red-500">*</span>
 													</label>
 													<input
-														{...register("jobs.0.position")}
-														placeholder="Masukkan jabatan"
+														{...register("jobs.0.position", { required: true })}
+														placeholder="Contoh: Software Developer"
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													/>
 													{errors.jobs?.[0]?.position && (
@@ -428,15 +507,30 @@ export default function AplZeroOne() {
 												</div>
 												<div className="flex-1">
 													<label className="block text-sm font-medium text-gray-700 mb-2">
-														Kode Pos
+														Kode Pos <span className="text-red-500">*</span>
 													</label>
 													<input
-														{...register("jobs.0.postal_code")}
-														placeholder="Masukkan kode pos"
+														{...register("jobs.0.postal_code", {
+															required: true,
+															maxLength: {
+																value: 5,
+																message: "Kode Pos maksimal 5 digit",
+															},
+															minLength: {
+																value: 5,
+																message: "Kode Pos harus 5 digit",
+															},
+															pattern: {
+																value: /^\d+$/,
+																message: "Kode Pos hanya boleh angka",
+															},
+														})}
+														maxLength={5}
+														placeholder="Contoh: 12940"
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													/>
 													{errors.jobs?.[0]?.postal_code && (
-														<span className="text-red-500 text-sm">Wajib diisi</span>
+														<span className="text-red-500 text-sm">{errors.jobs?.[0]?.postal_code.message || "Wajib diisi"}</span>
 													)}
 												</div>
 											</div>
@@ -444,12 +538,12 @@ export default function AplZeroOne() {
 										<div className="flex flex-col md:flex-[2] gap-2">
 											<div>
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													Email
+													Email <span className="text-red-500">*</span>
 												</label>
 												<input
 													type="email"
-													{...register("jobs.0.job_email")}
-													placeholder="Masukkan email"
+													{...register("jobs.0.job_email", { required: true })}
+													placeholder="Contoh: ahmad.rizki@company.com"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.jobs?.[0]?.job_email && (
@@ -458,28 +552,45 @@ export default function AplZeroOne() {
 											</div>
 											<div>
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													No. Telp Kantor
+													No. Telp Kantor <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("jobs.0.phone_no")}
+													{...register("jobs.0.phone_no",
+														{
+															required: true,
+															maxLength: {
+																value: 13,
+																message: "No. telp kantor maksimal 13 digit",
+															},
+															minLength: {
+																value: 13,
+																message: "No. telp kantor harus 13 digit",
+															},
+															pattern: {
+																value: /^\d+$/,
+																message: "No. telp kantor hanya boleh angka",
+															}
+														}
+													)}
+													maxLength={13}
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-													placeholder="Masukkan no. telp kantor"
+													placeholder="Contoh: 0215566777"
 												/>
 												{errors.jobs?.[0]?.phone_no && (
-													<span className="text-red-500 text-sm">Wajib diisi</span>
+													<span className="text-red-500 text-sm">{errors.jobs?.[0]?.phone_no.message || "Wajib diisi"}</span>
 												)}
 											</div>
 										</div>
 									</div>
 									<div className="">
 										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Alamat Kantor
+											Alamat Kantor <span className="text-red-500">*</span>
 										</label>
 										<textarea
-											{...register("jobs.0.address")}
+											{...register("jobs.0.address", { required: true })}
 											rows={3}
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-											placeholder="Masukkan alamat kantor"
+											placeholder="Contoh: Gedung Tech Plaza Lt. 5, Jl. Sudirman Kav. 25, Jakarta Selatan"
 										/>
 										{errors.jobs?.[0]?.address && (
 											<span className="text-red-500 text-sm">Wajib diisi</span>

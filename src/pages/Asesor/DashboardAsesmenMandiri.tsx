@@ -233,6 +233,13 @@ export default function DashboardAsesmenMandiri() {
 		"Butuh Persetujuan": "text-yellow-500",
 	};
 
+	const badgeClasses: Record<string, string> = {
+		"Belum Tuntas": "bg-red-100",
+		"Menunggu Asesi": "bg-blue-100",
+		"Tuntas": "bg-green-100",
+		"Butuh Persetujuan": "bg-yellow-100",
+	};
+
 	const statusIcons: Record<string, JSX.Element> = {
 		"Belum Tuntas": <SquareX size={14} />,
 		"Menunggu Asesi": <Loader size={14} />,
@@ -394,7 +401,7 @@ export default function DashboardAsesmenMandiri() {
 												</td>
 												<td className="px-4 py-3 text-sm text-gray-700 text-center">
 													<span
-														className={`inline-flex items-center gap-1 px-2 py-1 text-center rounded-full text-xs font-medium ${statusClasses[asesi.status]}`}
+														className={`inline-flex items-center ${badgeClasses[asesi.status]} gap-1 px-2 py-1 text-center rounded-full text-xs font-medium ${statusClasses[asesi.status]}`}
 													>
 														{statusIcons[asesi.status]}
 														{asesi.status}
