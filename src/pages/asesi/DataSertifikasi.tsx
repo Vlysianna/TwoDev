@@ -426,8 +426,8 @@ const FileUploadArea = ({
 					<button
 						type="button"
 						onClick={() => !isLocked && field.onChange(null)}
-						className="flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 hover:bg-red-100 text-sm font-medium cursor-pointer"
 						disabled={isLocked}
+						className={`flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 text-sm font-medium ${isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-red-100"}`}
 					>
 						Hapus
 					</button>
@@ -435,8 +435,8 @@ const FileUploadArea = ({
 				<button
 					type="button"
 					onClick={() => !isLocked && fileRef.current?.click()}
-					className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 text-sm font-medium cursor-pointer"
 					disabled={isLocked}
+					className={`flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 text-sm font-medium ${isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-gray-100"}`}
 				>
 					{fileData || existingFileName ? "Ganti" : "Pilih File"}
 				</button>

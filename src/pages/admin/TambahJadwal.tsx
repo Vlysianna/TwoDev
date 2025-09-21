@@ -5,7 +5,7 @@ import { Plus, Trash2, AlertCircle, CheckCircle, File } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import axiosInstance from "@/helper/axios";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import type { MukType } from "@/lib/types";
 
 interface Scheme {
@@ -43,11 +43,21 @@ const TambahJadwal: React.FC = () => {
 		register,
 		handleSubmit,
 		setValue,
+		control,
 		formState: { errors },
+		watch,
 	} = useForm<ScheduleForm>({
 		defaultValues: {
+			assessment_id: 0,
+			start_date: "",
+			end_date: "",
 			schedule_details: [{ assessor_id: 0, location: "" }],
 		},
+	});
+
+	const { fields, append, remove } = useFieldArray({
+		control,
+		name: "schedule_details",
 	});
 
 	const [assessments, setAssessments] = useState<MukType[]>([]);
@@ -56,20 +66,21 @@ const TambahJadwal: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [scheduleDetails, setScheduleDetails] = useState<ScheduleDetailForm[]>([
-		{ assessor_id: 0, location: "" },
-	]);
 
-	// initial load: occupations + assessors
+	// Watch schedule details to handle dynamic fields
+	const scheduleDetails = watch("schedule_details");
+
+	// initial load: assessments + assessors
 	useEffect(() => {
 		(async () => {
 			try {
-				const occResp = await axiosInstance.get("/assessments");
-				if (occResp.data?.success) {
-					setAssessments(occResp.data.data);
+				const assessmentResp = await axiosInstance.get("/assessments");
+				if (assessmentResp.data?.success) {
+					setAssessments(assessmentResp.data.data);
 				}
 			} catch (err) {
-				console.error("Error fetching occupations:", err);
+				console.error("Error fetching assessments:", err);
+				setError("Gagal memuat daftar assessment");
 			}
 
 			try {
@@ -78,25 +89,6 @@ const TambahJadwal: React.FC = () => {
 				if (resp.data && resp.data.success) {
 					const list: Assessor[] = resp.data.data;
 					setAssessors(list);
-					console.log("Assessor list:", list); // Debug log
-
-					// set first assessor as default for first row if none selected
-					if (list.length > 0) {
-						setScheduleDetails((prev) => {
-							const firstSelected = prev.some(
-								(d) => d.assessor_id && d.assessor_id !== 0
-							);
-							if (!firstSelected && prev.length > 0) {
-								const firstId = list[0].id;
-								const newDetails = prev.map((d, i) =>
-									i === 0 ? { ...d, assessor_id: firstId } : d
-								);
-								setValue("schedule_details", newDetails);
-								return newDetails;
-							}
-							return prev;
-						});
-					}
 				}
 			} catch (err) {
 				console.error("Error fetching assessors:", err);
@@ -107,17 +99,23 @@ const TambahJadwal: React.FC = () => {
 		})();
 	}, []);
 
+	// Set default assessor for the first field when assessors are loaded
+	useEffect(() => {
+		if (assessors.length > 0 && scheduleDetails && scheduleDetails.length > 0) {
+			const firstDetail = scheduleDetails[0];
+			if (!firstDetail.assessor_id || firstDetail.assessor_id === 0) {
+				setValue("schedule_details.0.assessor_id", assessors[0].id);
+			}
+		}
+	}, [assessors, scheduleDetails, setValue]);
+
 	const addScheduleDetail = () => {
-		const newDetails = [...scheduleDetails, { assessor_id: 0, location: "" }];
-		setScheduleDetails(newDetails);
-		setValue("schedule_details", newDetails);
+		append({ assessor_id: 0, location: "" });
 	};
 
 	const removeScheduleDetail = (index: number) => {
-		if (scheduleDetails.length > 1) {
-			const newDetails = scheduleDetails.filter((_, i) => i !== index);
-			setScheduleDetails(newDetails);
-			setValue("schedule_details", newDetails);
+		if (fields.length > 1) {
+			remove(index);
 		}
 	};
 
@@ -126,31 +124,74 @@ const TambahJadwal: React.FC = () => {
 			setLoading(true);
 			setError(null);
 			setSuccess(null);
-			console.log(data);
 
-			data.assessment_id = Number(data.assessment_id);
-			data.start_date = new Date(data.start_date).toISOString();
-			data.end_date = new Date(data.end_date).toISOString();
+			// Validasi tambahan
+			if (!data.assessment_id || data.assessment_id === 0) {
+				setError("Assessment wajib dipilih");
+				setLoading(false);
+				return;
+			}
 
-			const scheduleResponse = await axiosInstance.post("/schedules", data);
+			if (!data.start_date || !data.end_date) {
+				setError("Tanggal mulai dan selesai wajib diisi");
+				setLoading(false);
+				return;
+			}
+
+			if (new Date(data.start_date) >= new Date(data.end_date)) {
+				setError("Tanggal selesai harus setelah tanggal mulai");
+				setLoading(false);
+				return;
+			}
+
+			// Validasi setiap detail jadwal
+			const invalidDetails = data.schedule_details.filter(
+				detail => !detail.assessor_id || detail.assessor_id === 0 || !detail.location.trim()
+			);
+
+			if (invalidDetails.length > 0) {
+				setError("Semua asesor dan lokasi harus diisi");
+				setLoading(false);
+				return;
+			}
+
+			// Format data untuk API
+			const formattedData = {
+				assessment_id: Number(data.assessment_id),
+				start_date: new Date(data.start_date).toISOString(),
+				end_date: new Date(data.end_date).toISOString(),
+				schedule_details: data.schedule_details.map(detail => ({
+					assessor_id: Number(detail.assessor_id),
+					location: detail.location.trim()
+				}))
+			};
+
+			console.log("Submitting data:", formattedData);
+
+			const scheduleResponse = await axiosInstance.post("/schedules", formattedData);
 
 			if (scheduleResponse.data.success) {
 				setSuccess("Jadwal berhasil ditambahkan!");
 				setTimeout(() => {
 					navigate(paths.admin.kelolaJadwal);
-				}, 1000);
+				}, 1500);
 			} else {
 				setError(scheduleResponse.data.message || "Gagal membuat jadwal");
 			}
 		} catch (error: unknown) {
 			console.error("Error creating schedule:", error);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const msg =
-				(error as any)?.response?.data?.message || "Gagal membuat jadwal";
+			const err = error as any;
+			const msg = err?.response?.data?.message ||
+				err?.response?.data?.error ||
+				"Gagal membuat jadwal. Silakan coba lagi.";
 			setError(msg);
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const handleCancel = () => {
+		navigate(paths.admin.kelolaJadwal);
 	};
 
 	return (
@@ -212,10 +253,11 @@ const TambahJadwal: React.FC = () => {
 												<select
 													{...register("assessment_id", {
 														required: "Assessment wajib dipilih",
+														validate: value => value !== 0 || "Assessment wajib dipilih"
 													})}
-													className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none"
+													className={`w-full border ${errors.assessment_id ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none`}
 												>
-													<option value="">Pilih Assessment</option>
+													<option value={0}>Pilih Assessment</option>
 													{assessments.map((assessment) => (
 														<option key={assessment.id} value={assessment.id}>
 															{assessment.code} - {assessment.occupation.name}
@@ -239,7 +281,7 @@ const TambahJadwal: React.FC = () => {
 													{...register("start_date", {
 														required: "Tanggal mulai wajib diisi",
 													})}
-													className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none"
+													className={`w-full border ${errors.start_date ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none`}
 												/>
 												{errors.start_date && (
 													<span className="text-red-500 text-sm">
@@ -259,7 +301,7 @@ const TambahJadwal: React.FC = () => {
 													{...register("end_date", {
 														required: "Tanggal selesai wajib diisi",
 													})}
-													className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none"
+													className={`w-full border ${errors.end_date ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none`}
 												/>
 												{errors.end_date && (
 													<span className="text-red-500 text-sm">
@@ -287,16 +329,16 @@ const TambahJadwal: React.FC = () => {
 										</div>
 
 										<div className="space-y-4">
-											{scheduleDetails.map((detail, index) => (
+											{fields.map((field, index) => (
 												<div
-													key={index}
+													key={field.id}
 													className="p-4 border border-gray-200 rounded-md space-y-3"
 												>
 													<div className="flex items-center justify-between">
 														<h4 className="font-medium text-gray-900">
 															Asesor {index + 1}
 														</h4>
-														{scheduleDetails.length > 1 && (
+														{fields.length > 1 && (
 															<button
 																type="button"
 																onClick={() => removeScheduleDetail(index)}
@@ -309,22 +351,23 @@ const TambahJadwal: React.FC = () => {
 
 													<div>
 														<label className="block text-sm font-medium text-gray-700 mb-1">
-															Pilih Asesor
+															Pilih Asesor <span className="text-red-500">*</span>
 														</label>
 														<select
-															{...register(
-																`schedule_details.${index}.assessor_id`
-															)}
-															className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none"
+															{...register(`schedule_details.${index}.assessor_id` as const, {
+																required: "Asesor wajib dipilih",
+																validate: value => value !== 0 || "Asesor wajib dipilih"
+															})}
+															className={`w-full border ${errors.schedule_details?.[index]?.assessor_id ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none`}
 															disabled={assessorsLoading}
 														>
 															{assessorsLoading ? (
-																<option value="">Memuat asesor...</option>
+																<option value={0}>Memuat asesor...</option>
 															) : (
 																<>
-																	<option value="">Pilih Asesor</option>
+																	<option value={0}>Pilih Asesor</option>
 																	{assessors.length === 0 ? (
-																		<option value="">Tidak ada asesor</option>
+																		<option value={0}>Tidak ada asesor</option>
 																	) : (
 																		assessors.map((assessor) => (
 																			<option
@@ -338,6 +381,11 @@ const TambahJadwal: React.FC = () => {
 																</>
 															)}
 														</select>
+														{errors.schedule_details?.[index]?.assessor_id && (
+															<span className="text-red-500 text-sm">
+																{errors.schedule_details[index]?.assessor_id?.message}
+															</span>
+														)}
 														<label className="block text-sm font-medium text-red-500 mb-1 italic">
 															*Asesor yang muncul di sini adalah asesor yang sudah melengkapi persyaratan.
 														</label>
@@ -345,16 +393,25 @@ const TambahJadwal: React.FC = () => {
 
 													<div>
 														<label className="block text-sm font-medium text-gray-700 mb-1">
-															Lokasi
+															Lokasi <span className="text-red-500">*</span>
 														</label>
 														<input
 															type="text"
-															{...register(
-																`schedule_details.${index}.location` as const
-															)}
+															{...register(`schedule_details.${index}.location` as const, {
+																required: "Lokasi wajib diisi",
+																minLength: {
+																	value: 2,
+																	message: "Lokasi minimal 2 karakter"
+																}
+															})}
 															placeholder="Contoh: Ruang Lab 1"
-															className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none"
+															className={`w-full border ${errors.schedule_details?.[index]?.location ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] outline-none`}
 														/>
+														{errors.schedule_details?.[index]?.location && (
+															<span className="text-red-500 text-sm">
+																{errors.schedule_details[index]?.location?.message}
+															</span>
+														)}
 													</div>
 												</div>
 											))}
@@ -374,7 +431,8 @@ const TambahJadwal: React.FC = () => {
 										</button>
 										<button
 											type="button"
-											className="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400"
+											onClick={handleCancel}
+											className="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 cursor-pointer"
 										>
 											Batal
 										</button>

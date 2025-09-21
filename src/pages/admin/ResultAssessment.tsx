@@ -197,40 +197,40 @@ const ResultAssessment: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {data.map((assessment) => {
-                      const isExpanded = isRowExpanded(assessment.id);
+                    {data.map((schedule) => {
+                      const isExpanded = isRowExpanded(schedule.id);
 
                       return (
-                        <React.Fragment key={assessment.id}>
+                        <React.Fragment key={schedule.id}>
                           <tr
                             className="cursor-pointer hover:bg-gray-50"
-                            onClick={() => toggleRowExpansion(assessment.id)}
+                            onClick={() => toggleRowExpansion(schedule.id)}
                           >
                             <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {assessment.assessment.code}
+                              {schedule.assessment.code}
                             </td>
                             <td className="px-4 lg:px-6 py-4 text-sm text-gray-500">
                               <div>
-                                <span className="font-semibold">{assessment.assessment.occupation.scheme.name}</span>
+                                <span className="font-semibold">{schedule.assessment.occupation.scheme.name}</span>
                                 <br />
-                                <span>{assessment.assessment.occupation.name}</span>
+                                <span>{schedule.assessment.occupation.name}</span>
                               </div>
                             </td>
                             <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {formatDate(assessment.start_date)} - {formatDate(assessment.end_date)}
+                              {formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}
                             </td>
                             <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${assessment.status === 'Selesai'
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${schedule.status === 'Selesai'
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-yellow-100 text-yellow-800'
                                 }`}>
-                                {assessment.status}
+                                {schedule.status}
                               </span>
                             </td>
                             <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               <div className="flex items-center gap-1">
                                 <Users size={16} />
-                                <span>{assessment.schedule_details.length} Asesor</span>
+                                <span>{schedule.schedule_details.length} Asesor</span>
                               </div>
                             </td>
                             <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -240,42 +240,41 @@ const ResultAssessment: React.FC = () => {
 
                           {isExpanded && (
                             <>
-                              {assessment.schedule_details.map((schedule) => (
-                                <tr key={schedule.id} className="bg-gray-50">
+                              {schedule.schedule_details.map((detail) => (
+                                <tr key={detail.id} className="bg-gray-50">
                                   <td colSpan={6} className="px-4 lg:px-6 py-1">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2">
                                       <div className="flex items-center gap-3 flex-wrap">
                                         <MapPin size={16} className="text-gray-600" />
-                                        <span className="font-medium">{schedule.location}</span>
+                                        <span className="font-medium">{detail.location}</span>
                                         <span className="text-gray-400 hidden md:inline">|</span>
                                         <User size={16} className="text-gray-600" />
-                                        <span>{schedule.assessor.full_name}</span>
+                                        <span>{detail.assessor.full_name}</span>
                                       </div>
                                       <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
                                         <button
-                                          className="px-2 text-[#E77D35] rounded hover:text-orange-600 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          className="px-2 bg-green-600 text-white hover:bg-green-700 p-2 rounded hover:bg-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(paths.admin.resultAssessment.dashboard(assessment.id, String(schedule.assessor.id)));
-                                          }}
-                                        >
-                                          Lihat Detail Asesmen <ArrowRight size={16} />
-                                        </button>
-                                        
-                                        <button
-                                          className="px-2 text-green-600 rounded hover:text-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(schedule.assessor.id))}&schedule=${encodeURIComponent(String(schedule.id))}`);
+                                            navigate(`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(detail.assessor.id))}&schedule=${encodeURIComponent(String(detail.id))}`);
                                           }}
                                         >
                                           Verifikasi Assesi <ArrowRight size={16} />
                                         </button>
                                         <button
-                                          className="px-2 text-blue-500 rounded hover:text-blue-700 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          className="px-2 bg-[#E77D35] rounded hover:bg-orange-600 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id)));
+                                            navigate(paths.admin.resultAssessment.dashboard(schedule.assessment.id, String(detail.assessor.id)));
+                                          }}
+                                        >
+                                          Lihat Detail Asesmen <ArrowRight size={16} />
+                                        </button>
+                                        <button
+                                          className="px-2 bg-blue-500 rounded hover:bg-blue-700 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(paths.admin.recapAssessmentAdmin(detail.id, String(detail.assessor.id)));
                                           }}
                                         >
                                           Lihat Berita Acara <ArrowRight size={16} />
