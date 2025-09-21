@@ -253,17 +253,7 @@ const ResultAssessment: React.FC = () => {
                                       </div>
                                       <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
                                         <button
-                                          className="px-2 text-[#E77D35] rounded hover:text-orange-600 transition-colors text-sm cursor-pointer flex items-center gap-2"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(paths.admin.resultAssessment.dashboard(schedule.assessment.id, String(detail.assessor.id)));
-                                          }}
-                                        >
-                                          Lihat Detail Asesmen <ArrowRight size={16} />
-                                        </button>
-                                        
-                                        <button
-                                          className="px-2 text-green-600 rounded hover:text-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          className="px-2 bg-green-600 text-white hover:bg-green-700 p-2 rounded hover:bg-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             navigate(`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(detail.assessor.id))}&schedule=${encodeURIComponent(String(detail.id))}`);
@@ -272,7 +262,16 @@ const ResultAssessment: React.FC = () => {
                                           Verifikasi Assesi <ArrowRight size={16} />
                                         </button>
                                         <button
-                                          className="px-2 text-blue-500 rounded hover:text-blue-700 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          className="px-2 bg-[#E77D35] rounded hover:bg-orange-600 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(paths.admin.resultAssessment.dashboard(schedule.assessment.id, String(detail.assessor.id)));
+                                          }}
+                                        >
+                                          Lihat Detail Asesmen <ArrowRight size={16} />
+                                        </button>
+                                        <button
+                                          className="px-2 bg-blue-500 rounded hover:bg-blue-700 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             navigate(paths.admin.recapAssessmentAdmin(detail.id, String(detail.assessor.id)));

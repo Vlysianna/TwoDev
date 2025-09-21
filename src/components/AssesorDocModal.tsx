@@ -107,7 +107,7 @@ const AssessorDocumentsModal: React.FC<AssessorDocumentsModalProps> = ({
                                                 <button
                                                     type="button"
                                                     onClick={() => viewFile(url)}
-                                                    className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                                                    className="flex items-center text-white py-1 px-2 rounded cursor-pointer bg-blue-500 hover:bg-blue-700 text-sm"
                                                 >
                                                     <Eye className="w-4 h-4 mr-1" />
                                                     Lihat
@@ -115,7 +115,7 @@ const AssessorDocumentsModal: React.FC<AssessorDocumentsModalProps> = ({
                                                 <button
                                                     type="button"
                                                     onClick={() => downloadFile(url, filename)}
-                                                    className="flex items-center text-green-600 hover:text-green-800 text-sm"
+                                                    className="flex items-center text-white py-1 px-2 rounded cursor-pointer bg-green-600 hover:bg-green-800 text-sm"
                                                 >
                                                     <Download className="w-4 h-4 mr-1" />
                                                     Download
@@ -144,7 +144,7 @@ const AssessorDocumentsModal: React.FC<AssessorDocumentsModalProps> = ({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="btn btn-primary"
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded mr-2 cursor-pointer"
                         >
                             Tutup
                         </button>

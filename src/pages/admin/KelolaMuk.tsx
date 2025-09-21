@@ -171,7 +171,7 @@ const KelolaMUK: React.FC = () => {
 								<h2 className="text-[20px] sm:text-[26px] font-semibold text-[#000000]">
 									Kelola MUK
 								</h2>
-								<div className="flex flex-wrap gap-3 sm:space-x-3 items-center">
+								{/* <div className="flex flex-wrap gap-3 sm:space-x-3 items-center">
 									<button
 										onClick={handleExport}
 										className="bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors w-full sm:w-[152px] h-[41px] flex items-center justify-center"
@@ -186,7 +186,7 @@ const KelolaMUK: React.FC = () => {
 											<>Export ke Excel</>
 										)}
 									</button>
-								</div>
+								</div> */}
 							</div>
 							{/* Full width border line */}
 							<div className="border-b border-gray-200"></div>
@@ -238,13 +238,13 @@ const KelolaMUK: React.FC = () => {
 														>
 															<Edit3 size={16} />
 														</button>
-														<button
+														{/* <button
 															onClick={() => handleView(muk.id)}
 															className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
 															title="View"
 														>
 															<Eye size={16} />
-														</button>
+														</button> */}
 														<button
 															onClick={() => {
 																setDeletingId(muk.id);
