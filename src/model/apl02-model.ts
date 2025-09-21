@@ -1,5 +1,5 @@
-import type { APL02Header, Assessee, ResultTemplate } from "@/lib/types";
-import type { ElementAPL02 } from "./muk-model";
+import type { APL02Header, ResultTemplate } from "@/lib/types";
+import type { ItemElementAPL02 } from "./muk-model";
 
 export interface ResultAPL02 extends ResultTemplate {
 	apl02_header: APL02Header;
@@ -17,15 +17,14 @@ export interface APL02UnitAssessee {
 
 export interface APL02ResponseElement {
 	id: number;
-	result_id: number;
-	assessee: Assessee;
-	approved_assessee: boolean;
-	approved_assessor: boolean;
-	is_continue: boolean;
-	results: {
+	uc_id: number;
+	title: string;
+	details: ItemElementAPL02[];
+	result: {
 		id: number;
-		element: ElementAPL02;
+		header_id: number;
+		element_id: number;
 		is_competent: boolean;
-		evidences: { result_apl02_id: number; evidence: string }[];
-	}[];
+		evidences: { id: number; evidence: string }[];
+	};
 }

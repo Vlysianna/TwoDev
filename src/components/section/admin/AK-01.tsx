@@ -136,7 +136,7 @@ export default function AK01({ id_result }: { id_result: string }) {
 											readOnly
 										/>
 										<span
-											className={`w-4 h-4 flex items-center justify-center rounded-xs border-2
+											className={`w-4 h-4 flex items-center justify-center rounded-xs border-2 opacity-60 cursor-not-allowed
                         ${
 													checked
 														? "bg-[#E77D35] border-[#E77D35]"

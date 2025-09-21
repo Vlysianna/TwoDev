@@ -2,16 +2,20 @@ import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import type { Assessment } from "@/lib/types";
 import { type APL02UnitAssessee, type ResultAPL02 } from "@/model/apl02-model";
-import routes from "@/routes/paths";
 import { AlertCircle, ChevronRight, Monitor } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
 import useSWR from "swr";
 
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
-export default function APL02({ id_result }: { id_result: string }) {
+export default function APL02({
+	id_result,
+	handleDetail,
+}: {
+	id_result: string;
+	handleDetail: (name: string, id: string) => void;
+}) {
 	const {
 		data: result = {} as ResultAPL02,
 		isLoading: loadingResult,
@@ -145,18 +149,13 @@ export default function APL02({ id_result }: { id_result: string }) {
 														</span>
 													)}
 
-													<Link
-														to={routes.asesi.assessment.apl02_detail(
-															String(result?.assessment?.id),
-															String(result?.assessor?.id),
-															unit.id,
-															index + 1 // Tambahkan nomor urut sebagai argumen baru
-														)}
+													<button
+														onClick={() => handleDetail("apl-02-detail", unit.id.toString())}
 														className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
 													>
 														Lihat detail
 														<ChevronRight size={14} className="ml-1" />
-													</Link>
+													</button>
 												</div>
 											</div>
 										))}
