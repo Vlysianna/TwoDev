@@ -2,8 +2,9 @@ import type { Occupation, Scheme } from "@/lib/types";
 
 
 export type MukTypeInput = {
+	id?: number;
 	scheme_id: number;
-	occupation_name: string;
+	occupation_id: number;
 	code: string;
 	uc_apl02s: UnitAPL02[];
 	groups_ia01: IA01Group[];
@@ -42,6 +43,7 @@ export type MukDetailType = {
 };
 
 export type UnitAPL02 = {
+	id?: number;
 	unit_code: string;
 	title: string;
 	elements: ElementAPL02[];
@@ -59,11 +61,13 @@ export type ItemElementAPL02 = {
 };
 
 export type IA01Group = {
+	id?: number;
 	name: string;
 	units: UnitIA01[];
 };
 
 export type IA02Group = {
+	id?: number;
 	name: string;
 	scenario: string;
 	duration: number;
@@ -74,6 +78,7 @@ export type IA02Group = {
 };
 
 export type UnitIA01 = {
+	id?: number;
 	unit_code: string;
 	title: string;
 	elements: ElementIA01[];
@@ -92,26 +97,31 @@ export type ItemElementIA01 = {
 };
 
 export type UnitIA02 = {
+	id?: number;
 	unit_code: string;
 	title: string;
 };
 
 export type IA03Group = {
+	id?: number;
 	name: string;
 	units: UnitIA03[];
 	qa_ia03: IA03Question[];
 };
 
 export type UnitIA03 = {
+	id?: number;
 	unit_code: string;
 	title: string;
 };
 
 export type IA03Question = {
+	id?: number;
 	question: string;
 };
 
 export type IA05Question = {
+	id?: number;
 	order: number;
 	question: string;
 	options: {
@@ -121,6 +131,7 @@ export type IA05Question = {
 };
 
 export type IA07Question = {
+	id?: number;
 	question: string;
 	answer_key: string;
 };

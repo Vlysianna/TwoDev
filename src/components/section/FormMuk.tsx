@@ -7,12 +7,10 @@ import {
   type IA05Question,
   type ItemElementAPL02,
   type MukTypeInput,
-  type Occupation,
-  type Scheme,
   type UnitAPL02,
   type UnitIA01,
   type UnitIA03,
-} from "@/lib/types";
+} from "@/model/muk-model";
 import { ChevronDown } from "lucide-react";
 import {
   Controller,
@@ -32,9 +30,10 @@ import {
 import UnitFieldAPL02 from "@/components/apl02/UnitField";
 import UnitFieldIA01 from "@/components/ia01/UnitField";
 import UnitFieldIA03 from "@/components/ia03/UnitField";
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import mammoth from "mammoth";
-import api from "@/helper/axios";
+import type { Occupation, Scheme } from "@/lib/types";
+import useToast from "../ui/useToast";
 
 let currentCode: string | null = null;
 
@@ -44,22 +43,25 @@ export default function FormMuk({
   form,
   submitting,
   disabled = false,
-  id_assessment,
+  setFileIA02,
 }: {
   schemes: Scheme[];
   occupations: Occupation[];
   form: UseFormReturn<MukTypeInput>;
   submitting: boolean;
   disabled?: boolean;
-  id_assessment: string | number;
+  setFileIA02?: (file: File | null) => void;
 }) {
   const filteredOccupations = useMemo(
     () =>
       occupations.filter((o) => {
         return o.scheme?.id === Number(form.getValues("scheme_id"));
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [form.watch("scheme_id"), occupations]
   );
+  
+  const toast = useToast();
 
   const {
     register,
@@ -119,8 +121,7 @@ export default function FormMuk({
     undefined
   );
 
-  const [fileIA01, setFileIA01] = useState<File | null>(null);
-  const [IA01File, setIA01File] = useState<string | null>(null);
+  const [IA02File, setIA02File] = useState<string | null>(null);
 
   async function handleUploadAPL02(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -128,7 +129,6 @@ export default function FormMuk({
     try {
       const html = await extractDocxText(file);
       const parsedData = parseHTMLToAPL02(html);
-      // console.log(parsedData);
 
       const currentValues = getValues();
 
@@ -139,10 +139,9 @@ export default function FormMuk({
       });
       setOpenValueAPL02("item-1");
     } catch (err) {
-      console.error("Gagal parse docx:", err);
-      alert(
-        "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar."
-      );
+      toast.show({description: 
+        "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+    });
     }
     e.target.value = "";
   }
@@ -154,8 +153,6 @@ export default function FormMuk({
       const html = await extractDocxText(file);
       const parsedData = parseHTMLToIA01(html);
 
-      // console.log(parsedData);
-
       const currentValues = getValues();
 
       reset({
@@ -164,17 +161,17 @@ export default function FormMuk({
       });
       setOpenValueIA01("item-1");
     } catch (err) {
-      console.error("Gagal parse docx:", err);
-      alert(
-        "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar."
-      );
+      toast.show({
+        title: "Gagal",
+        description: "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+      });
     }
     e.target.value = "";
   }
   async function handleUploadIA02(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files?.[0]) {
-      setFileIA01(e.target.files[0]);
-      setIA01File(e.target.files[0].name);
+      if (setFileIA02) setFileIA02(e.target.files[0]);
+      setIA02File(e.target.files[0].name);
     }
   }
 
@@ -185,8 +182,6 @@ export default function FormMuk({
       const html = await extractDocxText(file);
       const parsedData = parseHTMLToIA03(html);
 
-      // console.log(parsedData);
-
       const currentValues = getValues();
 
       reset({
@@ -195,11 +190,10 @@ export default function FormMuk({
       });
       setOpenValueIA03("item-1");
     } catch (err) {
-      console.error("Gagal parse docx:", err);
-      alert(
-        "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar." +
-          err
-      );
+      toast.show({
+        title: "Gagal",
+        description: "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+      });
     }
     e.target.value = "";
   }
@@ -212,8 +206,6 @@ export default function FormMuk({
       const html = await extractDocxText(file);
       const parsedData = parseHTMLToIA05A(html);
 
-      console.log(parsedData);
-
       const currentValues = getValues();
 
       reset({
@@ -222,10 +214,9 @@ export default function FormMuk({
       });
       setOpenValueIA05("item-1");
     } catch (err) {
-      console.error("Gagal parse docx:", err);
-      alert(
-        "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar."
-      );
+      toast.show({
+        description: "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+      });
     }
     e.target.value = "";
   }
@@ -237,8 +228,6 @@ export default function FormMuk({
     try {
       const html = await extractDocxText(file);
       const parsedData = parseHTMLToIA05B(html);
-
-      // console.log(parsedData);
 
       const currentValues = getValues();
 
@@ -253,8 +242,6 @@ export default function FormMuk({
           return q;
         });
 
-        // console.log(mergedQuestions);
-
         reset({
           ...currentValues,
           ia05_questions: mergedQuestions,
@@ -262,39 +249,17 @@ export default function FormMuk({
       }
       setOpenValueIA05("item-1");
     } catch (err) {
-      console.error("Gagal parse docx:", err);
-      alert(
-        "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar."
-      );
+      toast.show({
+        title: "Gagal",
+        description: "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+      });
     }
     e.target.value = "";
   }
 
-  async function handleSubmitIA02() {
-    if (!id_assessment) {
-      alert("Anda belum menyimpan MUK terlebih dahulu");
-      return;
-    }
-    api
-      .post(
-        `/assessments/ia-02/upload-pdf/${id_assessment}`,
-        { pdf: fileIA01 },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      )
-      .then((res) => {
-        if (res?.data?.success) {
-          alert("IA02 berhasil diupload");
-        }
-      })
-      .catch((e) => console.log(e));
-  }
-
   useEffect(() => {
     setValue("code", currentCode ?? "");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCode]);
 
   return (
@@ -346,11 +311,11 @@ export default function FormMuk({
               </label>
               <div className="relative w-full">
                 <select
-                  {...register("occupation_name", {
+                  {...register("occupation_id", {
                     required: "Pilih Okupasi wajib diisi",
                   })}
                   className={`w-full px-3 py-2 border rounded-md appearance-none ${
-                    errors.occupation_name
+                    errors.occupation_id
                       ? "border-red-500"
                       : "border-gray-300"
                   }`}
@@ -358,7 +323,7 @@ export default function FormMuk({
                 >
                   <option value="">Pilih Okupasi</option>
                   {filteredOccupations.map((o) => (
-                    <option key={o.id} value={o.name}>
+                    <option key={o.id} value={o.id}>
                       {o.name}
                     </option>
                   ))}
@@ -368,9 +333,9 @@ export default function FormMuk({
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                 />
               </div>
-              {errors.occupation_name && (
+              {errors.occupation_id && (
                 <p className="text-xs text-red-500 mt-1">
-                  {errors.occupation_name.message}
+                  {errors.occupation_id.message}
                 </p>
               )}
             </div>
@@ -849,25 +814,16 @@ export default function FormMuk({
                 />
               </label>
               <span className="flex-1 bg-gray-100 text-gray-500 text-sm rounded-md px-6 flex items-center -ml-4 pl-10">
-                {!IA01File ? <>Pilih file pdf</> : IA01File}
+                {!IA02File ? <>Pilih file pdf</> : IA02File}
               </span>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={handleSubmitIA02}
-            className="inline-flex items-center bg-[#E77D35] text-white px-6 py-2 rounded-md cursor-pointer z-10"
-          >
-            Upload IA 02
-          </button>
         </div>
 
         {/* Submit */}
         <div className="mt-5">
           <button
             type="submit"
-            disabled={disabled}
             className="w-full bg-[#E77D35] text-white py-3 rounded-md font-semibold hover:opacity-95 transition-colors submitting:opacity-60"
           >
             {submitting ? "Menyimpan..." : "Simpan MUK"}
@@ -897,7 +853,6 @@ function extractCode(doc: Document): { code: string } | null {
         (td) => td.textContent?.trim() ?? ""
       );
       const joined = cells.join(" ");
-      // console.log(joined);
 
       if (/Nomor/i.test(joined)) {
         nomor = cells.at(-1)?.trim();
@@ -912,7 +867,6 @@ function extractCode(doc: Document): { code: string } | null {
 
 function validateSchemaNumber(doc: Document): boolean {
   const extracted = extractCode(doc);
-  console.log(extracted);
   if (!extracted) return false;
 
   const { code } = extracted;
@@ -926,6 +880,7 @@ function validateSchemaNumber(doc: Document): boolean {
 }
 
 function parseHTMLToAPL02(html: string): UnitAPL02[] {
+  
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
@@ -941,13 +896,10 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
   );
 
   if (!anchorNode) {
-    console.warn("FR.APL.02. tidak ditemukan!");
-    return units;
+    throw new Error("FR.APL.02. tidak ditemukan!");
   }
 
-  // console.log(doc);
   const tables = Array.from(doc.querySelectorAll("table"));
-  // console.log(tables);
   if (tables.length === 0)
     throw new Error("Tidak ada tabel ditemukan dalam dokumen.");
 
@@ -967,33 +919,27 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
     const rows = Array.from(table.querySelectorAll("tr"));
     const tableText = table.innerText.replace(/\s+/g, " ").trim();
 
-    // console.log(tableText);
     if (tableText.includes("ASESMEN MANDIRI")) {
       startParsing = true;
       continue;
     }
     if (!startParsing) continue;
 
-    // console.log(rows);
-
     for (const row of rows) {
       const text = row.innerText;
       const cells = Array.from(row.querySelectorAll("td")).map((td) =>
         td.innerText.trim()
       );
-      // console.log(text);
 
       // if (text.includes("Nomor")) {
       // 	year = cells[2].trim().split("/").at(-1) || "";
       // 	school = cells[2].trim().split("/").at(-2) || "";
-      // 	console.log(cells[2].trim().split("/"));
       // 	occupation = cells[2].trim().split("/").at(0)?.split(".").at(-1) || "";
       // 	continue;
       // }
 
       if (text.includes("Kode Unit")) {
         const kodeMatch = text.match(/Kode Unit\s*:?\s*(.+)/);
-        console.log(kodeMatch?.[1]?.trim());
         const kode =
           kodeMatch?.[1]?.trim() || cells[1]?.replace(":", "").trim() || "";
         currentUnit = {
@@ -1008,7 +954,6 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
         const judulMatch = text.match(/Judul Unit\s*:?\s*(.+)/);
         const judul =
           judulMatch?.[1]?.trim() || cells[1]?.replace(":", "").trim() || "";
-        console.log(judul);
         if (currentUnit) {
           currentUnit.title = judul;
           units.push(currentUnit);
@@ -1025,7 +970,6 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
         const target = Array.from(row.querySelectorAll("td *")).find((el) =>
           el.textContent?.trim().toLowerCase().includes("kriteria unjuk kerja")
         );
-        console.log(target);
 
         if (!target) continue;
 
@@ -1037,7 +981,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
         title = prevText.split(":").at(-1)?.trim() || "";
 
         // coba ambil list
-        let list: Element | null =
+        const list: Element | null =
           (target.querySelector("ol, ul") ||
             target.nextElementSibling ||
             target.parentElement?.querySelector("ol, ul")) ??
@@ -1046,8 +990,6 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
         if (list && (list.tagName === "OL" || list.tagName === "UL")) {
           // ✅ normal case
           Array.from(list.querySelectorAll("li")).forEach((li, i) => {
-            // console.log(units[units.length - 1].title);
-            // console.log(row);
             items.push({
               id: `${elemenCounter}.${i + 1}`,
               description: li.textContent?.trim() || "",
@@ -1060,8 +1002,6 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
             if (next.tagName === "P") {
               const text = next.textContent?.trim() || "";
               if (/^\d+(\.\d+)*\.?\s/.test(text)) {
-                // console.log(units[units.length - 1].title);
-                // console.log(row);
                 items.push({
                   id: text.split(" ")[0].replace(/\.$/, ""),
                   description: text.replace(/^\d+(\.\d+)*\.?\s*/, ""),
@@ -1080,7 +1020,6 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
         if (units.length > 0) {
           units[units.length - 1].elements.push(currentElemen);
         }
-        // console.log(units);
         elemenCounter++;
         continue;
       }
@@ -1108,8 +1047,7 @@ function parseHTMLToIA01(html: string): IA01Group[] {
   );
 
   if (!anchorNode) {
-    console.warn("FR.IA.01. tidak ditemukan!");
-    return groups_ia;
+    throw new Error("FR.IA.01. tidak ditemukan!");
   }
 
   const tables = Array.from(doc.querySelectorAll("table"));
@@ -1134,14 +1072,12 @@ function parseHTMLToIA01(html: string): IA01Group[] {
 
     // --- cek apakah ini tabel group baru (Kelompok Pekerjaan) ---
     const firstCellText = rows[0]?.querySelector("td")?.innerText || "";
-    // console.log(firstCellText);
     if (
       firstCellText
         .replace(/\s+/g, " ")
         .trim()
         .match(/Kelompok Pekerjaan (\d+)/)
     ) {
-      // console.log(firstCellText);
       const groupName = firstCellText.trim();
       currentGroup = {
         name: groupName,
@@ -1158,7 +1094,6 @@ function parseHTMLToIA01(html: string): IA01Group[] {
         const title = unitCells[2];
         currentUnit = { unit_code, title, elements: [] };
         // currentGroup.units.push(currentUnit);
-        console.log(unitCells);
         groups_ia.push(currentGroup);
       }
       continue; // lanjut ke tabel berikutnya
@@ -1190,7 +1125,6 @@ function parseHTMLToIA01(html: string): IA01Group[] {
           r.innerText.includes("Elemen") && r.innerText.includes("Kriteria")
       )
     ) {
-      // console.log(curr)
       if (!currentUnit)
         // throw new Error("Tabel elemen muncul sebelum tabel unit.");
         continue;
@@ -1249,16 +1183,13 @@ function parseHTMLToIA03(html: string): IA03Group[] {
 
   const groups: IA03Group[] = [];
 
-  // console.log(doc);
-
   // Cari node yang mengandung FR.IA.03.
   const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
     el.textContent?.includes("FR.IA.03.")
   );
 
   if (!anchorNode) {
-    console.warn("FR.IA.03. tidak ditemukan!");
-    return groups;
+    throw new Error("FR.IA.03. tidak ditemukan!");
   }
 
   // Mulai dari node ini, cari semua table setelahnya
@@ -1344,17 +1275,13 @@ function parseHTMLToIA05A(html: string): IA05Question[] {
   );
 
   if (!anchorNode) {
-    console.warn("FR.IA.05 tidak ditemukan!");
-    return questions;
+    throw new Error("FR.IA.05 tidak ditemukan!");
   }
 
   // ambil semua elemen yang mungkin berisi soal/opsi
   const elements = Array.from(doc.querySelectorAll("p, ol"));
 
-  // console.log(doc);
   elements.forEach((el) => {
-    // console.log(el.tagName);
-    // console.log(el);
     if (el.tagName.toLowerCase() === "p") {
       const text = el.textContent?.trim() ?? "";
       if (!text) return;
@@ -1373,10 +1300,10 @@ function parseHTMLToIA05A(html: string): IA05Question[] {
       }
 
       // deteksi opsi (awalnya a., b., c., d.)
-      if (/^[a-eA-E][\.\)]/.test(text)) {
+      if (/^[a-eA-E][\\.\\)]/.test(text)) {
         if (currentQuestion) {
           currentQuestion.options.push({
-            option: text.replace(/^[a-eA-E][\.\)]\s*/, ""),
+            option: text.replace(/^[a-eA-E][\\.\\)]\s*/, ""),
             is_answer: false,
           });
         }
@@ -1388,7 +1315,6 @@ function parseHTMLToIA05A(html: string): IA05Question[] {
       const items = Array.from(el.querySelectorAll("li")).map(
         (li) => li.textContent?.trim() ?? ""
       );
-      // console.log(items);
       if (items.length === 0) return;
 
       if (items.length === 1) {
@@ -1405,7 +1331,7 @@ function parseHTMLToIA05A(html: string): IA05Question[] {
         // Ini opsi jawaban
         if (currentQuestion) {
           currentQuestion.options = items.map((t) => ({
-            option: t.replace(/^[a-eA-E][\.\)]\s*/, ""), // buang prefix a./b. kalau ada
+            option: t.replace(/^[a-eA-E][\\.\\)]\s*/, ""), // buang prefix a./b. kalau ada
             is_answer: false,
           }));
         }
@@ -1436,8 +1362,7 @@ function parseHTMLToIA05B(html: string): Record<number, string> {
   );
 
   if (!anchorNode) {
-    console.warn("FR.IA.05 tidak ditemukan!");
-    return keyMap;
+    throw new Error("FR.IA.05 tidak ditemukan!");
   }
 
   const tables = Array.from(doc.querySelectorAll("table"));
@@ -1470,7 +1395,7 @@ function parseHTMLToIA05B(html: string): Record<number, string> {
             answer = ansEl.textContent?.trim() ?? "";
           }
 
-          keyMap[qNo] = answer.replace(/^[a-eA-E][\.\)]\s*/, "").trim();
+          keyMap[qNo] = answer.replace(/^[a-eA-E][\\.\\)]\s*/, "").trim();
         }
       });
       break; // stop setelah table kunci jawaban ditemukan
@@ -1673,7 +1598,7 @@ function OptionsFieldArray({
   qIndex,
   disabled = false,
 }: {
-  control: Control<MukTypeInput, any, MukTypeInput>;
+  control: Control<MukTypeInput, MukTypeInput>;
   qIndex: number;
   disabled?: boolean;
 }) {
@@ -1707,7 +1632,7 @@ function OptionsFieldArray({
                   className="h-4 w-4"
                   checked={checked}
                   onChange={() => {
-                    const newOptions = value.map((opt: any, idx: number) => ({
+                    const newOptions = value.map((opt, idx: number) => ({
                       ...opt,
                       is_answer: idx === oIndex,
                     }));
