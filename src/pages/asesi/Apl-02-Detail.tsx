@@ -115,7 +115,7 @@ export default function Apl02Detail() {
 
       // Add to unassessed if not already there
       if (!unassessedElements.includes(id)) {
-        setUnassessedElements(prev => [...prev, id]);
+        setUnassessedElements((prev) => [...prev, id]);
       }
     } else {
       setPencapaian((prev) => ({
@@ -128,7 +128,7 @@ export default function Apl02Detail() {
 
       // Remove from unassessed if already there
       if (unassessedElements.includes(id)) {
-        setUnassessedElements(prev => prev.filter(item => item !== id));
+        setUnassessedElements((prev) => prev.filter((item) => item !== id));
       }
     }
   };
@@ -159,7 +159,7 @@ export default function Apl02Detail() {
       setPencapaian(newPencapaian);
 
       // Add all elements to unassessed
-      setUnassessedElements(elements.map(el => el.id));
+      setUnassessedElements(elements.map((el) => el.id));
     }
   };
 
@@ -179,7 +179,7 @@ export default function Apl02Detail() {
   const getUnfilledElements = () => {
     const formValues = getValues();
     const unfilled: number[] = [];
-    elements.forEach(el => {
+    elements.forEach((el) => {
       const pencapaian = formValues.elements?.[el.id]?.is_competent;
       const evidence = formValues.elements?.[el.id]?.evidence;
       if (
@@ -219,14 +219,22 @@ export default function Apl02Detail() {
 
         response.data.data.forEach((el: any) => {
           if (el.result) {
-            pencapaianInit[el.id] = el.result.is_competent ? 'kompeten' : 'belum';
+            pencapaianInit[el.id] = el.result.is_competent
+              ? "kompeten"
+              : "belum";
             // Juga set nilai di react-hook-form
             setValue(`elements.${el.id}.is_competent`, el.result.is_competent);
 
             // Set evidence jika ada
             if (el.result.evidences && el.result.evidences.length > 0) {
-              setValue(`elements.${el.id}.evidence`, el.result.evidences.map((e: any) => e.evidence));
-              setSelectedProof(prev => ({ ...prev, [el.id]: el.result.evidences[0].evidence }));
+              setValue(
+                `elements.${el.id}.evidence`,
+                el.result.evidences.map((e: any) => e.evidence)
+              );
+              setSelectedProof((prev) => ({
+                ...prev,
+                [el.id]: el.result.evidences[0].evidence,
+              }));
             }
           } else {
             // Jika tidak ada data sebelumnya, set sebagai unassessed
@@ -249,7 +257,7 @@ export default function Apl02Detail() {
     // Validasi apakah semua elemen sudah diisi pencapaian dan bukti relevan
     const unfilled = getUnfilledElements();
     if (unfilled.length > 0) {
-      setSaveError('Harap isi pencapaian dan bukti relevan untuk semua elemen');
+      setSaveError("Harap isi pencapaian dan bukti relevan untuk semua elemen");
       return;
     }
 
@@ -275,25 +283,27 @@ export default function Apl02Detail() {
     console.log("Payload:", payload);
 
     try {
-      await api.post("/assessments/apl-02/result/send", payload).then((response) => {
-        if (response.data.success) {
-          toast.show({
-            title: "Berhasil",
-            description: "Berhasil menyimpan data",
-            type: "success",
-          });
-          // Navigate ke halaman APL-02 setelah simpan sukses
-          navigate(paths.asesi.assessment.apl02(id_assessment, id_asesor));
-        } else {
-          toast.show({
-            title: "Gagal",
-            description: "Gagal menyimpan data",
-            type: "error",
-          });
-        }
-      });
+      await api
+        .post("/assessments/apl-02/result/send", payload)
+        .then((response) => {
+          if (response.data.success) {
+            toast.show({
+              title: "Berhasil",
+              description: "Berhasil menyimpan data",
+              type: "success",
+            });
+            // Navigate ke halaman APL-02 setelah simpan sukses
+            navigate(paths.asesi.assessment.apl02(id_assessment, id_asesor));
+          } else {
+            toast.show({
+              title: "Gagal",
+              description: "Gagal menyimpan data",
+              type: "error",
+            });
+          }
+        });
     } catch (error: any) {
-      setSaveError('Gagal menyimpan data: ' + error.message);
+      setSaveError("Gagal menyimpan data: " + error.message);
       console.error("Save failed:", error);
     } finally {
       setSaving(false);
@@ -306,7 +316,6 @@ export default function Apl02Detail() {
   return (
     <div className="min-h-screen bg-gray-50">
       <form onSubmit={handleSubmit(onSubmit)}>
-
         <div className="mx-auto">
           <div className="bg-white rounded-lg shadow-sm">
             <NavbarAsesi
@@ -322,7 +331,7 @@ export default function Apl02Detail() {
             />
           </div>
 
-          <main className='m-4'>
+          <main className="m-4">
             <div className="bg-white rounded-lg shadow-sm p-6">
               {/* Header */}
               <div className="pb-7">
@@ -358,8 +367,9 @@ export default function Apl02Detail() {
                     ].map((opt) => (
                       <label
                         key={opt.value}
-                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition ${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
-                          }`}
+                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition ${
+                          filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
+                        }`}
                       >
                         <input
                           type="radio"
@@ -370,10 +380,11 @@ export default function Apl02Detail() {
                           className="hidden"
                         />
                         <span
-                          className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${filterKompeten === opt.value
-                            ? "bg-[#E77D35] border-[#E77D35]"
-                            : "border-[#E77D35]"
-                            }`}
+                          className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
+                            filterKompeten === opt.value
+                              ? "bg-[#E77D35] border-[#E77D35]"
+                              : "border-[#E77D35]"
+                          }`}
                         >
                           {filterKompeten === opt.value && (
                             <Check className="w-4 h-4 text-white" />
@@ -412,7 +423,9 @@ export default function Apl02Detail() {
                           <PopoverContent className="w-[250px] p-0">
                             <Command>
                               <CommandInput placeholder="Cari Bukti Relevan" />
-                              <CommandEmpty>Bukti Relevan tidak ditemukan.</CommandEmpty>
+                              <CommandEmpty>
+                                Bukti Relevan tidak ditemukan.
+                              </CommandEmpty>
                               <CommandGroup>
                                 {evidenceOptions.map((opt) => {
                                   const selected = field.value?.includes(opt);
@@ -424,7 +437,9 @@ export default function Apl02Detail() {
                                         let newValues;
 
                                         if (selected) {
-                                          newValues = currentValues.filter(v => v !== opt);
+                                          newValues = currentValues.filter(
+                                            (v) => v !== opt
+                                          );
                                         } else {
                                           newValues = [...currentValues, opt];
                                         }
@@ -457,7 +472,10 @@ export default function Apl02Detail() {
               {unfilledCount > 0 && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
                   <p className="text-red-600 text-sm">
-                    <strong>{unfilledCount} elemen</strong> belum diisi pencapaian <u>dan</u> bukti relevan. Harap isi <b>Kompeten/Belum Kompeten</b> dan pilih <b>Bukti Relevan</b> untuk semua elemen sebelum menyimpan.
+                    <strong>{unfilledCount} elemen</strong> belum diisi
+                    pencapaian <u>dan</u> bukti relevan. Harap isi{" "}
+                    <b>Kompeten/Belum Kompeten</b> dan pilih{" "}
+                    <b>Bukti Relevan</b> untuk semua elemen sebelum menyimpan.
                   </p>
                 </div>
               )}
@@ -482,7 +500,8 @@ export default function Apl02Detail() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredData.map((item) => {
+                    {filteredData.map((item, i) => {
+                      const elementNumber = i + 1;
                       return (
                         <React.Fragment key={item.id}>
                           <tr
@@ -491,20 +510,30 @@ export default function Apl02Detail() {
                           >
                             <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-900 align-top">
                               <div className="flex items-start gap-2">
-                                <span className="font-medium">{item.id}</span>
+                                <span className="font-medium">
+                                  {elementNumber}
+                                </span>
                                 <span>{item.title}</span>
                               </div>
                             </td>
 
                             <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-900">
-                              {item.details.map((criteria) => (
-                                <div key={criteria.id} className="flex items-start gap-2 mb-2">
-                                  <span className="font-medium text-[#00809D] min-w-8">
-                                    {criteria.id}
-                                  </span>
-                                  <span>{criteria.description}</span>
-                                </div>
-                              ))}
+                              {item.details.map((criteria, j) => {
+                                const criteriaNumber = `${elementNumber}.${
+                                  j + 1
+                                }`;
+                                return (
+                                  <div
+                                    key={criteria.id}
+                                    className="flex items-start gap-2 mb-2"
+                                  >
+                                    <span className="font-medium text-[#00809D] min-w-8">
+                                      {criteriaNumber}
+                                    </span>
+                                    <span>{criteria.description}</span>
+                                  </div>
+                                );
+                              })}
                             </td>
 
                             {/* Pencapaian */}
@@ -514,15 +543,22 @@ export default function Apl02Detail() {
                                 control={control}
                                 defaultValue={null}
                                 render={({ field }) => {
-                                  const selectedValue = field.value === true ? "kompeten" :
-                                    field.value === false ? "belum" : null;
+                                  const selectedValue =
+                                    field.value === true
+                                      ? "kompeten"
+                                      : field.value === false
+                                      ? "belum"
+                                      : null;
 
                                   return (
                                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
                                       {/* Kompeten */}
                                       <label
-                                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${selectedValue === "kompeten" ? "bg-[#E77D3533]" : ""
-                                          }`}
+                                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${
+                                          selectedValue === "kompeten"
+                                            ? "bg-[#E77D3533]"
+                                            : ""
+                                        }`}
                                       >
                                         <input
                                           type="radio"
@@ -530,18 +566,22 @@ export default function Apl02Detail() {
                                           checked={selectedValue === "kompeten"}
                                           onChange={() => {
                                             field.onChange(true);
-                                            handlePencapaianChange(item.id, "kompeten");
+                                            handlePencapaianChange(
+                                              item.id,
+                                              "kompeten"
+                                            );
                                           }}
                                           className="hidden"
                                         />
                                         <span
-                                          className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${selectedValue === "kompeten"
-                                            ? "bg-[#E77D35] border-[#E77D35]"
-                                            : "border-[#E77D35]"
-                                            }`}
+                                          className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
+                                            selectedValue === "kompeten"
+                                              ? "bg-[#E77D35] border-[#E77D35]"
+                                              : "border-[#E77D35]"
+                                          }`}
                                         >
                                           {selectedValue === "kompeten" && (
-                                           <Check className="w-4 h-4 text-white" />
+                                            <Check className="w-4 h-4 text-white" />
                                           )}
                                         </span>
                                         <span
@@ -557,8 +597,11 @@ export default function Apl02Detail() {
 
                                       {/* Belum Kompeten */}
                                       <label
-                                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${selectedValue === "belum" ? "bg-[#E77D3533]" : ""
-                                          }`}
+                                        className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm ${
+                                          selectedValue === "belum"
+                                            ? "bg-[#E77D3533]"
+                                            : ""
+                                        }`}
                                       >
                                         <input
                                           type="radio"
@@ -566,15 +609,19 @@ export default function Apl02Detail() {
                                           checked={selectedValue === "belum"}
                                           onChange={() => {
                                             field.onChange(false);
-                                            handlePencapaianChange(item.id, "belum");
+                                            handlePencapaianChange(
+                                              item.id,
+                                              "belum"
+                                            );
                                           }}
                                           className="hidden"
                                         />
                                         <span
-                                          className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${selectedValue === "belum"
-                                            ? "bg-[#E77D35] border-[#E77D35]"
-                                            : "border-[#E77D35]"
-                                            }`}
+                                          className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
+                                            selectedValue === "belum"
+                                              ? "bg-[#E77D35] border-[#E77D35]"
+                                              : "border-[#E77D35]"
+                                          }`}
                                         >
                                           {selectedValue === "belum" && (
                                             <Check className="w-4 h-4 text-white" />
@@ -620,41 +667,56 @@ export default function Apl02Detail() {
                                       <PopoverContent className="w-[250px] p-0">
                                         <Command>
                                           <CommandInput placeholder="Search evidences..." />
-                                          <CommandEmpty>No evidence found.</CommandEmpty>
+                                          <CommandEmpty>
+                                            No evidence found.
+                                          </CommandEmpty>
                                           <CommandGroup>
                                             {evidenceOptions.map((opt) => {
-                                              const selected = values.includes(opt);
+                                              const selected =
+                                                values.includes(opt);
                                               return (
                                                 <CommandItem
                                                   key={opt}
                                                   onSelect={() => {
                                                     if (selected) {
                                                       // Hapus evidence jika sudah dipilih
-                                                      const newValues = values.filter(v => v !== opt);
+                                                      const newValues =
+                                                        values.filter(
+                                                          (v) => v !== opt
+                                                        );
                                                       field.onChange(newValues);
 
                                                       // Update selectedProof state
-                                                      setSelectedProof(prev => ({
-                                                        ...prev,
-                                                        [item.id]: newValues
-                                                      }));
+                                                      setSelectedProof(
+                                                        (prev) => ({
+                                                          ...prev,
+                                                          [item.id]: newValues,
+                                                        })
+                                                      );
                                                     } else {
                                                       // Tambah evidence jika belum dipilih
-                                                      const newValues = [...values, opt];
+                                                      const newValues = [
+                                                        ...values,
+                                                        opt,
+                                                      ];
                                                       field.onChange(newValues);
 
                                                       // Update selectedProof state
-                                                      setSelectedProof(prev => ({
-                                                        ...prev,
-                                                        [item.id]: newValues
-                                                      }));
+                                                      setSelectedProof(
+                                                        (prev) => ({
+                                                          ...prev,
+                                                          [item.id]: newValues,
+                                                        })
+                                                      );
                                                     }
                                                   }}
                                                 >
                                                   <Check
                                                     className={cn(
                                                       "mr-2 h-4 w-4",
-                                                      selected ? "opacity-100" : "opacity-0"
+                                                      selected
+                                                        ? "opacity-100"
+                                                        : "opacity-0"
                                                     )}
                                                   />
                                                   {opt}
@@ -678,7 +740,9 @@ export default function Apl02Detail() {
               </div>
             </div>
             <div className="relative flex justify-end items-center gap-4 mt-6 mr-10">
-              {saveError && <span className="text-red-500 text-sm">{saveError}</span>}
+              {saveError && (
+                <span className="text-red-500 text-sm">{saveError}</span>
+              )}
               <motion.button
                 type="submit"
                 className="bg-[#E77D35] hover:bg-[#E77D35] text-white font-bold py-2 mb-6 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer hover:bg-orange-600"
@@ -687,7 +751,7 @@ export default function Apl02Detail() {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 disabled={saving || unfilledCount > 0}
               >
-                {saving ? 'Menyimpan...' : 'Simpan'}
+                {saving ? "Menyimpan..." : "Simpan"}
               </motion.button>
             </div>
           </main>

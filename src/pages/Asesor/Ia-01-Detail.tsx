@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Monitor, ChevronLeft, Search, Check } from 'lucide-react';
-import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
-import NavbarAsesor from '@/components/NavAsesor';
+import React, { useState, useEffect, useRef } from "react";
+import { Monitor, ChevronLeft, Search, Check } from "lucide-react";
+import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
+import NavbarAsesor from "@/components/NavAsesor";
 import paths from "@/routes/paths";
-import api from '@/helper/axios';
-import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
+import api from "@/helper/axios";
+import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
 
 interface ElementDetail {
   id: number;
@@ -19,10 +19,10 @@ interface ElementIA01 {
   details: ElementDetail[];
 }
 
-const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: string) => void }> = ({
-  initialValue = '',
-  onChange
-}) => {
+const PenilaianLanjut: React.FC<{
+  initialValue?: string;
+  onChange: (value: string) => void;
+}> = ({ initialValue = "", onChange }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialValue);
 
@@ -32,7 +32,7 @@ const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: strin
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       setIsEditing(false);
       onChange(value);
@@ -55,7 +55,7 @@ const PenilaianLanjut: React.FC<{ initialValue?: string; onChange: (value: strin
           className="text-gray-700 cursor-pointer min-h-[24px]"
           onClick={() => setIsEditing(true)}
         >
-          {value || 'Klik untuk menambahkan penilaian...'}
+          {value || "Klik untuk menambahkan penilaian..."}
         </p>
       )}
     </div>
@@ -68,19 +68,25 @@ export default function Ia01Detail() {
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
-  const activeGroup = searchParams.get('group') || '';
-  const unitNumber = location.state?.unitNumber || 'N/A';
+  const activeGroup = searchParams.get("group") || "";
+  const unitNumber = location.state?.unitNumber || "N/A";
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [elements, setElements] = useState<ElementIA01[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterKompeten, setFilterKompeten] = useState<'all' | 'kompeten' | 'belum'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterKompeten, setFilterKompeten] = useState<
+    "all" | "kompeten" | "belum"
+  >("all");
   const [pencapaian, setPencapaian] = useState<Record<number, string>>({});
-  const [penilaianLanjut, setPenilaianLanjut] = useState<Record<number, string>>({});
+  const [penilaianLanjut, setPenilaianLanjut] = useState<
+    Record<number, string>
+  >({});
   const finishedRef = useRef(false);
   const [unassessedCriteria, setUnassessedCriteria] = useState<number[]>([]);
-  const [unitNumberMap, setUnitNumberMap] = useState<Record<number, number>>({});
+  const [unitNumberMap, setUnitNumberMap] = useState<Record<number, number>>(
+    {}
+  );
 
   // Handle Save button
   const handleSave = async () => {
@@ -88,7 +94,7 @@ export default function Ia01Detail() {
     const unassessed = getUnassessedCriteria();
     if (unassessed.length > 0) {
       setUnassessedCriteria(unassessed);
-      setSaveError('Harap isi penilaian untuk semua kriteria kerja');
+      setSaveError("Harap isi penilaian untuk semua kriteria kerja");
       return;
     }
 
@@ -101,10 +107,13 @@ export default function Ia01Detail() {
       const processedPenilaianLanjut = { ...penilaianLanjut };
 
       // Iterasi melalui semua elemen dan detail untuk memastikan semua memiliki nilai
-      elements.forEach(el => {
-        el.details.forEach(det => {
-          if (!processedPenilaianLanjut[det.id] || processedPenilaianLanjut[det.id].trim() === '') {
-            processedPenilaianLanjut[det.id] = '-';
+      elements.forEach((el) => {
+        el.details.forEach((det) => {
+          if (
+            !processedPenilaianLanjut[det.id] ||
+            processedPenilaianLanjut[det.id].trim() === ""
+          ) {
+            processedPenilaianLanjut[det.id] = "-";
           }
         });
       });
@@ -112,36 +121,35 @@ export default function Ia01Detail() {
       // Payload per detail (kriteria kerja)
       const payload = {
         result_id: Number(id_result),
-        elements: elements.flatMap(el =>
-          el.details.map(det => ({
+        elements: elements.flatMap((el) =>
+          el.details.map((det) => ({
             element_detail_id: det.id,
-            is_competent: pencapaian[det.id] === 'kompeten',
-            evaluation: processedPenilaianLanjut[det.id] // Gunakan nilai yang sudah diproses
+            is_competent: pencapaian[det.id] === "kompeten",
+            evaluation: processedPenilaianLanjut[det.id], // Gunakan nilai yang sudah diproses
           }))
-        )
+        ),
       };
 
       // Kirim data ke API
-      await api.post('/assessments/ia-01/result/send', payload);
+      await api.post("/assessments/ia-01/result/send", payload);
 
       // Construct navigation path with activeGroup
       const basePath = paths.asesor.assessment.ia01(
-        id_assessment ?? '-',
-        id_asesi ?? '-'
+        id_assessment ?? "-",
+        id_asesi ?? "-"
       );
 
       const navigationPath = activeGroup
         ? `${basePath}?group=${encodeURIComponent(activeGroup)}`
         : basePath;
 
-      console.log('Navigating to:', navigationPath); // Debug log
+      console.log("Navigating to:", navigationPath); // Debug log
 
       // Force navigation with replace to ensure it works
       navigate(navigationPath, { replace: true });
-
     } catch (e: any) {
-      setSaveError('Gagal menyimpan data: ' + e.message);
-      console.error('Save error:', e);
+      setSaveError("Gagal menyimpan data: " + e.message);
+      console.error("Save error:", e);
     } finally {
       setSaving(false);
     }
@@ -167,8 +175,10 @@ export default function Ia01Detail() {
           if (el.details && el.details.length > 0) {
             el.details.forEach((det: any) => {
               if (det.result) {
-                pencapaianInit[det.id] = det.result.is_competent ? 'kompeten' : 'belum';
-                penilaianLanjutInit[det.id] = det.result.evaluation || '';
+                pencapaianInit[det.id] = det.result.is_competent
+                  ? "kompeten"
+                  : "belum";
+                penilaianLanjutInit[det.id] = det.result.evaluation || "";
               }
             });
           }
@@ -183,13 +193,13 @@ export default function Ia01Detail() {
 
   // id = detail.id
   const handlePencapaianChange = (id: number, value: string) => {
-    setPencapaian(prev => {
+    setPencapaian((prev) => {
       const updated = { ...prev, [id]: value };
       checkAndFinishUnit(updated);
 
       // Hapus kriteria dari daftar unassessed jika sudah dinilai
       if (unassessedCriteria.includes(id)) {
-        setUnassessedCriteria(prev => prev.filter(item => item !== id));
+        setUnassessedCriteria((prev) => prev.filter((item) => item !== id));
       }
 
       return updated;
@@ -197,15 +207,25 @@ export default function Ia01Detail() {
   };
 
   // Cek jika semua elemen sudah diisi (kompeten/belum), lalu update status unit ke finished
-  const checkAndFinishUnit = async (updatedPencapaian: Record<number, string>) => {
+  const checkAndFinishUnit = async (
+    updatedPencapaian: Record<number, string>
+  ) => {
     if (!elements.length || finishedRef.current) return;
     // Ambil semua id detail dari unit ini
-    const allDetailIds: number[] = elements.flatMap(el => el.details.map(det => det.id));
-    const allChecked = allDetailIds.every(id => updatedPencapaian[id] === 'kompeten' || updatedPencapaian[id] === 'belum');
+    const allDetailIds: number[] = elements.flatMap((el) =>
+      el.details.map((det) => det.id)
+    );
+    const allChecked = allDetailIds.every(
+      (id) =>
+        updatedPencapaian[id] === "kompeten" ||
+        updatedPencapaian[id] === "belum"
+    );
     if (allChecked) {
       finishedRef.current = true;
       try {
-        await api.put(`/assessments/ia-01/units/${id_result}/unit/${id_unit}/finish`);
+        await api.put(
+          `/assessments/ia-01/units/${id_result}/unit/${id_unit}/finish`
+        );
       } catch (e) {
         // Optional: handle error
       }
@@ -214,15 +234,15 @@ export default function Ia01Detail() {
 
   // id = detail.id
   const handlePenilaianLanjutChange = (id: number, value: string) => {
-    setPenilaianLanjut(prev => ({ ...prev, [id]: value }));
+    setPenilaianLanjut((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleFilterChange = (value: 'all' | 'kompeten' | 'belum') => {
+  const handleFilterChange = (value: "all" | "kompeten" | "belum") => {
     setFilterKompeten(value);
-    if (value === 'kompeten' || value === 'belum') {
+    if (value === "kompeten" || value === "belum") {
       const newPencapaian: Record<number, string> = {};
-      elements.forEach(item => {
-        item.details.forEach(det => {
+      elements.forEach((item) => {
+        item.details.forEach((det) => {
           newPencapaian[det.id] = value;
         });
       });
@@ -236,9 +256,12 @@ export default function Ia01Detail() {
   // Fungsi untuk mendapatkan daftar kriteria yang belum dinilai
   const getUnassessedCriteria = () => {
     const unassessed: number[] = [];
-    elements.forEach(el => {
-      el.details.forEach(det => {
-        if (!pencapaian[det.id] || (pencapaian[det.id] !== 'kompeten' && pencapaian[det.id] !== 'belum')) {
+    elements.forEach((el) => {
+      el.details.forEach((det) => {
+        if (
+          !pencapaian[det.id] ||
+          (pencapaian[det.id] !== "kompeten" && pencapaian[det.id] !== "belum")
+        ) {
           unassessed.push(det.id);
         }
       });
@@ -246,9 +269,12 @@ export default function Ia01Detail() {
     return unassessed;
   };
 
-  const filteredData = elements.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.details.some(det => det.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredData = elements.filter(
+    (item) =>
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.details.some((det) =>
+        det.description.toLowerCase().includes(searchTerm.toLowerCase())
+      )
   );
 
   // Hitung jumlah kriteria yang belum dinilai
@@ -280,7 +306,7 @@ export default function Ia01Detail() {
         setUnitNumberMap(numberMap);
       }
     } catch (error: any) {
-      console.error('fetchAllUnits error:', error);
+      console.error("fetchAllUnits error:", error);
     }
   };
 
@@ -294,10 +320,10 @@ export default function Ia01Detail() {
 
   // Tidak perlu kirim state, langsung navigasi biasa
   const handleBack = () => {
-    navigate(paths.asesor.assessment.ia01(
-      id_assessment ?? '-',
-      id_asesi ?? '-'
-    ) + (activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''));
+    navigate(
+      paths.asesor.assessment.ia01(id_assessment ?? "-", id_asesi ?? "-") +
+        (activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : "")
+    );
   };
 
   return (
@@ -322,7 +348,7 @@ export default function Ia01Detail() {
           <div className="flex items-center gap-2 text-[#00809D]">
             <Monitor size={20} />
             <span className="font-medium">
-              Unit kompetensi {unitNumberMap[Number(id_unit)] || 'N/A'}
+              Unit kompetensi {unitNumberMap[Number(id_unit)] || "N/A"}
             </span>
           </div>
 
@@ -343,53 +369,70 @@ export default function Ia01Detail() {
 
           {/* Filter Kompeten */}
           <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">
-
             <label
               className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-                ${filterKompeten === 'kompeten' ? "bg-[#E77D3533]" : ""}`}
+                ${filterKompeten === "kompeten" ? "bg-[#E77D3533]" : ""}`}
             >
               <input
                 type="radio"
                 name="filter"
                 value="kompeten"
-                checked={filterKompeten === 'kompeten'}
-                onChange={() => handleFilterChange('kompeten')}
+                checked={filterKompeten === "kompeten"}
+                onChange={() => handleFilterChange("kompeten")}
                 className="hidden"
               />
               <span
                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                  ${filterKompeten === 'kompeten' ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+                  ${
+                    filterKompeten === "kompeten"
+                      ? "bg-[#E77D35] border-[#E77D35]"
+                      : "border-[#E77D35]"
+                  }`}
               >
-                {filterKompeten === 'kompeten' && (
+                {filterKompeten === "kompeten" && (
                   <Check className="w-4 h-4 text-white" />
                 )}
               </span>
-              <span className={filterKompeten === 'kompeten' ? "text-gray-900" : "text-gray-500"}>
+              <span
+                className={
+                  filterKompeten === "kompeten"
+                    ? "text-gray-900"
+                    : "text-gray-500"
+                }
+              >
                 Ceklis Semua Ya
               </span>
             </label>
 
             <label
               className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-                ${filterKompeten === 'belum' ? "bg-[#E77D3533]" : ""}`}
+                ${filterKompeten === "belum" ? "bg-[#E77D3533]" : ""}`}
             >
               <input
                 type="radio"
                 name="filter"
                 value="belum"
-                checked={filterKompeten === 'belum'}
-                onChange={() => handleFilterChange('belum')}
+                checked={filterKompeten === "belum"}
+                onChange={() => handleFilterChange("belum")}
                 className="hidden"
               />
               <span
                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                  ${filterKompeten === 'belum' ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"}`}
+                  ${
+                    filterKompeten === "belum"
+                      ? "bg-[#E77D35] border-[#E77D35]"
+                      : "border-[#E77D35]"
+                  }`}
               >
-                {filterKompeten === 'belum' && (
+                {filterKompeten === "belum" && (
                   <Check className="w-4 h-4 text-white" />
                 )}
               </span>
-              <span className={filterKompeten === 'belum' ? "text-gray-900" : "text-gray-500"}>
+              <span
+                className={
+                  filterKompeten === "belum" ? "text-gray-900" : "text-gray-500"
+                }
+              >
                 Ceklis Semua Tidak
               </span>
             </label>
@@ -400,7 +443,8 @@ export default function Ia01Detail() {
         {unassessedCount > 0 && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-red-600 text-sm">
-              <strong>{unassessedCount} kriteria</strong> belum dinilai. Harap beri penilaian Ya/Tidak untuk semua kriteria sebelum menyimpan.
+              <strong>{unassessedCount} kriteria</strong> belum dinilai. Harap
+              beri penilaian Ya/Tidak untuk semua kriteria sebelum menyimpan.
             </p>
           </div>
         )}
@@ -410,63 +454,92 @@ export default function Ia01Detail() {
           <table className="w-full min-w-[800px]">
             <thead className="bg-gray-50">
               <tr>
-                <th className="p-4 text-left text-sm font-medium text-gray-700">No</th>
+                <th className="p-4 text-left text-sm font-medium text-gray-700">
+                  No
+                </th>
                 <th className="p-4 text-left text-sm font-medium text-gray-700"></th>
-                <th className="p-4 text-left text-sm font-medium text-gray-700">Kriteria Untuk Kerja</th>
-                <th className="p-4 text-left text-sm font-medium text-gray-700">Standar Industri atau Tempat Kerja</th>
-                <th className="p-4 text-center text-sm font-medium text-gray-700">Pencapaian</th>
-                <th className="p-4 text-center text-sm font-medium text-gray-700">Penilaian Lanjut</th>
+                <th className="p-4 text-left text-sm font-medium text-gray-700">
+                  Kriteria Untuk Kerja
+                </th>
+                <th className="p-4 text-left text-sm font-medium text-gray-700">
+                  Standar Industri atau Tempat Kerja
+                </th>
+                <th className="p-4 text-center text-sm font-medium text-gray-700">
+                  Pencapaian
+                </th>
+                <th className="p-4 text-center text-sm font-medium text-gray-700">
+                  Penilaian Lanjut
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredData.map((item, i) => (
                 <React.Fragment key={item.id}>
-                  {item.details.map((det, idx) => {
-                    const isUnassessed = !pencapaian[det.id] ||
-                      (pencapaian[det.id] !== 'kompeten' && pencapaian[det.id] !== 'belum');
+                  {item.details.map((det, j) => {
+                    const isUnassessed =
+                      !pencapaian[det.id] ||
+                      (pencapaian[det.id] !== "kompeten" &&
+                        pencapaian[det.id] !== "belum");
+
+                    const elementNumber = `${i + 1}`;
+                    const criteriaNumber = `${elementNumber}.${j + 1}`;
 
                     return (
-                      <tr
-                        key={det.id}
-                        className={`border-t border-gray-200`}
-                      >
-                        {idx === 0 && (
-                          <td rowSpan={item.details.length} className="px-4 py-3 text-sm text-gray-900 align-top">
-                            {i + 1}
+                      <tr key={det.id} className={`border-t border-gray-200`}>
+                        {j === 0 && (
+                          <td
+                            rowSpan={item.details.length}
+                            className="px-4 py-3 text-sm text-gray-900 align-top"
+                          >
+                            {elementNumber}
                           </td>
                         )}
-                        {idx === 0 && (
-                          <td rowSpan={item.details.length} className="px-4 py-3 text-sm text-gray-900 align-top">
+                        {j === 0 && (
+                          <td
+                            rowSpan={item.details.length}
+                            className="px-4 py-3 text-sm text-gray-900 align-top"
+                          >
                             {item.title}
                           </td>
                         )}
                         <td className="px-4 py-3 text-sm text-gray-900">
                           <div className="flex items-start gap-2">
-                            <span className="font-medium text-blue-600 min-w-8">{det.id}</span>
+                            <span className="font-medium text-blue-600 min-w-8">
+                              {criteriaNumber}
+                            </span>
                             <span>{det.description}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{det.benchmark}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {det.benchmark}
+                        </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
                             {/* Kompeten */}
                             <label
                               className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                ${pencapaian[det.id] === "kompeten" ? "bg-[#E77D3533]" : ""}`}
+                                ${
+                                  pencapaian[det.id] === "kompeten"
+                                    ? "bg-[#E77D3533]"
+                                    : ""
+                                }`}
                             >
                               <input
                                 type="radio"
                                 name={`pencapaian-${det.id}`}
                                 value="kompeten"
                                 checked={pencapaian[det.id] === "kompeten"}
-                                onChange={(e) => handlePencapaianChange(det.id, e.target.value)}
+                                onChange={(e) =>
+                                  handlePencapaianChange(det.id, e.target.value)
+                                }
                                 className="hidden"
                               />
                               <span
                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                  ${pencapaian[det.id] === "kompeten"
-                                    ? "bg-[#E77D35] border-[#E77D35]"
-                                    : "border-[#E77D35]"
+                                  ${
+                                    pencapaian[det.id] === "kompeten"
+                                      ? "bg-[#E77D35] border-[#E77D35]"
+                                      : "border-[#E77D35]"
                                   }`}
                               >
                                 {pencapaian[det.id] === "kompeten" && (
@@ -486,21 +559,28 @@ export default function Ia01Detail() {
                             {/* Belum Kompeten */}
                             <label
                               className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                ${pencapaian[det.id] === "belum" ? "bg-[#E77D3533]" : ""}`}
+                                ${
+                                  pencapaian[det.id] === "belum"
+                                    ? "bg-[#E77D3533]"
+                                    : ""
+                                }`}
                             >
                               <input
                                 type="radio"
                                 name={`pencapaian-${det.id}`}
                                 value="belum"
                                 checked={pencapaian[det.id] === "belum"}
-                                onChange={(e) => handlePencapaianChange(det.id, e.target.value)}
+                                onChange={(e) =>
+                                  handlePencapaianChange(det.id, e.target.value)
+                                }
                                 className="hidden"
                               />
                               <span
                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                  ${pencapaian[det.id] === "belum"
-                                    ? "bg-[#E77D35] border-[#E77D35]"
-                                    : "border-[#E77D35]"
+                                  ${
+                                    pencapaian[det.id] === "belum"
+                                      ? "bg-[#E77D35] border-[#E77D35]"
+                                      : "border-[#E77D35]"
                                   }`}
                               >
                                 {pencapaian[det.id] === "belum" && (
@@ -521,8 +601,10 @@ export default function Ia01Detail() {
                         </td>
                         <td className="px-4 py-3 text-center">
                           <PenilaianLanjut
-                            initialValue={penilaianLanjut[det.id] || ''}
-                            onChange={(value) => handlePenilaianLanjutChange(det.id, value)}
+                            initialValue={penilaianLanjut[det.id] || ""}
+                            onChange={(value) =>
+                              handlePenilaianLanjutChange(det.id, value)
+                            }
                           />
                         </td>
                       </tr>
@@ -534,13 +616,15 @@ export default function Ia01Detail() {
           </table>
         </div>
         <div className="flex justify-end items-center gap-4 mt-6">
-          {saveError && <span className="text-red-500 text-sm mr-4">{saveError}</span>}
+          {saveError && (
+            <span className="text-red-500 text-sm mr-4">{saveError}</span>
+          )}
           <button
             className="bg-[#E77D35] px-12 text-white lg:px-20 py-2 rounded-lg font-medium cursor-pointer hover:bg-[#E77D35]/90 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60"
             onClick={handleSave}
             disabled={saving || unassessedCount > 0}
           >
-            {saving ? 'Menyimpan...' : 'Simpan'}
+            {saving ? "Menyimpan..." : "Simpan"}
           </button>
         </div>
       </div>
