@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Monitor, ChevronLeft, Search, Check } from "lucide-react";
+import { Monitor, ChevronLeft, Search, Check, AlertCircle } from "lucide-react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import NavbarAsesor from "@/components/NavAsesor";
 import paths from "@/routes/paths";
@@ -18,49 +18,6 @@ interface ElementIA01 {
   title: string;
   details: ElementDetail[];
 }
-
-const PenilaianLanjut: React.FC<{
-  initialValue?: string;
-  onChange: (value: string) => void;
-}> = ({ initialValue = "", onChange }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [value, setValue] = useState(initialValue);
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    onChange(value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      setIsEditing(false);
-      onChange(value);
-    }
-  };
-
-  return (
-    <div className="p-2">
-      {isEditing ? (
-        <textarea
-          className="w-full p-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={value}
-          autoFocus
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-        />
-      ) : (
-        <p
-          className="text-gray-700 cursor-pointer min-h-[24px]"
-          onClick={() => setIsEditing(true)}
-        >
-          {value || "Klik untuk menambahkan penilaian..."}
-        </p>
-      )}
-    </div>
-  );
-};
 
 export default function Ia01Detail() {
   const { id_unit } = useParams();
@@ -87,6 +44,71 @@ export default function Ia01Detail() {
   const [unitNumberMap, setUnitNumberMap] = useState<Record<number, number>>(
     {}
   );
+
+  const [isEditable, setIsEditable] = useState(true);
+  const [assessmentStatus, setAssessmentStatus] = useState<any>(null);
+
+  const checkAssessmentStatus = async () => {
+    try {
+      const response = await api.get(`/assessments/ia-01/result/${id_result}`);
+      if (response.data.success) {
+        const data = response.data.data;
+        setAssessmentStatus(data.ia01_header);
+
+        // Jika asesi sudah approve, nonaktifkan editing
+        if (data.ia01_header?.approved_assessor) {
+          setIsEditable(false);
+        }
+      }
+    } catch (error) {
+      console.error("Gagal memeriksa status asesmen:", error);
+    }
+  };
+
+  const PenilaianLanjut: React.FC<{
+    initialValue?: string;
+    disabled?: boolean;
+    onChange: (value: string) => void;
+  }> = ({ initialValue = "", onChange }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [value, setValue] = useState(initialValue);
+
+    const handleBlur = () => {
+      setIsEditing(false);
+      onChange(value);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        setIsEditing(false);
+        onChange(value);
+      }
+    };
+
+    return (
+      <div className="p-2">
+        {isEditing && isEditable ? (
+          <textarea
+            className="w-full p-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={value}
+            autoFocus
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+          />
+        ) : (
+          <p
+            className={`text-gray-700 min-h-[24px] ${isEditable ? "cursor-pointer" : "opacity-50 cursor-not-allowed"
+              }`}
+            onClick={() => isEditable && setIsEditing(true)}
+          >
+            {value || "Klik untuk menambahkan penilaian..."}
+          </p>
+        )}
+      </div>
+    );
+  };
 
   // Handle Save button
   const handleSave = async () => {
@@ -312,6 +334,7 @@ export default function Ia01Detail() {
 
   // Panggil fungsi ini dalam useEffect
   useEffect(() => {
+    checkAssessmentStatus();
     if (id_result) {
       fetchAllUnits();
       fetchElements();
@@ -322,7 +345,7 @@ export default function Ia01Detail() {
   const handleBack = () => {
     navigate(
       paths.asesor.assessment.ia01(id_assessment ?? "-", id_asesi ?? "-") +
-        (activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : "")
+      (activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : "")
     );
   };
 
@@ -341,6 +364,17 @@ export default function Ia01Detail() {
           }
         />
       </div>
+
+      {!isEditable && (
+        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <div className="flex items-center">
+            <AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
+            <p className="text-yellow-800">
+              Data tidak dapat diubah karena QR code sudah digenerate.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-sm m-4 px-4 py-7">
         {/* Header */}
@@ -368,71 +402,53 @@ export default function Ia01Detail() {
           </div>
 
           {/* Filter Kompeten */}
-          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">
+          <div className={`flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none ${!isEditable ? "opacity-50" : ""}`}>
+            {/* Kompeten */}
             <label
-              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-                ${filterKompeten === "kompeten" ? "bg-[#E77D3533]" : ""}`}
+              className={`flex items-center gap-2 px-2 py-1 rounded-sm transition
+      ${filterKompeten === "kompeten" ? "bg-[#E77D3533]" : ""} ${!isEditable ? "cursor-not-allowed" : "cursor-pointer"}`}
             >
               <input
                 type="radio"
                 name="filter"
                 value="kompeten"
                 checked={filterKompeten === "kompeten"}
-                onChange={() => handleFilterChange("kompeten")}
+                onChange={() => isEditable && handleFilterChange("kompeten")}
+                disabled={!isEditable}
                 className="hidden"
               />
               <span
                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                  ${
-                    filterKompeten === "kompeten"
-                      ? "bg-[#E77D35] border-[#E77D35]"
-                      : "border-[#E77D35]"
-                  }`}
+        ${filterKompeten === "kompeten" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"} ${!isEditable ? "cursor-not-allowed" : ""}`}
               >
-                {filterKompeten === "kompeten" && (
-                  <Check className="w-4 h-4 text-white" />
-                )}
+                {filterKompeten === "kompeten" && <Check className="w-4 h-4 text-white" />}
               </span>
-              <span
-                className={
-                  filterKompeten === "kompeten"
-                    ? "text-gray-900"
-                    : "text-gray-500"
-                }
-              >
+              <span className={`${filterKompeten === "kompeten" ? "text-gray-900" : "text-gray-500"} ${!isEditable ? "cursor-not-allowed" : ""}`}>
                 Ceklis Semua Ya
               </span>
             </label>
 
+            {/* Belum Kompeten */}
             <label
-              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition
-                ${filterKompeten === "belum" ? "bg-[#E77D3533]" : ""}`}
+              className={`flex items-center gap-2 px-2 py-1 rounded-sm transition
+      ${filterKompeten === "belum" ? "bg-[#E77D3533]" : ""} ${!isEditable ? "cursor-not-allowed" : "cursor-pointer"}`}
             >
               <input
                 type="radio"
                 name="filter"
                 value="belum"
                 checked={filterKompeten === "belum"}
-                onChange={() => handleFilterChange("belum")}
+                onChange={() => isEditable && handleFilterChange("belum")}
+                disabled={!isEditable}
                 className="hidden"
               />
               <span
                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                  ${
-                    filterKompeten === "belum"
-                      ? "bg-[#E77D35] border-[#E77D35]"
-                      : "border-[#E77D35]"
-                  }`}
+        ${filterKompeten === "belum" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"} ${!isEditable ? "cursor-not-allowed" : ""}`}
               >
-                {filterKompeten === "belum" && (
-                  <Check className="w-4 h-4 text-white" />
-                )}
+                {filterKompeten === "belum" && <Check className="w-4 h-4 text-white" />}
               </span>
-              <span
-                className={
-                  filterKompeten === "belum" ? "text-gray-900" : "text-gray-500"
-                }
-              >
+              <span className={`${filterKompeten === "belum" ? "text-gray-900" : "text-gray-500"} ${!isEditable ? "cursor-not-allowed" : ""}`}>
                 Ceklis Semua Tidak
               </span>
             </label>
@@ -513,86 +529,61 @@ export default function Ia01Detail() {
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {det.benchmark}
                         </td>
-                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                        <td className={`px-2 sm:px-4 py-2 sm:py-3 text-center ${!isEditable ? "opacity-50" : ""}`}>
                           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
                             {/* Kompeten */}
                             <label
-                              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                ${
-                                  pencapaian[det.id] === "kompeten"
-                                    ? "bg-[#E77D3533]"
-                                    : ""
-                                }`}
+                              className={`flex items-center gap-2 px-2 py-1 rounded-sm transition text-sm
+        ${pencapaian[det.id] === "kompeten" ? "bg-[#E77D3533]" : ""} 
+        ${!isEditable ? "cursor-not-allowed" : "cursor-pointer"}`}
                             >
                               <input
                                 type="radio"
                                 name={`pencapaian-${det.id}`}
                                 value="kompeten"
                                 checked={pencapaian[det.id] === "kompeten"}
-                                onChange={(e) =>
-                                  handlePencapaianChange(det.id, e.target.value)
-                                }
+                                onChange={(e) => isEditable && handlePencapaianChange(det.id, e.target.value)}
+                                disabled={!isEditable}
                                 className="hidden"
                               />
                               <span
                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                  ${
-                                    pencapaian[det.id] === "kompeten"
-                                      ? "bg-[#E77D35] border-[#E77D35]"
-                                      : "border-[#E77D35]"
-                                  }`}
+          ${pencapaian[det.id] === "kompeten" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"} 
+          ${!isEditable ? "cursor-not-allowed" : ""}`}
                               >
-                                {pencapaian[det.id] === "kompeten" && (
-                                  <Check className="w-4 h-4 text-white" />
-                                )}
+                                {pencapaian[det.id] === "kompeten" && <Check className="w-4 h-4 text-white" />}
                               </span>
                               <span
-                                className={
-                                  pencapaian[det.id] === "kompeten"
-                                    ? "text-gray-900"
-                                    : "text-gray-500"
-                                }
+                                className={`${pencapaian[det.id] === "kompeten" ? "text-gray-900" : "text-gray-500"} ${!isEditable ? "cursor-not-allowed" : ""}`}
                               >
                                 Ya
                               </span>
                             </label>
+
                             {/* Belum Kompeten */}
                             <label
-                              className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition text-sm
-                                ${
-                                  pencapaian[det.id] === "belum"
-                                    ? "bg-[#E77D3533]"
-                                    : ""
-                                }`}
+                              className={`flex items-center gap-2 px-2 py-1 rounded-sm transition text-sm
+        ${pencapaian[det.id] === "belum" ? "bg-[#E77D3533]" : ""} 
+        ${!isEditable ? "cursor-not-allowed" : "cursor-pointer"}`}
                             >
                               <input
                                 type="radio"
                                 name={`pencapaian-${det.id}`}
                                 value="belum"
                                 checked={pencapaian[det.id] === "belum"}
-                                onChange={(e) =>
-                                  handlePencapaianChange(det.id, e.target.value)
-                                }
+                                onChange={(e) => isEditable && handlePencapaianChange(det.id, e.target.value)}
+                                disabled={!isEditable}
                                 className="hidden"
                               />
                               <span
                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-                                  ${
-                                    pencapaian[det.id] === "belum"
-                                      ? "bg-[#E77D35] border-[#E77D35]"
-                                      : "border-[#E77D35]"
-                                  }`}
+          ${pencapaian[det.id] === "belum" ? "bg-[#E77D35] border-[#E77D35]" : "border-[#E77D35]"} 
+          ${!isEditable ? "cursor-not-allowed" : ""}`}
                               >
-                                {pencapaian[det.id] === "belum" && (
-                                  <Check className="w-4 h-4 text-white" />
-                                )}
+                                {pencapaian[det.id] === "belum" && <Check className="w-4 h-4 text-white" />}
                               </span>
                               <span
-                                className={
-                                  pencapaian[det.id] === "belum"
-                                    ? "text-gray-900"
-                                    : "text-gray-500"
-                                }
+                                className={`${pencapaian[det.id] === "belum" ? "text-gray-900" : "text-gray-500"} ${!isEditable ? "cursor-not-allowed" : ""}`}
                               >
                                 Tidak
                               </span>
@@ -603,7 +594,7 @@ export default function Ia01Detail() {
                           <PenilaianLanjut
                             initialValue={penilaianLanjut[det.id] || ""}
                             onChange={(value) =>
-                              handlePenilaianLanjutChange(det.id, value)
+                              isEditable && handlePenilaianLanjutChange(det.id, value)
                             }
                           />
                         </td>

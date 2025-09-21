@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, X, AlertCircle, Check } from "lucide-react";
+import { Search, X, AlertCircle, Check, Clock } from "lucide-react";
 import api from "@/helper/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AK03Question, AssessmentData } from "@/model/ak03-model";
@@ -297,14 +297,19 @@ export default function AK03({
 			<div className="bg-white rounded-lg shadow-sm p-4 mb-4 space-y-4">
 				{/* Baris 1 */}
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-					<span className="block text-sm font-medium text-gray-800">
-						Skema Sertifikasi ( Okupasi )
-					</span>
+					<div className="flex flex-col lg:flex-row lg:items-center gap-3 flex-wrap">
+						<h2 className="text-lg font-bold text-gray-800">
+							Skema Sertifikasi {formData?.assessment?.occupation?.name}
+						</h2>
+						<div className="flex items-center space-x-2 mt-1 lg:mt-0">
+							<Clock className="w-5 h-5 text-gray-400" />
+							<span className="text-sm text-gray-600 capitalize">
+								{formData?.tuk || "Sewaktu"}
+							</span>
+						</div>
+					</div>
 
 					<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 whitespace-nowrap">
-						<span className="text-sm font-medium text-gray-800">
-							Okupasi Junior Coder
-						</span>
 						<span className="bg-[#E77D3533] text-[#E77D35] text-sm px-3 py-1 rounded-md font-sm">
 							{formData?.assessment?.code || "Tidak Diketahui"}
 						</span>
