@@ -1,22 +1,20 @@
 // TambahMUK.tsx
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { File, Filter } from "lucide-react";
+import { File } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
-import {
-	type MukDetailType,
-	type MukTypeInput,
-	type Scheme,
-} from "@/lib/types";
+import { type Occupation, type Scheme } from "@/lib/types";
+import { type MukDetailType, type MukTypeInput } from "@/model/muk-model";
 import api from "@/helper/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import routes from "@/routes/paths";
 import FormMuk from "@/components/section/FormMuk";
+import useToast from "@/components/ui/useToast";
 
 const defaultValues: MukTypeInput = {
 	scheme_id: 0,
-	occupation_name: "",
+	occupation_id: 0,
 	code: "",
 	uc_apl02s: [],
 	groups_ia01: [],
@@ -28,9 +26,15 @@ const EditMUK: React.FC = () => {
 	const { id_assessment } = useParams();
 	const navigate = useNavigate();
 
+	const toast = useToast();
+
 	const [schemes, setSchemes] = useState<Scheme[]>([]);
+	const [occupations, setOccupations] = useState<Occupation[]>([]);
 	const [dataMuk, setDataMuk] = useState<MukDetailType>();
 	const [loading, setLoading] = useState(true);
+	const [submitting, setSubmitting] = useState(false);
+	
+	const [fileIA02, setFileIA02] = useState<File | null>(null);
 
 	const form = useForm<MukTypeInput>({ defaultValues });
 
@@ -46,15 +50,31 @@ const EditMUK: React.FC = () => {
 
 				setSchemes(resSchemes.data.data || []);
 				setDataMuk(resMuk.data.data);
-			} catch (err) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			} catch (err: any) {
 				setSchemes([]);
 				setDataMuk(undefined);
+				toast.show({ title: "Gagal", description: "Gagal memuat schema dan MUK. " + err?.response?.data?.message || err.message });
 			} finally {
 				setLoading(false);
 			}
 		};
 
+		const fetchOccupations = async () => {
+			try {
+				const res = await api.get("/occupations");
+				if (res?.data?.success) {
+					setOccupations(res.data.data);
+				}
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			} catch (err: any) {
+				toast.show({ title: "Gagal", description: "Gagal memuat occupation. " + err?.response?.data?.message || err.message });
+			}
+		};
+
 		fetchData();
+		fetchOccupations();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id_assessment]);
 
 	useEffect(() => {
@@ -67,11 +87,65 @@ const EditMUK: React.FC = () => {
 		} else {
 			form.reset({
 				scheme_id: dataMuk?.occupation.scheme_id,
-				occupation_name: dataMuk?.occupation.name,
+				occupation_id: dataMuk?.occupation.id,
 				...dataMuk,
 			});
 		}
-	}, [dataMuk]);
+	}, [dataMuk, form, loading, navigate]);
+
+	const handleSubmitIA02 = async (id_assessment: string) => {
+		console.log(fileIA02, id_assessment);
+		await api
+			.post(
+				`/assessments/ia-02/upload-pdf/${id_assessment}`,
+				{ pdf: fileIA02 },
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				}
+			)
+			.then((res) => {
+				if (res?.data?.success) {
+					toast.show({
+						title: "Berhasil",
+						description: "IA02 berhasil diupload",
+					});
+				} else {
+					toast.show({ title: "Gagal", description: "Gagal mengupload IA02" + res?.data?.message });
+				}
+				navigate(routes.admin.muk.root);
+			})
+			.catch((err) => toast.show({ title: "Gagal", description: "Gagal mengupload IA02. " + err?.response?.data?.message || err.message }))
+			.finally(() => setSubmitting(false));
+	};
+
+	const onSubmit = async (data: MukTypeInput) => {
+		try {
+			setSubmitting(true);
+			// POST to /assessments/create (app mounts assessmentRoutes on /api/assessments)
+			const res = await api.put(`/assessments/${id_assessment}`, {
+				...data,
+				scheme_id: Number(data.scheme_id),
+			});
+			if (res?.data?.success) {
+				toast.show({
+					title: "Berhasil",
+					description: "MUK berhasil diupload. HARAP TUNGGU IA02 TERUPLOAD (Jika mengupload)",
+				});
+			} else {
+				toast.show({ title: "Gagal", description: "Gagal membuat MUK" });
+			}
+			if (fileIA02 === null) navigate(routes.admin.muk.root);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (err: any) {
+			toast.show({ title: "Gagal", description: ". " + err?.response?.data?.message || err.message });
+		} finally {
+			if (fileIA02 === null) setSubmitting(false);
+			// console.log(id_assessment, fileIA02);
+			if (id_assessment && fileIA02 !== null) handleSubmitIA02(id_assessment);
+		}
+	};
 
 	return (
 		<div className="min-h-screen bg-[#F7FAFC] flex">
@@ -86,7 +160,7 @@ const EditMUK: React.FC = () => {
 					</div>
 
 					{/* Card container mirip contoh KelolaMUK */}
-					<form>
+					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6 space-y-6">
 							{/* Header */}
 							<div>
@@ -99,23 +173,6 @@ const EditMUK: React.FC = () => {
 											Isi data unit dan elemen, atau import dari .docx
 										</p>
 									</div>
-
-									<div className="flex gap-3">
-										<button
-											type="button"
-											onClick={() => console.log("filter")}
-											className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-										>
-											<Filter size={16} className="text-[#E77D35]" /> Filter
-										</button>
-										<button
-											type="button"
-											onClick={() => console.log("export")}
-											className="bg-[#E77D35] text-white rounded-md text-sm px-4 py-2 hover:bg-orange-600 transition-colors"
-										>
-											Export ke Excel
-										</button>
-									</div>
 								</div>
 							</div>
 
@@ -125,10 +182,10 @@ const EditMUK: React.FC = () => {
 							{/* Body */}
 							<FormMuk
 								schemes={schemes}
+								occupations={occupations}
 								form={form}
-								submitting={false}
-								disabled={true}
-								id_assessment={id_assessment ?? ""}
+								submitting={submitting}
+								setFileIA02={setFileIA02}
 							/>
 						</div>
 					</form>

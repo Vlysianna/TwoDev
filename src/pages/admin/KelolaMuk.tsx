@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Edit3, Eye, Trash2, AlertCircle, File } from "lucide-react";
+import { Edit3, Trash2, AlertCircle, File } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
 import paths from "@/routes/paths";
 import axiosInstance from "@/helper/axios";
 import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
-import type { MukType } from "@/lib/types";
+import type { MukType } from "@/model/muk-model";
 
 const KelolaMUK: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
@@ -14,7 +14,6 @@ const KelolaMUK: React.FC = () => {
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
-	const [exportLoading] = useState<boolean>(false);
 	const [muks, setMuks] = useState<MukType[]>([]);
 
 	const navigate = useNavigate();
@@ -34,6 +33,7 @@ const KelolaMUK: React.FC = () => {
 			} else {
 				setError("Gagal memuat data muk");
 			}
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (error) {
 			setError("Gagal memuat data muk");
 		} finally {
@@ -47,7 +47,6 @@ const KelolaMUK: React.FC = () => {
 		console.log("Edit user:", id);
 		navigate(paths.admin.muk.edit(id));
 	};
-	const handleView = (id: number) => console.log("View user:", id);
 
 	const confirmDelete = async () => {
 		if (!deletingId) return;
@@ -64,26 +63,6 @@ const KelolaMUK: React.FC = () => {
 		} finally {
 			setDeleteLoading(false);
 		}
-	};
-	const handleExport = async () => {
-		// setExportLoading(true);
-		// setError(null);
-		// try {
-		// 	const response = await axiosInstance.get("/schemes/export/excel", {
-		// 		responseType: "blob",
-		// 	});
-		// 	const url = window.URL.createObjectURL(new Blob([response.data]));
-		// 	const link = document.createElement("a");
-		// 	link.href = url;
-		// 	link.setAttribute("download", "schemes.xlsx");
-		// 	document.body.appendChild(link);
-		// 	link.click();
-		// 	link.parentNode?.removeChild(link);
-		// } catch (error) {
-		// 	setError("Gagal mengekspor data ke Excel");
-		// } finally {
-		// 	setExportLoading(false);
-		// }
 	};
 
 	if (loading) {
@@ -171,22 +150,7 @@ const KelolaMUK: React.FC = () => {
 								<h2 className="text-[20px] sm:text-[26px] font-semibold text-[#000000]">
 									Kelola MUK
 								</h2>
-								<div className="flex flex-wrap gap-3 sm:space-x-3 items-center">
-									<button
-										onClick={handleExport}
-										className="bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors w-full sm:w-[152px] h-[41px] flex items-center justify-center"
-										disabled={exportLoading}
-									>
-										{exportLoading ? (
-											<span className="flex items-center">
-												<span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
-												Exporting...
-											</span>
-										) : (
-											<>Export ke Excel</>
-										)}
-									</button>
-								</div>
+								
 							</div>
 							{/* Full width border line */}
 							<div className="border-b border-gray-200"></div>
@@ -237,13 +201,6 @@ const KelolaMUK: React.FC = () => {
 															title="Edit"
 														>
 															<Edit3 size={16} />
-														</button>
-														<button
-															onClick={() => handleView(muk.id)}
-															className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
-															title="View"
-														>
-															<Eye size={16} />
 														</button>
 														<button
 															onClick={() => {

@@ -1,18 +1,20 @@
 // TambahMUK.tsx
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { File, Filter } from "lucide-react";
+import { File } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
-import { type MukTypeInput, type Occupation, type Scheme } from "@/lib/types";
+import { type Occupation, type Scheme } from "@/lib/types";
 import api from "@/helper/axios";
+import FormMuk from "@/components/section/FormMuk";
+import type { MukTypeInput } from "@/model/muk-model";
+import useToast from "@/components/ui/useToast";
 import { useNavigate } from "react-router-dom";
 import routes from "@/routes/paths";
-import FormMuk from "@/components/section/FormMuk";
 
 const defaultValues: MukTypeInput = {
 	scheme_id: 0,
-	occupation_name: "",
+	occupation_id: 0,
 	code: "",
 	uc_apl02s: [],
 	groups_ia01: [],
@@ -21,19 +23,21 @@ const defaultValues: MukTypeInput = {
 };
 
 const TambahMUK: React.FC = () => {
-	const navigate = useNavigate();
 	const form = useForm<MukTypeInput>({ defaultValues });
-	const { handleSubmit } = form;
+
+	const toast = useToast();
+	const navigate = useNavigate();
 
 	const [schemes, setSchemes] = useState<Scheme[]>([]);
 	const [occupations, setOccupations] = useState<Occupation[]>([]);
 	const [submitting, setSubmitting] = useState(false);
 
-	const [idAssessment, setIdAssessment] = useState<number | null>(null);
+	const [fileIA02, setFileIA02] = useState<File | null>(null);
 
 	useEffect(() => {
 		fetchSchemes();
 		fetchOccupations();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const fetchSchemes = async () => {
@@ -42,8 +46,9 @@ const TambahMUK: React.FC = () => {
 			if (res?.data?.success) {
 				setSchemes(res.data.data);
 			}
-		} catch (err: unknown) {
-			console.error(err);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (err: any) {
+			toast.show({ title: "Gagal", description: "Gagal memuat schema " + err?.response?.data?.message || err.message });
 		}
 	};
 
@@ -53,9 +58,35 @@ const TambahMUK: React.FC = () => {
 			if (res?.data?.success) {
 				setOccupations(res.data.data);
 			}
-		} catch (err: unknown) {
-			console.error(err);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (err: any) {
+			toast.show({ title: "Gagal", description: "Gagal memuat schema " + err?.response?.data?.message || err.message });
 		}
+	};
+
+	const handleSubmitIA02 = (id_assessment: string) => {
+		api
+			.post(
+				`/assessments/ia-02/upload-pdf/${id_assessment}`,
+				{ pdf: fileIA02 },
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				}
+			)
+			.then((res) => {
+				if (res?.data?.success) {
+					toast.show({
+						title: "Berhasil",
+						description: "IA02 berhasil diupload",
+					});
+				} else {
+					toast.show({ title: "Gagal", description: "Gagal mengupload IA02" + res?.data?.message });
+				}
+				navigate(routes.admin.muk.root);
+			})
+			.catch((err) => toast.show({ title: "Gagal", description: "Gagal memuat schema " + err?.response?.data?.message || err.message }));
 	};
 
 	const onSubmit = async (data: MukTypeInput) => {
@@ -67,17 +98,17 @@ const TambahMUK: React.FC = () => {
 				scheme_id: Number(data.scheme_id),
 			});
 			if (res?.data?.success) {
-				alert("MUK berhasil diupload");
-				setIdAssessment(res.data.data.id);
+				toast.show({
+					title: "Berhasil",
+					description: "MUK berhasil diupload. HARAP TUNGGU IA02 TERUPLOAD",
+				});
+				handleSubmitIA02(res.data.data.id);
 			} else {
-				alert("Gagal membuat APL");
+				toast.show({ title: "Gagal", description: "Gagal membuat APL" });
 			}
-		} catch (err: unknown) {
-			console.error(err);
-			// try to read axios response message if present
-			// @ts-expect-error - err may come from axios with response structure
-			const message = err?.response?.data?.message || "Terjadi kesalahan";
-			alert(message);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (err: any) {
+			toast.show({ title: "Gagal", description: "Gagal memuat schema " + err?.response?.data?.message || err.message });
 		} finally {
 			setSubmitting(false);
 		}
@@ -96,7 +127,7 @@ const TambahMUK: React.FC = () => {
 					</div>
 
 					{/* Card container mirip contoh KelolaMUK */}
-					<form onSubmit={handleSubmit(onSubmit)}>
+					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6 space-y-6">
 							{/* Header */}
 							<div>
@@ -121,7 +152,7 @@ const TambahMUK: React.FC = () => {
 								occupations={occupations}
 								form={form}
 								submitting={submitting}
-								id_assessment={idAssessment ?? ""}
+								setFileIA02={setFileIA02}
 							/>
 						</div>
 					</form>
