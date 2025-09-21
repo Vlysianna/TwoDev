@@ -20,7 +20,7 @@ export interface APL02ResponseElement {
 	uc_id: number;
 	title: string;
 	details: ItemElementAPL02[];
-	results: {
+	result: {
 		id: number;
 		header_id: number;
 		element_id: number;

@@ -1,16 +1,21 @@
 import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import type { IA01Group, ResultIA01 } from "@/model/ia01-model";
-import routes from "@/routes/paths";
 import { Calendar, ChevronRight, Clock, Monitor } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import useSWR from "swr";
 
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
-export default function IA01({ id_result }: { id_result: string }) {
+export default function IA01({
+	id_result,
+	handleDetail,
+}: {
+	id_result: string;
+	handleDetail: (name: string, id: string) => void;
+}) {
 	const { data: result } = useSWR<ResultIA01>(
 		`/assessments/ia-01/result/${id_result}`,
 		fetcher
@@ -130,8 +135,8 @@ export default function IA01({ id_result }: { id_result: string }) {
 						<div className="flex items-center justify-between w-full min-w-[220px]">
 							<span className="text-sm text-gray-600">Penyelesaian</span>
 							<span className="text-sm font-medium text-gray-900">
-								{unitData && unitData?.length > 0
-									? `${Math.round((completedUnits / unitData?.length) * 100)}%`
+								{unitData && unitData.flatMap((unit) => unit.units).length > 0
+									? `${Math.round((completedUnits / unitData.flatMap((unit) => unit.units).length) * 100)}%`
 									: "0%"}
 							</span>
 						</div>
@@ -141,8 +146,8 @@ export default function IA01({ id_result }: { id_result: string }) {
 									className="bg-[#E77D35] h-2 rounded-full"
 									style={{
 										width:
-											unitData && unitData?.length > 0
-												? `${(completedUnits / unitData?.length) * 100}%`
+											unitData && unitData.flatMap((unit) => unit.units).length > 0
+												? `${(completedUnits / unitData.flatMap((unit) => unit.units).length) * 100}%`
 												: "0%",
 									}}
 								></div>
@@ -190,20 +195,15 @@ export default function IA01({ id_result }: { id_result: string }) {
 												Belum Selesai
 											</span>
 										)}
-										<Link
-											to={
-												routes.asesi.assessment.ia01AsesiDetail(
-													"-",
-													id_result ?? "-",
-													"-",
-													unit.id
-												) + `?group=${encodeURIComponent(selectedKPekerjaan)}`
+										<button
+											onClick={() =>
+												handleDetail("ia-01-detail", unit.id.toString())
 											}
 											className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
 										>
 											Lihat detail
 											<ChevronRight size={14} className="ml-1" />
-										</Link>
+										</button>
 									</div>
 								</div>
 							))

@@ -1,14 +1,26 @@
 import api from "@/helper/axios";
 import { cn } from "@/lib/utils";
 import type { APL02ResponseElement } from "@/model/apl02-model";
+import { Check, Monitor, Search } from "lucide-react";
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+} from "@/components/ui/command";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "@radix-ui/react-popover";
-import { CommandEmpty, CommandGroup, CommandInput, CommandItem } from "cmdk";
-import { Check, Command, Monitor, Search } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+} from "@/components/ui/popover";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import useSWR from "swr";
 
 type EvidenceOptionType =
@@ -56,17 +68,9 @@ export default function APL02Detail({
 	}, [elements, searchTerm]);
 
 	const getPencapaianStatus = useCallback(
-		(res: APL02ResponseElement["results"]) => {
-			if (!res) return "belum";
+		(res: APL02ResponseElement["result"]) => {
+			if (!res) return "";
 			return res.is_competent ? "kompeten" : "belum";
-		},
-		[]
-	);
-
-	const getSelectedProofs = useCallback(
-		(res: APL02ResponseElement["results"]) => {
-			if (!res) return [];
-			return res.evidences.map((e) => e.evidence);
 		},
 		[]
 	);
@@ -190,8 +194,7 @@ export default function APL02Detail({
 						</thead>
 						<tbody>
 							{filteredData?.map((item) => {
-								const pencapaianStatus = getPencapaianStatus(item.results);
-								const selectedProofs = getSelectedProofs(item.results);
+								const pencapaianStatus = getPencapaianStatus(item.result);
 
 								return (
 									<React.Fragment key={item.id}>
@@ -222,7 +225,7 @@ export default function APL02Detail({
 												<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
 													{/* Kompeten */}
 													<label
-														className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm ${
+														className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm opacity-60 cursor-not-allowed ${
 															pencapaianStatus === "kompeten"
 																? "bg-[#E77D3533]"
 																: ""
@@ -259,7 +262,7 @@ export default function APL02Detail({
 
 													{/* Belum Kompeten */}
 													<label
-														className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm ${
+														className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm opacity-60 cursor-not-allowed ${
 															pencapaianStatus === "belum"
 																? "bg-[#E77D3533]"
 																: ""
@@ -302,37 +305,31 @@ export default function APL02Detail({
 													<PopoverTrigger asChild>
 														<button
 															type="button"
-															role="combobox"
-															className="w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left cursor-not-allowed bg-gray-100"
-															disabled
+															className="w-full px-3 py-2 bg-[#DADADA33] rounded-md text-left text-sm cursor-pointer"
 														>
-															{selectedProofs.length > 0
-																? `${selectedProofs.length} bukti terpilih`
-																: "Pilih bukti relevan"}
+															Bukti Relevan
 														</button>
 													</PopoverTrigger>
-													<PopoverContent className="w-[200px] p-0">
+													<PopoverContent className="w-[250px] p-0 opacity-60 cursor-not-allowed">
 														<Command>
-															<CommandInput placeholder="Search..." disabled />
-															<CommandEmpty>No evidence found.</CommandEmpty>
+															<CommandInput placeholder="Cari Bukti Relevan" />
+															<CommandEmpty>
+																Bukti Relevan tidak ditemukan.
+															</CommandEmpty>
 															<CommandGroup>
 																{evidenceOptions.map((opt) => {
-																	const selected = selectedProofs.some((v) => {
-																		return v === opt;
-																	});
+																	const selected = item.result?.evidences.some(
+																		(evidence) => evidence.evidence === opt
+																	);
+																	console.log(item.result);
 																	return (
-																		<CommandItem
-																			key={opt}
-																			className="cursor-not-allowed"
-																		>
-																			<span
+																		<CommandItem key={opt} value={opt}>
+																			<Check
 																				className={cn(
 																					"mr-2 h-4 w-4",
 																					selected ? "opacity-100" : "opacity-0"
 																				)}
-																			>
-																				✓
-																			</span>
+																			/>
 																			{opt}
 																		</CommandItem>
 																	);

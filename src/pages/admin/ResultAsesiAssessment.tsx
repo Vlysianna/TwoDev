@@ -19,6 +19,7 @@ import AK02 from "@/components/section/admin/AK-02";
 import AK03 from "@/components/section/admin/AK-03";
 import AK05 from "@/components/section/admin/AK-05";
 import APL02Detail from "@/components/section/admin/APL-02-Detail";
+import IA01Detail from "@/components/section/admin/IA-01-Detail";
 
 interface TabResponse {
 	assessment_id: number;
@@ -104,7 +105,7 @@ export default function ResultAsesiAssessment() {
 			case "apl-02":
 				return <APL02 id_result={id_result} handleDetail={handleDetail} />;
 			case "ia-01":
-				return <IA01 id_result={id_result} />;
+				return <IA01 id_result={id_result} handleDetail={handleDetail} />;
 				break;
 			case "ia-02":
 				return <IA02 id_result={id_result} />;
@@ -136,7 +137,7 @@ export default function ResultAsesiAssessment() {
 			case "apl-02-detail":
 				return <APL02Detail id_unit={idUnit} id_result={id_result} />;
 			case "ia-01-detail":
-				// return <IA01Detail id_unit={idUnit} />;
+				return <IA01Detail id_unit={idUnit} id_result={id_result} />;
 				return <></>;
 			default:
 				<></>;
