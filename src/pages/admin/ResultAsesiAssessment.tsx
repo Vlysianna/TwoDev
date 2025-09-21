@@ -252,10 +252,10 @@ export default function ResultAsesiAssessment() {
 					</div>
 
 					{/* Content */}
-					<div className="bg-white rounded-md shadow">{tabPage}</div>
+					<div className="">{tabPage}</div>
 
 					{/* Detail Content */}
-					<div className="bg-white rounded-md shadow mt-4">{tabDetailPage}</div>
+					<div className="mt-4">{tabDetailPage}</div>
 				</div>
 			</div>
 		</div>

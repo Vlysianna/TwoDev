@@ -153,7 +153,7 @@ export default function APL02Detail({
 					</div> */}
 
 					{/* Global Bukti Relevan (Disabled) */}
-					<div className="flex items-center gap-2 flex-none w-full md:w-80">
+					{/* <div className="flex items-center gap-2 flex-none w-full md:w-80">
 						<select
 							className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500 cursor-not-allowed"
 							value=""
@@ -164,7 +164,7 @@ export default function APL02Detail({
 							<option value="dokumen2">Dokumen 2</option>
 							<option value="dokumen3">Dokumen 3</option>
 						</select>
-					</div>
+					</div> */}
 				</div>
 			</div>
 

@@ -407,50 +407,51 @@ export default function AK03({
 						</div>
 
 						{/* Filter Kompeten with Select All options */}
-						<div className="flex flex-wrap items-center gap-3 md:gap-6 sm:flex-none">
-							{[
-								{ value: "ya", label: "Semua ya" },
-								{ value: "tidak", label: "Semua tidak" },
-							].map((opt) => (
-								<label
-									key={opt.value}
-									className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition disabled:opacity-50
-										${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""}
-										${isAdmin ? "text-gray-400 cursor-not-allowed opacity-50" : "text-gray-700 cursor-pointer"}`}
-								>
-									<input
-										type="radio"
-										name="filter"
-										value={opt.value}
-										checked={filterKompeten === opt.value}
-										onChange={(e) => handleFilterChange(e.target.value)}
-										className="hidden"
-										disabled={!isAssessee || isAdmin}
-									/>
-									<span
-										className={`w-4 h-4 flex items-center justify-center rounded-full border-2
-											${
+						{!isAdmin && (
+							<div className="flex flex-wrap items-center gap-3 md:gap-6 sm:flex-none">
+								{[
+									{ value: "ya", label: "Semua ya" },
+									{ value: "tidak", label: "Semua tidak" },
+								].map((opt) => (
+									<label
+										key={opt.value}
+										className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer transition disabled:opacity-50
+											${filterKompeten === opt.value ? "bg-[#E77D3533]" : ""}`}
+									>
+										<input
+											type="radio"
+											name="filter"
+											value={opt.value}
+											checked={filterKompeten === opt.value}
+											onChange={(e) => handleFilterChange(e.target.value)}
+											className="hidden"
+											disabled={!isAssessee || isAdmin}
+										/>
+										<span
+											className={`w-4 h-4 flex items-center justify-center rounded-full border-2
+												${
+													filterKompeten === opt.value
+														? "bg-[#E77D35] border-[#E77D35]"
+														: "border-[#E77D35]"
+												}`}
+										>
+											{filterKompeten === opt.value && (
+												<Check className="w-4 h-4 text-white" />
+											)}
+										</span>
+										<span
+											className={
 												filterKompeten === opt.value
-													? "bg-[#E77D35] border-[#E77D35]"
-													: "border-[#E77D35]"
-											}`}
-									>
-										{filterKompeten === opt.value && (
-											<Check className="w-4 h-4 text-white" />
-										)}
-									</span>
-									<span
-										className={
-											filterKompeten === opt.value
-												? "text-gray-900"
-												: "text-gray-500"
-										}
-									>
-										{opt.label}
-									</span>
-								</label>
-							))}
-						</div>
+													? "text-gray-900"
+													: "text-gray-500"
+											}
+										>
+											{opt.label}
+										</span>
+									</label>
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 

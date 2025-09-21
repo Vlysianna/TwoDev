@@ -46,9 +46,10 @@ export default function IA01({
 
 	const completedUnits = useMemo(() => {
 		if (unitData && unitData.length > 0) {
-			const completed = unitData.filter(
-				(unit) => unit.units.flatMap((u) => u.finished).length
+			const completed = unitData.flatMap((u) =>
+				u.units.filter((u) => u.finished)
 			);
+			console.log(unitData.flatMap((u) => u.units.filter((u) => u.finished)));
 			return completed.length;
 		} else {
 			return 0;
@@ -136,7 +137,11 @@ export default function IA01({
 							<span className="text-sm text-gray-600">Penyelesaian</span>
 							<span className="text-sm font-medium text-gray-900">
 								{unitData && unitData.flatMap((unit) => unit.units).length > 0
-									? `${Math.round((completedUnits / unitData.flatMap((unit) => unit.units).length) * 100)}%`
+									? `${Math.round(
+											(completedUnits /
+												unitData.flatMap((unit) => unit.units).length) *
+												100
+									  )}%`
 									: "0%"}
 							</span>
 						</div>
@@ -146,8 +151,13 @@ export default function IA01({
 									className="bg-[#E77D35] h-2 rounded-full"
 									style={{
 										width:
-											unitData && unitData.flatMap((unit) => unit.units).length > 0
-												? `${(completedUnits / unitData.flatMap((unit) => unit.units).length) * 100}%`
+											unitData &&
+											unitData.flatMap((unit) => unit.units).length > 0
+												? `${
+														(completedUnits /
+															unitData.flatMap((unit) => unit.units).length) *
+														100
+												  }%`
 												: "0%",
 									}}
 								></div>
@@ -164,49 +174,56 @@ export default function IA01({
 						</div>
 					) : (
 						filteredData?.map((group) =>
-							group.units.map((unit, index: number) => (
-								<div
-									key={unit.id}
-									className="bg-gray-50 rounded-lg p-4 border hover:shadow-md transition-shadow"
-								>
-									<div className="flex items-start justify-between mb-3">
-										<div className="flex items-center space-x-2">
-											<div className="w-5 h-5 flex items-center justify-center">
-												<Monitor size={16} className="text-[#E77D35]" />
+							group.units.map((unit) => {
+								const globalIndex =
+									unitData
+										?.flatMap((g) => g.units)
+										.findIndex((u) => u.id === unit.id) || 0;
+
+								return (
+									<div
+										key={unit.id}
+										className="bg-gray-50 rounded-lg p-4 border hover:shadow-md transition-shadow"
+									>
+										<div className="flex items-start justify-between mb-3">
+											<div className="flex items-center space-x-2">
+												<div className="w-5 h-5 flex items-center justify-center">
+													<Monitor size={16} className="text-[#E77D35]" />
+												</div>
+												<span className="text-sm font-medium text-[#E77D35]">
+													Unit kompetensi {globalIndex + 1}
+												</span>
 											</div>
-											<span className="text-sm font-medium text-[#E77D35]">
-												Unit kompetensi {index + 1}
-											</span>
+										</div>
+										<h3 className="font-medium text-gray-900 mb-2 text-sm leading-tight">
+											{unit.title}
+										</h3>
+										{/* <p className="text-xs text-gray-500 mb-1">{""}</p> */}
+										<p className="text-xs text-gray-400 italic">{group.name}</p>
+
+										<div className="flex items-center justify-between mt-3">
+											{unit.finished ? (
+												<span className="bg-[#E77D3533] text-[#E77D35] px-2 py-1 rounded text-xs font-medium">
+													Selesai
+												</span>
+											) : (
+												<span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">
+													Belum Selesai
+												</span>
+											)}
+											<button
+												onClick={() =>
+													handleDetail("ia-01-detail", unit.id.toString())
+												}
+												className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
+											>
+												Lihat detail
+												<ChevronRight size={14} className="ml-1" />
+											</button>
 										</div>
 									</div>
-									<h3 className="font-medium text-gray-900 mb-2 text-sm leading-tight">
-										{unit.title}
-									</h3>
-									{/* <p className="text-xs text-gray-500 mb-1">{""}</p> */}
-									<p className="text-xs text-gray-400 italic">{group.name}</p>
-
-									<div className="flex items-center justify-between mt-3">
-										{unit.finished ? (
-											<span className="bg-[#E77D3533] text-[#E77D35] px-2 py-1 rounded text-xs font-medium">
-												Selesai
-											</span>
-										) : (
-											<span className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium">
-												Belum Selesai
-											</span>
-										)}
-										<button
-											onClick={() =>
-												handleDetail("ia-01-detail", unit.id.toString())
-											}
-											className="text-[#E77D35] hover:text-[#E77D35] text-sm flex items-center hover:underline transition-colors"
-										>
-											Lihat detail
-											<ChevronRight size={14} className="ml-1" />
-										</button>
-									</div>
-								</div>
-							))
+								);
+							})
 						)
 					)}
 				</div>
