@@ -1,16 +1,7 @@
-import { createBrowserRouter, Outlet } from "react-router";
+import { createBrowserRouter, Outlet, Navigate } from "react-router";
 import LoginForm from "@/pages/login/Login";
 import RegisterForm from "@/pages/register/Register";
 import AplZeroOne from "@/pages/asesi/Apl-01";
-import LandingPage from "@/pages/LandingPage/LandingPage";
-import TentangLSP from "@/pages/LandingPage/TentangLSP";
-import Skema from "@/pages/LandingPage/Skema";
-import StrukturLSP from "@/pages/LandingPage/StrukturLSP";
-import Tempatuji from "@/pages/LandingPage/Tempatuji";
-import Asesor from "@/pages/LandingPage/Asesor";
-import Prosedur from "@/pages/LandingPage/Prosedur";
-import Berita from "@/pages/LandingPage/Berita";
-import Galeri from "@/pages/LandingPage/Galeri";
 import KelolaAkunAsesi from "@/pages/admin/AkunAsesi";
 import KelolaMUK from "@/pages/admin/KelolaMuk";
 import EditAsesor from "@/pages/admin/EditAsesor";
@@ -24,21 +15,20 @@ import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
 import DashboardAdmin from "@/pages/admin/DashboardAdmin";
 import AsessmentAktif from "@/pages/asesi/AsesmentAktif";
-import Test from "@/pages/LandingPage/Test";
+// Test page removed
 import TambahMUK from "@/pages/admin/TambahMUK";
-import KelolaJurusan from "@/pages/admin/kelolaJur";
 import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
 import paths from "./paths";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
-import Contact from "@/pages/LandingPage/Contact";
+// Contact page removed
 import AssessmentAsesiProvider from "@/components/AssessmentAsesiProvider";
-import Apl02Asesi from "@/pages/asesi/Apl-02";
 import Apl02Detail from "@/pages/asesi/Apl-02-Detail";
 import Ak04Asesi from "@/pages/asesi/Ak-04";
 import Ia05Asesi from "@/pages/asesi/Ia-05";
+import Apl02Asesi from "@/pages/asesi/Apl-02";
 import Ia03Asesi from "@/pages/asesi/Ia-03";
 import Ia02Asesi from "@/pages/asesi/Ia-02";
 import Ak02Asesi from "@/pages/asesi/Ak-02";
@@ -48,10 +38,11 @@ import Ak05Asesi from "@/pages/asesi/Ak-05";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
+import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
+import KelolaJurusan from "@/pages/admin/kelolaJur";
 import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
 import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
 import DashboardAsesmenMandiri from "@/pages/asesor/DashboardAsesmenMandiri";
-import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
 import Apl02Asesor from "@/pages/asesor/Apl-02";
 import Apl02DetailAsesor from "@/pages/asesor/Apl-02-Detail";
 import Ia01Asesor from "@/pages/asesor/Ia-01";
@@ -84,24 +75,13 @@ const router = createBrowserRouter(
 			path: paths.root,
 			element: <Outlet />,
 			children: [
-				// Landing & Public Pages
-				{ index: true, element: <LandingPage /> },
+				{ index: true, element: <Navigate to={paths.auth.login} replace /> },
 				// legacy path for older links to APL-02 (accepts id param)
 				{ path: "/apl-02/:id", element: <Apl02Asesi /> },
 				// legacy/alternate path for assesmen aktif (avoid 404 on older links)
 				{ path: "/asesmen-aktif-asesi", element: <AsessmentAktif /> },
 				// assessor legacy path (some links point here instead of the new /asesor/... path)
 				{ path: "/asesmen-aktif-asesor", element: <DashboardAsesor /> },
-				{ path: paths.dashboard.about, element: <TentangLSP /> },
-				{ path: paths.dashboard.struktur, element: <StrukturLSP /> },
-				{ path: paths.dashboard.skema, element: <Skema /> },
-				{ path: paths.dashboard.tempatUji, element: <Tempatuji /> },
-				{ path: paths.dashboard.asesor, element: <Asesor /> },
-				{ path: paths.dashboard.prosedurPendaftaran, element: <Prosedur /> },
-				{ path: paths.dashboard.berita, element: <Berita /> },
-				{ path: paths.dashboard.galeri, element: <Galeri /> },
-				{ path: paths.dashboard.contact, element: <Contact /> },
-				{ path: paths.dashboard.test, element: <Test /> },
 
 				// Public route
 				{ path: paths.public.dataAsesor, element: <DataAsesor /> },
