@@ -35,6 +35,7 @@ interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
+  summary: Summary;
   meta: PaginationMeta;
 }
 
@@ -81,8 +82,16 @@ interface FilterState {
   search: string;
 }
 
+interface Summary {
+  total_user: number;
+  total_assessee: number;
+  total_assessor: number;
+  total_admin: number;
+}
+
 const KelolaUser: React.FC = () => {
   const [users, setUsers] = useState<UserData[]>([]);
+  const [summary, setSummary] = useState<Summary>({ total_user: 0, total_assessee: 0, total_assessor: 0, total_admin: 0 });
   const [filteredUsers, setFilteredUsers] = useState<UserData[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +100,7 @@ const KelolaUser: React.FC = () => {
     role: '',
     search: ''
   });
+  const [searchValue, setSearchValue] = useState('');
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,21 +141,13 @@ const KelolaUser: React.FC = () => {
       if (response.data.success) {
         setUsers(response.data.data);
         setFilteredUsers(response.data.data);
+        setSummary(response.data.summary);
         
         // Update pagination state from API response
         setCurrentPage(response.data.meta.current_page);
         setTotalPages(response.data.meta.total_pages);
         setItemsPerPage(response.data.meta.limit);
         
-        // Extract unique roles from users data
-        const uniqueRoles = Array.from(
-          new Map(
-            response.data.data
-              .map((user: UserData) => user.role)
-              .map((role: Role) => [role.id, role])
-          ).values()
-        ) as Role[];
-        setRoles(uniqueRoles);
       } else {
         setError(response.data.message || 'Gagal memuat data pengguna');
       }
@@ -163,7 +165,20 @@ const KelolaUser: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    fetchRoles();
   }, [currentPage, itemsPerPage, filters]);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await api.get('/roles');
+      
+      if (response.data.success) {
+        setRoles(response.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch roles:', err);
+    }
+  };
   
   // Debug untuk melihat nilai filters saat berubah
   useEffect(() => {
@@ -171,11 +186,13 @@ const KelolaUser: React.FC = () => {
   }, [filters]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchValue(value);
-    // Hanya set filter jika ada nilai, jika kosong set ke string kosong
-    setFilters(prev => ({ ...prev, search: value }));
-    setCurrentPage(1); // Reset to first page when search changes
+    setSearchValue(e.target.value);
+  };
+
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setFilters(prev => ({ ...prev, search: searchValue }));
+    setCurrentPage(1);
   };
 
   const handleRoleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -345,16 +362,24 @@ const KelolaUser: React.FC = () => {
               {/* Filters */}
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 {/* Search */}
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <form className="relative flex-1 flex" onSubmit={handleSearchSubmit}>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <Search className="w-4 h-4" />
+                  </span>
                   <input
                     type="text"
                     placeholder="Cari berdasarkan nama, email..."
-                    value={filters.search}
+                    value={searchValue}
                     onChange={handleSearchChange}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E77D35] focus:border-transparent text-sm"
                   />
-                </div>
+                  <button
+                    type="submit"
+                    className="ml-2 px-4 py-2 bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
+                  >
+                    Cari
+                  </button>
+                </form>
                 
                 {/* Role Filter */}
                 <div className="relative">
@@ -391,6 +416,7 @@ const KelolaUser: React.FC = () => {
                   <button
                     onClick={() => {
                       setFilters({ role: '', search: '' });
+                      setSearchValue('');
                       setCurrentPage(1); // Reset to first page when clearing filters
                     }}
                     className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
@@ -409,19 +435,19 @@ const KelolaUser: React.FC = () => {
                 <div className="bg-red-50 p-4 rounded-lg">
                   <p className="text-sm text-red-600">Admin</p>
                   <p className="text-2xl font-semibold text-red-700">
-                    {users.filter(u => u.role.name === 'Admin').length}
+                    {summary.total_admin}
                   </p>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <p className="text-sm text-blue-600">Asesor</p>
                   <p className="text-2xl font-semibold text-blue-700">
-                    {users.filter(u => u.role.name === 'Assessor').length}
+                    {summary.total_assessor}
                   </p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
                   <p className="text-sm text-green-600">Asesi</p>
                   <p className="text-2xl font-semibold text-green-700">
-                    {users.filter(u => u.role.name === 'Assessee').length}
+                    {summary.total_assessee}
                   </p>
                 </div>
               </div>

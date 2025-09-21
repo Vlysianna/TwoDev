@@ -43,24 +43,33 @@ const KelolaAkunAsesor: React.FC = () => {
   // Detail modal state (for view only)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedAssessor, setSelectedAssessor] = useState<User | null>(null);
-  // pagination
+  // pagination & search
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   
 
+
+  // Reset to first page when searchTerm changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     fetchUsers(page, limit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit]);
+  }, [page, limit, searchTerm]);
 
   const fetchUsers = async (p = 1, l = 10) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/assessor/user/status', { params: { page: p, limit: l } });
+      const params: any = { page: p, limit: l };
+      if (searchTerm && searchTerm.trim() !== '') params.keyword = searchTerm.trim();
+      const response = await api.get('/assessor/user/status', { params });
       if (response?.data?.success) {
         const data = Array.isArray(response.data.data) ? response.data.data : [];
         setUsers(data);
@@ -260,6 +269,27 @@ const KelolaAkunAsesor: React.FC = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Akun Asessor</h2>
+                <form
+                  className="ml-4 flex items-center space-x-2"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    setSearchTerm(searchValue);
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={searchValue}
+                    onChange={e => setSearchValue(e.target.value)}
+                    placeholder="Cari nama, email, atau no. HP"
+                    className="px-3 py-2 border rounded-md text-sm w-64"
+                  />
+                  <button
+                    type="submit"
+                    className="ml-2 px-4 py-2 bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
+                  >
+                    Cari
+                  </button>
+                </form>
               </div>
               {/* Full width border line */}
               <div className="border-b border-gray-200"></div>

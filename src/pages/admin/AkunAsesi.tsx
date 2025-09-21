@@ -9,7 +9,7 @@ import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import AssesseeModal from '@/components/AssesseeModal';
 import api from '@/helper/axios';
-import useDebounce from '@/hooks/useDebounce';
+
 
 interface AssesseeItem {
   id: number;
@@ -45,18 +45,18 @@ const KelolaAkunAsesi: React.FC = () => {
   const [limit, setLimit] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [searchValue, setSearchValue] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const debouncedSearch = useDebounce(searchTerm, 350);
 
+  // Reset to first page when searchTerm changes
   useEffect(() => {
-    // reset to first page when search changes
     setPage(1);
-  }, [debouncedSearch]);
+  }, [searchTerm]);
 
   useEffect(() => {
     fetchAssessees(page, limit);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, debouncedSearch]);
+  }, [page, limit, searchTerm]);
 
   const fetchAssessees = async (p = 1, l = 10) => {
     try {
@@ -64,9 +64,9 @@ const KelolaAkunAsesi: React.FC = () => {
       setError(null);
 
       // Fetch assessee paginated data
-  const params: any = { page: p, limit: l };
-  if (debouncedSearch && debouncedSearch.trim() !== '') params.q = debouncedSearch.trim();
-  const response = await api.get('/assessee', { params });
+      const params: any = { page: p, limit: l };
+      if (searchTerm && searchTerm.trim() !== '') params.keyword = searchTerm.trim();
+      const response = await api.get('/assessee', { params });
       if (response?.data?.success) {
         const data = Array.isArray(response.data.data) ? response.data.data : [];
         setUsers(data);
@@ -80,8 +80,8 @@ const KelolaAkunAsesi: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error('Failed to fetch assessees:', error);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const msg = (error as any)?.response?.data?.message || 'Gagal memuat data asesi';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (error as any)?.response?.data?.message || 'Gagal memuat data asesi';
       setError(msg);
     } finally {
       setLoading(false);
@@ -161,15 +161,27 @@ const KelolaAkunAsesi: React.FC = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[26px] font-semibold text-[#000000]">Akun Asesi</h2>
-                <div className="ml-4 flex items-center space-x-2">
+                <form
+                  className="ml-4 flex items-center space-x-2"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    setSearchTerm(searchValue);
+                  }}
+                >
                   <input
                     type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    value={searchValue}
+                    onChange={e => setSearchValue(e.target.value)}
                     placeholder="Cari nama, email, atau no. HP"
                     className="px-3 py-2 border rounded-md text-sm w-64"
                   />
-                </div>
+                  <button
+                    type="submit"
+                    className="ml-2 px-4 py-2 bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
+                  >
+                    Cari
+                  </button>
+                </form>
               </div>
               {/* Full width border line */}
               <div className="border-b border-gray-200"></div>
