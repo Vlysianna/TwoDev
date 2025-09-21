@@ -75,7 +75,7 @@ export default function IA01Detail({
 					<input
 						type="text"
 						placeholder="Search..."
-						className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 cursor-not-allowed"
+						className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
 					/>
