@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { ArrowLeft, FileText, LayoutDashboard, Upload, AlertCircle } from 'lucide-react';
+import { FileText, Upload, AlertCircle } from 'lucide-react';
 import NavbarAsesor from '@/components/NavAsesor';
 import api from '@/helper/axios';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,33 +13,36 @@ export default function BiodataAsesor() {
   const [formData, setFormData] = useState({
     nama: '',
     alamat: '',
-    tempatLahir: '', // This will be stored in localStorage for now as it's not in DB schema
+    tempatLahir: '',
     tanggalLahir: '',
     email: '',
     noRegMET: '',
     noTelp: '',
-    catatan: '' // This will be stored in localStorage for now as it's not in DB schema
+    catatan: '',
+    kompetensiKeahlian: '',
+    asalLSP: ''
   });
 
   const [files, setFiles] = useState<Record<string, File | null>>({
-    npwp: null,
-    coverBuku: null,
-    sertifikatAsesor: null,
-    pasFoto: null,
-    ktp: null
+    tax_id_number: null,        // NPWP
+    bank_book_cover: null,      // Cover Buku Tabungan
+    certificate: null,          // Sertifikat Asesor
+    id_card: null,              // Pas Foto
+    national_id: null           // KTP/KK
   });
 
+  const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { refreshBiodataCheck } = useBiodataCheck();
-  const [assessor, setAssessor] = useState<Record<string, unknown> | null>(null);
-  const [assessorDetail, setAssessorDetail] = useState<Record<string, unknown> | null>(null);
+  const [assessor, setAssessor] = useState<any>(null);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [redirectMessage, setRedirectMessage] = useState<string | null>(null);
+  const [schemes, setSchemes] = useState<any[]>([]);
 
   const safeGet = (obj: Record<string, unknown> | null, key: string) => {
     if (!obj) return '';
@@ -48,8 +51,8 @@ export default function BiodataAsesor() {
     return String(v);
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target as HTMLInputElement;
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -58,58 +61,92 @@ export default function BiodataAsesor() {
 
   const handleFileChange = (fileType: string) => (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
-    setFiles(prev => ({
-      ...prev,
-      [fileType]: file
-    }));
+    if (file) {
+      setFiles(prev => ({
+        ...prev,
+        [fileType]: file
+      }));
+
+      // Create preview URL for image files
+      if (file.type.startsWith('image/')) {
+        const previewUrl = URL.createObjectURL(file);
+        setFilePreviews(prev => ({
+          ...prev,
+          [fileType]: previewUrl
+        }));
+      }
+    }
   };
 
   useEffect(() => {
     const load = async () => {
       if (!user) return;
       try {
+        try {
+          const schemesResp = await api.get('/schemes');
+          if (schemesResp.data?.success) {
+            setSchemes(schemesResp.data.data);
+          }
+        } catch (error) {
+          console.error('Error loading schemes:', error);
+        }
+
         // get assessor by user id
         const resp = await api.get(`/assessor/user/${user.id}`);
         if (resp.data?.success) {
           setAssessor(resp.data.data);
-          // try load assessor detail
-          try {
-            const det = await api.get(`/assessor-detail/${resp.data.data.id}`);
-            if (det.data?.success) setAssessorDetail(det.data.data);
-          } catch (detailError: any) {
-            // 404 is normal if assessor detail doesn't exist yet
-            if (detailError.response?.status !== 404) {
-              console.error('Error loading assessor detail:', detailError);
+
+          // Set file previews from existing data
+          if (resp.data.data.detail) {
+            setFilePreviews({
+              tax_id_number: resp.data.data.detail.tax_id_number || '',
+              bank_book_cover: resp.data.data.detail.bank_book_cover || '',
+              certificate: resp.data.data.detail.certificate || '',
+              id_card: resp.data.data.detail.id_card || '',
+              national_id: resp.data.data.detail.national_id || ''
+            });
+          }
+
+          // Load additional data from localStorage
+          const savedAdditionalData = localStorage.getItem(`assessor_additional_${user.id}`);
+          let catatan = '';
+          if (savedAdditionalData) {
+            try {
+              const additionalData = JSON.parse(savedAdditionalData);
+              catatan = additionalData.catatan || '';
+            } catch {
+              // ignore parsing errors
             }
           }
+
+          setFormData(prev => ({
+            ...prev,
+            nama: safeGet(resp.data.data, 'name') || user?.full_name || prev.nama || '',
+            email: user?.email || prev.email || '',
+            alamat: safeGet(resp.data.data, 'address') || prev.alamat || '',
+            tanggalLahir: safeGet(resp.data.data, 'birth_date') || prev.tanggalLahir || '',
+            tempatLahir: safeGet(resp.data.data, 'birth_location') || prev.tempatLahir || '',
+            noRegMET: safeGet(resp.data.data, 'no_reg_met') || prev.noRegMET || '',
+            noTelp: safeGet(resp.data.data, 'phone_no') || prev.noTelp || '',
+            kompetensiKeahlian: safeGet(resp.data.data.scheme, 'id') || prev.kompetensiKeahlian || '',
+            asalLSP: safeGet(resp.data.data, 'institution') || prev.asalLSP || '',
+            catatan: catatan || prev.catatan || ''
+          }));
         }
       } catch (error: any) {
-        // Handle different error types
         if (error.response?.status === 401) {
-          // Token expired, redirect to login
           console.error('Authentication failed - redirecting to login');
           navigate('/login');
           return;
         } else if (error.response?.status === 404) {
-          // New user without assessor data - this is normal
-          console.log('New user - no assessor data yet');
-        } else {
-          console.error('Error loading assessor data:', error);
-        }
-      }
-
-      // Load additional data from localStorage
-      const savedAdditionalData = localStorage.getItem(`assessor_additional_${user.id}`);
-      if (savedAdditionalData) {
-        try {
-          const additionalData = JSON.parse(savedAdditionalData);
+          // New user without assessor data - pre-fill with user data
           setFormData(prev => ({
             ...prev,
-            tempatLahir: additionalData.tempatLahir || '',
-            catatan: additionalData.catatan || ''
+            nama: user.full_name || prev.nama || '',
+            email: user.email || prev.email || '',
           }));
-        } catch {
-          // ignore parsing errors
+        } else {
+          console.error('Error loading assessor data:', error);
         }
       }
 
@@ -119,38 +156,10 @@ export default function BiodataAsesor() {
     load();
   }, [user]);
 
-  // populate form when assessor or assessorDetail loaded
-  useEffect(() => {
-    if (assessor) {
-      setFormData(prev => ({
-        ...prev,
-        nama: safeGet(assessor, 'name') || user?.full_name || prev.nama || '', // Use name from assessor or user.full_name
-        email: user?.email || prev.email || '', // email comes from user context
-        alamat: safeGet(assessor, 'address') || prev.alamat || '', // address is in assessor table
-        tanggalLahir: safeGet(assessor, 'birth_date') || prev.tanggalLahir || '', // birth_date is in assessor table
-        noRegMET: safeGet(assessor, 'no_reg_met') || prev.noRegMET || '', // no_reg_met is in assessor table
-        noTelp: safeGet(assessor, 'phone_no') || prev.noTelp || '', // phone_no is in assessor table
-      }));
-    } else if (user) {
-      // For new users without assessor data, pre-fill with user data
-      setFormData(prev => ({
-        ...prev,
-        nama: user.full_name || prev.nama || '',
-        email: user.email || prev.email || '',
-      }));
-    }
-
-    if (assessorDetail) {
-      // Don't override noRegMET since it should come from assessor table, not detail
-      // assessor_detail.tax_id_number is for NPWP file path, not the actual number
-    }
-  }, [assessor, assessorDetail, user]);
-
   // Check for redirect message
   useEffect(() => {
     if (location.state && (location.state as any).message) {
       setRedirectMessage((location.state as any).message);
-      // Clear the message after 10 seconds
       const timer = setTimeout(() => {
         setRedirectMessage(null);
       }, 10000);
@@ -165,7 +174,9 @@ export default function BiodataAsesor() {
     'tanggalLahir',
     'email',
     'noRegMET',
-    'noTelp'
+    'noTelp',
+    'kompetensiKeahlian',
+    'asalLSP'
   ];
 
   const OPTIONAL_FIELDS = [
@@ -198,99 +209,65 @@ export default function BiodataAsesor() {
     });
 
     try {
-      // 1) Prepare file uploads
-      const uploaded: Record<string, string> = {};
-      const fileMapping = {
-        npwp: 'tax_id_number',
-        coverBuku: 'bank_book_cover',
-        sertifikatAsesor: 'certificate',
-        ktp: 'national_id',
-        pasFoto: 'id_card'
-      };
+      // 1) Prepare FormData dengan semua field dan file
+      const formDataToSend = new FormData();
 
-      // Upload files if present
-      for (const [frontendKey, backendKey] of Object.entries(fileMapping)) {
-        const file = files[frontendKey];
+      // Append semua file ke FormData
+      Object.entries(files).forEach(([key, file]) => {
         if (file) {
-          const fd = new FormData();
-          fd.append('file', file);
-          try {
-            const up = await api.post('/uploads', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-            if (up.data?.success && up.data.data?.path) {
-              uploaded[backendKey] = up.data.data.path;
-            }
-          } catch (uploadError) {
-            console.error(`Failed to upload ${frontendKey}:`, uploadError);
-          }
+          formDataToSend.append(key, file);
         }
-      }
+      });
 
-      // 2) Create or update assessor basic data
-      let assessorId = assessor?.id;
+      // Append semua data form ke FormData
+      formDataToSend.append('user_id', user.id.toString());
+      formDataToSend.append('scheme_id', filledFormData.kompetensiKeahlian);
+      formDataToSend.append('name', filledFormData.nama);
+      formDataToSend.append('birth_location', filledFormData.tempatLahir);
+      formDataToSend.append('birth_date', filledFormData.tanggalLahir);
+      formDataToSend.append('no_reg_met', filledFormData.noRegMET);
+      formDataToSend.append('institution', filledFormData.asalLSP);
+      formDataToSend.append('address', filledFormData.alamat);
+      formDataToSend.append('phone_no', filledFormData.noTelp);
+      formDataToSend.append('catatan', filledFormData.catatan);
 
-      if (assessorId) {
-        await api.put(`/assessor/${assessorId}`, {
-          user_id: user.id,
-          scheme_id: (assessor?.scheme_id as number) ?? 1,
-          address: filledFormData.alamat,
-          phone_no: filledFormData.noTelp,
-          birth_date: filledFormData.tanggalLahir,
-          no_reg_met: filledFormData.noRegMET,
+      // 2) Create or update assessor menggunakan endpoint /assessor
+      let response;
+      if (assessor?.id) {
+        // Update existing assessor
+        response = await api.post(`/assessor/${assessor.id}`, formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
-        const createResp = await api.post('/assessor', {
-          user_id: user.id,
-          scheme_id: 1,
-          address: filledFormData.alamat,
-          phone_no: filledFormData.noTelp,
-          birth_date: filledFormData.tanggalLahir,
-          no_reg_met: filledFormData.noRegMET,
+        // Create new assessor
+        response = await api.post('/assessor', formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
-
-        if (createResp.data?.success) {
-          assessorId = createResp.data.data.id;
-          setAssessor(createResp.data.data);
-        }
       }
 
-      // 3) Upsert assessor-detail
-      if (assessorId) {
-        try {
-          await api.post(`/assessor-detail/${assessorId}`, {
-            tax_id_number: uploaded.tax_id_number || safeGet(assessorDetail, 'tax_id_number') || '',
-            bank_book_cover: uploaded.bank_book_cover || safeGet(assessorDetail, 'bank_book_cover') || '',
-            certificate: uploaded.certificate || safeGet(assessorDetail, 'certificate') || '',
-            national_id: uploaded.national_id || safeGet(assessorDetail, 'national_id') || '',
-            id_card: uploaded.id_card || safeGet(assessorDetail, 'id_card') || '',
-          });
-        } catch (detailError: any) {
-          console.error('Error saving assessor detail:', detailError);
+      if (response.data?.success) {
+        setAssessor(response.data.data);
+
+        // Save additional data to localStorage
+        const additionalData = {
+          catatan: filledFormData.catatan
+        };
+        localStorage.setItem(`assessor_additional_${user.id}`, JSON.stringify(additionalData));
+
+        setSuccessMessage('Data berhasil disimpan');
+        await refreshBiodataCheck();
+
+        if (location.state && (location.state as any).from) {
+          setTimeout(() => {
+            navigate((location.state as any).from, { replace: true });
+          }, 2000);
+        } else {
+          setTimeout(() => {
+            navigate(paths.asesor.dashboardAsesor, { replace: true });
+          }, 2000);
         }
-      }
-
-      try {
-        const det = await api.get(`/assessor-detail/${assessorId}`);
-        if (det.data?.success) setAssessorDetail(det.data.data);
-      } catch {}
-
-      // Save additional data to localStorage
-      const additionalData = {
-        tempatLahir: filledFormData.tempatLahir,
-        catatan: filledFormData.catatan
-      };
-      localStorage.setItem(`assessor_additional_${user.id}`, JSON.stringify(additionalData));
-
-      setSuccessMessage('Data berhasil disimpan');
-      await refreshBiodataCheck();
-
-      if (location.state && (location.state as any).from) {
-        setTimeout(() => {
-          navigate((location.state as any).from, { replace: true });
-        }, 2000);
       } else {
-        setTimeout(() => {
-          navigate(paths.asesor.dashboardAsesor, { replace: true });
-        }, 2000);
+        setErrorMessage('Gagal menyimpan data');
       }
     } catch (error) {
       console.error(error);
@@ -300,6 +277,7 @@ export default function BiodataAsesor() {
     }
   };
 
+  // Render UI
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -311,8 +289,7 @@ export default function BiodataAsesor() {
       <div className="flex-1">
         {/* Navbar */}
         <div className="sticky top-0 z-10 bg-white shadow-sm">
-          <NavbarAsesor title="Biodata Asesor" icon={<FileText size={25} />}
-          />
+          <NavbarAsesor title="Biodata Asesor" icon={<FileText size={25} />} />
         </div>
 
         {/* Main Body */}
@@ -346,7 +323,7 @@ export default function BiodataAsesor() {
                   <h3 className="text-lg font-semibold text-blue-900 mb-2">
                     Status Biodata Asesor
                   </h3>
-                  {!assessor || !assessorDetail ? (
+                  {!assessor ? (
                     <>
                       <p className="text-blue-800 text-sm mb-3">
                         Untuk mengakses Dashboard dan fitur-fitur asesor lainnya, Anda perlu melengkapi biodata terlebih dahulu.
@@ -464,6 +441,35 @@ export default function BiodataAsesor() {
                     <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom No. Telp wajib diisi</label>
                   </div>
                 </div>
+
+                {/* Third Row - 1 column on mobile, 2 columns on medium+ */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  {/* Kompetensi Keahlian */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Kompetensi Keahlian</label>
+                    <select
+                      name="kompetensiKeahlian"
+                      value={formData.kompetensiKeahlian}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base"
+                    >
+                      <option value="">Pilih Kompetensi Keahlian</option>
+                      {schemes.map((scheme) => (
+                        <option key={scheme.id} value={scheme.id}>
+                          {scheme.code} - {scheme.name}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom Kompetensi Keahlian wajib diisi</label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Asal LSP</label>
+                    <input type="text" name="asalLSP" value={formData.asalLSP} onChange={handleInputChange}
+                      placeholder="Masukkan asal LSP anda"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm sm:text-base" />
+                    <label className="block text-sm font-medium text-red-500 mb-2 italic">*Kolom Asal LSP wajib diisi</label>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -480,32 +486,23 @@ export default function BiodataAsesor() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Nomor Pokok Wajib Pajak (NPWP)
                   </label>
-                  <div
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
                     <div className="flex items-center space-x-3">
                       <Upload className="text-gray-400 flex-shrink-0" size={20} />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-700">Choose a file or drag & drop it
-                          here</p>
-                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, and PDF, formats up
-                          to 5MB</p>
+                        <p className="text-sm font-medium text-gray-700">Pilih file atau drag & drop di sini</p>
+                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, dan PDF, maksimal 5MB</p>
                       </div>
                     </div>
-                    <label
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
-                      <input type="file" className="hidden" onChange={handleFileChange('npwp')} />
-                      Browse File
+                    <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                      <input type="file" className="hidden" onChange={handleFileChange('tax_id_number')} accept=".jpg,.jpeg,.png,.pdf" />
+                      Pilih File
                     </label>
-                    <div className="text-xs text-gray-500 mt-2">
-                      {files.npwp ? files.npwp.name : safeGet(assessorDetail, 'tax_id_number') ?
-                        safeGet(assessorDetail, 'tax_id_number') : 'Belum ada file terpilih'}
-                      {safeGet(assessorDetail, 'tax_id_number') && safeGet(assessorDetail,
-                        'tax_id_number').startsWith('http') && (
-                          <div><a href={safeGet(assessorDetail, 'tax_id_number')} target="_blank"
-                            rel="noreferrer" className="text-blue-600 underline text-xs">Lihat file</a>
-                          </div>
-                        )}
-                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.tax_id_number ? files.tax_id_number.name : filePreviews.tax_id_number ?
+                      <a href={filePreviews.tax_id_number} target="_blank" rel="noreferrer" className="text-blue-600 underline">Lihat file terupload</a> :
+                      'Belum ada file terpilih'}
                   </div>
                 </div>
 
@@ -514,32 +511,23 @@ export default function BiodataAsesor() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Cover Buku Tabungan
                   </label>
-                  <div
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
                     <div className="flex items-center space-x-3">
                       <Upload className="text-gray-400 flex-shrink-0" size={20} />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-700">Choose a file or drag & drop it
-                          here</p>
-                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up
-                          to 50MB</p>
+                        <p className="text-sm font-medium text-gray-700">Pilih file atau drag & drop di sini</p>
+                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, maksimal 50MB</p>
                       </div>
                     </div>
-                    <label
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
-                      <input type="file" className="hidden" onChange={handleFileChange('coverBuku')} />
-                      Browse File
+                    <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                      <input type="file" className="hidden" onChange={handleFileChange('bank_book_cover')} accept=".jpg,.jpeg,.png,.pdf" />
+                      Pilih File
                     </label>
-                    <div className="text-xs text-gray-500 mt-2">
-                      {files.coverBuku ? files.coverBuku.name : safeGet(assessorDetail, 'bank_book_cover') ?
-                        safeGet(assessorDetail, 'bank_book_cover') : 'Belum ada file terpilih'}
-                      {safeGet(assessorDetail, 'bank_book_cover') && safeGet(assessorDetail,
-                        'bank_book_cover').startsWith('http') && (
-                          <div><a href={safeGet(assessorDetail, 'bank_book_cover')} target="_blank"
-                            rel="noreferrer" className="text-blue-600 underline text-xs">Lihat file</a>
-                          </div>
-                        )}
-                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.bank_book_cover ? files.bank_book_cover.name : filePreviews.bank_book_cover ?
+                      <a href={filePreviews.bank_book_cover} target="_blank" rel="noreferrer" className="text-blue-600 underline">Lihat file terupload</a> :
+                      'Belum ada file terpilih'}
                   </div>
                 </div>
 
@@ -548,31 +536,23 @@ export default function BiodataAsesor() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Sertifikat Asesor
                   </label>
-                  <div
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
                     <div className="flex items-center space-x-3">
                       <Upload className="text-gray-400 flex-shrink-0" size={20} />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-700">Choose a file or drag & drop it
-                          here</p>
-                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up
-                          to 50MB</p>
+                        <p className="text-sm font-medium text-gray-700">Pilih file atau drag & drop di sini</p>
+                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, maksimal 50MB</p>
                       </div>
                     </div>
-                    <label
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
-                      <input type="file" className="hidden" onChange={handleFileChange('sertifikatAsesor')} />
-                      Browse File
+                    <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                      <input type="file" className="hidden" onChange={handleFileChange('certificate')} accept=".jpg,.jpeg,.png,.pdf" />
+                      Pilih File
                     </label>
-                    <div className="text-xs text-gray-500 mt-2">
-                      {files.sertifikatAsesor ? files.sertifikatAsesor.name : safeGet(assessorDetail,
-                        'certificate') ? safeGet(assessorDetail, 'certificate') : 'Belum ada file terpilih'}
-                      {safeGet(assessorDetail, 'certificate') && safeGet(assessorDetail,
-                        'certificate').startsWith('http') && (
-                          <div><a href={safeGet(assessorDetail, 'certificate')} target="_blank" rel="noreferrer"
-                            className="text-blue-600 underline text-xs">Lihat file</a></div>
-                        )}
-                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.certificate ? files.certificate.name : filePreviews.certificate ?
+                      <a href={filePreviews.certificate} target="_blank" rel="noreferrer" className="text-blue-600 underline">Lihat file terupload</a> :
+                      'Belum ada file terpilih'}
                   </div>
                 </div>
               </div>
@@ -581,33 +561,30 @@ export default function BiodataAsesor() {
             {/* Kelengkapan Bukti Administratif Card */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-6">Kelengkapan Bukti
-                  Administratif</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-6">Kelengkapan Bukti Administratif</h3>
 
                 {/* Pas foto 3 x 4 latar belakang merah */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Pas foto 3 x 4 latar belakang merah
                   </label>
-                  <div
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
                     <div className="flex items-center space-x-3">
                       <Upload className="text-gray-400 flex-shrink-0" size={20} />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-700">Choose a file or drag & drop it
-                          here</p>
-                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up
-                          to 50MB</p>
+                        <p className="text-sm font-medium text-gray-700">Pilih file atau drag & drop di sini</p>
+                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, maksimal 5MB</p>
                       </div>
                     </div>
-                    <label
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
-                      <input type="file" className="hidden" onChange={handleFileChange('pasFoto')} />
-                      Browse File
+                    <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                      <input type="file" className="hidden" onChange={handleFileChange('id_card')} accept=".jpg,.jpeg,.png" />
+                      Pilih File
                     </label>
-                    <div className="text-xs text-gray-500 mt-2">
-                      {files.pasFoto ? files.pasFoto.name : 'Belum ada file terpilih'}
-                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.id_card ? files.id_card.name : filePreviews.id_card ?
+                      <a href={filePreviews.id_card} target="_blank" rel="noreferrer" className="text-blue-600 underline">Lihat file terupload</a> :
+                      'Belum ada file terpilih'}
                   </div>
                 </div>
 
@@ -616,31 +593,23 @@ export default function BiodataAsesor() {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Kartu Tanda Penduduk (KTP)/ Kartu keluarga (KK)
                   </label>
-                  <div
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
                     <div className="flex items-center space-x-3">
                       <Upload className="text-gray-400 flex-shrink-0" size={20} />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-700">Choose a file or drag & drop it
-                          here</p>
-                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, and MP4 formats, up
-                          to 50MB</p>
+                        <p className="text-sm font-medium text-gray-700">Pilih file atau drag & drop di sini</p>
+                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, PDF, maksimal 50MB</p>
                       </div>
                     </div>
-                    <label
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
-                      <input type="file" className="hidden" onChange={handleFileChange('ktp')} />
-                      Browse File
+                    <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                      <input type="file" className="hidden" onChange={handleFileChange('national_id')} accept=".jpg,.jpeg,.png,.pdf" />
+                      Pilih File
                     </label>
-                    <div className="text-xs text-gray-500 mt-2">
-                      {files.ktp ? files.ktp.name : safeGet(assessorDetail, 'national_id') ?
-                        safeGet(assessorDetail, 'national_id') : 'Belum ada file terpilih'}
-                      {safeGet(assessorDetail, 'national_id') && safeGet(assessorDetail,
-                        'national_id').startsWith('http') && (
-                          <div><a href={safeGet(assessorDetail, 'national_id')} target="_blank" rel="noreferrer"
-                            className="text-blue-600 underline text-xs">Lihat file</a></div>
-                        )}
-                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.national_id ? files.national_id.name : filePreviews.national_id ?
+                      <a href={filePreviews.national_id} target="_blank" rel="noreferrer" className="text-blue-600 underline">Lihat file terupload</a> :
+                      'Belum ada file terpilih'}
                   </div>
                 </div>
 

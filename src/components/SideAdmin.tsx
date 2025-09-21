@@ -14,7 +14,8 @@ import {
   Calendar,
   Album,
   LogIn,
-  ClipboardPen
+  ClipboardPen,
+  ListCheck
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import paths from '@/routes/paths';
@@ -44,16 +45,10 @@ const Sidebar: React.FC = () => {
       path: paths.admin.root,
     },
     {
-      name: 'Kelola Jadwal Asesmen',
-      icon: ClipboardPen,
+      name: 'Kelola Jurusan',
+      icon: Album,
       section: 'admin',
-      path: paths.admin.kelolaJadwal,
-    },
-    {
-      name: 'Kelola MUK',
-      icon: File,
-      section: 'admin',
-      path: paths.admin.muk.root,
+      path: paths.admin.kelolaJurusan,
     },
     {
       name: 'Kelola Okupasi',
@@ -62,10 +57,16 @@ const Sidebar: React.FC = () => {
       path: paths.admin.okupasi.index,
     },
     {
-      name: 'Kelola Jurusan',
-      icon: Album,
+      name: 'Kelola MUK',
+      icon: File,
       section: 'admin',
-      path: paths.admin.kelolaJurusan,
+      path: paths.admin.muk.root,
+    },
+    {
+      name: 'Kelola Jadwal Asesmen',
+      icon: ClipboardPen,
+      section: 'admin',
+      path: paths.admin.kelolaJadwal,
     },
     {
       name: 'Hasil Asesmen',
@@ -75,7 +76,7 @@ const Sidebar: React.FC = () => {
     },
       {
         name: 'Verifikasi',
-        icon: FileText,
+        icon: ListCheck,
         section: 'admin',
         path: paths.admin.verifikasi,
       },
@@ -144,6 +145,7 @@ const Sidebar: React.FC = () => {
         </Link>
       </div>
 
+      <div className="mx-4 border-t border-orange-400"></div>
 
       {/* Main Menu Items */}
       <div className="flex-1">
@@ -163,8 +165,11 @@ const Sidebar: React.FC = () => {
           ))}
         </div>
 
+        {/* Separator Line */}
+        <div className="mx-4 border-t border-orange-400"></div>
+
         {/* Management Section */}
-        <div className="py-2">
+        <div>
           <div className="px-4 py-3">
             <span className="text-xs text-orange-200 font-medium uppercase tracking-wider">
               Managemen
@@ -179,20 +184,6 @@ const Sidebar: React.FC = () => {
             />
           ))}
         </div>
-      </div>
-
-      {/* Separator Line */}
-      <div className="mx-4 border-t border-orange-400"></div>
-
-      {/* Logout */}
-      <div className="p-2">
-        <button
-          className="w-full flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 text-orange-100 hover:bg-orange-500 hover:text-white"
-          onClick={handleLogout}
-        >
-          <LogOut size={18} className="flex-shrink-0" />
-          <span className="text-sm font-medium">Logout</span>
-        </button>
       </div>
     </>
   );
