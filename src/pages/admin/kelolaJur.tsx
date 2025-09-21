@@ -132,6 +132,24 @@ const KelolaJurusan = () => {
 		setIsDetailModalOpen(true);
 	};
 
+	const handleExport = async () => {
+		try {
+			const res = await axiosInstance.get("/schemes/export/excel", {
+				responseType: "blob",
+			});
+			const url = window.URL.createObjectURL(new Blob([res.data]));
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute("download", "jurusan.xlsx");
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+		} catch (e) {
+			setError("Gagal mengekspor data");
+		}
+	}
+
 	return (
 		<div className="min-h-screen bg-[#F7FAFC]">
 			<Sidebar />
@@ -206,7 +224,7 @@ const KelolaJurusan = () => {
 									Daftar Jurusan
 								</h2>
 								<div className="flex flex-col sm:flex-row gap-3">
-									<button className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
+									<button onClick={handleExport} className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
 										<Download className="w-4 h-4 mr-2" />
 										Export to Excel
 									</button>
