@@ -349,13 +349,6 @@ const KelolaUser: React.FC = () => {
                     <Plus size={16} />
                     Tambah Pengguna
                   </button>
-                  <button
-                    onClick={handleExport}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#E77D35] rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <Download size={16} className="text-[#E77D35]" />
-                    Export ke Excel
-                  </button>
                 </div>
               </div>
 

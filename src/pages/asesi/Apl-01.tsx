@@ -266,8 +266,8 @@ export default function AplZeroOne() {
 															message: "No HP maksimal 13 digit",
 														},
 														minLength: {
-															value: 13,
-															message: "No HP harus 13 digit",
+															value: 10,
+															message: "No HP harus 10 digit",
 														}
 													})}
 													maxLength={13}
@@ -374,8 +374,8 @@ export default function AplZeroOne() {
 															message: "No. telp rumah maksimal 13 digit",
 														},
 														minLength: {
-															value: 13,
-															message: "No. telp rumah harus 13 digit",
+															value: 10,
+															message: "No. telp rumah harus 10 digit",
 														},
 													})}
 													maxLength={13}
@@ -403,8 +403,8 @@ export default function AplZeroOne() {
 																message: "No. telp kantor maksimal 13 digit",
 															},
 															minLength: {
-																value: 13,
-																message: "No. telp kantor harus 13 digit",
+																value: 10,
+																message: "No. telp kantor harus 10 digit",
 															},
 														}
 													)}
@@ -563,8 +563,8 @@ export default function AplZeroOne() {
 																message: "No. telp kantor maksimal 13 digit",
 															},
 															minLength: {
-																value: 13,
-																message: "No. telp kantor harus 13 digit",
+																value: 10,
+																message: "No. telp kantor harus 10 digit",
 															},
 															pattern: {
 																value: /^\d+$/,
