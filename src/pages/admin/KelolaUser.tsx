@@ -139,8 +139,8 @@ const KelolaUser: React.FC = () => {
         params: {
           page: currentPage,
           limit: itemsPerPage,
-          role_name: filters.role, // Menggunakan role_name sesuai API
-          keyword: filters.search // Menggunakan keyword untuk search
+          role_name: filters.role,
+          keyword: filters.search
         }
       });
 
@@ -239,7 +239,6 @@ const KelolaUser: React.FC = () => {
 
     try {
       setDeleteLoading(true);
-      // If approval not collected yet, open approval modal first
       if (!pendingApprovalData) {
         setIsApprovalModalOpen(true);
         return;
@@ -270,7 +269,6 @@ const KelolaUser: React.FC = () => {
   const handleApprovalCollectedForDelete = async (data: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
     setPendingApprovalData(data);
     setIsApprovalModalOpen(false);
-    // proceed delete now with headers
     await handleDeleteConfirm();
   };
 
@@ -711,7 +709,6 @@ const KelolaUser: React.FC = () => {
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={() => {
-            // open approval modal to collect approvers before delete
             setIsApprovalModalOpen(true);
           }}
           loading={deleteLoading}

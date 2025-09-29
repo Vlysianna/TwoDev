@@ -65,11 +65,9 @@ const KelolaMUK: React.FC = () => {
 					"x-approval-comment": approvalData.comment || "hapus MUK",
 				}
 			});
-			// jangan hapus dari tabel secara optimistik; biarkan tetap tampil sampai benar-benar approved
 			setDeleteModalOpen(false);
 			setDeletingId(null);
 			setApprovalData(null);
-			// opsional: sinkronkan data terkini dari server
 			void fetchMuk();
 			toast.show({ title: 'Berhasil', description: 'Permintaan penghapusan dikirim untuk persetujuan', type: 'success' });
 		} catch (error: unknown) {

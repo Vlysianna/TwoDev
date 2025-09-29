@@ -83,13 +83,11 @@ const KelolaJurusan = () => {
 
 		setError(null);
 		try {
-			// Jika approval belum terkumpul, buka modal approval lalu keluar TANPA mengubah loading/button state delete
 			if (!pendingApprovalData) {
 				setIsApprovalModalOpen(true);
 				return;
 			}
 
-			// Mulai loading setelah data approver tersedia
 			setDeleteLoading(schemeToDelete.id);
 			await axiosInstance.delete(`/schemes/${schemeToDelete.id}`, {
 				headers: {
@@ -99,7 +97,6 @@ const KelolaJurusan = () => {
 				},
 			});
 
-			// Jangan hapus item secara optimistik; refresh dari server agar konsisten
 			await fetchSchemes();
 			setIsDeleteModalOpen(false);
 			setSchemeToDelete(null);
@@ -133,7 +130,6 @@ const KelolaJurusan = () => {
 		try {
 			setAddLoading(true);
 			setError(null);
-			// Update does NOT require approval anymore
 			const res = await axiosInstance.put(`/schemes/${editingScheme.id}`, { ...data });
 			if (res.data.success) {
 				fetchSchemes();
