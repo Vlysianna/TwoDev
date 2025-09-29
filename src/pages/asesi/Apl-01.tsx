@@ -107,7 +107,11 @@ export default function AplZeroOne() {
 							...response.data.data,
 							gender:
 								response.data.data.gender == "male" ? "Laki-laki" : "Perempuan",
-							jobs: [response.data.data.jobs || {}],
+							jobs: [
+								response.data.data.jobs && response.data.data.jobs.position
+									? response.data.data.jobs
+									: { ...(response.data.data.jobs || {}), position: 'Satria' },
+							],
 							birth_date: response.data.data.birth_date.split("T")[0],
 						}),
 							setIsLocked(true))
@@ -496,11 +500,13 @@ export default function AplZeroOne() {
 													<label className="block text-sm font-medium text-gray-700 mb-2">
 														Jabatan <span className="text-red-500">*</span>
 													</label>
-													<input
+													<select
 														{...register("jobs.0.position", { required: true })}
-														placeholder="Contoh: Software Developer"
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-													/>
+													>
+														<option value="">Pilih Jabatan</option>
+														<option value="Siswa/Pelajar">Siswa/Pelajar</option>
+													</select>
 													{errors.jobs?.[0]?.position && (
 														<span className="text-red-500 text-sm">Wajib diisi</span>
 													)}
