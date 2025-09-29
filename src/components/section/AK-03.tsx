@@ -236,12 +236,17 @@ export default function AK03({
 		}
 	};
 
-	const handleFilterChange = (value: string) => {
-		if (!isAssessee || isAdmin || isSubmitted) return;
+	const handleFilterChange = (value) => {
 		setFilterKompeten(value);
-		if (value === "ya" || value === "tidak") {
-			questions.forEach((_q, idx) => setValue(`answers.${idx}.answer`, value));
-		}
+
+		// Update semua answer + comment
+		filteredData.forEach((item, idx) => {
+			setValue(`answers.${idx}.answer`, value); // isi ya/tidak
+			setValue(
+				`answers.${idx}.comment`,
+				value === "ya" ? "Iya dilakukan" : "Tidak dilakukan"
+			);
+		});
 	};
 
 	if (loading)
@@ -514,7 +519,18 @@ export default function AK03({
 																				type="radio"
 																				value={val.toLowerCase()}
 																				checked={isSelected}
-																				onChange={() => !isDisabled && field.onChange(val.toLowerCase())}
+																				onChange={() => {
+																					if (!isDisabled) {
+																						field.onChange(val.toLowerCase());
+
+																						// 👉 isi otomatis catatan
+																						if (val === "Ya") {
+																							setValue(`answers.${idx}.comment`, "Iya dilakukan");
+																						} else {
+																							setValue(`answers.${idx}.comment`, "Tidak dilakukan");
+																						}
+																					}
+																				}}
 																				className="hidden"
 																				disabled={isDisabled}
 																			/>
@@ -546,15 +562,18 @@ export default function AK03({
 												</div>
 											</td>
 											<td className="px-2 py-2">
-												<Controller control={control} name={`answers.${idx}.comment`} render={({
-													field }) => (
-													<textarea className={`w-full px-3 py-2 border border-gray-300
-                                                        rounded focus:outline-none focus:ring-2 focus:ring-blue-500
-                                                        text-xs sm:text-sm ${!isAssessee || isAdmin || isSubmitted
-															? "cursor-not-allowed bg-gray-100" : ""}`} {...field}
-														placeholder="Masukkan catatan..." rows={3} disabled={!isAssessee || isAdmin
-															|| isSubmitted} />
-												)}
+												<Controller
+													control={control}
+													name={`answers.${idx}.comment`}
+													render={({ field }) => (
+														<textarea
+															className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none text-xs sm:text-sm bg-gray-100 cursor-not-allowed"
+															{...field}
+															placeholder="Masukkan catatan..."
+															rows={3}
+															disabled
+														/>
+													)}
 												/>
 											</td>
 										</tr>
