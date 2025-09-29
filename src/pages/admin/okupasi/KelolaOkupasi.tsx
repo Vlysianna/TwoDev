@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Edit, Eye, Trash2, X, ChevronDown, Calendar, FileText } from "lucide-react";
+import { Edit, Trash2, X, ChevronDown, Calendar, FileText } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
 import NavAdmin from "@/components/NavAdmin";
+import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
+import ApprovalConfirmModal from "@/components/ApprovalConfirmModal";
+import useToast from "@/components/ui/useToast";
 
 interface OkupasiData {
 	id: number;
@@ -30,6 +33,13 @@ const KelolaOkupasi: React.FC = () => {
 	const [okupasiData, setOkupasiData] = useState<OkupasiData[]>([]);
 	const [schemes, setSchemes] = useState<{ id: number; name: string }[]>([]);
 	const [error, setError] = useState<string | null>(null);
+	const toast = useToast();
+
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+	const [deletingId, setDeletingId] = useState<number | null>(null);
+	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+	const [approvalOpen, setApprovalOpen] = useState<boolean>(false);
+	const [, setApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
 
 	const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -107,16 +117,33 @@ const KelolaOkupasi: React.FC = () => {
 	};
 
 
-	const handleDelete = (id: number) => {
-		if (!window.confirm("Apakah Anda yakin ingin menghapus okupasi ini?"))
-			return;
-		setError(null);
-		axiosInstance
-			.delete(`/occupations/${id}`)
-			.then(() =>
-				setOkupasiData((prev) => prev.filter((item) => item.id !== id))
-			)
-			.catch(() => setError("Gagal menghapus okupasi"));
+	const openDelete = (id: number) => {
+		setDeletingId(id);
+		setIsDeleteModalOpen(true);
+	};
+
+	const performDelete = async (id: number, approval: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
+		try {
+			setDeleteLoading(true);
+			setError(null);
+			await axiosInstance.delete(`/occupations/${id}`, {
+				headers: {
+					"x-approver-admin-id": approval.approver_admin_id,
+					"x-second-approver-admin-id": approval.second_approver_admin_id,
+					"x-approval-comment": approval.comment || "hapus okupasi",
+				},
+			});
+			await fetchOccupations();
+			toast.show({ title: "Berhasil", description: "Permintaan penghapusan dikirim untuk persetujuan", type: "success" });
+		} catch (e) {
+			setError("Gagal menghapus okupasi");
+			toast.show({ title: "Gagal", description: "Gagal menghapus okupasi", type: "error" });
+		} finally {
+			setDeleteLoading(false);
+			setIsDeleteModalOpen(false);
+			setDeletingId(null);
+			setApprovalData(null);
+		}
 	};
 
 	const handleSaveEdit = async () => {
@@ -273,6 +300,26 @@ const KelolaOkupasi: React.FC = () => {
 											))}
 										</div>
 									)}
+
+									{/* Confirm Delete Modal (top-level) */}
+									<ConfirmDeleteModal
+										isOpen={isDeleteModalOpen}
+										onClose={() => { if (!deleteLoading) { setIsDeleteModalOpen(false); setDeletingId(null); } }}
+										onConfirm={() => { setIsDeleteModalOpen(false); setApprovalOpen(true); }}
+										loading={deleteLoading}
+										title="Hapus Okupasi?"
+										message="Apakah Anda yakin ingin menghapus okupasi ini? Tindakan ini tidak dapat dibatalkan."
+									/>
+									{approvalOpen && (
+										<ApprovalConfirmModal
+											isOpen={approvalOpen}
+											onClose={() => { if (!deleteLoading) { setApprovalOpen(false); setApprovalData(null); } }}
+											onConfirm={(data) => { const id = deletingId; setApprovalOpen(false); if (id) { void performDelete(id, data); } }}
+											title={'Persetujuan Penghapusan Okupasi'}
+											subtitle="Pilih 2 admin untuk menyetujui penghapusan okupasi ini."
+											loading={deleteLoading}
+										/>
+									)}
 								</div>
 							</div>
 							<div className="order-2 lg:order-2">
@@ -339,7 +386,7 @@ const KelolaOkupasi: React.FC = () => {
 											<Edit size={16} />
 										</button>
 										<button
-											onClick={() => handleDelete(item.id)}
+											onClick={() => openDelete(item.id)}
 											className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
 											title="Delete"
 										>
@@ -412,7 +459,7 @@ const KelolaOkupasi: React.FC = () => {
 														<Edit size={16} />
 													</button>
 													<button
-														onClick={() => handleDelete(item.id)}
+														onClick={() => openDelete(item.id)}
 														className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
 														title="Delete"
 													>

@@ -21,6 +21,7 @@ interface UserFormModalProps {
   user?: UserData | null;
   roles: Role[];
   onSuccess: () => void;
+  onSubmitEditWithApproval?: (payload: any) => void;
 }
 
 interface FormData {
@@ -29,6 +30,9 @@ interface FormData {
   password: string;
   confirmPassword: string;
   role_id: number | '';
+  approver_admin_id?: number | '';
+  second_approver_admin_id?: number | '';
+  comment?: string;
 }
 
 const UserFormModal: React.FC<UserFormModalProps> = ({
@@ -37,16 +41,20 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
   mode,
   user,
   roles,
-  onSuccess
+  onSuccess,
+  onSubmitEditWithApproval
 }) => {
   const [formData, setFormData] = useState<FormData>({
     full_name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role_id: ''
+    role_id: '',
+    approver_admin_id: '',
+    second_approver_admin_id: '',
+    comment: ''
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -59,7 +67,10 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         email: user.email,
         password: '',
         confirmPassword: '',
-        role_id: user.role.id
+        role_id: user.role.id,
+        approver_admin_id: '',
+        second_approver_admin_id: '',
+        comment: ''
       });
     } else {
       setFormData({
@@ -67,17 +78,20 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         email: '',
         password: '',
         confirmPassword: '',
-        role_id: ''
+        role_id: '',
+        approver_admin_id: '',
+        second_approver_admin_id: '',
+        comment: ''
       });
     }
     setError(null);
   }, [mode, user, isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'role_id' ? (value ? Number(value) : '') : value
+      [name]: ['role_id', 'approver_admin_id', 'second_approver_admin_id'].includes(name) ? (value ? Number(value) : '') : value
     }));
   };
 
@@ -86,17 +100,17 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
       setError('Nama lengkap harus diisi');
       return false;
     }
-    
+
     if (!formData.email.trim()) {
       setError('Email harus diisi');
       return false;
     }
-    
+
     if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
       setError('Format email tidak valid');
       return false;
     }
-    
+
     if (!formData.role_id) {
       setError('Role harus dipilih');
       return false;
@@ -107,12 +121,12 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         setError('Password harus diisi');
         return false;
       }
-      
+
       if (formData.password.length < 6) {
         setError('Password minimal 6 karakter');
         return false;
       }
-      
+
       if (formData.password !== formData.confirmPassword) {
         setError('Password dan konfirmasi password tidak cocok');
         return false;
@@ -124,7 +138,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         setError('Password minimal 6 karakter');
         return false;
       }
-      
+
       if (formData.password !== formData.confirmPassword) {
         setError('Password dan konfirmasi password tidak cocok');
         return false;
@@ -136,7 +150,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     try {
@@ -154,12 +168,11 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         submitData.password = formData.password;
       }
 
-      let response;
-      if (mode === 'create') {
-        response = await api.post('/user', submitData);
-      } else {
-        response = await api.put(`/user/${user?.id}`, submitData);
+      if (mode === 'edit' && onSubmitEditWithApproval) {
+        onSubmitEditWithApproval(submitData);
+        return;
       }
+      const response = await api.post('/user', submitData);
 
       if (response.data.success) {
         onSuccess();
@@ -173,15 +186,6 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const getRoleDisplayName = (roleName: string) => {
-    const roleMap: { [key: string]: string } = {
-      'Admin': 'Administrator',
-      'Assessor': 'Asesor',
-      'Assessee': 'Asesi'
-    };
-    return roleMap[roleName] || roleName;
   };
 
   if (!isOpen) return null;
@@ -264,7 +268,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
               <option value="">Pilih Role</option>
               {roles.map(role => (
                 <option key={role.id} value={role.id}>
-                  {getRoleDisplayName(role.name)}
+                  {role.name}
                 </option>
               ))}
             </select>
@@ -328,6 +332,8 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* Approval selection is handled in a separate modal by the parent on Save (edit mode) */}
 
           {/* Actions */}
           <div className="flex justify-end space-x-3 pt-4">

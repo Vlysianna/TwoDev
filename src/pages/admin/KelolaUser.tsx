@@ -14,9 +14,11 @@ import {
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import ApprovalConfirmModal from '@/components/ApprovalConfirmModal';
 import UserFormModal from '@/components/UserFormModal';
 import UserDetailModal from '@/components/UserDetailModal';
 import { useNavigate } from 'react-router-dom';
+import useToast from '@/components/ui/useToast';
 import api from '@/helper/axios';
 
 interface Role {
@@ -90,6 +92,7 @@ interface Summary {
 }
 
 const KelolaUser: React.FC = () => {
+  const toast = useToast();
   const [users, setUsers] = useState<UserData[]>([]);
   const [summary, setSummary] = useState<Summary>({ total_user: 0, total_assessee: 0, total_assessor: 0, total_admin: 0 });
   const [filteredUsers, setFilteredUsers] = useState<UserData[]>([]);
@@ -111,6 +114,9 @@ const KelolaUser: React.FC = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -142,12 +148,12 @@ const KelolaUser: React.FC = () => {
         setUsers(response.data.data);
         setFilteredUsers(response.data.data);
         setSummary(response.data.summary);
-        
+
         // Update pagination state from API response
         setCurrentPage(response.data.meta.current_page);
         setTotalPages(response.data.meta.total_pages);
         setItemsPerPage(response.data.meta.limit);
-        
+
       } else {
         setError(response.data.message || 'Gagal memuat data pengguna');
       }
@@ -171,7 +177,7 @@ const KelolaUser: React.FC = () => {
   const fetchRoles = async () => {
     try {
       const response = await api.get('/roles');
-      
+
       if (response.data.success) {
         setRoles(response.data.data);
       }
@@ -179,7 +185,7 @@ const KelolaUser: React.FC = () => {
       console.error('Failed to fetch roles:', err);
     }
   };
-  
+
   // Debug untuk melihat nilai filters saat berubah
   useEffect(() => {
     console.log('Current filters:', filters);
@@ -233,24 +239,65 @@ const KelolaUser: React.FC = () => {
 
     try {
       setDeleteLoading(true);
-      await api.delete(`/user/${userToDelete.id}`);
+      // If approval not collected yet, open approval modal first
+      if (!pendingApprovalData) {
+        setIsApprovalModalOpen(true);
+        return;
+      }
+      await api.delete(`/user/${userToDelete.id}`, {
+        headers: {
+          'x-approver-admin-id': pendingApprovalData.approver_admin_id,
+          'x-second-approver-admin-id': pendingApprovalData.second_approver_admin_id,
+          'x-approval-comment': pendingApprovalData.comment,
+        },
+      });
       await fetchData(); // Refresh the list
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
+      setPendingApprovalData(null);
+      toast.show({ title: 'Berhasil', description: 'Permintaan penghapusan dikirim untuk persetujuan', type: 'success' });
     } catch (error: unknown) {
       console.error('Error deleting user:', error);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const msg = (error as any)?.response?.data?.message || 'Gagal menghapus pengguna';
       setError(msg);
+      toast.show({ title: 'Gagal', description: msg, type: 'error' });
     } finally {
       setDeleteLoading(false);
     }
+  };
+
+  const handleApprovalCollectedForDelete = async (data: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
+    setPendingApprovalData(data);
+    setIsApprovalModalOpen(false);
+    // proceed delete now with headers
+    await handleDeleteConfirm();
   };
 
   const handleFormSuccess = () => {
     setIsFormModalOpen(false);
     setSelectedUser(null);
     fetchData(); // Refresh the list
+  };
+
+  const handleSubmitEditWithApproval = async (payload: any) => {
+    // EDIT no longer requires approval: submit directly
+    if (!selectedUser) return;
+    try {
+      setEditLoading(true);
+      const res = await api.put(`/user/${selectedUser.id}`, payload);
+      if (res?.data?.success) {
+        handleFormSuccess();
+      } else {
+        setError(res?.data?.message || 'Gagal mengupdate pengguna');
+      }
+    } catch (err: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (err as any)?.response?.data?.message || 'Gagal mengupdate pengguna';
+      setError(msg);
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   const handleExport = () => {
@@ -281,11 +328,11 @@ const KelolaUser: React.FC = () => {
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '-';
-    
+
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return '-';
-      
+
       return date.toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'long',
@@ -373,7 +420,7 @@ const KelolaUser: React.FC = () => {
                     Cari
                   </button>
                 </form>
-                
+
                 {/* Role Filter */}
                 <div className="relative">
                   <select
@@ -487,14 +534,14 @@ const KelolaUser: React.FC = () => {
                       <tr>
                         <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                           {filters.search ? `Tidak ditemukan pengguna dengan kata kunci "${filters.search}"` :
-                           filters.role ? `Tidak ditemukan pengguna dengan role "${getRoleDisplayName(filters.role)}"` :
-                           'Belum ada data pengguna'}
+                            filters.role ? `Tidak ditemukan pengguna dengan role "${getRoleDisplayName(filters.role)}"` :
+                              'Belum ada data pengguna'}
                         </td>
                       </tr>
                     ) : (
                       filteredUsers.map((user, index) => (
-                        <tr 
-                          key={user.id} 
+                        <tr
+                          key={user.id}
                           className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
                         >
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -509,13 +556,12 @@ const KelolaUser: React.FC = () => {
                             {user.email}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              user.role.name === 'Admin' 
-                                ? 'bg-red-100 text-red-800'
-                                : user.role.name === 'Assessor'
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role.name === 'Admin'
+                              ? 'bg-red-100 text-red-800'
+                              : user.role.name === 'Assessor'
                                 ? 'bg-blue-100 text-blue-800'
                                 : 'bg-green-100 text-green-800'
-                            }`}>
+                              }`}>
                               {getRoleDisplayName(user.role.name)}
                             </span>
                           </td>
@@ -611,11 +657,10 @@ const KelolaUser: React.FC = () => {
                           <button
                             key={pageNumber}
                             onClick={() => setCurrentPage(pageNumber)}
-                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                              currentPage === pageNumber
-                                ? 'z-10 bg-[#E77D35] text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E77D35]'
-                                : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
-                            }`}
+                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${currentPage === pageNumber
+                              ? 'z-10 bg-[#E77D35] text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E77D35]'
+                              : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                              }`}
                           >
                             {pageNumber}
                           </button>
@@ -649,6 +694,7 @@ const KelolaUser: React.FC = () => {
           user={selectedUser}
           roles={roles}
           onSuccess={handleFormSuccess}
+          onSubmitEditWithApproval={handleSubmitEditWithApproval}
         />
       )}
 
@@ -664,10 +710,27 @@ const KelolaUser: React.FC = () => {
         <ConfirmDeleteModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDeleteConfirm}
+          onConfirm={() => {
+            // open approval modal to collect approvers before delete
+            setIsApprovalModalOpen(true);
+          }}
           loading={deleteLoading}
           title="Hapus Pengguna"
           message={`Apakah Anda yakin ingin menghapus pengguna "${getUserDisplayName(userToDelete)}"? Tindakan ini tidak dapat dibatalkan.`}
+        />
+      )}
+
+      {isApprovalModalOpen && (
+        <ApprovalConfirmModal
+          isOpen={isApprovalModalOpen}
+          onClose={() => {
+            setIsApprovalModalOpen(false);
+            setPendingApprovalData(null);
+          }}
+          onConfirm={(data) => { setPendingApprovalData(data); setIsApprovalModalOpen(false); void handleDeleteConfirm(); }}
+          title={'Persetujuan Penghapusan'}
+          subtitle={'Pilih 2 admin (Sertifikasi dan Ketua LSP) untuk menyetujui penghapusan ini.'}
+          loading={deleteLoading}
         />
       )}
     </div>

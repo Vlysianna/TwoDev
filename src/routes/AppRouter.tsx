@@ -68,6 +68,7 @@ import AssessmentAdminProvider from "@/components/AssessmentAdminProvider";
 import BiodataProtectedRoute from "@/components/BiodataProtectedRoute";
 import AsesorIndexRoute from "@/components/AsesorIndexRoute";
 import ResultAsesiAssessmentAdmin from "@/pages/admin/ResultAsesiAssessment";
+import PersetujuanAdmin from "@/pages/admin/Persetujuan";
 
 const router = createBrowserRouter(
 	[
@@ -163,6 +164,7 @@ const router = createBrowserRouter(
 						},
 						{ path: paths.admin.editAsesi, element: <EditAsesi /> },
 						{ path: paths.admin.verifikasi, element: <VerifikasiPage /> },
+						{ path: paths.admin.persetujuan, element: <PersetujuanAdmin /> },
 						{
 							path: paths.admin.muk.root,
 							children: [

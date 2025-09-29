@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Edit3, Trash2, AlertCircle, File } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import useToast from '@/components/ui/useToast';
 import Sidebar from "@/components/SideAdmin";
 import Navbar from "@/components/NavAdmin";
 import paths from "@/routes/paths";
 import axiosInstance from "@/helper/axios";
 import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
+import ApprovalConfirmModal from "@/components/ApprovalConfirmModal";
 import type { MukType } from "@/model/muk-model";
 
 const KelolaMUK: React.FC = () => {
+	const toast = useToast();
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [muks, setMuks] = useState<MukType[]>([]);
+	const [approvalOpen, setApprovalOpen] = useState(false);
+	const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
 
 	const navigate = useNavigate();
 
@@ -33,7 +38,7 @@ const KelolaMUK: React.FC = () => {
 			} else {
 				setError("Gagal memuat data muk");
 			}
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (error) {
 			setError("Gagal memuat data muk");
 		} finally {
@@ -52,14 +57,25 @@ const KelolaMUK: React.FC = () => {
 		if (!deletingId) return;
 		try {
 			setDeleteLoading(true);
-			await axiosInstance.delete(`/assessments/${deletingId}`);
-			// optimistic update
-			setMuks((prev) => prev.filter((muk) => muk.id !== deletingId));
+			if (!approvalData) { setApprovalOpen(true); return; }
+			await axiosInstance.delete(`/assessments/${deletingId}`, {
+				headers: {
+					"x-approver-admin-id": approvalData.approver_admin_id,
+					"x-second-approver-admin-id": approvalData.second_approver_admin_id,
+					"x-approval-comment": approvalData.comment || "hapus MUK",
+				}
+			});
+			// jangan hapus dari tabel secara optimistik; biarkan tetap tampil sampai benar-benar approved
 			setDeleteModalOpen(false);
 			setDeletingId(null);
+			setApprovalData(null);
+			// opsional: sinkronkan data terkini dari server
+			void fetchMuk();
+			toast.show({ title: 'Berhasil', description: 'Permintaan penghapusan dikirim untuk persetujuan', type: 'success' });
 		} catch (error: unknown) {
 			console.error("Error deleting assessment:", error);
 			setError("Gagal menghapus MUK");
+			toast.show({ title: 'Gagal', description: 'Gagal menghapus MUK', type: 'error' });
 		} finally {
 			setDeleteLoading(false);
 		}
@@ -114,11 +130,22 @@ const KelolaMUK: React.FC = () => {
 							setDeleteModalOpen(false);
 							setDeletingId(null);
 						}}
-						onConfirm={confirmDelete}
+						onConfirm={() => setApprovalOpen(true)}
 						loading={deleteLoading}
 						title="Hapus Skema"
 						message="Apakah Anda yakin ingin menghapus skema ini? Tindakan ini tidak dapat dibatalkan."
 					/>
+
+					{approvalOpen && (
+						<ApprovalConfirmModal
+							isOpen={approvalOpen}
+							onClose={() => { setApprovalOpen(false); setApprovalData(null); }}
+							onConfirm={(data) => { setApprovalData(data); setApprovalOpen(false); void confirmDelete(); }}
+							title="Persetujuan Penghapusan MUK"
+							subtitle="Pilih 2 admin untuk menyetujui penghapusan MUK ini."
+							loading={deleteLoading}
+						/>
+					)}
 
 					{/* Page Title */}
 					<div className="mb-6">
@@ -150,7 +177,7 @@ const KelolaMUK: React.FC = () => {
 								<h2 className="text-[20px] sm:text-[26px] font-semibold text-[#000000]">
 									Kelola MUK
 								</h2>
-								
+
 							</div>
 							{/* Full width border line */}
 							<div className="border-b border-gray-200"></div>
@@ -180,9 +207,8 @@ const KelolaMUK: React.FC = () => {
 										{muks.map((muk, index) => (
 											<tr
 												key={muk.id}
-												className={`${
-													index % 2 === 0 ? "bg-white" : "bg-gray-50"
-												} hover:bg-gray-100 transition-colors`}
+												className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+													} hover:bg-gray-100 transition-colors`}
 											>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
 													{muk.code}

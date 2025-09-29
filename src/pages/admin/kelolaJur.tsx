@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Download, Edit, Eye, Trash2, AlertTriangle, X, Album } from "lucide-react";
+import ApprovalConfirmModal from "@/components/ApprovalConfirmModal";
+import useToast from '@/components/ui/useToast';
 import Navbar from "@/components/NavAdmin";
 import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
@@ -12,6 +14,7 @@ type FormData = {
 };
 
 const KelolaJurusan = () => {
+	const toast = useToast();
 	const { register, handleSubmit, reset } = useForm<FormData>();
 	const { register: registerEdit, handleSubmit: handleSubmitEdit, reset: resetEdit, setValue: setValueEdit } = useForm<FormData>();
 	const [loading, setLoading] = useState(true);
@@ -19,10 +22,13 @@ const KelolaJurusan = () => {
 	const [addLoading, setAddLoading] = useState(false);
 	const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
 	const [schemes, setSchemes] = useState<Scheme[]>([]);
-	
+
 	// Modal states
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [schemeToDelete, setSchemeToDelete] = useState<Scheme | null>(null);
+	const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+	const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
+	// approval only used for delete now
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [editingScheme, setEditingScheme] = useState<Scheme | null>(null);
 	const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -51,7 +57,7 @@ const KelolaJurusan = () => {
 		try {
 			setAddLoading(true);
 			setError(null);
-			
+
 			// Add new scheme only
 			const res = await axiosInstance.post("/schemes", data);
 			if (res.data.success) {
@@ -74,19 +80,43 @@ const KelolaJurusan = () => {
 
 	const handleDeleteConfirm = async () => {
 		if (!schemeToDelete) return;
-		
-		setDeleteLoading(schemeToDelete.id);
+
 		setError(null);
 		try {
-			await axiosInstance.delete(`/schemes/${schemeToDelete.id}`);
-			setSchemes(schemes.filter((item) => item.id !== schemeToDelete.id));
+			// Jika approval belum terkumpul, buka modal approval lalu keluar TANPA mengubah loading/button state delete
+			if (!pendingApprovalData) {
+				setIsApprovalModalOpen(true);
+				return;
+			}
+
+			// Mulai loading setelah data approver tersedia
+			setDeleteLoading(schemeToDelete.id);
+			await axiosInstance.delete(`/schemes/${schemeToDelete.id}`, {
+				headers: {
+					"x-approver-admin-id": pendingApprovalData.approver_admin_id,
+					"x-second-approver-admin-id": pendingApprovalData.second_approver_admin_id,
+					"x-approval-comment": pendingApprovalData.comment || "hapus jurusan",
+				},
+			});
+
+			// Jangan hapus item secara optimistik; refresh dari server agar konsisten
+			await fetchSchemes();
 			setIsDeleteModalOpen(false);
 			setSchemeToDelete(null);
+			setPendingApprovalData(null);
+			toast.show({ title: 'Berhasil', description: 'Permintaan penghapusan dikirim untuk persetujuan', type: 'success' });
 		} catch (e) {
 			setError("Gagal menghapus jurusan");
+			toast.show({ title: 'Gagal', description: 'Gagal menghapus jurusan', type: 'error' });
 		} finally {
 			setDeleteLoading(null);
 		}
+	};
+
+	const onApprovalCollectedForDelete = async (data: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
+		setPendingApprovalData(data);
+		setIsApprovalModalOpen(false);
+		await handleDeleteConfirm();
 	};
 
 	const handleEdit = (scheme: Scheme) => {
@@ -99,17 +129,18 @@ const KelolaJurusan = () => {
 
 	const handleEditScheme = async (data: FormData) => {
 		if (!editingScheme) return;
-		
+
 		try {
 			setAddLoading(true);
 			setError(null);
-			
-			const res = await axiosInstance.put(`/schemes/${editingScheme.id}`, data);
+			// Update does NOT require approval anymore
+			const res = await axiosInstance.put(`/schemes/${editingScheme.id}`, { ...data });
 			if (res.data.success) {
 				fetchSchemes();
 				setIsEditModalOpen(false);
 				setEditingScheme(null);
 				resetEdit();
+				setPendingApprovalData(null);
 			} else {
 				setError(res.data.message || "Gagal mengupdate jurusan");
 			}
@@ -255,9 +286,8 @@ const KelolaJurusan = () => {
 										{schemes.map((scheme, index) => (
 											<tr
 												key={scheme.id}
-												className={`${
-													index % 2 === 0 ? "bg-white" : "bg-gray-50"
-												} hover:bg-gray-100 transition-colors`}
+												className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+													} hover:bg-gray-100 transition-colors`}
 											>
 												<td className="px-4 lg:px-6 py-4 whitespace-nowrap">
 													<div className="text-sm font-medium text-gray-900">
@@ -332,7 +362,7 @@ const KelolaJurusan = () => {
 							Konfirmasi Hapus
 						</h3>
 						<p className="text-sm text-gray-500 text-center mb-6">
-							Apakah Anda yakin ingin menghapus skema "{schemeToDelete.name}"? 
+							Apakah Anda yakin ingin menghapus skema "{schemeToDelete.name}"?
 							Tindakan ini tidak dapat dibatalkan.
 						</p>
 						<div className="flex gap-3">
@@ -347,12 +377,23 @@ const KelolaJurusan = () => {
 								Batal
 							</button>
 							<button
-								onClick={handleDeleteConfirm}
+								onClick={() => setIsApprovalModalOpen(true)}
 								className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
 								disabled={deleteLoading === schemeToDelete.id}
 							>
 								{deleteLoading === schemeToDelete.id ? "Menghapus..." : "Hapus"}
 							</button>
+
+							{isApprovalModalOpen && (
+								<ApprovalConfirmModal
+									isOpen={isApprovalModalOpen}
+									onClose={() => { if (!deleteLoading) { setIsApprovalModalOpen(false); setPendingApprovalData(null); } }}
+									onConfirm={(data) => { setPendingApprovalData(data); setIsApprovalModalOpen(false); void handleDeleteConfirm(); }}
+									title={"Persetujuan Penghapusan Jurusan"}
+									subtitle="Pilih Admin Sertifikasi dan Ketua LSP untuk menyetujui aksi ini."
+									loading={deleteLoading === (schemeToDelete?.id ?? -1) || addLoading}
+								/>
+							)}
 						</div>
 					</div>
 				</div>
@@ -376,7 +417,7 @@ const KelolaJurusan = () => {
 								<X className="h-5 w-5" />
 							</button>
 						</div>
-						
+
 						<div className="space-y-4">
 							<div>
 								<label className="text-sm font-medium text-gray-500">Kode Skema</label>
@@ -384,14 +425,14 @@ const KelolaJurusan = () => {
 									{selectedScheme.code}
 								</p>
 							</div>
-							
+
 							<div>
 								<label className="text-sm font-medium text-gray-500">Nama Skema</label>
 								<p className="text-sm text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">
 									{selectedScheme.name}
 								</p>
 							</div>
-							
+
 							<div>
 								<label className="text-sm font-medium text-gray-500">Tanggal Dibuat</label>
 								<p className="text-sm text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">
@@ -403,7 +444,7 @@ const KelolaJurusan = () => {
 									})}
 								</p>
 							</div>
-							
+
 							<div>
 								<label className="text-sm font-medium text-gray-500">Terakhir Diperbarui</label>
 								<p className="text-sm text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">
@@ -416,7 +457,7 @@ const KelolaJurusan = () => {
 								</p>
 							</div>
 						</div>
-						
+
 						<div className="flex justify-end mt-6">
 							<button
 								onClick={() => {
@@ -447,7 +488,7 @@ const KelolaJurusan = () => {
 								<X className="h-5 w-5" />
 							</button>
 						</div>
-						
+
 						<form onSubmit={handleSubmitEdit(handleEditScheme)} className="space-y-4">
 							<div>
 								<label className="block text-sm font-medium text-gray-700 mb-2">
@@ -460,7 +501,7 @@ const KelolaJurusan = () => {
 									className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-500"
 								/>
 							</div>
-							
+
 							<div>
 								<label className="block text-sm font-medium text-gray-700 mb-2">
 									Nama Jurusan
@@ -472,7 +513,7 @@ const KelolaJurusan = () => {
 									className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-500"
 								/>
 							</div>
-							
+
 							<div className="flex justify-end gap-3 mt-6">
 								<button
 									type="button"

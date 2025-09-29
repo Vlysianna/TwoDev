@@ -89,6 +89,7 @@ const routes = {
 		kelolaAkunAsesor: "/admin/kelola-akun-asesor",
 		editAsesi: "/admin/edit-asesi",
 		verifikasi: "/admin/verifikasi",
+		persetujuan: "/admin/persetujuan",
 		muk: {
 			root: "/admin/muk",
 			tambah: "/admin/muk/tambah",
