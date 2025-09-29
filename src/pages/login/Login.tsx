@@ -24,11 +24,11 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState('');
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const from = location.state?.from?.pathname || '/';
 
   // Handle success message and pre-fill email from registration
@@ -53,15 +53,15 @@ export default function LoginForm() {
 
     setError('');
     setSuccessMessage('');
-    
+
     await login(email, password).then(async () => {
       setSuccessMessage('Login berhasil');
-      
+
       // Get user info to check role
       try {
         const response = await api.get('/auth/me');
         const userRole = response.data.data.role_id;
-        
+
         // For asesor users, always redirect to asesor root to ensure biodata check
         if (userRole === 2 && from.startsWith('/asesor') && from !== '/asesor') {
           navigate('/asesor', { replace: true });
@@ -101,7 +101,7 @@ export default function LoginForm() {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
-            
+
             {/* Email Field */}
             <div>
               <div className="block text-sm font-medium text-gray-700 mb-1 md:mb-2">
@@ -187,14 +187,14 @@ export default function LoginForm() {
               </Link>
             </div>
           </form>
-        </div>
-        <div className="fixed bottom-0 pb-10 flex items-center justify-center text-xs md:text-sm text-gray-600">
-          <span>Developed by</span>
-          <img
-            src={getAssetPath('/img/logo-two-dev.svg')}
-            alt=""
-            className="w-20 ml-2"
-          />
+          <div className="mt-10 flex items-center justify-center text-xs md:text-sm text-gray-600">
+            <span>Developed by</span>
+            <img
+              src={getAssetPath('/img/logo-two-dev.svg')}
+              alt=""
+              className="w-20 ml-2"
+            />
+          </div>
         </div>
       </div>
 
