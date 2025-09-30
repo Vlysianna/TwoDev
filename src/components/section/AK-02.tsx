@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "@/components/ConfirmModal";
 import useToast from "../ui/useToast";
+import { formatDate } from "@/helper/format-date";
 
 // Evidence types
 export const evidenceTypes = [
@@ -570,7 +571,7 @@ export default function AK02({
 
 					<div className="flex flex-col xl:flex-row xl:items-center space-y-1 xl:space-y-0 xl:space-x-2 text-gray-600 text-sm lg:ml-auto">
 						<span className="whitespace-nowrap">
-							{new Date(data.created_at).toLocaleDateString("id-ID")}
+							{data.created_at ? formatDate(data.created_at) : "-"}
 						</span>
 					</div>
 				</div>

@@ -7,6 +7,7 @@ import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
 import { useForm } from "react-hook-form";
 import type { Scheme } from "@/lib/types";
+import { formatDate } from "@/helper/format-date";
 
 type FormData = {
 	code: string;
@@ -279,6 +280,16 @@ const KelolaJurusan = () => {
 										</tr>
 									</thead>
 									<tbody className="bg-white divide-y divide-gray-200">
+										{schemes.length === 0 && (
+											<tr>
+												<td
+													colSpan={3}
+													className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500"
+												>
+													Tidak ada data jurusan
+												</td>
+											</tr>
+										)}
 										{schemes.map((scheme, index) => (
 											<tr
 												key={scheme.id}
@@ -432,24 +443,14 @@ const KelolaJurusan = () => {
 							<div>
 								<label className="text-sm font-medium text-gray-500">Tanggal Dibuat</label>
 								<p className="text-sm text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">
-									{new Date(selectedScheme.created_at).toLocaleDateString("id-ID", {
-										weekday: 'long',
-										year: 'numeric',
-										month: 'long',
-										day: 'numeric'
-									})}
+									{formatDate(selectedScheme.created_at)}
 								</p>
 							</div>
 
 							<div>
 								<label className="text-sm font-medium text-gray-500">Terakhir Diperbarui</label>
 								<p className="text-sm text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">
-									{new Date(selectedScheme.updated_at).toLocaleDateString("id-ID", {
-										weekday: 'long',
-										year: 'numeric',
-										month: 'long',
-										day: 'numeric'
-									})}
+									{formatDate(selectedScheme.updated_at)}
 								</p>
 							</div>
 						</div>

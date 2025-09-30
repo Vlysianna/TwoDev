@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import paths from "@/routes/paths";
 import api from '@/helper/axios';
 import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, Mail, Phone, MapPin, Calendar, ArrowRight, Users } from 'lucide-react';
+import { formatDate } from "@/helper/format-date";
 
 // Types & helpers
 interface Assessor {
@@ -45,20 +46,6 @@ interface AssessmentResult {
 interface ExpandedRow {
   assessmentId: number;
 }
-
-const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric'
-});
-
-const formatDateTime = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
-  day: '2-digit',
-  month: 'long',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit'
-});
 
 const ResultAssessment: React.FC = () => {
   const navigate = useNavigate();
@@ -197,6 +184,13 @@ const ResultAssessment: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
+                    {data.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500">
+                          Belum ada hasil assessment
+                        </td>
+                      </tr>
+                    )}
                     {data.map((schedule) => {
                       const isExpanded = isRowExpanded(schedule.id);
 

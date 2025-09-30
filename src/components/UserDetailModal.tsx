@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, User, Mail, Calendar, MapPin, Phone, IdCard, GraduationCap } from 'lucide-react';
+import { formatDate } from '@/helper/format-date';
 
 interface Role {
   id: number;
@@ -73,24 +74,6 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       'Assessee': 'bg-green-100 text-green-800'
     };
     return colorMap[roleName] || 'bg-gray-100 text-gray-800';
-  };
-
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return '-';
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '-';
-      
-      return date.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return '-';
-    }
   };
 
   const getUserDisplayName = () => {

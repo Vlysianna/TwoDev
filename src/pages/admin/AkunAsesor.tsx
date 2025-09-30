@@ -319,6 +319,13 @@ const KelolaAkunAsesor: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
+                    {users.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500">
+                          Tidak ada data asesor
+                        </td>
+                      </tr>
+                    )}
                     {users.map((user, index) => (
                       <tr 
                         key={user.id} 

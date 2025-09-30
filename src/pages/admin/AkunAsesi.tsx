@@ -9,6 +9,7 @@ import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import AssesseeModal from '@/components/AssesseeModal';
 import api from '@/helper/axios';
+import { formatDate } from "@/helper/format-date";
 
 
 interface AssesseeItem {
@@ -202,6 +203,13 @@ const KelolaAkunAsesi: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
+                    {users.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500">
+                          Tidak ada data asesi
+                        </td>
+                      </tr>
+                    )}
                     {users.map((user, index) => (
                       <tr 
                         key={user.id} 
@@ -214,7 +222,7 @@ const KelolaAkunAsesi: React.FC = () => {
                           {user.identity_number || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.birth_date ? new Date(user.birth_date).toLocaleDateString() : '-'}
+                          {user.birth_date ? formatDate(user.birth_date) : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                           {user.birth_location || '-'}

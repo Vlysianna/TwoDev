@@ -8,6 +8,8 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { getAssessorUrl, getAssesseeUrl } from '@/lib/hashids';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import ConfirmModal from '@/components/ConfirmModal';
+import { formatDate } from "@/helper/format-date";
+
 // Interface untuk struktur data incomplete criteria
 interface IncompleteCriteria {
   id: number;
@@ -550,12 +552,7 @@ export default function Ia01() {
   };
 
   const formattedDate = assesmentDate
-    ? new Date(assesmentDate).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    })
-    : "";
+    ? formatDate(assesmentDate) : "";
 
   const getFilteredData = () => {
     return unitData.filter(unit => unit.group_name === selectedKPekerjaan);

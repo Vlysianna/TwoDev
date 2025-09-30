@@ -10,6 +10,7 @@ import type { AK05ResponseData } from "@/model/ak05-model";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import ConfirmModal from "@/components/ConfirmModal";
+import { formatDate } from "@/helper/format-date";
 
 export default function CekAk05() {
 	const { id_result, id_asesor } = useAssessmentParams();
@@ -288,11 +289,7 @@ export default function CekAk05() {
 								<h2 className="text-sm font-medium mb-3">Tanggal</h2>
 								<input
 									type="text"
-									value={
-										new Date(
-											data.result.result_ak05.updated_at
-										).toLocaleDateString("id-ID") || "N/A"
-									}
+									value={formatDate(data.result.result_ak05.updated_at) || "N/A" }
 									disabled
 									className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
 								/>

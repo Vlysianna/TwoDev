@@ -20,6 +20,7 @@ import UserDetailModal from '@/components/UserDetailModal';
 import { useNavigate } from 'react-router-dom';
 import useToast from '@/components/ui/useToast';
 import api from '@/helper/axios';
+import { formatDate } from '@/helper/format-date';
 
 interface Role {
   id: number;
@@ -324,24 +325,6 @@ const KelolaUser: React.FC = () => {
     return 'Verified'; // Placeholder
   };
 
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return '-';
-
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '-';
-
-      return date.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return '-';
-    }
-  };
-
   // Remove initial loading screen since we're showing loading state in the table
 
   if (error) {
@@ -521,6 +504,7 @@ const KelolaUser: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
+                    {users.length === 0 && <tr><td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500">Tidak ada data pengguna</td></tr>}
                     {loading ? (
                       <tr>
                         <td colSpan={6} className="px-6 py-8 text-center">

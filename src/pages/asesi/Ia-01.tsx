@@ -9,6 +9,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import paths from "@/routes/paths";
 import NavbarAsesi from '@/components/NavbarAsesi';
 import ConfirmModal from '@/components/ConfirmModal';
+import { formatDate } from "@/helper/format-date";
 
 export default function Ia01Asesi() {
     const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
@@ -153,13 +154,7 @@ export default function Ia01Asesi() {
     const filteredData = getFilteredData();
 
     const assesmentDate = resultData?.ia01_header?.updated_at || assessment?.date || '';
-    const formattedDate = assesmentDate
-        ? new Date(assesmentDate).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        })
-        : "";
+    const formattedDate = assesmentDate ? formatDate(assesmentDate) : "";
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 

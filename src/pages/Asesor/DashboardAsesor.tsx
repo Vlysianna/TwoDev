@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavbarAsesor from "@/components/NavAsesor";
+import { formatDate } from "@/helper/format-date";
 
 const DashboardAsesor: React.FC = () => {
 	const { user } = useAuth();
@@ -205,21 +206,6 @@ const DashboardAsesor: React.FC = () => {
 			(c.schemeName || "").toLowerCase().includes(q)
 		);
 	});
-
-	const formatDate = (dateString: string) => {
-		if (!dateString) return "TBD";
-		try {
-			const d = new Date(dateString);
-			return d.toLocaleDateString("id-ID", {
-				day: "numeric",
-				month: "short",
-				hour: "2-digit",
-				minute: "2-digit",
-			});
-		} catch {
-			return dateString;
-		}
-	};
 
 	return (
 		<div className="flex min-h-screen bg-gray-50">

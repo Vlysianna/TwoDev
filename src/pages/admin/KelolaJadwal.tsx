@@ -10,6 +10,7 @@ import JadwalViewModal from '@/components/JadwalViewModal';
 import JadwalEditModal from '@/components/JadwalEditModal';
 import paths from '@/routes/paths';
 import axiosInstance from '@/helper/axios';
+import { formatDate } from "@/helper/format-date";
 
 // Backend response interfaces matching the actual API
 interface BackendScheduleResponse {
@@ -334,6 +335,13 @@ const KelolaJadwal: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredSchedules.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500">
+                          Tidak ada data jadwal
+                        </td>
+                      </tr>
+                    )}
                     {filteredSchedules.map((schedule, index) => (
                       <tr
                         key={schedule.id}
@@ -346,10 +354,10 @@ const KelolaJadwal: React.FC = () => {
                           {schedule.assessment.occupation.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {schedule.start_date ? new Date(schedule.start_date).toLocaleDateString('id-ID') : '-'}
+                          {schedule.start_date ? formatDate(schedule.start_date) : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {schedule.end_date ? new Date(schedule.end_date).toLocaleDateString('id-ID') : '-'}
+                          {schedule.end_date ? formatDate(schedule.end_date) : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">

@@ -4,6 +4,7 @@ import api from "@/helper/axios";
 import Sidebar from "@/components/SideAdmin";
 import NavAdmin from "@/components/NavAdmin";
 import paths from '@/routes/paths';
+import { formatDate } from "@/helper/format-date";
 
 import {
     LayoutDashboard,
@@ -87,21 +88,6 @@ const RecapAssessmentAdmin: React.FC = () => {
 
         fetchRecapData();
     }, [scheduleDetailId]);
-
-    const formatDate = (dateString: string) => {
-        if (!dateString) return "TBD";
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleDateString("id-ID", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-            });
-        } catch {
-            return dateString;
-        }
-    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -457,6 +443,13 @@ const RecapAssessmentAdmin: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
+                                    {assessment.assessees.length === 0 && (
+                                        <tr>
+                                            <td colSpan={3} className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500">
+                                                Tidak ada data
+                                            </td>
+                                        </tr>
+                                    )}
                                     {assessment.assessees.map((assessee, index) => (
                                         <tr key={assessee.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

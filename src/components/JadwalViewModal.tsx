@@ -1,5 +1,6 @@
 import React from 'react';
 import BaseModal from './BaseModal';
+import { formatDate } from "@/helper/format-date";
 
 interface JadwalViewModalProps {
   isOpen: boolean;
@@ -31,8 +32,8 @@ const JadwalViewModal: React.FC<JadwalViewModalProps> = ({ isOpen, onClose, jadw
           <div className="space-y-2 text-sm text-gray-700">
             <div><b>Skema:</b> {jadwal.assessment.occupation.scheme.name}</div>
             <div><b>Okupasi:</b> {jadwal.assessment.occupation.name}</div>
-            <div><b>Tanggal Mulai:</b> {jadwal.start_date ? new Date(jadwal.start_date).toLocaleDateString('id-ID') : '-'}</div>
-            <div><b>Tanggal Selesai:</b> {jadwal.end_date ? new Date(jadwal.end_date).toLocaleDateString('id-ID') : '-'}</div>
+            <div><b>Tanggal Mulai:</b> {jadwal.start_date ? formatDate(jadwal.start_date) : '-'}</div>
+            <div><b>Tanggal Selesai:</b> {jadwal.end_date ? formatDate(jadwal.end_date) : '-'}</div>
           </div>
         </div>
       </div>

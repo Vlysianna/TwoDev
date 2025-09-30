@@ -6,6 +6,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import useSWR from "swr";
+import { formatDate } from "@/helper/format-date";
 
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
@@ -31,16 +32,7 @@ export default function IA01({
 
 	const formattedDate = useMemo(
 		() =>
-			result?.ia01_header?.updated_at
-				? new Date(result?.ia01_header?.updated_at).toLocaleDateString(
-						"id-ID",
-						{
-							day: "numeric",
-							month: "long",
-							year: "numeric",
-						}
-				  )
-				: "Tanggal | Jam",
+			result?.ia01_header?.updated_at ?formatDate(result?.ia01_header?.updated_at) : "Tanggal | Jam",
 		[result]
 	);
 

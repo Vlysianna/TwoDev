@@ -11,6 +11,7 @@ import { getAssessorUrl } from "@/lib/hashids";
 import type { AK05ApiResponse, AK05ResponseData } from "@/model/ak05-model";
 import { Description } from "@radix-ui/react-dialog";
 import ConfirmModal from "@/components/ConfirmModal";
+import { formatDate } from "@/helper/format-date";
 
 export default function CekAk05() {
   const { id_assessment, id_result, id_asesor } = useAssessmentParams();
@@ -447,9 +448,7 @@ export default function CekAk05() {
                 <input
                   type="text"
                   value={
-                    new Date(
-                      data.result.result_ak05.updated_at
-                    ).toLocaleDateString("id-ID") || "N/A"
+                    formatDate(data.result.result_ak05.updated_at) || "N/A"
                   }
                   disabled
                   className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"

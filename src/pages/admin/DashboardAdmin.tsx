@@ -21,6 +21,7 @@ import { useToast } from '@/components/ui/useToast';
 import { useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { getAssetPath } from '@/utils/assetPath';
+import { formatDate } from "@/helper/format-date";
 
 interface DashboardStats {
     totalSchemes: number;
@@ -186,14 +187,6 @@ const Dashboard: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
     };
 
     const navigate = useNavigate();
@@ -564,6 +557,13 @@ const Dashboard: React.FC = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
+                                        {verificationData.length === 0 && (
+                                            <tr>
+                                                <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-600">
+                                                    Tidak ada pengajuan yang membutuhkan verifikasi
+                                                </td>
+                                            </tr>
+                                        )}
                                         {verificationData.map((item, index) => (
                                             <tr
                                                 key={item.id}

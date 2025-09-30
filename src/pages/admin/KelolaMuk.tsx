@@ -202,6 +202,16 @@ const KelolaMUK: React.FC = () => {
 										</tr>
 									</thead>
 									<tbody className="bg-white divide-y divide-gray-200">
+										{muks.length === 0 && (
+											<tr>
+												<td
+													colSpan={4}
+													className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500"
+												>
+													Tidak ada data MUK
+												</td>
+											</tr>
+										)}
 										{muks.map((muk, index) => (
 											<tr
 												key={muk.id}

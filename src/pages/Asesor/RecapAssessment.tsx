@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavbarAsesor from "@/components/NavAsesor";
+import { formatDate } from "@/helper/format-date";
 
 interface Assessee {
 	id: number;
@@ -82,21 +83,6 @@ const RecapAssessment: React.FC = () => {
 
 		fetchRecapData();
 	}, [scheduleDetailId]);
-
-	const formatDate = (dateString: string) => {
-		if (!dateString) return "TBD";
-		try {
-			const date = new Date(dateString);
-			return date.toLocaleDateString("id-ID", {
-				weekday: "long",
-				year: "numeric",
-				month: "long",
-				day: "numeric",
-			});
-		} catch {
-			return dateString;
-		}
-	};
 
 	const getStatusColor = (status: string) => {
 		switch (status) {

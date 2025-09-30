@@ -8,6 +8,7 @@ import api from '@/helper/axios';
 import { QRCodeCanvas } from 'qrcode.react';
 import { getAssesseeUrl } from '@/lib/hashids';
 import ConfirmModal from '@/components/ConfirmModal';
+import { formatDate } from "@/helper/format-date";
 
 export default function Ak04() {
     // Menggunakan default empty object jika useAssessmentParams undefined
@@ -318,13 +319,7 @@ export default function Ak04() {
                                     type="text"
                                     className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                     value={
-                                        resultData?.created_at
-                                            ? new Date(resultData.created_at).toLocaleDateString('id-ID', {
-                                                day: '2-digit',
-                                                month: 'long',
-                                                year: 'numeric',
-                                            })
-                                            : ''
+                                        resultData?.created_at ? formatDate(resultData.created_at) : ''
                                     }
                                     readOnly
                                 />
