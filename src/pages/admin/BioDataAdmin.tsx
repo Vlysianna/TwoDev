@@ -27,7 +27,7 @@ const BioDataAdmin: React.FC = () => {
 
   useEffect(() => {
     // If biodata already complete, redirect away and don't load form
-    if (!isCheckingBiodata && biodataComplete) {
+    if (!isCheckingBiodata && biodataComplete === true) {
       navigate('/admin', { replace: true });
       return;
     }
@@ -154,10 +154,10 @@ const BioDataAdmin: React.FC = () => {
           {isCheckingBiodata && (
             <div className="mb-4 p-4 bg-gray-100 rounded text-gray-700">Memeriksa biodata...</div>
           )}
-          {biodataComplete && !isCheckingBiodata && (
+          {biodataComplete === true && !isCheckingBiodata && (
             <div className="mb-4 p-4 bg-green-50 rounded text-green-700">Biodata sudah terisi. Mengalihkan...</div>
           )}
-          {!biodataComplete && !isCheckingBiodata && (
+          {biodataComplete === false && !isCheckingBiodata && (
             <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Alamat <span className="text-red-500">*</span></label>

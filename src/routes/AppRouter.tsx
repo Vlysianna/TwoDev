@@ -171,25 +171,21 @@ const router = createBrowserRouter(
 						{ path: paths.admin.editAsesi, element: <EditAsesi /> },
 						{ path: paths.admin.verifikasi, element: <VerifikasiPage /> },
 						{ path: paths.admin.persetujuan, element: <PersetujuanAdmin /> },
-						{
+						{ // MUK routes grouped under /admin/muk
 							path: paths.admin.muk.root,
 							children: [
-								{
-									path: paths.admin.muk.root,
-									children: [
-										{ path: paths.admin.muk.root, element: <KelolaMUK /> },
-										{ path: paths.admin.muk.tambah, element: <TambahMUK /> },
-										{ path: paths.admin.muk.editPattern, element: <EditMUK /> },
-									],
-								},
-								{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
-								{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
-								{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
-								{
-									path: paths.admin.okupasi.root,
-									children: [{ index: true, element: <KelolaOkupasi /> }],
-								},
+								{ index: true, element: <KelolaMUK /> },
+								{ path: "tambah", element: <TambahMUK /> },
+								{ path: "edit/:id_assessment", element: <EditMUK /> },
 							],
+						},
+						// Other admin routes (siblings of /admin/muk)
+						{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
+						{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
+						{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
+						{
+							path: paths.admin.okupasi.root,
+							children: [{ index: true, element: <KelolaOkupasi /> }],
 						},
 					],
 				},

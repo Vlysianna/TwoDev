@@ -18,7 +18,8 @@ export const useBiodataAdminCheck = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCheckingBiodata, setIsCheckingBiodata] = useState(true);
-  const [biodataComplete, setBiodataComplete] = useState(false);
+  // biodataComplete is tri-state: null = unknown/loading, false = incomplete, true = complete
+  const [biodataComplete, setBiodataComplete] = useState<boolean | null>(null);
 
   const checkBiodataCompleteness = (biodata: AdminBiodata | null): boolean => {
     if (!biodata) return false;
@@ -63,8 +64,8 @@ export const useBiodataAdminCheck = () => {
         console.error('Error checking admin biodata:', error);
         biodata = null;
       }
-      const isComplete = checkBiodataCompleteness(biodata);
-      setBiodataComplete(isComplete);
+  const isComplete = checkBiodataCompleteness(biodata);
+  setBiodataComplete(isComplete);
       // Redirect if not complete and not on biodata page
       if (!isComplete && location.pathname !== paths.admin.biodata) {
         if (location.pathname.startsWith('/admin')) {
@@ -104,7 +105,7 @@ export const useBiodataAdminCheck = () => {
       console.error('Error refreshing admin biodata:', error);
       biodata = null;
     }
-    setBiodataComplete(checkBiodataCompleteness(biodata));
+  setBiodataComplete(checkBiodataCompleteness(biodata));
     setIsCheckingBiodata(false);
   };
 

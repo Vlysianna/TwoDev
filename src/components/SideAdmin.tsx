@@ -8,13 +8,11 @@ import {
   Users,
   User,
   UserCheck,
-  LogOut,
   Menu,
   X,
   File,
   Calendar,
   Album,
-  LogIn,
   ClipboardPen,
   ListCheck
 } from 'lucide-react';
@@ -38,60 +36,12 @@ const Sidebar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const location = useLocation();
 
-  const menuItems: MenuItem[] = [
-    {
-      name: 'Dashboard',
-      icon: LayoutDashboard,
-      section: 'admin',
-      path: paths.admin.root,
-    },
-    {
-      name: 'Kelola Jurusan',
-      icon: Album,
-      section: 'admin',
-      path: paths.admin.kelolaJurusan,
-    },
-    {
-      name: 'Kelola Okupasi',
-      icon: Calendar,
-      section: 'main',
-      path: paths.admin.okupasi.index,
-    },
-    {
-      name: 'Kelola MUK',
-      icon: File,
-      section: 'admin',
-      path: paths.admin.muk.root,
-    },
-    {
-      name: 'Kelola Jadwal Asesmen',
-      icon: ClipboardPen,
-      section: 'admin',
-      path: paths.admin.kelolaJadwal,
-    },
-    {
-      name: 'Hasil Asesmen',
-      icon: FileText,
-      section: 'admin',
-      path: paths.admin.resultAssessment.root,
-    },
-    {
-      name: 'Verifikasi',
-      icon: ListCheck,
-      section: 'admin',
-      path: paths.admin.verifikasi,
-    },
-    {
-      name: 'Persetujuan',
-      icon: ListCheck,
-      section: 'admin',
-      path: paths.admin.persetujuan,
-    },
-  ];
-  const { isCheckingBiodata, biodataComplete } = useBiodataAdminCheck();
+  
+  const { biodataComplete } = useBiodataAdminCheck();
 
-  // Only show Biodata menu if not complete
-  const menuItems: MenuItem[] = biodataComplete
+  // If biodataComplete is null (still checking), don't render admin-specific menu items yet to avoid flicker.
+  // Only show full admin menu when biodataComplete === true
+  const menuItems: MenuItem[] = biodataComplete === true
     ? [
         {
           name: 'Dashboard',
@@ -142,14 +92,19 @@ const Sidebar: React.FC = () => {
         path: paths.admin.persetujuan,
       },
     ]
-    : [
-        {
-          name: 'Biodata Admin',
-          icon: FileText,
-          section: 'admin',
-          path: paths.admin.biodata,
-        },
-      ];
+    : (
+      biodataComplete === false
+        ? [
+            {
+              name: 'Biodata Admin',
+              icon: FileText,
+              section: 'admin',
+              path: paths.admin.biodata,
+            },
+          ]
+        : // while checking, render an empty array so the menu doesn't flicker
+          []
+    );
 
   const managementItems: MenuItem[] = [
     {
@@ -181,11 +136,7 @@ const Sidebar: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleLogout = (): void => {
-    // Add logout logic here
-    console.log('Logout clicked');
-    setIsMobileMenuOpen(false);
-  };
+  // logout handled elsewhere
 
   const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
     const IconComponent = item.icon;
