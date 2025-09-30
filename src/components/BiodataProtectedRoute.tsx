@@ -19,8 +19,6 @@ const BiodataProtectedRoute: React.FC<BiodataProtectedRouteProps> = ({ children 
       </div>
     );
   }
-
-  // If biodata is complete or user is on biodata page, render children
   return <>{children}</>;
 };
 

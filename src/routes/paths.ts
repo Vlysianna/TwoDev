@@ -26,6 +26,7 @@ const routes = {
 	},
 	admin: {
 		root: "/admin",
+		biodata: "/admin/biodata",
 		kelolaUser: "/admin/kelola-user",
 		kelolaAkunAsesi: "/admin/kelola-akun-asesi",
 		recapAssessmentAdmin: (scheduleDetailId: string | number, id_asesor: string | number) => 

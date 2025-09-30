@@ -8,12 +8,13 @@ import EditAsesor from "@/pages/admin/EditAsesor";
 import KelolaAkunAsesor from "@/pages/admin/AkunAsesor";
 import KelolaUser from "@/pages/admin/KelolaUser";
 import VerifikasiPage from "@/pages/admin/verifikasi";
-import RegisterPage from "@/pages/admin/register";
 import EditAsesi from "@/pages/admin/EditAsessi";
 import KelolaOkupasi from "@/pages/admin/okupasi/KelolaOkupasi";
 import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
 import DashboardAdmin from "@/pages/admin/DashboardAdmin";
+import BioDataAdmin from "@/pages/admin/BioDataAdmin";
+import BiodataAdminProtectedRoute from "@/components/BiodataAdminProtectedRoute";
 import AsessmentAktif from "@/pages/asesi/AsesmentAktif";
 // Test page removed
 import TambahMUK from "@/pages/admin/TambahMUK";
@@ -108,7 +109,7 @@ const router = createBrowserRouter(
 					),
 					children: [
 						{ path: paths.auth.login, element: <LoginForm /> },
-						{ path: paths.auth.register, element: <RegisterPage /> },
+						{ path: paths.auth.register, element: <RegisterForm /> },
 						{ path: paths.auth.registerAsesi, element: <RegisterForm /> },
 					],
 				},
@@ -122,21 +123,26 @@ const router = createBrowserRouter(
 						</ProtectedRoute>
 					),
 					children: [
-						{ index: true, element: <DashboardAdmin /> },
-						{ path: paths.admin.kelolaUser, element: <KelolaUser /> },
-						{ path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
-						{ path: paths.admin.recapAssessmentAdminPattern, element: <RecapAssessmentAdmin /> },
+						{ path: paths.admin.biodata, element: <BioDataAdmin /> },
 						{
-							path: paths.admin.resultAssessment.root,
-							element: (
-								<AssessmentAdminProvider>
-									<Outlet />
-								</AssessmentAdminProvider>
-							),
+							element: <BiodataAdminProtectedRoute><Outlet /></BiodataAdminProtectedRoute>,
 							children: [
+								{ index: true, element: <DashboardAdmin /> },
+								{ path: paths.admin.kelolaUser, element: <KelolaUser /> },
+								{ path: paths.admin.kelolaAkunAsesi, element: <KelolaAkunAsesi /> },
+								{ path: paths.admin.recapAssessmentAdminPattern, element: <RecapAssessmentAdmin /> },
 								{
-									index: true,
-									element: <ResultAssessment />,
+									path: paths.admin.resultAssessment.root,
+									element: (
+										<AssessmentAdminProvider>
+											<Outlet />
+										</AssessmentAdminProvider>
+									),
+									children: [
+										{ index: true, element: <ResultAssessment /> },
+										{ path: paths.admin.resultAssessment.dashboardPattern, element: <DashboardAsesmenMandiriAdmin /> },
+										{ path: paths.admin.resultAssessment.resultAsesiPattern, element: <ResultAsesiAssessmentAdmin /> }
+									],
 								},
 								{
 									path: paths.admin.resultAssessment.dashboardPattern,
@@ -170,20 +176,20 @@ const router = createBrowserRouter(
 							children: [
 								{
 									path: paths.admin.muk.root,
-									element: <KelolaMUK />,
+									children: [
+										{ path: paths.admin.muk.root, element: <KelolaMUK /> },
+										{ path: paths.admin.muk.tambah, element: <TambahMUK /> },
+										{ path: paths.admin.muk.editPattern, element: <EditMUK /> },
+									],
 								},
-								{ path: paths.admin.muk.tambah, element: <TambahMUK /> },
-								{ path: paths.admin.muk.editPattern, element: <EditMUK /> },
+								{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
+								{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
+								{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
+								{
+									path: paths.admin.okupasi.root,
+									children: [{ index: true, element: <KelolaOkupasi /> }],
+								},
 							],
-						},
-						{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
-						{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
-						{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
-
-						// Okupasi nested
-						{
-							path: paths.admin.okupasi.root,
-							children: [{ index: true, element: <KelolaOkupasi /> }],
 						},
 					],
 				},

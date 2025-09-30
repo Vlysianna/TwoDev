@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useBiodataAdminCheck } from '@/hooks/useBiodataAdminCheck';
 import { Link, useLocation } from 'react-router-dom';
 import { getAssetPath } from '@/utils/assetPath';
 import {
@@ -87,6 +88,68 @@ const Sidebar: React.FC = () => {
       path: paths.admin.persetujuan,
     },
   ];
+  const { isCheckingBiodata, biodataComplete } = useBiodataAdminCheck();
+
+  // Only show Biodata menu if not complete
+  const menuItems: MenuItem[] = biodataComplete
+    ? [
+        {
+          name: 'Dashboard',
+          icon: LayoutDashboard,
+          section: 'admin',
+          path: paths.admin.root,
+        },
+        {
+          name: 'Kelola Jurusan',
+          icon: Album,
+          section: 'admin',
+          path: paths.admin.kelolaJurusan,
+        },
+        {
+          name: 'Kelola Okupasi',
+          icon: Calendar,
+          section: 'main',
+          path: paths.admin.okupasi.index,
+        },
+        {
+          name: 'Kelola MUK',
+          icon: File,
+          section: 'admin',
+          path: paths.admin.muk.root,
+        },
+        {
+          name: 'Kelola Jadwal Asesmen',
+          icon: ClipboardPen,
+          section: 'admin',
+          path: paths.admin.kelolaJadwal,
+        },
+        {
+          name: 'Hasil Asesmen',
+          icon: FileText,
+          section: 'admin',
+          path: paths.admin.resultAssessment.root,
+        },
+        {
+          name: 'Verifikasi',
+          icon: ListCheck,
+          section: 'admin',
+          path: paths.admin.verifikasi,
+        },
+        {
+        name: 'Persetujuan',
+        icon: ListCheck,
+        section: 'admin',
+        path: paths.admin.persetujuan,
+      },
+    ]
+    : [
+        {
+          name: 'Biodata Admin',
+          icon: FileText,
+          section: 'admin',
+          path: paths.admin.biodata,
+        },
+      ];
 
   const managementItems: MenuItem[] = [
     {
@@ -158,7 +221,7 @@ const Sidebar: React.FC = () => {
         <div className="pb  -2">
           <div className="px-4 py-3">
             <span className="text-xs text-orange-200 font-medium uppercase tracking-wider">
-              Sertifikasi
+              {biodataComplete ? 'Sertifikasi' : 'Biodata'}
             </span>
           </div>
           {menuItems.map((item) => (
@@ -175,21 +238,23 @@ const Sidebar: React.FC = () => {
         <div className="mx-4 border-t border-orange-400"></div>
 
         {/* Management Section */}
-        <div>
-          <div className="px-4 py-3">
-            <span className="text-xs text-orange-200 font-medium uppercase tracking-wider">
-              Managemen
-            </span>
+        {biodataComplete && (
+          <div>
+            <div className="px-4 py-3">
+              <span className="text-xs text-orange-200 font-medium uppercase tracking-wider">
+                Managemen
+              </span>
+            </div>
+            {managementItems.map((item) => (
+              <MenuItem
+                key={item.name}
+                item={item}
+                isActive={location.pathname === item.path}
+                onClick={handleItemClick}
+              />
+            ))}
           </div>
-          {managementItems.map((item) => (
-            <MenuItem
-              key={item.name}
-              item={item}
-              isActive={location.pathname === item.path}
-              onClick={handleItemClick}
-            />
-          ))}
-        </div>
+        )}
       </div>
     </>
   );
