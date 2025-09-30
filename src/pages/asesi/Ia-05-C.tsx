@@ -293,74 +293,78 @@ export default function Ia05CAssessee() {
             <div className="overflow-x-auto p-3 md:p-6 border border-gray-200 rounded-sm">
               <div className="w-full overflow-x-auto">
                 <div className="min-w-[600px]">
-                  <table className="w-full text-xs md:text-sm border-collapse">
-                    <thead>
-                      <tr className="bg-gray-0 text-sm md:text-[16px]">
-                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-medium text-gray-900 border-b border-gray-200 w-[10%]">
-                          No
-                        </th>
-                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-medium text-gray-900 border-b border-gray-200 w-[30%]">
-                          Soal
-                        </th>
-                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-medium text-gray-900 border-b border-gray-200 w-[30%]">
-                          Jawaban
-                        </th>
-                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-medium text-gray-900 border-b border-gray-200 w-[30%]">
-                          Pencapaian
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {assesseeAnswers.map((answer, index) => (
-                        <tr key={answer.id} className="hover:bg-gray-50">
-                          <td className="px-2 md:px-4 py-2 md:py-4 text-center border-b border-gray-200">
-                            {index + 1}
-                          </td>
-                          <td className="px-2 md:px-4 py-2 md:py-4 border-b border-gray-200 text-gray-700">
-                            {answer.question}
-                          </td>
-                          <td className="px-2 md:px-4 py-2 md:py-4 text-center border-b border-gray-200 text-gray-700">
-                            {answer.answers.option}
-                          </td>
-                          <td className="px-2 md:px-4 py-2 md:py-4 text-center border-b border-gray-200">
-                            <div className="flex justify-center gap-3 md:gap-6">
-                              {["Ya", "Tidak"].map((option) => (
-                                <label
-                                  key={option}
-                                  className={`flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1 rounded-sm cursor-default transition ${selectedAnswers[answer.id] === option
-                                    ? "bg-[#E77D3533]"
-                                    : ""
-                                    }`}
-                                >
-                                  <input
-                                    type="radio"
-                                    name={`q-${answer.id}`}
-                                    value={option}
-                                    className="w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-                                    checked={
-                                      selectedAnswers[answer.id] === option
-                                    }
-                                    onChange={() =>
-                                      handleTableRadioChange(answer.id, option)
-                                    }
-                                    disabled // Disabled for assessee
-                                  />
-                                  <span
-                                    className={`${selectedAnswers[answer.id] === option
-                                      ? "text-gray-900"
-                                      : "text-gray-500"
-                                      } whitespace-nowrap text-xs md:text-sm`}
-                                  >
-                                    {option}
-                                  </span>
-                                </label>
-                              ))}
-                            </div>
-                          </td>
+                  {assesseeAnswers.length > 0 ? (
+                    <table className="w-full text-xs md:text-sm border-collapse">
+                      <thead>
+                        <tr className="bg-gray-0 text-sm md:text-[16px]">
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-center font-medium text-gray-900 border-b border-gray-200 w-[10%]">
+                            No
+                          </th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-left font-medium text-gray-900 border-b border-gray-200 w-[30%]">
+                            Soal
+                          </th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-center font-medium text-gray-900 border-b border-gray-200 w-[30%]">
+                            Jawaban
+                          </th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-center font-medium text-gray-900 border-b border-gray-200 w-[30%]">
+                            Pencapaian
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {assesseeAnswers.map((answer, index) => (
+                          <tr key={answer.id} className="hover:bg-gray-50">
+                            <td className="px-2 md:px-4 py-2 md:py-4 text-center border-b border-gray-200">
+                              {index + 1}
+                            </td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 border-b border-gray-200 text-gray-700">
+                              {answer.question}
+                            </td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 text-center border-b border-gray-200 text-gray-700">
+                              {answer.answers.option}
+                            </td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 text-center border-b border-gray-200">
+                              <div className="flex justify-center gap-3 md:gap-6">
+                                {["Ya", "Tidak"].map((option) => (
+                                  <label
+                                    key={option}
+                                    className={`flex items-center gap-1 md:gap-2 px-1 md:px-2 py-1 rounded-sm cursor-default transition ${selectedAnswers[answer.id] === option
+                                      ? "bg-[#E77D3533]"
+                                      : ""
+                                      }`}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`q-${answer.id}`}
+                                      value={option}
+                                      className="w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
+                                      checked={
+                                        selectedAnswers[answer.id] === option
+                                      }
+                                      onChange={() =>
+                                        handleTableRadioChange(answer.id, option)
+                                      }
+                                      disabled // Disabled for assessee
+                                    />
+                                    <span
+                                      className={`${selectedAnswers[answer.id] === option
+                                        ? "text-gray-900"
+                                        : "text-gray-500"
+                                        } whitespace-nowrap text-xs md:text-sm`}
+                                    >
+                                      {option}
+                                    </span>
+                                  </label>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="text-center text-gray-700">Anda belum menyelesaikan IA-05</p>
+                  )}
                 </div>
               </div>
             </div>
