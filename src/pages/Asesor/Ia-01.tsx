@@ -8,7 +8,38 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { getAssessorUrl, getAssesseeUrl } from '@/lib/hashids';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import ConfirmModal from '@/components/ConfirmModal';
+// Interface untuk struktur data incomplete criteria
+interface IncompleteCriteria {
+  id: number;
+  element_detail_id: number;
+  no: string;
+  description: string;
+  benchmark: string;
+  is_competent: boolean;
+  evaluation: string;
+}
 
+interface Element {
+  id: number;
+  title: string;
+  no: string;
+  criterias: IncompleteCriteria[];
+}
+
+interface Unit {
+  id: number;
+  unit_code: string;
+  title: string;
+  no: string;
+  elements: Element[];
+}
+
+interface IncompleteGroup {
+  id: number;
+  name: string;
+  assessment_id: number;
+  units: Unit[];
+}
 
 export default function Ia01() {
   const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams ? useAssessmentParams() : {};
@@ -25,28 +56,30 @@ export default function Ia01() {
   const [unitNumberMap, setUnitNumberMap] = useState<Record<number, number>>({});
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Local state for IA-01 header fields
+  // State untuk data incomplete criteria
+  const [incompleteCriteria, setIncompleteCriteria] = useState<IncompleteGroup[]>([]);
+  const [loadingIncomplete, setLoadingIncomplete] = useState(false);
+
+  // State untuk dropdown selection
+  const [selectedGroup, setSelectedGroup] = useState<IncompleteGroup | null>(null);
+  const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
+  const [selectedElement, setSelectedElement] = useState<Element | null>(null);
+  const [selectedCriteria, setSelectedCriteria] = useState<IncompleteCriteria | null>(null);
+
+  // State untuk available options
+  const [availableUnits, setAvailableUnits] = useState<Unit[]>([]);
+  const [availableElements, setAvailableElements] = useState<Element[]>([]);
+  const [availableCriterias, setAvailableCriterias] = useState<IncompleteCriteria[]>([]);
+
+  // Local state untuk IA-01 header fields
   const [groupField, setGroupField] = useState('');
   const [unitField, setUnitField] = useState('');
   const [elementField, setElementField] = useState('');
   const [kukField, setKukField] = useState('');
   const [assesmentDate, setAssesmentDate] = useState('');
 
-  // Store initial values for reset
-  const [initialHeader, setInitialHeader] = useState({
-    group: '',
-    unit: '',
-    element: '',
-    kuk: ''
-  });
-
-
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
-  // State untuk simpan header
-  const [savingHeader, setSavingHeader] = useState(false);
-  const [saveHeaderError, setSaveHeaderError] = useState<string | null>(null);
-  // Tambahkan state untuk proses dan status
   const [saveProcessing, setSaveProcessing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [qrProcessing, setQrProcessing] = useState(false);
@@ -54,6 +87,103 @@ export default function Ia01() {
   const [processSuccess, setProcessSuccess] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingValue, setPendingValue] = useState<string>('');
+
+  // Fungsi untuk mengambil data incomplete criteria
+  const fetchIncompleteCriteria = async () => {
+    if (!id_result) return;
+
+    setLoadingIncomplete(true);
+    try {
+      const response = await api.get(`/assessments/ia-01/result/incomplete-criteria/${id_result}`);
+      console.log('fetchIncompleteCriteria response:', response.data);
+
+      if (response.data.success) {
+        setIncompleteCriteria(response.data.data);
+      }
+    } catch (error: any) {
+      console.error('fetchIncompleteCriteria error:', error);
+      setError('Gagal memuat data kriteria yang belum kompeten');
+    } finally {
+      setLoadingIncomplete(false);
+    }
+  };
+
+  // Handler untuk memilih kelompok pekerjaan
+  const handleGroupChange = (groupName: string) => {
+    const group = incompleteCriteria.find(g => g.name === groupName);
+    setSelectedGroup(group || null);
+    setSelectedUnit(null);
+    setSelectedElement(null);
+    setSelectedCriteria(null);
+
+    setGroupField(groupName);
+    setUnitField('');
+    setElementField('');
+    setKukField('');
+
+    // Reset saved status karena ada perubahan
+    setIsSaved(false);
+
+    // Set available units berdasarkan kelompok pekerjaan yang dipilih
+    if (group) {
+      setAvailableUnits(group.units);
+    } else {
+      setAvailableUnits([]);
+    }
+    setAvailableElements([]);
+    setAvailableCriterias([]);
+  };
+
+  // Handler untuk memilih unit
+  const handleUnitChange = (unitId: number) => {
+    const unit = availableUnits.find(u => u.id === unitId);
+    setSelectedUnit(unit || null);
+    setSelectedElement(null);
+    setSelectedCriteria(null);
+
+    if (unit) {
+      setUnitField(`${unit.no}. ${unit.title} (${unit.unit_code})`);
+      setAvailableElements(unit.elements);
+    } else {
+      setUnitField('');
+      setAvailableElements([]);
+    }
+    setElementField('');
+    setKukField('');
+    setAvailableCriterias([]);
+    setIsSaved(false);
+  };
+
+  // Handler untuk memilih elemen
+  const handleElementChange = (elementId: number) => {
+    const element = availableElements.find(e => e.id === elementId);
+    setSelectedElement(element || null);
+    setSelectedCriteria(null);
+
+    if (element) {
+      setElementField(`${element.no}. ${element.title}`);
+      setAvailableCriterias(element.criterias);
+    } else {
+      setElementField('');
+      setAvailableCriterias([]);
+    }
+    setKukField('');
+    setIsSaved(false);
+  };
+
+  // Handler untuk memilih KUK
+  const handleCriteriaChange = (criteriaId: number) => {
+    const criteria = availableCriterias.find(c => c.id === criteriaId);
+    setSelectedCriteria(criteria || null);
+
+    if (criteria) {
+      setKukField(`${criteria.no}. ${criteria.description}`);
+    } else {
+      setKukField('');
+    }
+    setIsSaved(false);
+  };
+
   // Cek apakah ada perubahan pada header atau rekomendasi
   const isHeaderChanged = () => {
     if (!resultData?.ia01_header) return false;
@@ -65,20 +195,6 @@ export default function Ia01() {
       (typeof resultData.ia01_header.is_competent === 'boolean' &&
         (recommendation === 'kompeten' ? true : recommendation === 'belum' ? false : null) !== resultData.ia01_header.is_competent)
     );
-  };
-
-  // Cek field wajib: jika rekomendasi 'belum', semua field wajib diisi. Jika 'kompeten', field boleh kosong.
-  const isHeaderValid = () => {
-    if (recommendation === 'belum') {
-      return (
-        groupField.trim() !== '' &&
-        unitField.trim() !== '' &&
-        elementField.trim() !== '' &&
-        kukField.trim() !== ''
-      );
-    }
-    // Jika kompeten, cukup rekomendasi terisi
-    return recommendation === 'belum' || recommendation === 'kompeten';
   };
 
   // Handler simpan header IA-01
@@ -95,7 +211,6 @@ export default function Ia01() {
     setProcessSuccess(null);
 
     try {
-      // HANYA simpan rekomendasi, TANPA approve asesor
       await api.post(`/assessments/ia-01/result/send-header`, {
         result_id: Number(id_result),
         group: groupField,
@@ -107,7 +222,10 @@ export default function Ia01() {
 
       setIsSaved(true);
       setProcessSuccess("Rekomendasi berhasil disimpan");
-      fetchResultData();
+
+      // Fetch data terbaru untuk sync
+      await fetchResultData();
+
       setTimeout(() => setProcessSuccess(null), 3000);
     } catch (err) {
       setProcessError("Gagal menyimpan rekomendasi IA-01");
@@ -117,7 +235,7 @@ export default function Ia01() {
     }
   };
 
-  // Handler generate QR code (sekaligus approve asesor)
+  // Handler generate QR code
   const handleGenerateQRCode = async () => {
     if (!id_asesor || !isSaved) return;
     setQrProcessing(true);
@@ -125,13 +243,15 @@ export default function Ia01() {
     setProcessSuccess(null);
 
     try {
-      // Pindahkan panggilan approve asesor ke sini
       const response = await api.put(`/assessments/ia-01/result/assessor/${id_result}/approve`);
       if (response.data.success) {
         const qrValue = getAssessorUrl(Number(id_asesor));
         setAssessorQrValue(qrValue);
         setProcessSuccess("QR Code berhasil digenerate");
-        fetchResultData();
+
+        // Hanya fetch data untuk update status QR, tapi jangan reset selection
+        fetchResultDataForQR();
+
         setTimeout(() => setProcessSuccess(null), 3000);
       }
     } catch (error) {
@@ -140,6 +260,67 @@ export default function Ia01() {
       setQrProcessing(false);
     }
   };
+
+  // Fungsi khusus untuk fetch data QR saja tanpa reset selection
+  const fetchResultDataForQR = async () => {
+    if (!id_result) return;
+    try {
+      const response = await api.get(`/assessments/ia-01/result/${id_result}`);
+      console.log('fetchResultDataForQR response:', response.data);
+
+      if (response.data.success) {
+        // Hanya update data yang berkaitan dengan QR, jangan reset selection
+        setResultData(prev => ({
+          ...prev,
+          ...response.data.data,
+          ia01_header: {
+            ...prev?.ia01_header,
+            ...response.data.data.ia01_header
+          }
+        }));
+
+        if (response.data.data.ia01_header?.approved_assessee && id_asesi) {
+          setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+        }
+
+        if (response.data.data.ia01_header?.approved_assessor) {
+          setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
+        }
+      }
+    } catch (error) {
+      console.error("fetchResultDataForQR error:", error);
+    }
+  };
+
+  // Tambahkan juga useEffect untuk handle ketika rekomendasi berubah
+  useEffect(() => {
+    if (recommendation === 'kompeten') {
+      setGroupField('-');
+      setUnitField('-');
+      setElementField('-');
+      setKukField('-');
+      setSelectedGroup(null);
+      setSelectedUnit(null);
+      setSelectedElement(null);
+      setSelectedCriteria(null);
+      setAvailableUnits([]);
+      setAvailableElements([]);
+      setAvailableCriterias([]);
+    } else if (recommendation === 'belum') {
+      // Reset fields tapi biarkan user memilih dari dropdown
+      setGroupField('');
+      setUnitField('');
+      setElementField('');
+      setKukField('');
+      setSelectedGroup(null);
+      setSelectedUnit(null);
+      setSelectedElement(null);
+      setSelectedCriteria(null);
+      setAvailableUnits([]);
+      setAvailableElements([]);
+      setAvailableCriterias([]);
+    }
+  }, [recommendation]);
 
   const handleSaveHeaderClick = () => {
     setPendingValue(recommendation === 'kompeten' ? 'Kompeten' : 'Belum Kompeten');
@@ -153,7 +334,10 @@ export default function Ia01() {
 
   useEffect(() => {
     if (id_assessment) fetchAssessment();
-    if (id_result) fetchUnitData();
+    if (id_result) {
+      fetchUnitData();
+      fetchIncompleteCriteria();
+    }
   }, [id_assessment, id_result]);
 
   useEffect(() => {
@@ -179,6 +363,7 @@ export default function Ia01() {
       setLoading(false);
     }
   };
+
   const fetchUnitData = async () => {
     if (!id_result) return;
     try {
@@ -186,16 +371,13 @@ export default function Ia01() {
       console.log('fetchUnitData response:', response.data);
 
       if (response.data.success) {
-        // Ambil daftar group name
         const groupNames = response.data.data.map((group: any) => group.name);
         setGroupList(groupNames);
 
-        // Auto-select first group if available
         if (groupNames.length > 0) {
           setSelectedKPekerjaan(groupNames[0]);
         }
 
-        // Flatten data dari group ke unit
         const flattenedUnits = response.data.data.flatMap((group: any) =>
           group.units.map((unit: any) => ({
             id: unit.id,
@@ -211,7 +393,6 @@ export default function Ia01() {
 
         setUnitData(flattenedUnits);
 
-        // Buat mapping id unit ke nomor urut global
         const numberMap: Record<number, number> = {};
         flattenedUnits.forEach((unit: any, index: number) => {
           numberMap[unit.id] = index + 1;
@@ -224,9 +405,6 @@ export default function Ia01() {
     }
   };
 
-  // fetchUnitData();
-
-  // Dalam useEffect yang fetch resultData
   const fetchResultData = async () => {
     if (!id_result) return;
     try {
@@ -236,7 +414,6 @@ export default function Ia01() {
       if (response.data.success) {
         setResultData(response.data.data);
 
-        // Generate QR value untuk asesi jika sudah approved
         if (response.data.data.ia01_header?.approved_assessee && id_asesi) {
           setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
         }
@@ -244,75 +421,134 @@ export default function Ia01() {
         if (response.data.data.ia01_header?.approved_assessor) {
           setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
         }
+
+        // HANYA sync fields jika belum ada perubahan dari user
+        if (response.data.data.ia01_header && !isHeaderChanged()) {
+          setGroupField(response.data.data.ia01_header.group || '');
+          setUnitField(response.data.data.ia01_header.unit || '');
+          setElementField(response.data.data.ia01_header.element || '');
+          setKukField(response.data.data.ia01_header.kuk || '');
+          setAssesmentDate(response.data.data.ia01_header.updated_at || '');
+
+          // Sync recommendation
+          if (typeof response.data.data.ia01_header.is_competent === 'boolean') {
+            setRecommendation(response.data.data.ia01_header.is_competent ? 'kompeten' : 'belum');
+          }
+        }
       }
     } catch (error) {
       console.error("fetchResultData error:", error);
     }
   };
 
-
+  // PERBAIKI juga useEffect untuk sync dropdown selection
   useEffect(() => {
-    fetchResultData();
-  }, [id_result]);
+    if (resultData?.ia01_header && incompleteCriteria.length > 0 && recommendation === 'belum') {
+      syncDropdownSelection(resultData.ia01_header);
+    }
+  }, [resultData, incompleteCriteria, recommendation]);
 
-  useEffect(() => {
-    if (resultData?.ia01_header) {
-      setGroupField(resultData.ia01_header.group || '');
-      setUnitField(resultData.ia01_header.unit || '');
-      setElementField(resultData.ia01_header.element || '');
-      setKukField(resultData.ia01_header.kuk || '');
-      setAssesmentDate(resultData.ia01_header.updated_at || '');
-      setInitialHeader({
-        group: resultData.ia01_header.group || '',
-        unit: resultData.ia01_header.unit || '',
-        element: resultData.ia01_header.element || '',
-        kuk: resultData.ia01_header.kuk || ''
+  // Fungsi untuk sync dropdown selection
+  const syncDropdownSelection = (ia01Header: any) => {
+    if (!ia01Header || recommendation !== 'belum') return;
+
+    console.log('Syncing dropdown selection with:', ia01Header);
+
+    // Sync kelompok pekerjaan
+    const savedGroup = incompleteCriteria.find(group => group.name === ia01Header.group);
+    if (savedGroup && !selectedGroup) {
+      setSelectedGroup(savedGroup);
+      setAvailableUnits(savedGroup.units);
+
+      // Sync unit
+      const savedUnit = savedGroup.units.find(unit => {
+        const unitText = `${unit.no}. ${unit.title} (${unit.unit_code})`;
+        return unitText === ia01Header.unit;
       });
+      if (savedUnit && !selectedUnit) {
+        setSelectedUnit(savedUnit);
+        setAvailableElements(savedUnit.elements);
 
-      // Sync recommendation state dengan data dari API
-      if (typeof resultData.ia01_header.is_competent === 'boolean') {
-        setRecommendation(resultData.ia01_header.is_competent ? 'kompeten' : 'belum');
-      } else {
-        setRecommendation(null); // Reset jika tidak ada data
+        // Sync elemen
+        const savedElement = savedUnit.elements.find(element => {
+          const elementText = `${element.no}. ${element.title}`;
+          return elementText === ia01Header.element;
+        });
+        if (savedElement && !selectedElement) {
+          setSelectedElement(savedElement);
+          setAvailableCriterias(savedElement.criterias);
+
+          // Sync KUK
+          const savedCriteria = savedElement.criterias.find(criteria => {
+            const criteriaText = `${criteria.no}. ${criteria.description}`;
+            return criteriaText === ia01Header.kuk;
+          });
+          if (savedCriteria && !selectedCriteria) {
+            setSelectedCriteria(savedCriteria);
+          }
+        }
       }
-    }
-  }, [resultData]);
-
-  useEffect(() => {
-    if (recommendation === 'kompeten') {
-      // Isi dengan "-" ketika memilih kompeten
-      setGroupField('-');
-      setUnitField('-');
-      setElementField('-');
-      setKukField('-');
-    } else if (recommendation === 'belum') {
-      // Kembalikan ke nilai awal dari API ketika memilih belum kompeten
-      setGroupField(initialHeader.group);
-      setUnitField(initialHeader.unit);
-      setElementField(initialHeader.element);
-      setKukField(initialHeader.kuk);
-    }
-  }, [recommendation, initialHeader]);
-
-  const handleRecommendationChange = (value: 'kompeten' | 'belum') => {
-    setRecommendation(value);
-
-    if (value === 'kompeten') {
-      // Langsung isi dengan "-" ketika memilih kompeten
-      setGroupField('-');
-      setUnitField('-');
-      setElementField('-');
-      setKukField('-');
-    } else {
-      // Kembalikan ke nilai awal ketika memilih belum kompeten
-      setGroupField(initialHeader.group);
-      setUnitField(initialHeader.unit);
-      setElementField(initialHeader.element);
-      setKukField(initialHeader.kuk);
     }
   };
 
-  // misalnya assesmentDate = "2025-10-24"
+  // Juga panggil sync ketika recommendation berubah ke 'belum'
+  useEffect(() => {
+    if (recommendation === 'belum' && resultData?.ia01_header && incompleteCriteria.length > 0) {
+      syncDropdownSelection(resultData.ia01_header);
+    }
+  }, [recommendation, resultData, incompleteCriteria]);
+
+  useEffect(() => {
+    if (recommendation === 'kompeten') {
+      setGroupField('-');
+      setUnitField('-');
+      setElementField('-');
+      setKukField('-');
+      setSelectedGroup(null);
+      setSelectedUnit(null);
+      setSelectedElement(null);
+      setSelectedCriteria(null);
+      setAvailableUnits([]);
+      setAvailableElements([]);
+      setAvailableCriterias([]);
+    } else if (recommendation === 'belum') {
+      // Reset fields tapi biarkan user memilih dari dropdown
+      // TAPI jangan reset jika sudah ada data dari API
+      if (!resultData?.ia01_header?.group) {
+        setGroupField('');
+        setUnitField('');
+        setElementField('');
+        setKukField('');
+        setSelectedGroup(null);
+        setSelectedUnit(null);
+        setSelectedElement(null);
+        setSelectedCriteria(null);
+        setAvailableUnits([]);
+        setAvailableElements([]);
+        setAvailableCriterias([]);
+      }
+    }
+  }, [recommendation]);
+
+  // TAMBAHKAN state untuk track initial load
+  const [initialLoad, setInitialLoad] = useState(true);
+  
+
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchResultData();
+      setInitialLoad(false);
+    };
+
+    if (id_result) {
+      loadData();
+    }
+  }, [id_result]);
+
+  const handleRecommendationChange = (value: 'kompeten' | 'belum') => {
+    setRecommendation(value);
+  };
+
   const formattedDate = assesmentDate
     ? new Date(assesmentDate).toLocaleDateString("id-ID", {
       day: "numeric",
@@ -321,44 +557,40 @@ export default function Ia01() {
     })
     : "";
 
-  // Filter data berdasarkan K-Pekerjaan yang dipilih
   const getFilteredData = () => {
     return unitData.filter(unit => unit.group_name === selectedKPekerjaan);
   };
   const filteredData = getFilteredData();
 
-  // Simpan group aktif ke localStorage saat berubah
   useEffect(() => {
     if (selectedKPekerjaan) {
       localStorage.setItem('activeGroup', selectedKPekerjaan);
     }
   }, [selectedKPekerjaan]);
 
-
   useEffect(() => {
     const groupFromUrl = searchParams.get('group');
-
-    // Prioritaskan group dari URL jika valid
     if (groupFromUrl && groupList.includes(groupFromUrl)) {
       setSelectedKPekerjaan(groupFromUrl);
-    }
-    // Jika tidak ada di URL, gunakan group pertama yang tersedia
-    else if (groupList.length > 0) {
+    } else if (groupList.length > 0) {
       setSelectedKPekerjaan(groupList[0]);
     }
   }, [groupList, searchParams]);
-
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto">
         <div className="bg-white rounded-lg shadow-sm">
-          <NavbarAsesor title='Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR-IA-01' icon={<Link
-            to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment!)}
-            className="text-gray-500 hover:text-gray-600">
-            <ChevronLeft size={20} />
-          </Link>
-          }
+          <NavbarAsesor
+            title='Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR-IA-01'
+            icon={
+              <Link
+                to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment!)}
+                className="text-gray-500 hover:text-gray-600"
+              >
+                <ChevronLeft size={20} />
+              </Link>
+            }
           />
         </div>
 
@@ -477,11 +709,13 @@ export default function Ia01() {
               ))}
             </div>
           </div>
+
           <div className="bg-white mt-4 rounded-lg shadow-sm border p-6">
-            {/* Bagian Rekomendasi - Full Width */}
+            {/* Bagian Rekomendasi */}
             <div className="mb-6">
               <h3 className="text-xl font-medium text-gray-900 mb-4">Rekomendasi</h3>
-              <div className="space-y-3">
+
+              <div className="space-y-3 mb-6">
                 {!resultData ? (
                   <div className="text-gray-500">Memuat rekomendasi...</div>
                 ) : (
@@ -493,7 +727,7 @@ export default function Ia01() {
                         checked={recommendation === 'kompeten'}
                         onChange={() => handleRecommendationChange('kompeten')}
                         className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-                        disabled={!!assessorQrValue} // Tambahkan ini
+                        disabled={!!assessorQrValue}
                       />
                       <span className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
     ${recommendation === 'belum' ? 'line-through opacity-50' : ''}`}>
@@ -507,7 +741,7 @@ export default function Ia01() {
                         checked={recommendation === 'belum'}
                         onChange={() => handleRecommendationChange('belum')}
                         className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-                        disabled={!!assessorQrValue} // Tambahkan ini
+                        disabled={!!assessorQrValue}
                       />
                       <span className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
                 ${recommendation === 'kompeten' ? 'line-through opacity-50' : ''}`}>
@@ -528,64 +762,97 @@ export default function Ia01() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Pada :</label>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  {/* Kelompok Pekerjaan */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Kelompok Pekerjaan</label>
-                    <input
-                      type="text"
-                      value={groupField}
-                      onChange={e => setGroupField(e.target.value)}
-                      disabled={recommendation === 'kompeten'}
-                      className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-              ${recommendation === 'kompeten'
-                          ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                          : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
-            `}
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kelompok Pekerjaan *
+                    </label>
+                    <select
+                      value={selectedGroup?.name || ''}
+                      onChange={(e) => handleGroupChange(e.target.value)}
+                      disabled={recommendation === 'kompeten' || !!assessorQrValue}
+                      className={`w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] ${recommendation === 'kompeten' || !!assessorQrValue
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                          : 'bg-white border-gray-300'
+                        }`}
+                      required
+                    >
+                      <option value="">Pilih Kelompok Pekerjaan</option>
+                      {incompleteCriteria.map((group) => (
+                        <option key={group.id} value={group.name}>
+                          {group.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
+                  {/* Unit */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Unit</label>
-                    <input
-                      type="text"
-                      value={unitField}
-                      onChange={e => setUnitField(e.target.value)}
-                      disabled={recommendation === 'kompeten'}
-                      className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-              ${recommendation === 'kompeten'
-                          ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                          : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
-            `}
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Unit
+                    </label>
+                    <select
+                      value={selectedUnit?.id || ''}
+                      onChange={(e) => handleUnitChange(Number(e.target.value))}
+                      disabled={!selectedGroup || recommendation === 'kompeten' || !!assessorQrValue}
+                      className={`w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] ${!selectedGroup || recommendation === 'kompeten' || !!assessorQrValue
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                          : 'bg-white border-gray-300'
+                        }`}
+                    >
+                      <option value="">Pilih Unit</option>
+                      {availableUnits.map((unit) => (
+                        <option key={unit.id} value={unit.id}>
+                          {unit.no}. {unit.title} ({unit.unit_code})
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
+                  {/* Elemen */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Elemen</label>
-                    <input
-                      type="text"
-                      value={elementField}
-                      onChange={e => setElementField(e.target.value)}
-                      disabled={recommendation === 'kompeten'}
-                      className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-              ${recommendation === 'kompeten'
-                          ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                          : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
-            `}
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Elemen
+                    </label>
+                    <select
+                      value={selectedElement?.id || ''}
+                      onChange={(e) => handleElementChange(Number(e.target.value))}
+                      disabled={!selectedUnit || recommendation === 'kompeten' || !!assessorQrValue}
+                      className={`w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] ${!selectedUnit || recommendation === 'kompeten' || !!assessorQrValue
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                          : 'bg-white border-gray-300'
+                        }`}
+                    >
+                      <option value="">Pilih Elemen</option>
+                      {availableElements.map((element) => (
+                        <option key={element.id} value={element.id}>
+                          {element.no}. {element.title}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
+                  {/* KUK */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">KUK</label>
-                    <input
-                      type="text"
-                      value={kukField}
-                      onChange={e => setKukField(e.target.value)}
-                      disabled={recommendation === 'kompeten'}
-                      className={`w-full rounded-lg px-3 py-2 text-sm transition-all
-              ${recommendation === 'kompeten'
-                          ? 'bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed'
-                          : 'bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35]'}
-            `}
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      KUK
+                    </label>
+                    <select
+                      value={selectedCriteria?.id || ''}
+                      onChange={(e) => handleCriteriaChange(Number(e.target.value))}
+                      disabled={!selectedElement || recommendation === 'kompeten' || !!assessorQrValue}
+                      className={`w-full rounded-lg px-3 py-2 text-sm border focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] ${!selectedElement || recommendation === 'kompeten' || !!assessorQrValue
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                          : 'bg-white border-gray-300'
+                        }`}
+                    >
+                      <option value="">Pilih KUK</option>
+                      {availableCriterias.map((criteria) => (
+                        <option key={criteria.id} value={criteria.id}>
+                          {criteria.no}. {criteria.description}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
@@ -702,10 +969,6 @@ export default function Ia01() {
 
                   {/* Section bawah tombol (full width, col-span-2) */}
                   <div className="col-span-1 sm:col-span-2 mt-8 flex flex-col items-center gap-4">
-                    {saveHeaderError && (
-                      <span className="text-red-500 text-sm text-center">{saveHeaderError}</span>
-                    )}
-
                     {(unitData.length > 0
                       ? `${Math.round((completedUnits / unitData.length) * 100)}%`
                       : "0%") !== "100%" && (
