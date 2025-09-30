@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import { ListCheck, AlertCircle, RefreshCw, Clock, CheckCircle } from 'lucide-react';
+import { ListCheck, AlertCircle, RefreshCw, Clock, CheckCircle, XCircle, Filter } from 'lucide-react';
 import api from '@/helper/axios';
 import useToast from '@/components/ui/useToast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,11 +16,18 @@ type ApprovalItem = {
     target_id?: number;
     comment?: string | null;
     requester_admin_id?: number;
+    approver_admin_id?: number;
+    second_approver_admin_id?: number;
+    status?: string;
+    approved_by_first?: boolean;
+    approved_by_second?: boolean;
+    approved_at?: string;
 };
+
 
 const PersetujuanAdmin: React.FC = () => {
     const [items, setItems] = useState<ApprovalItem[]>([]);
-    const [filter, setFilter] = useState<'pending' | 'approved'>('pending');
+    const [allItems, setAllItems] = useState<ApprovalItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [actingId, setActingId] = useState<number | null>(null);
@@ -29,13 +36,13 @@ const PersetujuanAdmin: React.FC = () => {
     const [requesterLabels, setRequesterLabels] = useState<Record<number, string>>({});
     const { user } = useAuth();
     const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
+    const [selectedFilter, setSelectedFilter] = useState<'all' | 'my-requests' | 'my-approvals'>('all');
 
     const fetchApprovals = async () => {
         try {
             setLoading(true);
             setError(null);
-            const scope = filter === 'pending' ? 'to-approve' : 'all';
-            const res = await api.get(`/approval/requests/scope/${scope}`, { params: { page: 1, limit: 50 } });
+            const res = await api.get(`/approval/requests/scope/all`, { params: { page: 1, limit: 100 } });
             const raw = res?.data ?? {};
             if (raw?.success === false) {
                 throw new Error(raw?.message || 'Gagal memuat daftar persetujuan');
@@ -68,6 +75,8 @@ const PersetujuanAdmin: React.FC = () => {
                     target_id: Number(it?.target_id ?? it?.targetId ?? 0) || undefined,
                     comment: it?.comment ?? null,
                     requester_admin_id: Number(it?.requester_admin_id ?? it?.requesterAdminId ?? requester?.admin_id ?? 0) || undefined,
+                    approver_admin_id: Number(it?.approver_admin_id ?? it?.approverAdminId ?? 0) || undefined,
+                    second_approver_admin_id: Number(it?.second_approver_admin_id ?? it?.secondApproverAdminId ?? 0) || undefined,
                     status: it?.status,
                     approved_by_first: Boolean(it?.approved_by_first),
                     approved_by_second: Boolean(it?.approved_by_second),
@@ -75,12 +84,8 @@ const PersetujuanAdmin: React.FC = () => {
                 } as ApprovalItem;
             });
 
-            const normalizedStatus = (s: any) => String(s || '').toLowerCase();
-            const filtered = filter === 'approved'
-                ? list.filter((r: any) => normalizedStatus(r?.status) === 'approved')
-                : list.filter((r: any) => normalizedStatus(r?.status) !== 'approved');
-
-            setItems(filtered);
+            setAllItems(list);
+            applyFilters(list);
             void resolveTargets(list);
             void resolveRequesters(list);
         } catch (err: any) {
@@ -90,20 +95,70 @@ const PersetujuanAdmin: React.FC = () => {
         }
     };
 
-    useEffect(() => { void fetchApprovals(); }, [filter]);
+    const applyFilters = (list: ApprovalItem[]) => {
+        let filtered = [...list];
+
+        if (selectedFilter === 'my-requests') {
+            filtered = filtered.filter(item => item.requester_admin_id === currentAdminId);
+        } else if (selectedFilter === 'my-approvals') {
+            filtered = filtered.filter(item =>
+                item.approver_admin_id === currentAdminId ||
+                item.second_approver_admin_id === currentAdminId
+            );
+        }
+
+        filtered.sort((a, b) => {
+            if (selectedFilter === 'my-approvals') {
+                const aInScope = a.approver_admin_id === currentAdminId || a.second_approver_admin_id === currentAdminId;
+                const bInScope = b.approver_admin_id === currentAdminId || b.second_approver_admin_id === currentAdminId;
+                if (aInScope !== bInScope) {
+                    return aInScope ? -1 : 1;
+                }
+            }
+
+            const aStatus = String(a.status || '').toLowerCase();
+            const bStatus = String(b.status || '').toLowerCase();
+
+            const getStatusOrder = (status: string) => {
+                if (status === 'pending') return 1;
+                if (status === 'approved') return 2;
+                if (status === 'rejected') return 3;
+                return 4; // unknown status
+            };
+
+            const aOrder = getStatusOrder(aStatus);
+            const bOrder = getStatusOrder(bStatus);
+
+            if (aOrder !== bOrder) {
+                return aOrder - bOrder;
+            }
+
+            return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
+        });
+
+        setItems(filtered);
+    };
+
+    useEffect(() => { void fetchApprovals(); }, []);
+
+    useEffect(() => { applyFilters(allItems); }, [selectedFilter, allItems, currentAdminId]);
+
+    const fetchCurrentAdmin = async () => {
+        try {
+            const res = await api.get('/admins', { params: { page: 1, limit: 1000 } });
+            const list = Array.isArray(res?.data?.data) ? res.data.data : Array.isArray(res?.data) ? res.data : [];
+
+            const found = list.find((a: any) => Number(a?.user?.id ?? a?.user_id) === Number(user?.id));
+            if (found) {
+                setCurrentAdminId(Number(found.id));
+            }
+        } catch {
+            setCurrentAdminId(null);
+        }
+    };
 
     useEffect(() => {
-        const resolveCurrentAdmin = async () => {
-            try {
-                const res = await api.get('/admins', { params: { page: 1, limit: 1000 } });
-                const list = Array.isArray(res?.data?.data) ? res.data.data : Array.isArray(res?.data) ? res.data : [];
-                const found = list.find((a: any) => Number(a?.user?.id ?? a?.user_id) === Number(user?.id));
-                if (found) setCurrentAdminId(Number(found.id));
-            } catch {
-                setCurrentAdminId(null);
-            }
-        };
-        void resolveCurrentAdmin();
+        void fetchCurrentAdmin();
     }, [user?.id]);
 
     const resolveTargets = async (list: ApprovalItem[]) => {
@@ -111,22 +166,77 @@ const PersetujuanAdmin: React.FC = () => {
         const need = keys.filter(k => !!k && !targetLabels[k]);
         if (need.length === 0) return;
         const updates: Record<string, string> = {};
+
         await Promise.all(need.map(async (k) => {
             const [tbl, idStr] = k.split(':');
             const id = Number(idStr);
             if (!tbl || !id) return;
+
             try {
-                if (tbl.toLowerCase() === 'user') {
+                const tableName = tbl.toLowerCase();
+                if (tableName === 'user') {
                     const res = await api.get(`/user/${id}`);
                     const u = res?.data?.data || res?.data;
-                    updates[k] = u?.full_name || u?.email || `user #${id}`;
-                    return;
+                    const displayName = u?.full_name || u?.email || `User #${id}`;
+                    updates[k] = `user(${displayName})`;
+                } else if (tableName === 'occupation') {
+                    // Try multiple possible endpoints and field names
+                    let occupationName = null;
+
+                    // Try /occupation/{id}
+                    try {
+                        const res = await api.get(`/occupation/${id}`);
+                        const occ = res?.data?.data || res?.data;
+                        occupationName = occ?.name || occ?.title || occ?.occupation_name || occ?.scheme_name;
+                    } catch { }
+
+                    // Try /occupations/{id} if first attempt failed
+                    if (!occupationName) {
+                        try {
+                            const res = await api.get(`/occupations/${id}`);
+                            const occ = res?.data?.data || res?.data;
+                            occupationName = occ?.name || occ?.title || occ?.occupation_name || occ?.scheme_name;
+                        } catch { }
+                    }
+
+                    // Try /scheme/{id} as fallback
+                    if (!occupationName) {
+                        try {
+                            const res = await api.get(`/scheme/${id}`);
+                            const scheme = res?.data?.data || res?.data;
+                            occupationName = scheme?.name || scheme?.title || scheme?.scheme_name;
+                        } catch { }
+                    }
+
+                    const displayName = occupationName || `Occupation #${id}`;
+                    updates[k] = `occupation(${displayName})`;
+                    console.log(`Occupation ${id} resolved to:`, displayName);
+                } else if (tableName === 'admin') {
+                    const res = await api.get(`/admins/${id}`);
+                    const admin = res?.data?.data || res?.data;
+                    const user = admin?.user || admin?.User || {};
+                    const displayName = user?.full_name || user?.name || user?.email || `Admin #${id}`;
+                    updates[k] = `admin(${displayName})`;
+                } else if (tableName === 'result') {
+                    const res = await api.get(`/result/${id}`);
+                    const result = res?.data?.data || res?.data;
+                    const displayName = result?.name || `Result #${id}`;
+                    updates[k] = `result(${displayName})`;
+                } else if (tableName === 'resultdoc') {
+                    const res = await api.get(`/resultdoc/${id}`);
+                    const doc = res?.data?.data || res?.data;
+                    const displayName = doc?.name || doc?.filename || `Document #${id}`;
+                    updates[k] = `resultdoc(${displayName})`;
+                } else {
+                    // Fallback untuk table lain
+                    updates[k] = `${tbl}(#${id})`;
                 }
-                updates[k] = `${tbl} #${id}`;
-            } catch {
-                updates[k] = `${tbl} #${id}`;
+            } catch (error) {
+                console.error(`Error resolving ${tbl} ${id}:`, error);
+                updates[k] = `${tbl}(#${id})`;
             }
         }));
+
         setTargetLabels(prev => ({ ...prev, ...updates }));
     };
 
@@ -166,6 +276,29 @@ const PersetujuanAdmin: React.FC = () => {
             toast.show({ title: 'Gagal', description: msg, type: 'error' });
         } finally {
             setActingId(null);
+        }
+    };
+
+    const getStatusDisplay = (item: ApprovalItem) => {
+        const status = String(item.status || '').toLowerCase();
+        if (status === 'approved') {
+            return {
+                text: 'Approved',
+                className: 'bg-green-100 text-green-700',
+                icon: <CheckCircle size={12} className="mr-1" />
+            };
+        } else if (status === 'rejected') {
+            return {
+                text: 'Rejected',
+                className: 'bg-red-100 text-red-700',
+                icon: <XCircle size={12} className="mr-1" />
+            };
+        } else {
+            return {
+                text: 'Pending',
+                className: 'bg-orange-100 text-orange-700',
+                icon: <Clock size={12} className="mr-1" />
+            };
         }
     };
 
@@ -229,44 +362,26 @@ const PersetujuanAdmin: React.FC = () => {
                     <div className="text-sm text-gray-500 mb-2">Dashboard / Persetujuan</div>
                     <h1 className="text-xl lg:text-2xl font-bold text-gray-800 mb-2">Persetujuan</h1>
 
-                    {/* Controls (tabs + refresh) */}
+                    {/* Controls (filter + refresh) */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                            <div className="flex p-1 rounded-lg bg-gray-100/80 shadow-sm">
-                                <button
-                                    onClick={() => setFilter('pending')}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${filter === 'pending'
-                                        ? 'bg-white text-orange-600 shadow-sm ring-1 ring-orange-100'
-                                        : 'text-gray-600 hover:text-orange-600'}`}
+                            <div className="flex items-center gap-3">
+                                <Filter size={16} className="text-gray-600" />
+                                <select
+                                    value={selectedFilter}
+                                    onChange={(e) => setSelectedFilter(e.target.value as 'all' | 'my-requests' | 'my-approvals')}
+                                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
                                 >
-                                    <div className="flex items-center gap-2">
-                                        <Clock size={16} />
-                                        <span>Pending</span>
-                                        {filter === 'pending' && items.length > 0 && (
-                                            <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-xs">{items.length}</span>
-                                        )}
-                                    </div>
-                                </button>
-                                <button
-                                    onClick={() => setFilter('approved')}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${filter === 'approved'
-                                        ? 'bg-white text-orange-600 shadow-sm ring-1 ring-orange-100'
-                                        : 'text-gray-600 hover:text-orange-600'}`}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle size={16} />
-                                        <span>Approved</span>
-                                        {filter === 'approved' && items.length > 0 && (
-                                            <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-xs">{items.length}</span>
-                                        )}
-                                    </div>
-                                </button>
+                                    <option value="all">Semua</option>
+                                    <option value="my-requests">Request Saya</option>
+                                    <option value="my-approvals">Butuh Persetujuan Saya</option>
+                                </select>
                             </div>
                             <button
                                 onClick={() => void fetchApprovals()}
                                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all shadow-sm"
                             >
-                                <RefreshCw size={16} className="animate-spin" />
+                                <RefreshCw size={16} />
                                 Refresh
                             </button>
                         </div>
@@ -282,52 +397,76 @@ const PersetujuanAdmin: React.FC = () => {
                                         <th className="px-2 py-3 sm:px-4 lg:px-6 font-medium text-left">Target</th>
                                         <th className="px-2 py-3 sm:px-4 lg:px-6 font-medium text-left">Catatan</th>
                                         <th className="px-2 py-3 sm:px-4 lg:px-6 font-medium text-left">Tanggal</th>
-                                        <th className="px-2 py-3 sm:px-4 lg:px-6 text-center font-medium rounded-tr-xl">Setujui</th>
+                                        <th className="px-2 py-3 sm:px-4 lg:px-6 text-center font-medium">Setujui</th>
+                                        <th className="px-2 py-3 sm:px-4 lg:px-6 text-center font-medium rounded-tr-xl">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="text-sm text-gray-700">
                                     {loading ? (
                                         <tr>
-                                            <td colSpan={6} className="p-6 text-center">Memuat...</td>
+                                            <td colSpan={7} className="p-6 text-center">Memuat...</td>
                                         </tr>
                                     ) : items.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="p-6 text-center">Tidak ada persetujuan</td>
+                                            <td colSpan={7} className="p-6 text-center">Tidak ada persetujuan</td>
                                         </tr>
                                     ) : (
-                                        items.map((it) => (
-                                            <tr key={it.id} className={`group transition-colors ${it.id % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'} hover:bg-orange-50/50`}>
-                                                <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">
-                                                    <div className="flex items-center gap-2">
-                                                        <span>{filter === 'pending' ? '-' : (requesterLabels[it.requester_admin_id || 0] || it.requester?.full_name || it.requester?.email || '-')}</span>
-                                                        {filter === 'pending' && (
-                                                            <span className="inline-flex px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700">Pending</span>
+                                        items.map((it) => {
+                                            const statusDisplay = getStatusDisplay(it);
+                                            const isPending = String(it.status || '').toLowerCase() !== 'approved' && String(it.status || '').toLowerCase() !== 'rejected';
+
+                                            const isCurrentAdminApprover = currentAdminId !== null &&
+                                                (it.approver_admin_id === currentAdminId || it.second_approver_admin_id === currentAdminId);
+
+                                            const canApprove = isPending && isCurrentAdminApprover &&
+                                                Number(it.requester_admin_id) !== currentAdminId;
+
+                                            return (
+                                                <tr key={it.id} className={`group transition-colors ${it.id % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'} hover:bg-orange-50/50`}>
+                                                    <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">
+                                                        <div className="flex items-center gap-2">
+                                                            <span>{requesterLabels[it.requester_admin_id || 0] || it.requester?.full_name || it.requester?.email || '-'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-2 py-3 sm:px-4 lg:px-6">{(it.action || '').toLowerCase() === 'update' ? 'Edit' : (it.action || '').toLowerCase() === 'delete' ? 'Hapus' : (it.action || '-')}</td>
+                                                    <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">
+                                                        {targetLabels[`${it.target_table || ''}:${it.target_id || ''}`] || it.resource || '-'}
+                                                    </td>
+                                                    <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">{it.comment || '-'}</td>
+                                                    <td className="px-2 py-3 sm:px-4 lg:px-6">{formatDateIndo(it.created_at)}</td>
+                                                    <td className="px-4 py-4 lg:px-6 text-center">
+                                                        {canApprove ? (
+                                                            <div className="flex items-center justify-center gap-2">
+                                                                <button
+                                                                    onClick={() => void act(it.id, 'approve')}
+                                                                    disabled={actingId === it.id}
+                                                                    className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                                                    title="Setujui"
+                                                                >
+                                                                    <CheckCircle size={14} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => void act(it.id, 'reject')}
+                                                                    disabled={actingId === it.id}
+                                                                    className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                                                                    title="Tolak"
+                                                                >
+                                                                    <XCircle size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-gray-400 text-xs">-</span>
                                                         )}
-                                                    </div>
-                                                </td>
-                                                <td className="px-2 py-3 sm:px-4 lg:px-6">{(it.action || '').toLowerCase() === 'update' ? 'Edit' : (it.action || '').toLowerCase() === 'delete' ? 'Hapus' : (it.action || '-')}</td>
-                                                <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">{targetLabels[`${it.target_table || ''}:${it.target_id || ''}`] || it.resource || '-'}</td>
-                                                <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">{it.comment || '-'}</td>
-                                                <td className="px-2 py-3 sm:px-4 lg:px-6">{formatDateIndo(it.created_at)}</td>
-                                                <td className="px-4 py-4 lg:px-6 text-center">
-                                                    {filter === 'pending' ? (
-                                                        <button
-                                                            onClick={() => void act(it.id, 'approve')}
-                                                            disabled={actingId === it.id || (currentAdminId !== null && Number(it.requester_admin_id) === currentAdminId)}
-                                                            className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                                                            title="Setujui"
-                                                        >
-                                                            <CheckCircle size={16} />
-                                                        </button>
-                                                    ) : (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">
-                                                            <CheckCircle size={12} className="mr-1" />
-                                                            Disetujui
+                                                    </td>
+                                                    <td className="px-2 py-3 sm:px-4 lg:px-6 text-center">
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${statusDisplay.className}`}>
+                                                            {statusDisplay.icon}
+                                                            {statusDisplay.text}
                                                         </span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
                                     )}
                                 </tbody>
                             </table>
