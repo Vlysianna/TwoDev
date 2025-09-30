@@ -234,7 +234,7 @@ const DashboardAsesor: React.FC = () => {
 				<div className="sticky top-0 z-10 bg-white shadow-sm">
 					<NavbarAsesor
 						title="Dashboard Asesor"
-						icon={<LayoutDashboard size={25} />}
+						icon=""
 					/>
 				</div>
 
