@@ -51,15 +51,15 @@ export default function DataSertifikasi() {
 
 	const administrativeFilesStatic = [
 		{
-			title: "Fotokopi Kartu Pelajar",
+			title: "Kartu Pelajar",
 			name: "student_card" as keyof FormValues,
 		},
 		{
-			title: "Fotokopi Kartu Keluarga / KTP",
+			title: "Kartu Keluarga / KTP",
 			name: "family_card" as keyof FormValues,
 		},
 		{
-			title: "Pasfoto berwarna ukuran 3 x 4 sebanyak 2 lembar",
+			title: "Pasfoto berwarna ukuran 3 x 4",
 			name: "id_card" as keyof FormValues,
 		},
 	];
@@ -67,12 +67,12 @@ export default function DataSertifikasi() {
 	const supportingFilesStatic = [
 		{
 			title:
-				"Fotokopi Rapor SMK Konsentrasi Keahlian Rekayasa Perangkat Lunak semester 1 sampai dengan 5",
+				"Rapor SMK Konsentrasi Keahlian semester 1 sampai dengan 5",
 			name: "school_report_card" as keyof FormValues,
 		},
 		{
 			title:
-				"Fotokopi Sertifikat / Surat Keterangan Praktik Kerja Lapangan (PKL) pada bidang Software Development",
+				"Sertifikat / Surat Keterangan Praktik Kerja Lapangan (PKL)",
 			name: "field_work_practice_certificate" as keyof FormValues,
 		},
 	];
