@@ -327,7 +327,7 @@ export default function IA01({
 													>
 														<div>
 															<div className="text-sm font-medium text-gray-800">
-																{unit.no}. {unit.title}
+																<span className="font-bold">Unit {unit.no}:</span> {unit.title}
 															</div>
 
 															<div className="mt-2 space-y-2 pl-4">
