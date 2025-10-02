@@ -300,41 +300,17 @@ export default function IA03({
     }
   };
 
-  // Tambahkan state untuk error tanggapan per pertanyaan
-  const [tanggapanErrors, setTanggapanErrors] = useState<{
-    [key: number]: string;
-  }>({});
+  // NOTE: Tanggapan tidak wajib diisi — kosongkan errors handling for tanggapan
 
   // Simpan semua perubahan pertanyaan
   const handleSaveAllQuestions = async () => {
     if (isAssessee || isAdmin) return;
     try {
       setLoading(true);
-      const errors: { [key: number]: string } = {};
-      let hasError = false;
-
-      questions.forEach((question) => {
-        if (!question.tanggapan.trim()) {
-          errors[question.id] = "tanggapan harus diisi";
-          hasError = true;
-        }
-      });
-      setTanggapanErrors(errors);
-
-      if (hasError) {
-        setError("Tanggapan harus diisi pada semua pertanyaan");
-        toast.show({
-          title: "Gagal",
-          description: "Tanggapan harus diisi pada semua pertanyaan",
-          type: "error",
-        });
-        setLoading(false);
-        return;
-      }
 
       const promises = questions.map(async (question) => {
         const approved = question.pencapaian === "kompeten";
-        return saveQuestionAnswer(question.id, question.tanggapan, approved);
+        return saveQuestionAnswer(question.id, question.tanggapan || "", approved);
       });
 
       await Promise.all(promises);
@@ -389,9 +365,9 @@ export default function IA03({
 
   // Helper untuk cek completion satu grup
   const isGroupComplete = (group: GroupIA03) => {
-    return group.questions.every(
-      (q) => q.result && q.result.answer && q.result.approved !== undefined
-    );
+    // Anggap lengk ap jika terdapat `result` (jawaban telah disimpan),
+    // karena tanggapan/approved bisa saja null/false dan tetap valid.
+    return group.questions.every((q) => !!q.result);
   };
 
   // Effect untuk fetch data saat komponen dimount
@@ -726,32 +702,22 @@ export default function IA03({
 
                     {/* Tanggapan */}
                     <td className="py-3 px-2">
-                      <textarea
-                        value={question.tanggapan}
-                        onChange={(e) => {
-                          updateTanggapan(question.id, e.target.value);
-                          setTanggapanErrors((prev) => ({
-                            ...prev,
-                            [question.id]: e.target.value.trim()
-                              ? ""
-                              : "tanggapan harus diisi",
-                          }));
-                        }}
-                        placeholder="Tanggapan"
-                        className={`w-full min-h-[70px] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm resize-y 
-													${tanggapanErrors[question.id] ? "border-red-500" : ""}
-													${
-                            isAssessee || isApprovedByAssessor || isAdmin
-                              ? "bg-gray-100 cursor-not-allowed"
-                              : ""
-                          }
-													`}
-                        disabled={isAssessee || isApprovedByAssessor || isAdmin}
-                      />
-                      {tanggapanErrors[question.id] && (
-                        <span className="text-xs text-red-500 mt-1">
-                          {tanggapanErrors[question.id]}
-                        </span>
+                      {isAssessee || isApprovedByAssessor || isAdmin ? (
+                        // Read-only view: show dash when empty
+                        <div className="w-full min-h-[70px] px-3 py-2 border border-gray-200 rounded bg-gray-100 text-sm text-gray-700">
+                          {question.tanggapan && question.tanggapan.trim()
+                            ? question.tanggapan
+                            : "-"}
+                        </div>
+                      ) : (
+                        <textarea
+                          value={question.tanggapan}
+                          onChange={(e) => {
+                            updateTanggapan(question.id, e.target.value);
+                          }}
+                          placeholder="Tanggapan"
+                          className={`w-full min-h-[70px] px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm resize-y`}
+                        />
                       )}
                     </td>
                   </tr>
