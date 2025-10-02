@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import paths from '@/routes/paths';
 import ConfirmModal from './ConfirmModal';
 import { getAssetPath } from '@/utils/assetPath';
 
@@ -88,14 +89,28 @@ const UserMenu: React.FC = () => {
 
           {/* Logout */}
           <div className="p-2">
-            <button
-              type="button"
-              onClick={handleLogoutClick}
-              className="w-full flex justify-center items-center text-red-500 hover:bg-gray-100 px-3 py-2 rounded transition cursor-pointer"
-            >
-              <LogOut size={18} className="mr-2" />
-              Logout
-            </button>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileOpen(false);
+                  if (user.role_id === 1) navigate(paths.admin.profile);
+                  else if (user.role_id === 2) navigate(paths.asesor.profile);
+                  else navigate('/');
+                }}
+                className="w-full flex items-center text-gray-700 hover:bg-gray-100 px-3 py-2 rounded transition cursor-pointer"
+              >
+                Profile
+              </button>
+              <button
+                type="button"
+                onClick={handleLogoutClick}
+                className="w-full flex justify-center items-center text-red-500 hover:bg-gray-100 px-3 py-2 rounded transition cursor-pointer"
+              >
+                <LogOut size={18} className="mr-2" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       )}

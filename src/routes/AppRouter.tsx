@@ -14,6 +14,7 @@ import DataSertifikasi from "@/pages/asesi/DataSertifikasi";
 import DashboardAsesi from "@/pages/asesi/DashboardAsesi";
 import DashboardAdmin from "@/pages/admin/DashboardAdmin";
 import BioDataAdmin from "@/pages/admin/BioDataAdmin";
+import Profile from "@/pages/admin/Profile";
 import BiodataAdminProtectedRoute from "@/components/BiodataAdminProtectedRoute";
 import AsessmentAktif from "@/pages/asesi/AsesmentAktif";
 // Test page removed
@@ -57,6 +58,7 @@ import Ak05Asesor from "@/pages/Asesor/Ak-05";
 import Ia05CAsesor from "@/pages/Asesor/Ia-05-C";
 import DashboardPenilaian from "@/pages/Asesor/DashboardPenilaian";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
+import ProfileAsesor from "@/pages/asesor/Profile";
 import IA05Assessor from "@/pages/Asesor/ia-05";
 import RecapAssessment from "@/pages/Asesor/RecapAssessment";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
@@ -124,6 +126,7 @@ const router = createBrowserRouter(
 					),
 					children: [
 						{ path: paths.admin.biodata, element: <BioDataAdmin /> },
+						{ path: paths.admin.profile, element: <Profile /> },
 						{
 							element: <BiodataAdminProtectedRoute><Outlet /></BiodataAdminProtectedRoute>,
 							children: [
@@ -409,6 +412,7 @@ const router = createBrowserRouter(
 							</BiodataProtectedRoute>
 						) 
 					},
+					{ path: paths.asesor.profile, element: <ProfileAsesor /> },
 				],
 			},
 			],

@@ -27,6 +27,7 @@ const routes = {
 	admin: {
 		root: "/admin",
 		biodata: "/admin/biodata",
+		profile: "/admin/profile",
 		kelolaUser: "/admin/kelola-user",
 		kelolaAkunAsesi: "/admin/kelola-akun-asesi",
 		recapAssessmentAdmin: (scheduleDetailId: string | number, id_asesor: string | number) => 
@@ -112,6 +113,7 @@ const routes = {
 	asesor: {
 		root: "/asesor",
 		biodata: "/asesor/biodata",
+		profile: "/asesor/profile",
 		dashboardAsesor: "/asesor/dashboard-asesor",
 		dashboardPenilaian: "/asesor/dashboard-penilaian",
 		assessmentReceipt: "/asesor/assessment-receipt",
