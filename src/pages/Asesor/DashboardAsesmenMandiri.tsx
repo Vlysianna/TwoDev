@@ -7,6 +7,7 @@ import {
 	CheckCircle,
 	SquareX,
 	Loader,
+	Info,
 } from "lucide-react";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavAsesor from "@/components/NavAsesor";
@@ -49,14 +50,13 @@ export default function DashboardAsesmenMandiri() {
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [tabData, setTabData] = useState<TabResponse | null>();
-	// const [selectedTab, setSelectedTab] = useState<string>("apl-02");
 	const [selectedTab, setSelectedTab] = useState<string>(() => {
-		// Coba ambil dari localStorage saat inisialisasi
 		const savedTab = localStorage.getItem(`selectedTab-${id_assessment}`);
-		return savedTab || "apl-02"; // Default ke "apl-02" jika tidak ada
+		return savedTab || "apl-02";
 	});
 	const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
-	
+	const [showStatusInfo, setShowStatusInfo] = useState(false);
+
 	useEffect(() => {
 		localStorage.setItem(`selectedTab-${id_assessment}`, selectedTab);
 	}, [selectedTab, id_assessment]);
@@ -112,11 +112,9 @@ export default function DashboardAsesmenMandiri() {
 							"Tuntas": 2,
 						};
 
-						// Bandingkan status dulu
 						const statusDiff = order[a.status] - order[b.status];
 						if (statusDiff !== 0) return statusDiff;
 
-						// Kalau status sama, bandingkan huruf pertama dari nama asesi
 						const nameA = a.assessee_name.toUpperCase();
 						const nameB = b.assessee_name.toUpperCase();
 						if (nameA < nameB) return -1;
@@ -147,7 +145,7 @@ export default function DashboardAsesmenMandiri() {
 
 		if (tabsContainerRef.current) {
 			tabsContainerRef.current.addEventListener("scroll", checkScroll);
-			checkScroll(); // Check initial state
+			checkScroll();
 		}
 
 		return () => {
@@ -247,6 +245,30 @@ export default function DashboardAsesmenMandiri() {
 		"Butuh Persetujuan": <SquareCheck size={14} />,
 	};
 
+	// Keterangan untuk setiap status
+	const statusDescriptions = {
+		"Tuntas": {
+			description: "Formulir telah lengkap dan disetujui",
+			color: "bg-green-500",
+			textColor: "text-green-700"
+		},
+		"Menunggu Asesi": {
+			description: "Menunggu respons atau tindakan dari asesi",
+			color: "bg-blue-500",
+			textColor: "text-blue-700"
+		},
+		"Belum Tuntas": {
+			description: "Formulir belum dikerjakan oleh Anda (Asesor)",
+			color: "bg-red-500",
+			textColor: "text-red-700"
+		},
+		"Butuh Persetujuan": {
+			description: "Menunggu persetujuan dari Anda (Asesor)",
+			color: "bg-yellow-500",
+			textColor: "text-yellow-700"
+		}
+	};
+
 	return (
 		<div className="flex min-h-screen bg-gray-50">
 			{/* Sidebar */}
@@ -272,6 +294,52 @@ export default function DashboardAsesmenMandiri() {
 						</Link>
 						<span className="mx-2">/</span>
 						<span className="text-gray-700">Asesmen Mandiri</span>
+					</div>
+
+					{/* Keterangan Status */}
+					<div className="mb-4 p-4 bg-white rounded-lg shadow-sm border">
+						<div className="flex items-center mb-3">
+							<h3 className="text-sm font-semibold text-gray-700 me-2">Keterangan Status Formulir</h3>
+							<button
+								onClick={() => setShowStatusInfo(!showStatusInfo)}
+								className="flex items-center text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+							>
+								<Info size={16} />
+								<span className="ml-1 text-xs sm:text-md">Lihat detail status</span>
+							</button>
+						</div>
+
+						{showStatusInfo ? (
+							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+								{Object.entries(statusDescriptions).map(([status, info]) => (
+									<div
+										key={status}
+										className="flex items-start space-x-2 p-2 bg-gray-50 rounded-md"
+									>
+										<div
+											className={`w-3 h-3 rounded-full mt-1 flex-shrink-0 ${info.color}`}
+										></div>
+										<div>
+											<span className={`text-sm font-medium ${info.textColor}`}>
+												{status}
+											</span>
+											<p className="text-xs text-gray-600 mt-1">{info.description}</p>
+										</div>
+									</div>
+								))}
+							</div>
+						) : (
+							<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+								{Object.entries(statusDescriptions).map(([status, info]) => (
+									<div key={status} className="flex items-center space-x-2">
+										<div className={`w-3 h-3 rounded-full ${info.color}`}></div>
+										<span className={`text-xs font-medium ${info.textColor}`}>
+											{status}
+										</span>
+									</div>
+								))}
+							</div>
+						)}
 					</div>
 
 					{/* Tab Buttons dengan Scroll Horizontal */}

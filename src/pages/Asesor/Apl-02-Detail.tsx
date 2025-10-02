@@ -146,65 +146,6 @@ export default function CekApl02Detail() {
                     size={16}
                   />
                 </div>
-
-                {/* Filter Kompeten (Disabled) */}
-                <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">
-                  {[
-                    { value: "kompeten", label: "Semua Kompeten" },
-                    { value: "belum", label: "Semua Belum Kompeten" },
-                  ].map((opt) => (
-                    <label
-                      key={opt.value}
-                      className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition ${
-                        filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="filter"
-                        value={opt.value}
-                        checked={filterKompeten === opt.value}
-                        onChange={(e) => setFilterKompeten(e.target.value)}
-                        className="hidden"
-                        disabled
-                      />
-                      <span
-                        className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-                          filterKompeten === opt.value
-                            ? "bg-[#E77D35] border-[#E77D35]"
-                            : "border-[#E77D35]"
-                        }`}
-                      >
-                        {filterKompeten === opt.value && (
-                          <Check className="w-4 h-4 text-white" />
-                        )}
-                      </span>
-                      <span
-                        className={
-                          filterKompeten === opt.value
-                            ? "text-gray-900"
-                            : "text-gray-500"
-                        }
-                      >
-                        {opt.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-
-                {/* Global Bukti Relevan (Disabled) */}
-                <div className="flex items-center gap-2 flex-none w-full md:w-80">
-                  <select
-                    className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500 cursor-not-allowed"
-                    value=""
-                    disabled
-                  >
-                    <option value="">Bukti Relevan</option>
-                    <option value="dokumen1">Dokumen 1</option>
-                    <option value="dokumen2">Dokumen 2</option>
-                    <option value="dokumen3">Dokumen 3</option>
-                  </select>
-                </div>
               </div>
             </div>
 
@@ -272,11 +213,10 @@ export default function CekApl02Detail() {
                               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
                                 {/* Kompeten */}
                                 <label
-                                  className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm ${
-                                    pencapaianStatus === "kompeten"
+                                  className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm ${pencapaianStatus === "kompeten"
                                       ? "bg-[#E77D3533]"
                                       : ""
-                                  }`}
+                                    }`}
                                 >
                                   <input
                                     type="radio"
@@ -286,11 +226,10 @@ export default function CekApl02Detail() {
                                     disabled
                                   />
                                   <span
-                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-                                      pencapaianStatus === "kompeten"
+                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${pencapaianStatus === "kompeten"
                                         ? "bg-[#E77D35] border-[#E77D35]"
                                         : "border-[#E77D35]"
-                                    }`}
+                                      }`}
                                   >
                                     {pencapaianStatus === "kompeten" && (
                                       <Check className="w-4 h-4 text-white" />
@@ -309,11 +248,10 @@ export default function CekApl02Detail() {
 
                                 {/* Belum Kompeten */}
                                 <label
-                                  className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm ${
-                                    pencapaianStatus === "belum"
+                                  className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm ${pencapaianStatus === "belum"
                                       ? "bg-[#E77D3533]"
                                       : ""
-                                  }`}
+                                    }`}
                                 >
                                   <input
                                     type="radio"
@@ -323,11 +261,10 @@ export default function CekApl02Detail() {
                                     disabled
                                   />
                                   <span
-                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-                                      pencapaianStatus === "belum"
+                                    className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${pencapaianStatus === "belum"
                                         ? "bg-[#E77D35] border-[#E77D35]"
                                         : "border-[#E77D35]"
-                                    }`}
+                                      }`}
                                   >
                                     {pencapaianStatus === "belum" && (
                                       <Check className="w-4 h-4 text-white" />
@@ -346,56 +283,44 @@ export default function CekApl02Detail() {
                               </div>
                             </td>
 
-                            {/* Bukti relevan (Readonly) */}
+                            {/* Bukti relevan (Readonly - MODIFIED) */}
                             <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <button
                                     type="button"
-                                    role="combobox"
-                                    className="w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left cursor-not-allowed bg-gray-100"
-                                    disabled
+                                    className="w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left bg-white hover:bg-gray-50 cursor-pointer"
                                   >
                                     {selectedProofs.length > 0
                                       ? `${selectedProofs.length} bukti terpilih`
-                                      : "Pilih bukti relevan"}
+                                      : "Tidak ada bukti"}
                                   </button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-[200px] p-0">
+                                <PopoverContent className="w-[250px] p-0">
                                   <Command>
-                                    <CommandInput
-                                      placeholder="Search..."
-                                      disabled
-                                    />
-                                    <CommandEmpty>
-                                      No evidence found.
-                                    </CommandEmpty>
                                     <CommandGroup>
-                                      {evidenceOptions.map((opt) => {
-                                        const selected = selectedProofs.some(
-                                          (v) => {
-                                            return v === opt;
-                                          }
-                                        );
-                                        return (
-                                          <CommandItem
-                                            key={opt}
-                                            className="cursor-not-allowed"
-                                          >
-                                            <span
-                                              className={cn(
-                                                "mr-2 h-4 w-4",
-                                                selected
-                                                  ? "opacity-100"
-                                                  : "opacity-0"
-                                              )}
-                                            >
-                                              ✓
-                                            </span>
-                                            {opt}
-                                          </CommandItem>
-                                        );
-                                      })}
+                                      <div className="p-2">
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">
+                                          Bukti yang dipilih:
+                                        </h4>
+                                        {selectedProofs.length > 0 ? (
+                                          <ul className="space-y-1">
+                                            {selectedProofs.map((proof, index) => (
+                                              <li
+                                                key={index}
+                                                className="flex items-center text-sm text-gray-600 p-1 bg-gray-50 rounded"
+                                              >
+                                                <Check className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                                                <span className="truncate">{proof}</span>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        ) : (
+                                          <p className="text-sm text-gray-500 italic">
+                                            Tidak ada bukti yang dipilih
+                                          </p>
+                                        )}
+                                      </div>
                                     </CommandGroup>
                                   </Command>
                                 </PopoverContent>

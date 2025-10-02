@@ -33,11 +33,17 @@ type AssessmentElement = {
     element_id: number;
     description: string;
   }[];
+  result?: {
+    is_competent: boolean;
+    evidences: {
+      evidence: string;
+    }[];
+  };
 };
 
 type Element = {
   element_id: number;
-  is_competent: boolean | null; // Changed to allow null for empty state
+  is_competent: boolean | null;
   evidence: string[];
 };
 
@@ -47,16 +53,18 @@ type FormValues = {
 };
 
 type EvidenceOptionType =
-  | "Fotocopy Ijazah Terakhir"
-  | "Pas foto 3x4 latar belakang merah"
-  | "Kartu Tanda Penduduk ( KTP ) / KK"
-  | "Raport semester 1 s.d. 5";
+  | "Kartu Pelajar"
+  | "Kartu Keluarga / KTP"
+  | "Pasfoto berwarna ukuran 3 x 4"
+  | "Rapor SMK Konsentrasi Keahlian semester 1 sampai dengan 5K"
+  | "Sertifikat / Surat Keterangan Praktik Kerja Lapangan (PKL)";
 
 const evidenceOptions: EvidenceOptionType[] = [
-  "Fotocopy Ijazah Terakhir",
-  "Pas foto 3x4 latar belakang merah",
-  "Kartu Tanda Penduduk ( KTP ) / KK",
-  "Raport semester 1 s.d. 5",
+  "Kartu Pelajar",
+  "Kartu Keluarga / KTP",
+  "Pasfoto berwarna ukuran 3 x 4",
+  "Rapor SMK Konsentrasi Keahlian semester 1 sampai dengan 5K",
+  "Sertifikat / Surat Keterangan Praktik Kerja Lapangan (PKL)",
 ];
 
 export default function Apl02Detail() {
@@ -70,12 +78,12 @@ export default function Apl02Detail() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterKompeten, setFilterKompeten] = useState("all");
   const [selectedProof, setSelectedProof] = useState<{
-    [key: number]: string | undefined;
+    [key: number]: string[];
   }>({});
   const [pencapaian, setPencapaian] = useState<{
     [key: number]: string | undefined;
   }>({});
-  const [globalProof, setGlobalProof] = useState(""); // dropdown header
+  const [globalProof, setGlobalProof] = useState("");
   const [elements, setElements] = useState<AssessmentElement[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -83,6 +91,9 @@ export default function Apl02Detail() {
   const [unassessedElements, setUnassessedElements] = useState<number[]>([]);
   const [isEditable, setIsEditable] = useState(true);
   const [assessmentStatus, setAssessmentStatus] = useState<any>(null);
+
+  // State untuk pencarian bukti - dipindahkan ke sini
+  const [proofSearchTerm, setProofSearchTerm] = useState("");
 
   const toast = useToast();
 
@@ -93,7 +104,6 @@ export default function Apl02Detail() {
         const data = response.data.data;
         setAssessmentStatus(data.apl02_header);
 
-        // Jika asesi sudah approve, nonaktifkan editing
         if (data.apl02_header?.approved_assessee) {
           setIsEditable(false);
         }
@@ -114,26 +124,23 @@ export default function Apl02Detail() {
     }
   }, [elements]);
 
-  const handleProofSelection = (criteriaId: number, value: string) => {
-    setSelectedProof((prev) => ({
-      ...prev,
-      [criteriaId]: value,
-    }));
+  // Fungsi untuk memfilter bukti berdasarkan pencarian
+  const getFilteredProofs = (proofs: string[]) => {
+    if (!proofSearchTerm) return proofs;
+    return proofs.filter(proof =>
+      proof.toLowerCase().includes(proofSearchTerm.toLowerCase())
+    );
   };
 
   const handlePencapaianChange = (id: number, value: string | null) => {
     if (value === null) {
-      // Clear selection
       setPencapaian((prev) => {
         const newPencapaian = { ...prev };
         delete newPencapaian[id];
         return newPencapaian;
       });
-
-      // Update react-hook-form value to null
       setValue(`elements.${id}.is_competent`, null);
 
-      // Add to unassessed if not already there
       if (!unassessedElements.includes(id)) {
         setUnassessedElements((prev) => [...prev, id]);
       }
@@ -142,11 +149,8 @@ export default function Apl02Detail() {
         ...prev,
         [id]: value,
       }));
-
-      // Update react-hook-form value
       setValue(`elements.${id}.is_competent`, value === "kompeten");
 
-      // Remove from unassessed if already there
       if (unassessedElements.includes(id)) {
         setUnassessedElements((prev) => prev.filter((item) => item !== id));
       }
@@ -162,23 +166,17 @@ export default function Apl02Detail() {
 
       elements.forEach((item) => {
         newPencapaian[item.id] = value;
-        // update react-hook-form value
         setValue(`elements.${item.id}.is_competent`, isKompeten);
       });
 
       setPencapaian(newPencapaian);
-
-      // Hapus semua elemen dari daftar unassessed karena sudah dinilai semua
       setUnassessedElements([]);
     } else if (value === "all") {
-      // Clear all selections
       const newPencapaian: { [key: number]: string } = {};
       elements.forEach((item) => {
         setValue(`elements.${item.id}.is_competent`, null);
       });
       setPencapaian(newPencapaian);
-
-      // Add all elements to unassessed
       setUnassessedElements(elements.map((el) => el.id));
     }
   };
@@ -195,7 +193,6 @@ export default function Apl02Detail() {
     setSelectedProof(newProof);
   };
 
-  // Fungsi untuk mendapatkan daftar elemen yang belum dinilai atau belum ada bukti
   const getUnfilledElements = () => {
     const formValues = getValues();
     const unfilled: number[] = [];
@@ -233,8 +230,8 @@ export default function Apl02Detail() {
       if (response.data.success) {
         setElements(response.data.data);
 
-        // Auto-populate pencapaian dari data yang sudah ada
         const pencapaianInit: { [key: number]: string } = {};
+        const proofInit: { [key: number]: string[] } = {};
         const unassessedInit: number[] = [];
 
         response.data.data.forEach((el: any) => {
@@ -242,28 +239,21 @@ export default function Apl02Detail() {
             pencapaianInit[el.id] = el.result.is_competent
               ? "kompeten"
               : "belum";
-            // Juga set nilai di react-hook-form
             setValue(`elements.${el.id}.is_competent`, el.result.is_competent);
 
-            // Set evidence jika ada
             if (el.result.evidences && el.result.evidences.length > 0) {
-              setValue(
-                `elements.${el.id}.evidence`,
-                el.result.evidences.map((e: any) => e.evidence)
-              );
-              setSelectedProof((prev) => ({
-                ...prev,
-                [el.id]: el.result.evidences[0].evidence,
-              }));
+              const evidenceValues = el.result.evidences.map((e: any) => e.evidence);
+              setValue(`elements.${el.id}.evidence`, evidenceValues);
+              proofInit[el.id] = evidenceValues;
             }
           } else {
-            // Jika tidak ada data sebelumnya, set sebagai unassessed
             unassessedInit.push(el.id);
             setValue(`elements.${el.id}.is_competent`, null);
           }
         });
 
         setPencapaian(pencapaianInit);
+        setSelectedProof(proofInit);
         setUnassessedElements(unassessedInit);
       }
     } catch (error: any) {
@@ -274,7 +264,6 @@ export default function Apl02Detail() {
   };
 
   const onSubmit = async (data: FormValues) => {
-    // Validasi apakah semua elemen sudah diisi pencapaian dan bukti relevan
     const unfilled = getUnfilledElements();
     if (unfilled.length > 0) {
       setSaveError("Harap isi pencapaian dan bukti relevan untuk semua elemen");
@@ -284,7 +273,6 @@ export default function Apl02Detail() {
     setSaving(true);
     setSaveError(null);
 
-    // Filter out elements with null values (shouldn't happen after validation)
     const validElements = Object.entries(data.elements).filter(
       ([, val]) => val.is_competent !== null
     );
@@ -312,7 +300,6 @@ export default function Apl02Detail() {
               description: "Berhasil menyimpan data",
               type: "success",
             });
-            // Navigate ke halaman APL-02 setelah simpan sukses
             navigate(paths.asesi.assessment.apl02(id_assessment, id_asesor));
           } else {
             toast.show({
@@ -330,7 +317,6 @@ export default function Apl02Detail() {
     }
   };
 
-  // Hitung jumlah elemen yang belum dinilai
   const unfilledCount = getUnfilledElements().length;
 
   return (
@@ -391,7 +377,7 @@ export default function Apl02Detail() {
                   </div>
 
                   {/* Filter Kompeten */}
-                  <div className={`flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none ${!isEditable ? "opacity-50" : ""}`}>
+                  <div className={`flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none ${!isEditable ? "hidden" : ""}`}>
                     {[
                       { value: "kompeten", label: "Semua Kompeten" },
                       { value: "belum", label: "Semua Belum Kompeten" },
@@ -423,10 +409,10 @@ export default function Apl02Detail() {
                         </span>
                       </label>
                     ))}
-                </div>
+                  </div>
 
                   {/* Global Bukti Relevan - Multi Select */}
-                  <div className={`flex items-center gap-2 flex-none w-full md:w-80 ${!isEditable ? "opacity-50" : ""}`}>
+                  <div className={`flex items-center gap-2 flex-none w-full md:w-80 ${!isEditable ? "hidden" : ""}`}>
                     <Controller
                       name="globalEvidence"
                       control={control}
@@ -436,14 +422,14 @@ export default function Apl02Detail() {
                             <button
                               type="button"
                               className={`w-full px-3 py-2 bg-[#DADADA33] rounded-md text-left text-sm ${!isEditable ? "cursor-not-allowed" : "cursor-pointer"}`}
-                              disabled={!isEditable} // mencegah klik saat tidak editable
+                              disabled={!isEditable}
                             >
                               {field.value?.length > 0
                                 ? `${field.value.length} Bukti Relevan telah dipilih`
                                 : "Pilih Bukti Relevan"}
                             </button>
                           </PopoverTrigger>
-                          {isEditable && ( // hanya render PopoverContent jika editable
+                          {isEditable && (
                             <PopoverContent className="w-[250px] p-0">
                               <Command>
                                 <CommandInput placeholder="Cari Bukti Relevan" />
@@ -542,8 +528,7 @@ export default function Apl02Detail() {
 
                             <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm text-gray-900">
                               {item.details.map((criteria, j) => {
-                                const criteriaNumber = `${elementNumber}.${j + 1
-                                  }`;
+                                const criteriaNumber = `${elementNumber}.${j + 1}`;
                                 return (
                                   <div
                                     key={criteria.id}
@@ -636,21 +621,23 @@ export default function Apl02Detail() {
                             </td>
 
                             {/* Bukti relevan */}
-                            <td className={`px-2 sm:px-4 py-2 sm:py-3 text-center ${!isEditable ? "opacity-50" : ""}`}>
+                            <td className={`px-2 sm:px-4 py-2 sm:py-3 text-center ${!isEditable ? "" : ""}`}>
                               <Controller
                                 name={`elements.${item.id}.evidence`}
                                 control={control}
                                 defaultValue={[]}
                                 render={({ field }) => {
                                   const values = field.value || [];
+
                                   return (
                                     <Popover>
                                       <PopoverTrigger asChild>
                                         <button
                                           type="button"
                                           role="combobox"
-                                          className={`w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left ${!isEditable ? "cursor-not-allowed" : "cursor-pointer"}`}
-                                          disabled={!isEditable}
+                                          className={`w-[200px] justify-between rounded-md border px-3 py-2 text-sm text-left ${!isEditable ? "cursor-pointer bg-white hover:bg-gray-50" : "cursor-pointer bg-white"
+                                            }`}
+                                        // HAPUS disabled={!isEditable} - biar tombol tetap bisa diklik di mode view-only
                                         >
                                           {values.length > 0
                                             ? `${values.length} bukti terpilih`
@@ -658,11 +645,11 @@ export default function Apl02Detail() {
                                         </button>
                                       </PopoverTrigger>
 
-                                      {isEditable && ( // hanya render PopoverContent saat editable
+                                      {isEditable ? (
                                         <PopoverContent className="w-[250px] p-0">
                                           <Command>
-                                            <CommandInput placeholder="Search evidences..." />
-                                            <CommandEmpty>No evidence found.</CommandEmpty>
+                                            <CommandInput placeholder="Cari Bukti Relevan..." />
+                                            <CommandEmpty>Tidak ada bukti relevan.</CommandEmpty>
                                             <CommandGroup>
                                               {evidenceOptions.map((opt) => {
                                                 const selected = values.includes(opt);
@@ -677,8 +664,6 @@ export default function Apl02Detail() {
                                                         newValues = [...values, opt];
                                                       }
                                                       field.onChange(newValues);
-
-                                                      // Update selectedProof state
                                                       setSelectedProof((prev) => ({
                                                         ...prev,
                                                         [item.id]: newValues,
@@ -695,6 +680,35 @@ export default function Apl02Detail() {
                                                   </CommandItem>
                                                 );
                                               })}
+                                            </CommandGroup>
+                                          </Command>
+                                        </PopoverContent>
+                                      ) : (
+                                        <PopoverContent className="w-[250px] p-0">
+                                          <Command>
+                                            <CommandGroup>
+                                              <div className="p-2">
+                                                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                                                  Bukti yang dipilih:
+                                                </h4>
+                                                {values.length > 0 ? (
+                                                  <ul className="space-y-1">
+                                                    {values.map((proof, index) => (
+                                                      <li
+                                                        key={index}
+                                                        className="flex items-center text-sm text-gray-600 p-1 bg-gray-50 rounded"
+                                                      >
+                                                        <Check className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                                                        <span className="truncate">{proof}</span>
+                                                      </li>
+                                                    ))}
+                                                  </ul>
+                                                ) : (
+                                                  <p className="text-sm text-gray-500 italic">
+                                                    Tidak ada bukti yang dipilih
+                                                  </p>
+                                                )}
+                                              </div>
                                             </CommandGroup>
                                           </Command>
                                         </PopoverContent>
