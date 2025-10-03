@@ -1,15 +1,14 @@
-export const formatDate = (
-	date: string
-) => {
-	if(!date) return "-";
+export const formatDate = (date?: string | null) => {
+	if (!date) return "-";
 	try {
 		const dateObj = new Date(date);
-		return dateObj.toLocaleDateString("id-ID", {
+		if (Number.isNaN(dateObj.getTime())) return "-";
+		return dateObj.toLocaleString("id-ID", {
 			day: "numeric",
 			month: "long",
 			hour: "2-digit",
 			minute: "2-digit",
-			timeZone: 'UTC'
+			hour12: false,
 		});
 	} catch {
 		return "-";

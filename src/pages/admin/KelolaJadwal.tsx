@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Edit3, Eye, Trash2, AlertCircle, File } from 'lucide-react';
 import useToast from '@/components/ui/useToast';
 import Sidebar from '@/components/SideAdmin';
@@ -7,7 +8,6 @@ import { Link } from 'react-router-dom';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 import ApprovalConfirmModal from '@/components/ApprovalConfirmModal';
 import JadwalViewModal from '@/components/JadwalViewModal';
-import JadwalEditModal from '@/components/JadwalEditModal';
 import paths from '@/routes/paths';
 import axiosInstance from '@/helper/axios';
 import { formatDate } from "@/helper/format-date";
@@ -65,9 +65,7 @@ const KelolaJadwal: React.FC = () => {
   const [approvalOpen, setApprovalOpen] = useState(false);
   const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedJadwal, setSelectedJadwal] = useState<Schedule | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     fetchSchedules();
@@ -119,10 +117,9 @@ const KelolaJadwal: React.FC = () => {
     }
   };
 
+  const navigate = useNavigate();
   const handleEdit = (id: number) => {
-    const jadwal = schedules.find(s => s.id === id) || null;
-    setSelectedJadwal(jadwal);
-    setShowEditModal(true);
+    navigate(paths.admin.editJadwal(id));
   };
 
   const handleView = (id: number) => {
@@ -130,33 +127,7 @@ const KelolaJadwal: React.FC = () => {
     setSelectedJadwal(jadwal);
     setShowViewModal(true);
   };
-  const handleEditSave = async (data: { start_date: string; end_date: string }) => {
-    if (!selectedJadwal) return;
-    try {
-      setEditLoading(true);
-      setError(null);
-      setSuccess(null);
-      const res = await axiosInstance.put(`/schedules/${selectedJadwal.id}`, {
-        start_date: data.start_date,
-        end_date: data.end_date
-      });
-      if (res.data?.success) {
-        toast.show({ title: 'Berhasil', description: 'Jadwal berhasil diupdate', type: 'success' });
-        await fetchSchedules();
-        setShowEditModal(false);
-        setSelectedJadwal(null);
-      } else {
-        const msg = res.data?.message || 'Gagal update jadwal';
-        setError(msg);
-        toast.show({ title: 'Gagal', description: msg, type: 'error' });
-      }
-    } catch (err) {
-      setError('Gagal update jadwal');
-      toast.show({ title: 'Gagal', description: 'Gagal update jadwal', type: 'error' });
-    } finally {
-      setEditLoading(false);
-    }
-  };
+  // edit now handled on separate page
 
   const handleDelete = async (forcedId?: number, approvalOverride?: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
     const id = forcedId ?? deleteId;
@@ -381,14 +352,7 @@ const KelolaJadwal: React.FC = () => {
                               onClose={() => { setShowViewModal(false); setSelectedJadwal(null); }}
                               jadwal={selectedJadwal as any}
                             />
-                            {/* Modal Edit Jadwal */}
-                            <JadwalEditModal
-                              isOpen={showEditModal}
-                              onClose={() => { setShowEditModal(false); setSelectedJadwal(null); }}
-                              jadwal={selectedJadwal as any}
-                              onSave={handleEditSave}
-                              loading={editLoading}
-                            />
+                            {/* Edit now handled on a separate page */}
                             <button
                               onClick={() => {
                                 setDeleteId(schedule.id);

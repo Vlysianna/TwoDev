@@ -109,6 +109,8 @@ const routes = {
 		editAsessi: "/admin/edit-asesi",
 		kelolaJadwal: "/admin/kelola-jadwal",
 		tambahJadwal: "/admin/tambah-jadwal",
+		editJadwal: (id: string | number) => `/admin/edit-jadwal/${id}`,
+		editJadwalPattern: "/admin/edit-jadwal/:id",
 	},
 	asesor: {
 		root: "/asesor",

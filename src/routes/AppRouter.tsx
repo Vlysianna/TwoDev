@@ -22,6 +22,7 @@ import TambahMUK from "@/pages/admin/TambahMUK";
 import EditAsessi from "@/pages/admin/EditAsessi";
 import KelolaJadwal from "@/pages/admin/KelolaJadwal";
 import TambahJadwal from "@/pages/admin/TambahJadwal";
+import EditJadwal from "@/pages/admin/EditJadwal";
 import paths from "./paths";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardHome from "@/components/DashboardHome";
@@ -186,6 +187,7 @@ const router = createBrowserRouter(
 						{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
 						{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
 						{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
+						{ path: paths.admin.editJadwalPattern, element: <EditJadwal /> },
 						{
 							path: paths.admin.okupasi.root,
 							children: [{ index: true, element: <KelolaOkupasi /> }],
