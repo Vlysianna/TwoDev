@@ -150,7 +150,7 @@ const TambahJadwal: React.FC = () => {
 			);
 
 			if (invalidDetails.length > 0) {
-				setError("Semua asesor dan lokasi harus diisi");
+				setError("Semua asesor dan TUK harus diisi");
 				setLoading(false);
 				return;
 			}
@@ -393,15 +393,15 @@ const TambahJadwal: React.FC = () => {
 
 													<div>
 														<label className="block text-sm font-medium text-gray-700 mb-1">
-															Lokasi <span className="text-red-500">*</span>
+															TUK <span className="text-red-500">*</span>
 														</label>
 														<input
 															type="text"
 															{...register(`schedule_details.${index}.location` as const, {
-																required: "Lokasi wajib diisi",
+																required: "TUK wajib diisi",
 																minLength: {
 																	value: 2,
-																	message: "Lokasi minimal 2 karakter"
+																	message: "TUK minimal 2 karakter"
 																}
 															})}
 															placeholder="Contoh: Ruang Lab 1"

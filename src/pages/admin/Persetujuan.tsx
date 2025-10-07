@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import { ListCheck, AlertCircle, RefreshCw, Clock, CheckCircle, XCircle, Filter } from 'lucide-react';
+import { ListCheck, AlertCircle, RefreshCw, Clock, CheckCircle, XCircle, Filter, ChevronDown } from 'lucide-react';
+import ConfirmModal from '@/components/ConfirmModal';
 import api from '@/helper/axios';
 import useToast from '@/components/ui/useToast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +11,7 @@ type ApprovalItem = {
     id: number;
     action: string;
     resource: string;
+    target_name?: string;
     requester?: { id: number; full_name?: string; email?: string };
     created_at?: string;
     target_table?: string;
@@ -34,9 +36,13 @@ const PersetujuanAdmin: React.FC = () => {
     const toast = useToast();
     const [targetLabels, setTargetLabels] = useState<Record<string, string>>({});
     const [requesterLabels, setRequesterLabels] = useState<Record<number, string>>({});
+    const [approverLabels, setApproverLabels] = useState<Record<number, string>>({});
     const { user } = useAuth();
     const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
     const [selectedFilter, setSelectedFilter] = useState<'all' | 'my-requests' | 'my-approvals'>('all');
+    const [expandedIds, setExpandedIds] = useState<number[]>([]);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [confirmState, setConfirmState] = useState<{ id: number | null; action: 'approve' | 'reject' | null }>( { id: null, action: null } );
 
     const fetchApprovals = async () => {
         try {
@@ -65,6 +71,7 @@ const PersetujuanAdmin: React.FC = () => {
                     id: Number(it?.id ?? it?.approval_id ?? it?.approvalId ?? 0),
                     action: String(it?.action ?? it?.type ?? it?.operation ?? it?.verb ?? ''),
                     resource: String(it?.resource ?? it?.target ?? it?.entity ?? it?.subject ?? fallbackResource),
+                    target_name: it?.target_name ?? it?.targetName ?? undefined,
                     requester: requester ? {
                         id: Number(requester?.id ?? 0),
                         full_name: requester?.full_name ?? requester?.name ?? undefined,
@@ -88,6 +95,7 @@ const PersetujuanAdmin: React.FC = () => {
             applyFilters(list);
             void resolveTargets(list);
             void resolveRequesters(list);
+            void resolveApprovers(list);
         } catch (err: any) {
             setError(err?.response?.data?.message || 'Gagal memuat daftar persetujuan');
         } finally {
@@ -101,16 +109,13 @@ const PersetujuanAdmin: React.FC = () => {
         if (selectedFilter === 'my-requests') {
             filtered = filtered.filter(item => item.requester_admin_id === currentAdminId);
         } else if (selectedFilter === 'my-approvals') {
-            filtered = filtered.filter(item =>
-                item.approver_admin_id === currentAdminId ||
-                item.second_approver_admin_id === currentAdminId
-            );
+            filtered = filtered.filter(item => item.approver_admin_id === currentAdminId);
         }
 
         filtered.sort((a, b) => {
             if (selectedFilter === 'my-approvals') {
-                const aInScope = a.approver_admin_id === currentAdminId || a.second_approver_admin_id === currentAdminId;
-                const bInScope = b.approver_admin_id === currentAdminId || b.second_approver_admin_id === currentAdminId;
+                const aInScope = a.approver_admin_id === currentAdminId;
+                const bInScope = b.approver_admin_id === currentAdminId;
                 if (aInScope !== bInScope) {
                     return aInScope ? -1 : 1;
                 }
@@ -174,15 +179,15 @@ const PersetujuanAdmin: React.FC = () => {
 
             try {
                 const tableName = tbl.toLowerCase();
-                
+
                 const tableNameMap: Record<string, string> = {
                     'occupation': 'okupasi',
                     'schedule': 'jadwal asesmen',
                     'assessment': 'asesmen',
                     'user': 'pengguna',
-                    'schema': 'jurusan',
+                    'scheme': 'jurusan',
                 };
-                
+
                 const displayName = tableNameMap[tableName] || tableName;
                 updates[k] = displayName;
             } catch (error) {
@@ -199,7 +204,7 @@ const PersetujuanAdmin: React.FC = () => {
         const need = ids.filter((id) => requesterLabels[id] === undefined);
         if (need.length === 0) return;
         const updates: Record<number, string> = {};
-        
+
         const adminData: Record<number, any> = {};
         await Promise.all(need.map(async (id) => {
             try {
@@ -209,9 +214,9 @@ const PersetujuanAdmin: React.FC = () => {
                 console.log(`Admin ${id} API error:`, error);
             }
         }));
-        
+
         const userIds = [...new Set(Object.values(adminData).map((a: any) => a?.user_id).filter(Boolean))];
-        
+
         const userDetails: Record<number, any> = {};
         await Promise.all(userIds.map(async (userId: unknown) => {
             try {
@@ -223,7 +228,7 @@ const PersetujuanAdmin: React.FC = () => {
                 console.log(`Failed to fetch user ${userId}:`, error);
             }
         }));
-        
+
         need.forEach((id) => {
             const admin = adminData[id];
             const userId = Number(admin?.user_id ?? 0);
@@ -232,8 +237,53 @@ const PersetujuanAdmin: React.FC = () => {
             updates[id] = displayName;
             console.log(`Admin ${id} (user_id: ${userId}) resolved to:`, displayName);
         });
-        
+
         setRequesterLabels(prev => ({ ...prev, ...updates }));
+    };
+
+    const resolveApprovers = async (list: ApprovalItem[]) => {
+        const ids = Array.from(new Set(list.map(it => it.approver_admin_id).filter(Boolean))) as number[];
+        const need = ids.filter((id) => approverLabels[id] === undefined);
+        if (need.length === 0) return;
+        const updates: Record<number, string> = {};
+
+        const adminData: Record<number, any> = {};
+        await Promise.all(need.map(async (id) => {
+            try {
+                const res = await api.get(`/admins/${id}`);
+                adminData[id] = res?.data?.data || res?.data;
+            } catch (error) {
+                console.log(`Admin ${id} API error:`, error);
+            }
+        }));
+
+        const userIds = [...new Set(Object.values(adminData).map((a: any) => a?.user_id).filter(Boolean))];
+
+        const userDetails: Record<number, any> = {};
+        await Promise.all(userIds.map(async (userId: unknown) => {
+            try {
+                const userIdNum = Number(userId);
+                const userRes = await api.get(`/user/${userIdNum}`);
+                const userData = userRes?.data?.data || userRes?.data;
+                userDetails[userIdNum] = userData;
+            } catch (error) {
+                console.log(`Failed to fetch user ${userId}:`, error);
+            }
+        }));
+
+        need.forEach((id) => {
+            const admin = adminData[id];
+            const userId = Number(admin?.user_id ?? 0);
+            const userData = userDetails[userId] || {};
+            const displayName = userData?.full_name || userData?.name || userData?.email || `Admin #${id}`;
+            updates[id] = displayName;
+        });
+
+        setApproverLabels(prev => ({ ...prev, ...updates }));
+    };
+
+    const toggleExpanded = (id: number) => {
+        setExpandedIds((prev) => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
     };
 
     const act = async (id: number, type: 'approve' | 'reject') => {
@@ -255,6 +305,20 @@ const PersetujuanAdmin: React.FC = () => {
         } finally {
             setActingId(null);
         }
+    };
+
+    const requestConfirm = (id: number, type: 'approve' | 'reject') => {
+        setConfirmState({ id, action: type });
+    };
+
+    const closeConfirm = () => setConfirmState({ id: null, action: null });
+
+    const confirmProceed = async () => {
+        if (!confirmState.id || !confirmState.action) return closeConfirm();
+        const id = confirmState.id;
+        const action = confirmState.action;
+        closeConfirm();
+        await act(id, action);
     };
 
     const getStatusDisplay = (item: ApprovalItem) => {
@@ -328,7 +392,6 @@ const PersetujuanAdmin: React.FC = () => {
             <div className="flex-1 flex flex-col min-w-0">
                 <Navbar title="Persetujuan" icon={<ListCheck size={20} />} />
                 <main className="flex-1 overflow-auto p-6">
-                    {/* Error Alert */}
                     {error && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
                             <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
@@ -336,11 +399,9 @@ const PersetujuanAdmin: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Breadcrumb + Title */}
-                    <div className="text-sm text-gray-500 mb-2">Dashboard / Persetujuan</div>
-                    <h1 className="text-xl lg:text-2xl font-bold text-gray-800 mb-2">Persetujuan</h1>
+                    <div className="text-sm text-gray-500 mb-2">Dashboard / Persetujuan Penghapusan</div>
+                    <h1 className="text-xl lg:text-2xl font-bold text-gray-800 mb-2">Persetujuan Penghapusan</h1>
 
-                    {/* Controls (filter + refresh) */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                             <div className="flex items-center gap-3">
@@ -356,10 +417,12 @@ const PersetujuanAdmin: React.FC = () => {
                                 </select>
                             </div>
                             <button
-                                onClick={() => void fetchApprovals()}
+                                onClick={async () => { setRefreshing(true); try { await fetchApprovals(); } finally { setRefreshing(false); } }}
                                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all shadow-sm"
+                                aria-label="Refresh"
+                                title="Refresh"
                             >
-                                <RefreshCw size={16} />
+                                <RefreshCw size={16} className="animate-spin" />
                                 Refresh
                             </button>
                         </div>
@@ -371,7 +434,6 @@ const PersetujuanAdmin: React.FC = () => {
                                 <thead>
                                     <tr className="bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs sm:text-sm">
                                         <th className="px-2 py-3 sm:px-4 lg:px-6 font-medium rounded-tl-xl text-left">Pemohon</th>
-                                        <th className="px-2 py-3 sm:px-4 lg:px-6 font-medium text-left">Aksi</th>
                                         <th className="px-2 py-3 sm:px-4 lg:px-6 font-medium text-left">Target</th>
                                         <th className="px-2 py-3 sm:px-4 lg:px-6 font-medium text-left">Catatan</th>
                                         <th className="px-2 py-3 sm:px-4 lg:px-6 font-medium text-left">Tanggal</th>
@@ -382,11 +444,11 @@ const PersetujuanAdmin: React.FC = () => {
                                 <tbody className="text-sm text-gray-700">
                                     {loading ? (
                                         <tr>
-                                            <td colSpan={7} className="p-6 text-center">Memuat...</td>
+                                            <td colSpan={6} className="p-6 text-center">Memuat...</td>
                                         </tr>
                                     ) : items.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="p-6 text-center">Tidak ada persetujuan</td>
+                                            <td colSpan={6} className="p-6 text-center">Tidak ada persetujuan</td>
                                         </tr>
                                     ) : (
                                         items.map((it) => {
@@ -394,55 +456,96 @@ const PersetujuanAdmin: React.FC = () => {
                                             const isPending = String(it.status || '').toLowerCase() !== 'approved' && String(it.status || '').toLowerCase() !== 'rejected';
 
                                             const isCurrentAdminApprover = currentAdminId !== null &&
-                                                (it.approver_admin_id === currentAdminId || it.second_approver_admin_id === currentAdminId);
+                                                (it.approver_admin_id === currentAdminId);
 
                                             const canApprove = isPending && isCurrentAdminApprover &&
                                                 Number(it.requester_admin_id) !== currentAdminId;
 
                                             return (
-                                                <tr key={it.id} className={`group transition-colors ${it.id % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'} hover:bg-orange-50/50`}>
-                                                    <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">
-                                                        <div className="flex items-center gap-2">
-                                                            <span>{requesterLabels[it.requester_admin_id || 0] || it.requester?.full_name || it.requester?.email || '-'}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-2 py-3 sm:px-4 lg:px-6">{(it.action || '').toLowerCase() === 'update' ? 'Edit' : (it.action || '').toLowerCase() === 'delete' ? 'Hapus' : (it.action || '-')}</td>
-                                                    <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">
-                                                        {targetLabels[`${it.target_table || ''}:${it.target_id || ''}`] || it.resource || '-'}
-                                                    </td>
-                                                    <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">{it.comment || '-'}</td>
-                                                    <td className="px-2 py-3 sm:px-4 lg:px-6">{formatDateIndo(it.created_at)}</td>
-                                                    <td className="px-4 py-4 lg:px-6 text-center">
-                                                        {canApprove ? (
-                                                            <div className="flex items-center justify-center gap-2">
-                                                                <button
-                                                                    onClick={() => void act(it.id, 'approve')}
-                                                                    disabled={actingId === it.id}
-                                                                    className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                                                                    title="Setujui"
-                                                                >
-                                                                    <CheckCircle size={14} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => void act(it.id, 'reject')}
-                                                                    disabled={actingId === it.id}
-                                                                    className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                                                                    title="Tolak"
-                                                                >
-                                                                    <XCircle size={14} />
-                                                                </button>
+                                                <React.Fragment key={it.id}>
+                                                    <tr className={`group transition-colors ${it.id % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'} hover:bg-orange-50/50 cursor-pointer`} onClick={() => toggleExpanded(it.id)}>
+                                                        <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">
+                                                            <div className="flex items-center gap-2">
+                                                                <ChevronDown size={14} className={`transition-transform ${expandedIds.includes(it.id) ? 'rotate-180' : ''}`} />
+                                                                <span>{requesterLabels[it.requester_admin_id || 0] || it.requester?.full_name || it.requester?.email || '-'}</span>
                                                             </div>
-                                                        ) : (
-                                                            <span className="text-gray-400 text-xs">-</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-2 py-3 sm:px-4 lg:px-6 text-center">
-                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${statusDisplay.className}`}>
-                                                            {statusDisplay.icon}
-                                                            {statusDisplay.text}
-                                                        </span>
-                                                    </td>
-                                                </tr>
+                                                        </td>
+                                                        <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">
+                                                            {(() => {
+                                                                const map: Record<string, string> = {
+                                                                    'occupation': 'okupasi',
+                                                                    'schedule': 'jadwal asesmen',
+                                                                    'assessment': 'muk',
+                                                                    'user': 'pengguna',
+                                                                    'scheme': 'jurusan',
+                                                                };
+                                                                const key = String(it.target_table || '').toLowerCase();
+                                                                const label = map[key] || key;
+                                                                return `${label}${it.target_name ? ` (${it.target_name})` : ''}`;
+                                                            })()}
+                                                        </td>
+                                                        <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">{it.comment || '-'}</td>
+                                                        <td className="px-2 py-3 sm:px-4 lg:px-6">{formatDateIndo(it.created_at)}</td>
+                                                        <td className="px-4 py-4 lg:px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                                                            {canApprove ? (
+                                                                <div className="flex items-center justify-center gap-3">
+                                                                    <button
+                                                                        onClick={() => requestConfirm(it.id, 'approve')}
+                                                                        disabled={actingId === it.id}
+                                                                        className="p-1 rounded-full text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors"
+                                                                        title="Setujui"
+                                                                        aria-label="Setujui"
+                                                                    >
+                                                                        <CheckCircle size={20} />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => requestConfirm(it.id, 'reject')}
+                                                                        disabled={actingId === it.id}
+                                                                        className="p-1 rounded-full text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors"
+                                                                        title="Tolak"
+                                                                        aria-label="Tolak"
+                                                                    >
+                                                                        <XCircle size={20} />
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-gray-400 text-xs">-</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-2 py-3 sm:px-4 lg:px-6 text-center">
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${statusDisplay.className}`}>
+                                                                {statusDisplay.icon}
+                                                                {statusDisplay.text}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    {expandedIds.includes(it.id) && (
+                                                        <tr className={`${it.id % 2 === 0 ? 'bg-gray-50/30' : 'bg-white'}`}>
+                                                            <td colSpan={6} className="px-4 lg:px-6 py-3 text-sm">
+                                                                {String(it.status || '').toLowerCase() === 'approved' ? (
+                                                                    <div className="rounded-md border border-green-200 bg-green-50 text-green-800 px-3 py-2 inline-flex items-center gap-2">
+                                                                        <CheckCircle size={16} />
+                                                                        <span className="font-semibold">Disetujui oleh:</span>
+                                                                        <span className="font-medium">{approverLabels[it.approver_admin_id || 0] || '-'}</span>
+                                                                    </div>
+                                                                ) : String(it.status || '').toLowerCase() === 'rejected' ? (
+                                                                    <div className="rounded-md border border-red-200 bg-red-50 text-red-800 px-3 py-2 inline-flex items-center gap-2">
+                                                                        <XCircle size={16} />
+                                                                        <span className="font-semibold">Ditolak oleh:</span>
+                                                                        <span className="font-medium">{approverLabels[it.approver_admin_id || 0] || '-'}</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="rounded-md border border-orange-200 bg-orange-50 text-orange-800 px-3 py-2 inline-flex items-center gap-2">
+                                                                        <Clock size={16} />
+                                                                        <span className="font-semibold">Disetujui oleh:</span>
+                                                                        <span className="font-medium">{approverLabels[it.approver_admin_id || 0] || 'Tidak tersedia'}</span>
+                                                                        <span className="ml-2 text-xs font-semibold bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Pending</span>
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </React.Fragment>
                                             );
                                         })
                                     )}
@@ -452,6 +555,18 @@ const PersetujuanAdmin: React.FC = () => {
                     </div>
                 </main>
             </div>
+            {Boolean(confirmState.id && confirmState.action) && (
+                <ConfirmModal
+                    isOpen={true}
+                    onClose={closeConfirm}
+                    onConfirm={confirmProceed}
+                    title={confirmState.action === 'approve' ? 'Konfirmasi Persetujuan' : 'Konfirmasi Penolakan'}
+                    message={confirmState.action === 'approve' ? 'Apakah Anda yakin ingin menyetujui permintaan ini?' : 'Apakah Anda yakin ingin menolak permintaan ini?'}
+                    type={confirmState.action === 'approve' ? 'success' : 'danger'}
+                    confirmText={confirmState.action === 'approve' ? 'Setujui' : 'Tolak'}
+                    cancelText={'Batal'}
+                />
+            )}
         </div>
     );
 };

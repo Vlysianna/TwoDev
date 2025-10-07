@@ -63,7 +63,7 @@ const KelolaJadwal: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [approvalOpen, setApprovalOpen] = useState(false);
-  const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
+  const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedJadwal, setSelectedJadwal] = useState<Schedule | null>(null);
 
@@ -129,7 +129,7 @@ const KelolaJadwal: React.FC = () => {
   };
   // edit now handled on separate page
 
-  const handleDelete = async (forcedId?: number, approvalOverride?: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
+  const handleDelete = async (forcedId?: number, approvalOverride?: { approver_admin_id: number; comment: string }) => {
     const id = forcedId ?? deleteId;
     if (!id) return;
     try {
@@ -141,7 +141,6 @@ const KelolaJadwal: React.FC = () => {
       const res = await axiosInstance.delete(`/schedules/${id}`, {
         headers: {
           'x-approver-admin-id': effectiveApproval.approver_admin_id,
-          'x-second-approver-admin-id': effectiveApproval.second_approver_admin_id,
           'x-approval-comment': effectiveApproval.comment || 'hapus jadwal',
         }
       });
@@ -390,7 +389,7 @@ const KelolaJadwal: React.FC = () => {
           onClose={() => { if (!deleteLoading) { setApprovalOpen(false); setApprovalData(null); } }}
           onConfirm={(data) => { const idSnapshot = deleteId; setApprovalOpen(false); if (idSnapshot) { void handleDelete(idSnapshot, data); } }}
           title={'Persetujuan Penghapusan Jadwal'}
-          subtitle="Pilih 2 admin untuk menyetujui penghapusan ini."
+          subtitle="Pilih 1 admin untuk menyetujui penghapusan ini."
           loading={deleteLoading}
         />
       )}
