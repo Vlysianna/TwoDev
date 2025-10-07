@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Edit, Trash2, X, ChevronDown, Calendar, FileText } from "lucide-react";
+import { Edit, Trash2, X, ChevronDown, Calendar, FileText, Eye, Download } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
 import NavAdmin from "@/components/NavAdmin";
@@ -26,7 +26,12 @@ const KelolaOkupasi: React.FC = () => {
 
 	// form stores name and selected scheme id as string
 	const [formData, setFormData] = useState({ name: "", schemeId: "" });
-	const [editFormData, setEditFormData] = useState({ name: "", schemeId: "", file: null });
+	const [editFormData, setEditFormData] = useState({
+		name: "",
+		schemeId: "",
+		file: null as File | null,
+		currentPdfUrl: null as string | null
+	});
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const [isEditDropdownOpen, setIsEditDropdownOpen] = useState(false);
 
@@ -86,11 +91,11 @@ const KelolaOkupasi: React.FC = () => {
 		setEditFormData({
 			name: occ.name,
 			schemeId: occ.scheme?.id ? String(occ.scheme.id) : "",
-			file: null, // file selalu null waktu buka modal
+			file: null, // file baru selalu null waktu buka modal
+			currentPdfUrl: occ.uploaded_file || null // URL PDF yang sudah diupload
 		});
 		setIsEditModalOpen(true);
 	};
-
 
 	const handleView = async (id: number) => {
 		try {
@@ -116,6 +121,11 @@ const KelolaOkupasi: React.FC = () => {
 		}
 	};
 
+	const handleViewCurrentPdf = () => {
+		if (editFormData.currentPdfUrl && editingOkupasi) {
+			handleView(editingOkupasi.id);
+		}
+	};
 
 	const openDelete = (id: number) => {
 		setDeletingId(id);
@@ -155,7 +165,7 @@ const KelolaOkupasi: React.FC = () => {
 			formData.append("name", editFormData.name);
 			formData.append("scheme_id", String(editFormData.schemeId));
 
-			// kalau ada file PDF yang dipilih user
+			// kalau ada file PDF baru yang dipilih user
 			if (editFormData.file) {
 				formData.append("pdf", editFormData.file);
 			}
@@ -169,13 +179,12 @@ const KelolaOkupasi: React.FC = () => {
 			fetchOccupations();
 			setIsEditModalOpen(false);
 			setEditingOkupasi(null);
-			setEditFormData({ name: "", schemeId: "", file: null });
+			setEditFormData({ name: "", schemeId: "", file: null, currentPdfUrl: null });
 		} catch (e) {
 			console.error("Error updating occupation:", e);
 			setError("Gagal memperbarui okupasi");
 		}
 	};
-
 
 	const fetchOccupations = async () => {
 		setError(null);
@@ -217,7 +226,6 @@ const KelolaOkupasi: React.FC = () => {
 			setError("Gagal mengekspor data");
 		}
 	};
-
 
 	useEffect(() => {
 		fetchOccupations();
@@ -403,7 +411,7 @@ const KelolaOkupasi: React.FC = () => {
 												title="Lihat PDF"
 											>
 												<FileText size={16} className="text-gray-600" />
-												<span className="text-sm">Lihat PDF</span>
+												<span className="text-sm">Lihat Skema</span>
 											</button>
 										) : (
 											<span className="text-gray-400 italic text-sm">
@@ -477,7 +485,7 @@ const KelolaOkupasi: React.FC = () => {
 														title="Lihat PDF"
 													>
 														<FileText size={16} className="text-gray-600" />
-														<span className="text-sm">Lihat PDF</span>
+														<span className="text-sm">Lihat Skema</span>
 													</button>
 												) : (
 													<span className="text-gray-400 italic text-sm">Tidak ada file</span>
@@ -572,9 +580,49 @@ const KelolaOkupasi: React.FC = () => {
 										className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E77D35] focus:border-[#E77D35] transition-all duration-200"
 									/>
 								</div>
+
+								{/* Section untuk PDF yang sudah diupload */}
+								{editFormData.currentPdfUrl && (
+									<div>
+										<label className="block text-sm font-medium mb-2 text-gray-700">
+											Skema Saat Ini
+										</label>
+										<div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+											<FileText size={20} className="text-gray-600 flex-shrink-0" />
+											<div className="flex-1 min-w-0">
+												<p className="text-sm font-medium text-gray-900 truncate">
+													Skema Okupasi.pdf
+												</p>
+												<p className="text-xs text-gray-500">
+													File PDF yang sudah diupload
+												</p>
+											</div>
+											<div className="flex gap-2">
+												<button
+													onClick={handleViewCurrentPdf}
+													className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+													title="Lihat PDF"
+												>
+													<Eye size={16} />
+												</button>
+												<button
+													onClick={handleViewCurrentPdf}
+													className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+													title="Download PDF"
+												>
+													<Download size={16} />
+												</button>
+											</div>
+										</div>
+										<p className="text-xs text-gray-500 mt-1">
+											Upload file baru di bawah untuk mengganti skema ini
+										</p>
+									</div>
+								)}
+
 								<div>
 									<label className="block text-sm font-medium mb-2 text-gray-700">
-										Upload PDF
+										{editFormData.currentPdfUrl ? "Upload Skema Baru (PDF)" : "Upload Skema (PDF)"}
 									</label>
 									{/* Input File */}
 									<div className="w-full sm:w-auto px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm">
@@ -597,6 +645,11 @@ const KelolaOkupasi: React.FC = () => {
                  cursor-pointer"
 										/>
 									</div>
+									{editFormData.file && (
+										<p className="text-xs text-green-600 mt-1">
+											File baru dipilih: {editFormData.file.name}
+										</p>
+									)}
 								</div>
 							</div>
 

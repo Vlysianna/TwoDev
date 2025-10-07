@@ -286,7 +286,7 @@ export default function SuratTugas() {
 							{/* Posisi */}
 							<div>
 								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Posisi
+									Jabatan
 								</label>
 								<input
 									{...register("position")}
