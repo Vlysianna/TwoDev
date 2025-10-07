@@ -47,13 +47,28 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
                             : [];
 
                 const currentUserId = Number(user?.id || 0);
+                
+                const userIds = [...new Set(list.map((a: any) => a?.user_id).filter(Boolean))];
+                
+                const userDetails: Record<number, any> = {};
+                await Promise.all(userIds.map(async (userId: unknown) => {
+                    try {
+                        const userIdNum = Number(userId);
+                        const userRes = await api.get(`/user/${userIdNum}`);
+                        const userData = userRes?.data?.data || userRes?.data;
+                        userDetails[userIdNum] = userData;
+                    } catch (error) {
+                        console.log(`Failed to fetch user ${userId}:`, error);
+                    }
+                }));
+
                 const options: AdminOption[] = list
                     .map((a: any) => {
                         const adminId = Number(a?.id ?? a?.admin_id ?? a?.id_admin ?? 0);
-                        const relatedUser = a?.user ?? a?.User ?? a?.users ?? a?.user_data ?? {};
-                        const relatedUserId = Number(relatedUser?.id ?? a?.user_id ?? 0);
-                        const name = relatedUser?.full_name || relatedUser?.name || relatedUser?.email || `Admin ${adminId || relatedUserId || ''}`;
-                        return { id: adminId || relatedUserId, name, _userId: relatedUserId } as any;
+                        const userId = Number(a?.user_id ?? 0);
+                        const userData = userDetails[userId] || {};
+                        const name = userData?.full_name || userData?.name || userData?.email || `Admin ${adminId}`;
+                        return { id: adminId, name, _userId: userId } as any;
                     })
                     .filter((opt: any) => Number(opt._userId) !== currentUserId)
                     .map((opt: any) => ({ id: Number(opt.id), name: String(opt.name) }));

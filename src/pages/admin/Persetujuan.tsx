@@ -123,7 +123,7 @@ const PersetujuanAdmin: React.FC = () => {
                 if (status === 'pending') return 1;
                 if (status === 'approved') return 2;
                 if (status === 'rejected') return 3;
-                return 4; // unknown status
+                return 4;
             };
 
             const aOrder = getStatusOrder(aStatus);
@@ -174,66 +174,20 @@ const PersetujuanAdmin: React.FC = () => {
 
             try {
                 const tableName = tbl.toLowerCase();
-                if (tableName === 'user') {
-                    const res = await api.get(`/user/${id}`);
-                    const u = res?.data?.data || res?.data;
-                    const displayName = u?.full_name || u?.email || `User #${id}`;
-                    updates[k] = `user(${displayName})`;
-                } else if (tableName === 'occupation') {
-                    // Try multiple possible endpoints and field names
-                    let occupationName = null;
-
-                    // Try /occupation/{id}
-                    try {
-                        const res = await api.get(`/occupation/${id}`);
-                        const occ = res?.data?.data || res?.data;
-                        occupationName = occ?.name || occ?.title || occ?.occupation_name || occ?.scheme_name;
-                    } catch { }
-
-                    // Try /occupations/{id} if first attempt failed
-                    if (!occupationName) {
-                        try {
-                            const res = await api.get(`/occupations/${id}`);
-                            const occ = res?.data?.data || res?.data;
-                            occupationName = occ?.name || occ?.title || occ?.occupation_name || occ?.scheme_name;
-                        } catch { }
-                    }
-
-                    // Try /scheme/{id} as fallback
-                    if (!occupationName) {
-                        try {
-                            const res = await api.get(`/scheme/${id}`);
-                            const scheme = res?.data?.data || res?.data;
-                            occupationName = scheme?.name || scheme?.title || scheme?.scheme_name;
-                        } catch { }
-                    }
-
-                    const displayName = occupationName || `Occupation #${id}`;
-                    updates[k] = `occupation(${displayName})`;
-                    console.log(`Occupation ${id} resolved to:`, displayName);
-                } else if (tableName === 'admin') {
-                    const res = await api.get(`/admins/${id}`);
-                    const admin = res?.data?.data || res?.data;
-                    const user = admin?.user || admin?.User || {};
-                    const displayName = user?.full_name || user?.name || user?.email || `Admin #${id}`;
-                    updates[k] = `admin(${displayName})`;
-                } else if (tableName === 'result') {
-                    const res = await api.get(`/result/${id}`);
-                    const result = res?.data?.data || res?.data;
-                    const displayName = result?.name || `Result #${id}`;
-                    updates[k] = `result(${displayName})`;
-                } else if (tableName === 'resultdoc') {
-                    const res = await api.get(`/resultdoc/${id}`);
-                    const doc = res?.data?.data || res?.data;
-                    const displayName = doc?.name || doc?.filename || `Document #${id}`;
-                    updates[k] = `resultdoc(${displayName})`;
-                } else {
-                    // Fallback untuk table lain
-                    updates[k] = `${tbl}(#${id})`;
-                }
+                
+                const tableNameMap: Record<string, string> = {
+                    'occupation': 'okupasi',
+                    'schedule': 'jadwal asesmen',
+                    'assessment': 'asesmen',
+                    'user': 'pengguna',
+                    'schema': 'jurusan',
+                };
+                
+                const displayName = tableNameMap[tableName] || tableName;
+                updates[k] = displayName;
             } catch (error) {
                 console.error(`Error resolving ${tbl} ${id}:`, error);
-                updates[k] = `${tbl}(#${id})`;
+                updates[k] = tbl.toLowerCase();
             }
         }));
 
@@ -245,16 +199,40 @@ const PersetujuanAdmin: React.FC = () => {
         const need = ids.filter((id) => requesterLabels[id] === undefined);
         if (need.length === 0) return;
         const updates: Record<number, string> = {};
+        
+        const adminData: Record<number, any> = {};
         await Promise.all(need.map(async (id) => {
             try {
                 const res = await api.get(`/admins/${id}`);
-                const a = res?.data?.data || res?.data;
-                const user = a?.user || a?.User || {};
-                updates[id] = user?.full_name || user?.name || user?.email || `admin #${id}`;
-            } catch {
-                updates[id] = `admin #${id}`;
+                adminData[id] = res?.data?.data || res?.data;
+            } catch (error) {
+                console.log(`Admin ${id} API error:`, error);
             }
         }));
+        
+        const userIds = [...new Set(Object.values(adminData).map((a: any) => a?.user_id).filter(Boolean))];
+        
+        const userDetails: Record<number, any> = {};
+        await Promise.all(userIds.map(async (userId: unknown) => {
+            try {
+                const userIdNum = Number(userId);
+                const userRes = await api.get(`/user/${userIdNum}`);
+                const userData = userRes?.data?.data || userRes?.data;
+                userDetails[userIdNum] = userData;
+            } catch (error) {
+                console.log(`Failed to fetch user ${userId}:`, error);
+            }
+        }));
+        
+        need.forEach((id) => {
+            const admin = adminData[id];
+            const userId = Number(admin?.user_id ?? 0);
+            const userData = userDetails[userId] || {};
+            const displayName = userData?.full_name || userData?.name || userData?.email || `Admin #${id}`;
+            updates[id] = displayName;
+            console.log(`Admin ${id} (user_id: ${userId}) resolved to:`, displayName);
+        });
+        
         setRequesterLabels(prev => ({ ...prev, ...updates }));
     };
 
