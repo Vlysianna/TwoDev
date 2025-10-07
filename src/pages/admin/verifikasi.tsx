@@ -5,8 +5,6 @@ import {
   SquareCheck,
   Download,
   X,
-  Menu,
-  Bell,
   Check,
   Clock,
   CheckCircle,
@@ -53,14 +51,13 @@ export default function VerifikasiPage() {
   const [selected, setSelected] = useState<ResultDetail | null>(null);
   const [docDetails, setDocDetails] = useState<ResultDoc | any>(null);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const toast = useToast();
   const location = useLocation();
   // optional query params from ResultAssessment when opening per-schedule
   const searchParams = new URLSearchParams(location.search);
   const queryAssessor = searchParams.get('assessor');
-  const querySchedule = searchParams.get('schedule');
+  // const querySchedule = searchParams.get('schedule');
 
   const fetchPending = useCallback(async () => {
     try {
@@ -156,37 +153,11 @@ export default function VerifikasiPage() {
 
   return (
     <>
-      <div className="flex min-h-screen bg-gray-50">
-        {/* Sidebar with responsive behavior */}
-        <div className={`fixed inset-y-0 left-0 z-20 lg:w-64 md:w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <Sidebar />
-        </div>
-
-        {/* Overlay for mobile when sidebar is open */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-10 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          ></div>
-        )}
-
-        {/* Main Content Area */}
-        <div className="flex-1 lg:ml-0">
-          {/* Navbar - Sticky di atas */}
-          <div className="sticky top-0 z-10 bg-white shadow-sm flex items-center">
-            <button
-              className="lg:hidden ml-4 p-2 text-gray-700"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu size={24} />
-            </button>
-            <div className="w-full">
-              <Navbar title="Verifikasi" icon={<Check size={20} />} />
-            </div>
-          </div>
-
-          {/* Konten Utama */}
-          <div className="p-4 lg:p-6">
+      <div className="min-h-screen bg-[#F7FAFC] flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar title="Verifikasi" icon={<Check size={20} />} />
+          <div className="flex-1 overflow-auto p-4 lg:p-6">
             <main>
               <div className="text-sm text-gray-500 mb-2">Dashboard / Verifikasi Approval</div>
               <h1 className="text-xl lg:text-2xl font-bold text-gray-800 mb-2">Verifikasi Approval</h1>
