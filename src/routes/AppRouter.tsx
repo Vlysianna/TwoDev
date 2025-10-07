@@ -59,7 +59,7 @@ import Ak05Asesor from "@/pages/Asesor/Ak-05";
 import Ia05CAsesor from "@/pages/Asesor/Ia-05-C";
 import DashboardPenilaian from "@/pages/Asesor/DashboardPenilaian";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
-import ProfileAsesor from "@/pages/asesor/Profile";
+import ProfileAsesor from "@/pages/Asesor/Profile";
 import IA05Assessor from "@/pages/Asesor/ia-05";
 import RecapAssessment from "@/pages/Asesor/RecapAssessment";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
