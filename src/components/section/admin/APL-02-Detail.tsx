@@ -1,7 +1,7 @@
 import api from "@/helper/axios";
 import { cn } from "@/lib/utils";
 import type { APL02ResponseElement } from "@/model/apl02-model";
-import { Check, Monitor, Search } from "lucide-react";
+import { Check, Monitor, Search, FileText, Eye } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -75,6 +75,12 @@ export default function APL02Detail({
     []
   );
 
+  // Fungsi untuk mendapatkan bukti yang dipilih untuk elemen tertentu
+  const getSelectedEvidences = useCallback((result: APL02ResponseElement["result"]) => {
+    if (!result || !result.evidences) return [];
+    return result.evidences.map(evidence => evidence.evidence);
+  }, []);
+
   useEffect(() => {
     if (elements && !loading) {
       detailRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -106,67 +112,8 @@ export default function APL02Detail({
               size={16}
             />
           </div>
-
-          {/* Filter Kompeten (Disabled) */}
-          {/* <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 md:gap-6 flex-none">
-						{[
-							{ value: "kompeten", label: "Semua Kompeten" },
-							{ value: "belum", label: "Semua Belum Kompeten" },
-						].map((opt) => (
-							<label
-								key={opt.value}
-								className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition ${
-									filterKompeten === opt.value ? "bg-[#E77D3533]" : ""
-								}`}
-							>
-								<input
-									type="radio"
-									name="filter"
-									value={opt.value}
-									checked={filterKompeten === opt.value}
-									onChange={(e) => setFilterKompeten(e.target.value)}
-									className="hidden"
-									disabled
-								/>
-								<span
-									className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-										filterKompeten === opt.value
-											? "bg-[#E77D35] border-[#E77D35]"
-											: "border-[#E77D35]"
-									}`}
-								>
-									{filterKompeten === opt.value && (
-										<Check className="w-4 h-4 text-white" />
-									)}
-								</span>
-								<span
-									className={
-										filterKompeten === opt.value
-											? "text-gray-900"
-											: "text-gray-500"
-									}
-								>
-									{opt.label}
-								</span>
-							</label>
-						))}
-					</div> */}
-
-					{/* Global Bukti Relevan (Disabled) */}
-					{/* <div className="flex items-center gap-2 flex-none w-full md:w-80">
-						<select
-							className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-500 cursor-not-allowed"
-							value=""
-							disabled
-						>
-							<option value="">Bukti Relevan</option>
-							<option value="dokumen1">Dokumen 1</option>
-							<option value="dokumen2">Dokumen 2</option>
-							<option value="dokumen3">Dokumen 3</option>
-						</select>
-					</div> */}
-				</div>
-			</div>
+        </div>
+      </div>
 
       {loading ? (
         <div className="text-center py-10">
@@ -196,6 +143,7 @@ export default function APL02Detail({
               {filteredData?.map((item, i) => {
                 const elementNumber = i + 1;
                 const pencapaianStatus = getPencapaianStatus(item.result);
+                const selectedEvidences = getSelectedEvidences(item.result);
 
                 return (
                   <React.Fragment key={item.id}>
@@ -229,11 +177,10 @@ export default function APL02Detail({
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
                           {/* Kompeten */}
                           <label
-                            className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm opacity-60 cursor-not-allowed ${
-                              pencapaianStatus === "kompeten"
-                                ? "bg-[#E77D3533]"
-                                : ""
-                            }`}
+                            className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm opacity-60 cursor-not-allowed ${pencapaianStatus === "kompeten"
+                              ? "bg-[#E77D3533]"
+                              : ""
+                              }`}
                           >
                             <input
                               type="radio"
@@ -243,11 +190,10 @@ export default function APL02Detail({
                               disabled
                             />
                             <span
-                              className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-                                pencapaianStatus === "kompeten"
-                                  ? "bg-[#E77D35] border-[#E77D35]"
-                                  : "border-[#E77D35]"
-                              }`}
+                              className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${pencapaianStatus === "kompeten"
+                                ? "bg-[#E77D35] border-[#E77D35]"
+                                : "border-[#E77D35]"
+                                }`}
                             >
                               {pencapaianStatus === "kompeten" && (
                                 <Check className="w-4 h-4 text-white" />
@@ -266,11 +212,10 @@ export default function APL02Detail({
 
                           {/* Belum Kompeten */}
                           <label
-                            className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm opacity-60 cursor-not-allowed ${
-                              pencapaianStatus === "belum"
-                                ? "bg-[#E77D3533]"
-                                : ""
-                            }`}
+                            className={`flex items-center gap-2 px-2 py-1 rounded-sm cursor-not-allowed transition text-sm opacity-60 cursor-not-allowed ${pencapaianStatus === "belum"
+                              ? "bg-[#E77D3533]"
+                              : ""
+                              }`}
                           >
                             <input
                               type="radio"
@@ -280,11 +225,10 @@ export default function APL02Detail({
                               disabled
                             />
                             <span
-                              className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${
-                                pencapaianStatus === "belum"
-                                  ? "bg-[#E77D35] border-[#E77D35]"
-                                  : "border-[#E77D35]"
-                              }`}
+                              className={`w-4 h-4 flex items-center justify-center rounded-full border-2 ${pencapaianStatus === "belum"
+                                ? "bg-[#E77D35] border-[#E77D35]"
+                                : "border-[#E77D35]"
+                                }`}
                             >
                               {pencapaianStatus === "belum" && (
                                 <Check className="w-4 h-4 text-white" />
@@ -303,45 +247,88 @@ export default function APL02Detail({
                         </div>
                       </td>
 
-                      {/* Bukti relevan (Readonly) */}
+                      {/* Bukti relevan (Readonly - Tampilkan yang sudah dipilih) */}
                       <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                         <Popover>
                           <PopoverTrigger asChild>
                             <button
                               type="button"
-                              className="w-full px-3 py-2 bg-[#DADADA33] rounded-md text-left text-sm cursor-pointer"
+                              className="w-full px-3 py-2 bg-[#DADADA33] rounded-md text-left text-sm cursor-pointer hover:bg-gray-100 transition-colors"
                             >
-                              Bukti Relevan
+                              <div className="flex items-center justify-between">
+                                <span>
+                                  {selectedEvidences.length > 0
+                                    ? `${selectedEvidences.length} bukti dipilih`
+                                    : "Tidak ada bukti"
+                                  }
+                                </span>
+                                <Eye size={16} className="text-gray-500" />
+                              </div>
                             </button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[250px] p-0 opacity-60 cursor-not-allowed">
-                            <Command>
-                              <CommandInput placeholder="Cari Bukti Relevan" />
-                              <CommandEmpty>
-                                Bukti Relevan tidak ditemukan.
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {evidenceOptions.map((opt) => {
-                                  const selected = item.result?.evidences.some(
-                                    (evidence) => evidence.evidence === opt
-                                  );
-                                  console.log(item.result);
-                                  return (
-                                    <CommandItem key={opt} value={opt}>
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          selected ? "opacity-100" : "opacity-0"
-                                        )}
-                                      />
-                                      {opt}
-                                    </CommandItem>
-                                  );
-                                })}
-                              </CommandGroup>
-                            </Command>
+                          <PopoverContent className="w-[300px] p-4">
+                            <div className="space-y-3">
+                              <h4 className="font-medium text-gray-900 text-sm">
+                                Bukti Relevan yang Dipilih
+                              </h4>
+
+                              {selectedEvidences.length > 0 ? (
+                                <div className="space-y-2">
+                                  {selectedEvidences.map((evidence, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-start gap-3 p-2 bg-blue-50 rounded-lg border border-blue-100"
+                                    >
+                                      <FileText size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                                      <div className="flex-1">
+                                        <p className="text-sm text-gray-900 font-medium">
+                                          {evidence}
+                                        </p>
+                                      </div>
+                                      <Check size={16} className="text-green-600 flex-shrink-0" />
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-4">
+                                  <FileText size={32} className="text-gray-300 mx-auto mb-2" />
+                                  <p className="text-sm text-gray-500">
+                                    Tidak ada bukti relevan yang dipilih
+                                  </p>
+                                </div>
+                              )}
+
+                              <div className="pt-2 border-t border-gray-200">
+                                <p className="text-xs text-gray-500 text-center">
+                                  Informasi bukti relevan (read-only)
+                                </p>
+                              </div>
+                            </div>
                           </PopoverContent>
                         </Popover>
+
+                        {/* Tampilan mini di sel tabel (untuk quick view) */}
+                        {/* {selectedEvidences.length > 0 && (
+                          <div className="mt-2 text-xs text-gray-600">
+                            <div className="flex flex-wrap gap-1 justify-center">
+                              {selectedEvidences.slice(0, 2).map((evidence, index) => (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
+                                >
+                                  <FileText size={10} />
+                                  {evidence.split(' ')[0]}
+                                  {index === 1 && selectedEvidences.length > 2 && "..."}
+                                </span>
+                              ))}
+                            </div>
+                            {selectedEvidences.length > 2 && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                +{selectedEvidences.length - 2} lainnya
+                              </p>
+                            )}
+                          </div>
+                        )} */}
                       </td>
                     </tr>
                   </React.Fragment>
