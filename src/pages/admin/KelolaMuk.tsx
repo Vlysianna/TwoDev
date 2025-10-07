@@ -19,7 +19,7 @@ const KelolaMUK: React.FC = () => {
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [muks, setMuks] = useState<MukType[]>([]);
 	const [approvalOpen, setApprovalOpen] = useState(false);
-	const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
+	const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
 
 	const navigate = useNavigate();
 
@@ -61,7 +61,6 @@ const KelolaMUK: React.FC = () => {
 			await axiosInstance.delete(`/assessments/${deletingId}`, {
 				headers: {
 					"x-approver-admin-id": approvalData.approver_admin_id,
-					"x-second-approver-admin-id": approvalData.second_approver_admin_id,
 					"x-approval-comment": approvalData.comment || "hapus MUK",
 				}
 			});
@@ -140,7 +139,7 @@ const KelolaMUK: React.FC = () => {
 							onClose={() => { setApprovalOpen(false); setApprovalData(null); }}
 							onConfirm={(data) => { setApprovalData(data); setApprovalOpen(false); void confirmDelete(); }}
 							title="Persetujuan Penghapusan MUK"
-							subtitle="Pilih 2 admin untuk menyetujui penghapusan MUK ini."
+							subtitle="Pilih 1 admin untuk menyetujui penghapusan MUK ini."
 							loading={deleteLoading}
 						/>
 					)}

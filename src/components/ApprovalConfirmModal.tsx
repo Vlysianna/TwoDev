@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import api from '@/helper/axios';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,7 +11,7 @@ interface AdminOption {
 interface ApprovalConfirmModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (data: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => void;
+    onConfirm: (data: { approver_admin_id: number; comment: string }) => void;
     loading?: boolean;
     title?: string;
     subtitle?: string;
@@ -23,12 +23,11 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
     onConfirm,
     loading = false,
     title = 'Persetujuan Diperlukan',
-    subtitle = 'Pilih 2 admin sebagai approver dan beri catatan (opsional).',
+    subtitle = 'Pilih 1 admin yang berwenang dan beri catatan (opsional).',
 }) => {
     const { user } = useAuth();
     const [admins, setAdmins] = useState<AdminOption[]>([]);
-    const [approver1, setApprover1] = useState<number | ''>('');
-    const [approver2, setApprover2] = useState<number | ''>('');
+    const [approver, setApprover] = useState<number | ''>('');
     const [comment, setComment] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +35,7 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
         const fetchAdmins = async () => {
             try {
                 setError(null);
-                const res = await api.get('/admins', { params: { page: 1, limit: 10 } });
+                const res = await api.get('/admins', { params: { page: 1, limit: 1000 } });
                 const raw = res?.data;
                 const list = Array.isArray(raw?.data)
                     ? raw.data
@@ -63,6 +62,7 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
                 }));
 
                 const options: AdminOption[] = list
+                    .filter((a: any) => a?.can_approve === true || a?.canApprove === true)
                     .map((a: any) => {
                         const adminId = Number(a?.id ?? a?.admin_id ?? a?.id_admin ?? 0);
                         const userId = Number(a?.user_id ?? 0);
@@ -84,26 +84,19 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
 
     useEffect(() => {
         if (!isOpen) {
-            setApprover1('');
-            setApprover2('');
+            setApprover('');
             setComment('');
             setError(null);
         }
     }, [isOpen]);
 
-    const approver2Options = useMemo(() => admins.filter((a) => (approver1 ? a.id !== approver1 : true)), [admins, approver1]);
-
     const handleSubmit = () => {
-        if (!approver1 || !approver2) {
-            setError('Pilih admin pertama dan admin kedua.');
-            return;
-        }
-        if (approver1 === approver2) {
-            setError('Admin pertama dan kedua harus berbeda.');
+        if (!approver) {
+            setError('Pilih admin yang berwenang.');
             return;
         }
         setError(null);
-        onConfirm({ approver_admin_id: Number(approver1), second_approver_admin_id: Number(approver2), comment });
+        onConfirm({ approver_admin_id: Number(approver), comment });
     };
 
     if (!isOpen) return null;
@@ -128,30 +121,15 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
                     )}
 
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">Admin pertama (Sertifikasi)</label>
+                        <label className="block text-sm font-medium text-gray-700">Pilih Admin Penyetuju</label>
                         <select
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-                            value={approver1}
-                            onChange={(e) => setApprover1(e.target.value ? Number(e.target.value) : '')}
+                            value={approver}
+                            onChange={(e) => setApprover(e.target.value ? Number(e.target.value) : '')}
                             disabled={loading}
                         >
-                            <option value="">Pilih Admin Sertifikasi</option>
+                            <option value="">Pilih Admin</option>
                             {admins.map((a) => (
-                                <option key={a.id} value={a.id}>{a.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">Admin kedua (Ketua LSP)</label>
-                        <select
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E77D35] focus:border-transparent"
-                            value={approver2}
-                            onChange={(e) => setApprover2(e.target.value ? Number(e.target.value) : '')}
-                            disabled={loading}
-                        >
-                            <option value="">Pilih Ketua LSP</option>
-                            {approver2Options.map((a) => (
                                 <option key={a.id} value={a.id}>{a.name}</option>
                             ))}
                         </select>

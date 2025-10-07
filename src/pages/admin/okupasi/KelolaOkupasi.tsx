@@ -39,7 +39,7 @@ const KelolaOkupasi: React.FC = () => {
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [approvalOpen, setApprovalOpen] = useState<boolean>(false);
-	const [, setApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
+	const [, setApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
 
 	const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -122,14 +122,13 @@ const KelolaOkupasi: React.FC = () => {
 		setIsDeleteModalOpen(true);
 	};
 
-	const performDelete = async (id: number, approval: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
+	const performDelete = async (id: number, approval: { approver_admin_id: number; comment: string }) => {
 		try {
 			setDeleteLoading(true);
 			setError(null);
 			await axiosInstance.delete(`/occupations/${id}`, {
 				headers: {
 					"x-approver-admin-id": approval.approver_admin_id,
-					"x-second-approver-admin-id": approval.second_approver_admin_id,
 					"x-approval-comment": approval.comment || "hapus okupasi",
 				},
 			});
@@ -316,7 +315,7 @@ const KelolaOkupasi: React.FC = () => {
 											onClose={() => { if (!deleteLoading) { setApprovalOpen(false); setApprovalData(null); } }}
 											onConfirm={(data) => { const id = deletingId; setApprovalOpen(false); if (id) { void performDelete(id, data); } }}
 											title={'Persetujuan Penghapusan Okupasi'}
-											subtitle="Pilih 2 admin untuk menyetujui penghapusan okupasi ini."
+											subtitle="Pilih 1 admin untuk menyetujui penghapusan okupasi ini."
 											loading={deleteLoading}
 										/>
 									)}

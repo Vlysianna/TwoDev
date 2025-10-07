@@ -28,7 +28,7 @@ const KelolaJurusan = () => {
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [schemeToDelete, setSchemeToDelete] = useState<Scheme | null>(null);
 	const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
-	const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
+	const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
 	// approval only used for delete now
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [editingScheme, setEditingScheme] = useState<Scheme | null>(null);
@@ -93,7 +93,6 @@ const KelolaJurusan = () => {
 			await axiosInstance.delete(`/schemes/${schemeToDelete.id}`, {
 				headers: {
 					"x-approver-admin-id": pendingApprovalData.approver_admin_id,
-					"x-second-approver-admin-id": pendingApprovalData.second_approver_admin_id,
 					"x-approval-comment": pendingApprovalData.comment || "hapus jurusan",
 				},
 			});
@@ -109,12 +108,6 @@ const KelolaJurusan = () => {
 		} finally {
 			setDeleteLoading(null);
 		}
-	};
-
-	const onApprovalCollectedForDelete = async (data: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
-		setPendingApprovalData(data);
-		setIsApprovalModalOpen(false);
-		await handleDeleteConfirm();
 	};
 
 	const handleEdit = (scheme: Scheme) => {
@@ -397,7 +390,7 @@ const KelolaJurusan = () => {
 									onClose={() => { if (!deleteLoading) { setIsApprovalModalOpen(false); setPendingApprovalData(null); } }}
 									onConfirm={(data) => { setPendingApprovalData(data); setIsApprovalModalOpen(false); void handleDeleteConfirm(); }}
 									title={"Persetujuan Penghapusan Jurusan"}
-									subtitle="Pilih Admin Sertifikasi dan Ketua LSP untuk menyetujui aksi ini."
+									subtitle="Pilih 1 admin untuk menyetujui aksi ini."
 									loading={deleteLoading === (schemeToDelete?.id ?? -1) || addLoading}
 								/>
 							)}

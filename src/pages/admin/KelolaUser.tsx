@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import useDebounce from '@/hooks/useDebounce';
+// import useDebounce from '@/hooks/useDebounce';
 import {
   Search,
   Plus,
@@ -8,7 +8,7 @@ import {
   Trash2,
   Loader2,
   AlertCircle,
-  Download,
+  // Download,
   Users
 } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
@@ -17,7 +17,7 @@ import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 import ApprovalConfirmModal from '@/components/ApprovalConfirmModal';
 import UserFormModal from '@/components/UserFormModal';
 import UserDetailModal from '@/components/UserDetailModal';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import useToast from '@/components/ui/useToast';
 import api from '@/helper/axios';
 import { formatDate } from '@/helper/format-date';
@@ -116,14 +116,13 @@ const KelolaUser: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
-  const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; second_approver_admin_id: number; comment: string } | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
+  const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // Initial data fetch
   useEffect(() => {
@@ -247,7 +246,6 @@ const KelolaUser: React.FC = () => {
       await api.delete(`/user/${userToDelete.id}`, {
         headers: {
           'x-approver-admin-id': pendingApprovalData.approver_admin_id,
-          'x-second-approver-admin-id': pendingApprovalData.second_approver_admin_id,
           'x-approval-comment': pendingApprovalData.comment,
         },
       });
@@ -267,11 +265,11 @@ const KelolaUser: React.FC = () => {
     }
   };
 
-  const handleApprovalCollectedForDelete = async (data: { approver_admin_id: number; second_approver_admin_id: number; comment: string }) => {
-    setPendingApprovalData(data);
-    setIsApprovalModalOpen(false);
-    await handleDeleteConfirm();
-  };
+  // const handleApprovalCollectedForDelete = async (data: { approver_admin_id: number; comment: string }) => {
+  //   setPendingApprovalData(data);
+  //   setIsApprovalModalOpen(false);
+  //   await handleDeleteConfirm();
+  // };
 
   const handleFormSuccess = () => {
     setIsFormModalOpen(false);
@@ -283,7 +281,6 @@ const KelolaUser: React.FC = () => {
     // EDIT no longer requires approval: submit directly
     if (!selectedUser) return;
     try {
-      setEditLoading(true);
       const res = await api.put(`/user/${selectedUser.id}`, payload);
       if (res?.data?.success) {
         handleFormSuccess();
@@ -295,14 +292,12 @@ const KelolaUser: React.FC = () => {
       const msg = (err as any)?.response?.data?.message || 'Gagal mengupdate pengguna';
       setError(msg);
     } finally {
-      setEditLoading(false);
     }
   };
 
-  const handleExport = () => {
-    console.log('Export to Excel clicked');
-    // TODO: Implement export functionality
-  };
+  // const handleExport = () => {
+  //   console.log('Export to Excel clicked');
+  // };
 
   const getRoleDisplayName = (roleName: string) => {
     const roleMap: { [key: string]: string } = {
@@ -320,7 +315,7 @@ const KelolaUser: React.FC = () => {
     return user.full_name;
   };
 
-  const getVerificationStatus = (user: UserData) => {
+  const getVerificationStatus = (_user: UserData) => {
     // TODO: Implement verification status logic based on business rules
     return 'Verified'; // Placeholder
   };
@@ -710,7 +705,7 @@ const KelolaUser: React.FC = () => {
           }}
           onConfirm={(data) => { setPendingApprovalData(data); setIsApprovalModalOpen(false); void handleDeleteConfirm(); }}
           title={'Persetujuan Penghapusan'}
-          subtitle={'Pilih 2 admin (Sertifikasi dan Ketua LSP) untuk menyetujui penghapusan ini.'}
+          subtitle={'Pilih 1 admin untuk menyetujui penghapusan ini.'}
           loading={deleteLoading}
         />
       )}
