@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import { ListCheck, AlertCircle, RefreshCw, Clock, CheckCircle, XCircle, Filter, ChevronDown } from 'lucide-react';
@@ -30,6 +30,7 @@ type ApprovalItem = {
 const PersetujuanAdmin: React.FC = () => {
     const [items, setItems] = useState<ApprovalItem[]>([]);
     const [allItems, setAllItems] = useState<ApprovalItem[]>([]);
+    const [approvalsLoaded, setApprovalsLoaded] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [actingId, setActingId] = useState<number | null>(null);
@@ -40,8 +41,9 @@ const PersetujuanAdmin: React.FC = () => {
     const { user } = useAuth();
     const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
     const [selectedFilter, setSelectedFilter] = useState<'all' | 'my-requests' | 'my-approvals'>('all');
+    const [canApprove, setCanApprove] = useState<boolean | null>(null);
     const [expandedIds, setExpandedIds] = useState<number[]>([]);
-    const [refreshing, setRefreshing] = useState<boolean>(false);
+    // const [refreshing, setRefreshing] = useState<boolean>(false);
     const [confirmState, setConfirmState] = useState<{ id: number | null; action: 'approve' | 'reject' | null }>( { id: null, action: null } );
 
     const fetchApprovals = async () => {
@@ -96,6 +98,7 @@ const PersetujuanAdmin: React.FC = () => {
             void resolveTargets(list);
             void resolveRequesters(list);
             void resolveApprovers(list);
+            setApprovalsLoaded(true);
         } catch (err: any) {
             setError(err?.response?.data?.message || 'Gagal memuat daftar persetujuan');
         } finally {
@@ -104,16 +107,21 @@ const PersetujuanAdmin: React.FC = () => {
     };
 
     const applyFilters = (list: ApprovalItem[]) => {
+        let effectiveFilter: 'all' | 'my-requests' | 'my-approvals' = selectedFilter;
+        if (canApprove === false) {
+            effectiveFilter = 'my-requests';
+        }
+
         let filtered = [...list];
 
-        if (selectedFilter === 'my-requests') {
+        if (effectiveFilter === 'my-requests') {
             filtered = filtered.filter(item => item.requester_admin_id === currentAdminId);
-        } else if (selectedFilter === 'my-approvals') {
+        } else if (effectiveFilter === 'my-approvals') {
             filtered = filtered.filter(item => item.approver_admin_id === currentAdminId);
         }
 
         filtered.sort((a, b) => {
-            if (selectedFilter === 'my-approvals') {
+            if (effectiveFilter === 'my-approvals') {
                 const aInScope = a.approver_admin_id === currentAdminId;
                 const bInScope = b.approver_admin_id === currentAdminId;
                 if (aInScope !== bInScope) {
@@ -146,7 +154,7 @@ const PersetujuanAdmin: React.FC = () => {
 
     useEffect(() => { void fetchApprovals(); }, []);
 
-    useEffect(() => { applyFilters(allItems); }, [selectedFilter, allItems, currentAdminId]);
+    useEffect(() => { applyFilters(allItems); }, [selectedFilter, allItems, currentAdminId, canApprove]);
 
     const fetchCurrentAdmin = async () => {
         try {
@@ -165,6 +173,27 @@ const PersetujuanAdmin: React.FC = () => {
     useEffect(() => {
         void fetchCurrentAdmin();
     }, [user?.id]);
+
+    useEffect(() => {
+        if (!approvalsLoaded || !currentAdminId) {
+            setCanApprove(null);
+            return;
+        }
+        const approverScope = allItems.some(it => it.approver_admin_id === currentAdminId);
+        setCanApprove(approverScope);
+    }, [allItems, currentAdminId, approvalsLoaded]);
+
+    const initializedFilterRef = useRef<boolean>(false);
+    useEffect(() => {
+        if (initializedFilterRef.current) return;
+        if (canApprove === null) return; // wait until permission resolved
+        if (canApprove === true) {
+            setSelectedFilter('all');
+        } else {
+            setSelectedFilter('my-requests');
+        }
+        initializedFilterRef.current = true;
+    }, [canApprove]);
 
     const resolveTargets = async (list: ApprovalItem[]) => {
         const keys = Array.from(new Set(list.map(it => `${it.target_table || ''}:${it.target_id || ''}`)));
@@ -407,17 +436,18 @@ const PersetujuanAdmin: React.FC = () => {
                             <div className="flex items-center gap-3">
                                 <Filter size={16} className="text-gray-600" />
                                 <select
-                                    value={selectedFilter}
+                                    value={canApprove === false ? 'my-requests' : selectedFilter}
                                     onChange={(e) => setSelectedFilter(e.target.value as 'all' | 'my-requests' | 'my-approvals')}
-                                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
+                                    disabled={canApprove === false}
+                                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
-                                    <option value="all">Semua</option>
+                                    {canApprove !== false && <option value="all">Semua</option>}
                                     <option value="my-requests">Request Saya</option>
-                                    <option value="my-approvals">Butuh Persetujuan Saya</option>
+                                    {canApprove !== false && <option value="my-approvals">Butuh Persetujuan Saya</option>}
                                 </select>
                             </div>
                             <button
-                                onClick={async () => { setRefreshing(true); try { await fetchApprovals(); } finally { setRefreshing(false); } }}
+                                onClick={() => { void fetchApprovals(); }}
                                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all shadow-sm"
                                 aria-label="Refresh"
                                 title="Refresh"
