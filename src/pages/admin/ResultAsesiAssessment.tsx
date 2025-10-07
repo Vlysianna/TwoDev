@@ -1,4 +1,9 @@
-import { LayoutDashboard, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+	LayoutDashboard,
+	ChevronLeft,
+	ChevronRight,
+	Download,
+} from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import api from "@/helper/axios";
@@ -20,6 +25,7 @@ import AK03 from "@/components/section/admin/AK-03";
 import AK05 from "@/components/section/admin/AK-05";
 import APL02Detail from "@/components/section/admin/APL-02-Detail";
 import IA01Detail from "@/components/section/admin/IA-01-Detail";
+import useToast from "@/components/ui/useToast";
 
 interface TabResponse {
 	assessment_id: number;
@@ -44,7 +50,10 @@ export default function ResultAsesiAssessment() {
 		localStorage.getItem("selectedTab") || "apl-01"
 	);
 	const [selectedDetailTab, setSelectedDetailTab] = useState<string>("");
+	const [loadingExport, setLoadingExport] = useState(false);
 	const [idUnit, setIdUnit] = useState<string>("");
+
+	const toast = useToast();
 
 	useEffect(() => {
 		// fetchAssesseeData(selectedTab.toLowerCase());
@@ -156,6 +165,39 @@ export default function ResultAsesiAssessment() {
 	// 	Selesai: <CheckCircle size={14} />,
 	// };
 
+	const handleExport = async (tab: string) => {
+		try {
+			setLoadingExport(true);
+
+			const res = await api.get(
+				`/assessments/${tab}/result/${id_result}/export`,
+				{ responseType: "blob" }
+			);
+			const url = window.URL.createObjectURL(new Blob([res.data]));
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute("download", `hasil-assesmen(${tab}).pdf`);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+			toast.show({
+				title: "Berhasil",
+				description: `Hasil Asesmen (${tab}) berhasil diunduh`,
+				type: "success",
+			});
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (e: any) {
+			toast.show({
+				title: "Gagal",
+				description: e?.response?.data?.message || "Terjadi kesalahan",
+				type: "error",
+			});
+		} finally {
+			setLoadingExport(false);
+		}
+	};
+
 	return (
 		<div className="flex min-h-screen bg-gray-50">
 			{/* Sidebar */}
@@ -175,26 +217,43 @@ export default function ResultAsesiAssessment() {
 
 				{/* Breadcrumb + Content */}
 				<div className="p-4">
-					<div className="p-4">
-						<div className="text-sm text-gray-500 mb-4">
-							<Link
-								to={paths.admin.resultAssessment.root}
-								className="hover:underline"
+					<div className="flex justify-between">
+						<div className="p-4">
+							<div className="text-sm text-gray-500 mb-4">
+								<Link
+									to={paths.admin.resultAssessment.root}
+									className="hover:underline"
+								>
+									Hasil Asesmen
+								</Link>
+								<span className="mx-2">/</span>
+								<Link
+									to={paths.admin.resultAssessment.dashboard(
+										id_assessment,
+										id_asesor!
+									)}
+									className="hover:underline"
+								>
+									Asesmen Mandiri
+								</Link>
+								<span className="mx-2">/</span>
+								<span className="text-gray-700">Asesi</span>
+							</div>
+						</div>
+						<div className="p-4">
+							<button
+								onClick={() => handleExport(selectedTab)}
+								className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
 							>
-								Hasil Asesmen
-							</Link>
-							<span className="mx-2">/</span>
-							<Link
-								to={paths.admin.resultAssessment.dashboard(
-									id_assessment,
-									id_asesor!
+								{loadingExport ? (
+									"Mengunduh..."
+								) : (
+									<>
+										<Download className="w-4 h-4 mr-2" />
+										Export ({selectedTab})
+									</>
 								)}
-								className="hover:underline"
-							>
-								Asesmen Mandiri
-							</Link>
-							<span className="mx-2">/</span>
-							<span className="text-gray-700">Asesi</span>
+							</button>
 						</div>
 					</div>
 

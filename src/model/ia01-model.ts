@@ -41,10 +41,42 @@ export interface IA01ResponseElement {
 }
 
 interface ItemElementIA01 extends ItemElementIA01Raw {
-  result: {
-    id: number;
-    header_id: number;
-    is_competent: boolean;
-    evaluation: string;
-  }
+	result: {
+		id: number;
+		header_id: number;
+		is_competent: boolean;
+		evaluation: string;
+	};
+}
+
+interface IncompleteCriteria {
+	id: number;
+	element_detail_id: number;
+	no: string;
+	description: string;
+	benchmark: string;
+	is_competent: boolean;
+	evaluation: string;
+}
+
+interface Element {
+	id: number;
+	title: string;
+	no: string;
+	criterias: IncompleteCriteria[];
+}
+
+interface Unit {
+	id: number;
+	unit_code: string;
+	title: string;
+	no: string;
+	elements: Element[];
+}
+
+export interface IncompleteGroup {
+	id: number;
+	name: string;
+	assessment_id: number;
+	units: Unit[];
 }

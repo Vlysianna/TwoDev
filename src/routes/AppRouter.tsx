@@ -41,27 +41,27 @@ import Ak05Asesi from "@/pages/asesi/Ak-05";
 import DataAsesor from "@/pages/public/DataAsesor";
 import DataAssesi from "@/pages/public/DataAssesi";
 import AssessmentAsesorProvider from "@/components/AssessmentAsesorProvider";
-import FaktaIntegritas from "@/pages/Asesor/FaktaIntegritas";
+import FaktaIntegritas from "@/pages/asesor/FaktaIntegritas";
 import KelolaJurusan from "@/pages/admin/kelolaJur";
 import Ia05CAssessee from "@/pages/asesi/Ia-05-C";
-import DashboardAsesor from "@/pages/Asesor/DashboardAsesor";
-import DashboardAsesmenMandiri from "@/pages/Asesor/DashboardAsesmenMandiri";
-import Apl02Asesor from "@/pages/Asesor/Apl-02";
-import Apl02DetailAsesor from "@/pages/Asesor/Apl-02-Detail";
-import Ia01Asesor from "@/pages/Asesor/Ia-01";
-import Ia01DetailAsesor from "@/pages/Asesor/Ia-01-Detail";
-import Ia02Asesor from "@/pages/Asesor/Ia-02";
-import Ia03Asesor from "@/pages/Asesor/Ia-03";
-import Ak01Asesor from "@/pages/Asesor/Ak-01";
-import Ak02Asesor from "@/pages/Asesor/Ak-02";
-import Ak03Asesor from "@/pages/Asesor/Ak-03";
-import Ak05Asesor from "@/pages/Asesor/Ak-05";
-import Ia05CAsesor from "@/pages/Asesor/Ia-05-C";
-import DashboardPenilaian from "@/pages/Asesor/DashboardPenilaian";
+import DashboardAsesor from "@/pages/asesor/DashboardAsesor";
+import DashboardAsesmenMandiri from "@/pages/asesor/DashboardAsesmenMandiri";
+import Apl02Asesor from "@/pages/asesor/Apl-02";
+import Apl02DetailAsesor from "@/pages/asesor/Apl-02-Detail";
+import Ia01Asesor from "@/pages/asesor/Ia-01";
+import Ia01DetailAsesor from "@/pages/asesor/Ia-01-Detail";
+import Ia02Asesor from "@/pages/asesor/Ia-02";
+import Ia03Asesor from "@/pages/asesor/Ia-03";
+import Ak01Asesor from "@/pages/asesor/Ak-01";
+import Ak02Asesor from "@/pages/asesor/Ak-02";
+import Ak03Asesor from "@/pages/asesor/Ak-03";
+import Ak05Asesor from "@/pages/asesor/Ak-05";
+import Ia05CAsesor from "@/pages/asesor/Ia-05-C";
+import DashboardPenilaian from "@/pages/asesor/DashboardPenilaian";
 import BiodataAsesor from "@/pages/asesor/BiodataAsesor";
-import ProfileAsesor from "@/pages/Asesor/Profile";
-import IA05Assessor from "@/pages/Asesor/ia-05";
-import RecapAssessment from "@/pages/Asesor/RecapAssessment";
+import ProfileAsesor from "@/pages/asesor/Profile";
+import IA05Assessor from "@/pages/asesor/ia-05";
+import RecapAssessment from "@/pages/asesor/RecapAssessment";
 import Ia01Asesi from "@/pages/asesi/Ia-01";
 import Ia01AsesiDetail from "@/pages/asesi/Ia-01-Detail";
 import ResultAssessment from "@/pages/admin/ResultAssessment";
@@ -73,6 +73,7 @@ import BiodataProtectedRoute from "@/components/BiodataProtectedRoute";
 import AsesorIndexRoute from "@/components/AsesorIndexRoute";
 import ResultAsesiAssessmentAdmin from "@/pages/admin/ResultAsesiAssessment";
 import PersetujuanAdmin from "@/pages/admin/Persetujuan";
+import SuratTugas from "@/pages/admin/SuratTugas";
 
 const router = createBrowserRouter(
 	[
@@ -188,6 +189,7 @@ const router = createBrowserRouter(
 						{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
 						{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
 						{ path: paths.admin.editJadwalPattern, element: <EditJadwal /> },
+						{ path: paths.admin.suratTugasPattern, element: <SuratTugas /> },
 						{
 							path: paths.admin.okupasi.root,
 							children: [{ index: true, element: <KelolaOkupasi /> }],

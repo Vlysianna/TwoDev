@@ -66,6 +66,8 @@ const ResultAssessment: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  console.log(data);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -246,6 +248,15 @@ const ResultAssessment: React.FC = () => {
                                         <span>{detail.assessor.full_name}</span>
                                       </div>
                                       <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
+                                        <button
+                                          className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(paths.admin.suratTugas(schedule.assessment.id, String(detail.assessor.id)));
+                                          }}
+                                        >
+                                          Surat Tugas <ArrowRight size={16} />
+                                        </button>
                                         <button
                                           className="px-2 bg-green-600 text-white hover:bg-green-700 p-2 rounded hover:bg-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {

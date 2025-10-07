@@ -10,6 +10,8 @@ import paths from "@/routes/paths";
 import NavbarAsesi from '@/components/NavbarAsesi';
 import ConfirmModal from '@/components/ConfirmModal';
 import { formatDate } from "@/helper/format-date";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import type { IncompleteGroup } from '@/model/ia01-model';
 
 export default function Ia01Asesi() {
     const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
@@ -23,6 +25,9 @@ export default function Ia01Asesi() {
     const [valueQr, setValueQr] = useState('');
     const [resultData, setResultData] = useState<any>(null);
     const [generating, setGenerating] = useState(false);
+    const [incompleteCriteria, setIncompleteCriteria] = useState<
+        IncompleteGroup[]
+    >([]);
     const [unitNumberMap, setUnitNumberMap] = useState<Record<number, number>>({});
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -50,7 +55,10 @@ export default function Ia01Asesi() {
 
     useEffect(() => {
         if (id_assessment) fetchAssessment();
-        if (id_result) fetchUnitData();
+        if (id_result) {
+            fetchUnitData();
+			fetchIncompleteCriteria();
+        }
         fetchResultData();
     }, [id_assessment, id_result]);
 
@@ -138,6 +146,23 @@ export default function Ia01Asesi() {
             console.error("fetchResultData error asesi:", error);
         }
     };
+
+	const fetchIncompleteCriteria = async () => {
+		if (!id_result) return;
+
+		try {
+			const response = await api.get(
+				`/assessments/ia-01/result/incomplete-criteria/${id_result}`
+			);
+
+			if (response.data.success) {
+				setIncompleteCriteria(response.data.data);
+			}
+		} catch (error: any) {
+			console.error("fetchIncompleteCriteria error:", error);
+			setError("Gagal memuat data kriteria yang belum kompeten");
+		}
+	};
 
     // Update URL when selected group changes
     useEffect(() => {
@@ -354,48 +379,70 @@ export default function Ia01Asesi() {
                                 <div className='mb-2'>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Pada :</label>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Kelompok Pekerjaan</label>
-                                        <input
-                                            type="text"
-                                            value={resultData?.ia01_header?.group || ''}
-                                            disabled
-                                            className="w-full rounded-lg px-3 py-2 text-sm bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-                                        />
-                                    </div>
+                                
+								<div className="d-flex flex-column gap-4 mb-6">
+									<div className="text-lg font-medium text-gray-900 mb-4">
+										Daftar Tidak Kompeten
+									</div>
+									<div className="d-flex flex-column">
+										<Accordion
+											type="multiple"
+											defaultValue={["criteria-0"]}
+											className="w-full space-y-4"
+										>
+											{incompleteCriteria.map((criteria, ci) => (
+												<AccordionItem
+													key={ci}
+													value={`criteria-${ci}`}
+													className="rounded-lg border border-gray-200 bg-white shadow-sm"
+												>
+													{/* Criteria Header */}
+													<AccordionTrigger className="px-4 py-2 text-base font-semibold text-gray-900">
+														{criteria.name}
+													</AccordionTrigger>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Unit</label>
-                                        <input
-                                            type="text"
-                                            value={resultData?.ia01_header?.unit || ''}
-                                            disabled
-                                            className="w-full rounded-lg px-3 py-2 text-sm bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-                                        />
-                                    </div>
+													<AccordionContent className="space-y-4 m-3">
+														{criteria.units.map((unit) => (
+															<div
+																key={unit.no}
+																className="rounded-md border border-gray-200 bg-gray-50 p-3"
+															>
+																<div>
+																	<div className="text-sm font-medium text-gray-800">
+																		<span className="font-bold">Unit {unit.no}:</span> {unit.title}
+																	</div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Elemen</label>
-                                        <input
-                                            type="text"
-                                            value={resultData?.ia01_header?.element || ''}
-                                            disabled
-                                            className="w-full rounded-lg px-3 py-2 text-sm bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">KUK</label>
-                                        <input
-                                            type="text"
-                                            value={resultData?.ia01_header?.kuk || ''}
-                                            disabled
-                                            className="w-full rounded-lg px-3 py-2 text-sm bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex-grow"></div>
+																	<div className="mt-2 space-y-2 pl-4">
+																		{unit.elements.map((element, j) => (
+																			<ul key={j} className="space-y-2">
+																				<span className="text-sm font-medium text-gray-800">
+																					{element.no}. {element.title}
+																				</span>
+																				{element.criterias.map((c, k) => (
+																					<li
+																						key={k}
+																						className="flex items-start gap-2 rounded-md bg-white px-3 py-2"
+																					>
+																						<span className="min-w-[40px] text-blue-600 min-w-8">
+																							{c.no}
+																						</span>
+																						<span className="text-gray-700">
+																							{c.description}
+																						</span>
+																					</li>
+																				))}
+																			</ul>
+																		))}
+																	</div>
+																</div>
+															</div>
+														))}
+													</AccordionContent>
+												</AccordionItem>
+											))}
+										</Accordion>
+									</div>
+								</div>
                             </div>
                             <div className="h-full flex flex-col">
                                 <div className="mb-6">

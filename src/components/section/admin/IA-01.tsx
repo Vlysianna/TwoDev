@@ -1,12 +1,22 @@
 import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
-import type { IA01Group, ResultIA01 } from "@/model/ia01-model";
+import type {
+	IA01Group,
+	IncompleteGroup,
+	ResultIA01,
+} from "@/model/ia01-model";
 import { Calendar, ChevronRight, Clock, Monitor } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import useSWR from "swr";
 import { formatDate } from "@/helper/format-date";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
@@ -27,12 +37,19 @@ export default function IA01({
 		fetcher
 	);
 
+	const { data: incompleteCriteria } = useSWR<IncompleteGroup[]>(
+		`/assessments/ia-01/result/incomplete-criteria/${id_result}`,
+		fetcher
+	);
+
 	const [selectedKPekerjaan, setSelectedKPekerjaan] = useState("");
 	const [searchParams, setSearchParams] = useSearchParams();
 
 	const formattedDate = useMemo(
 		() =>
-			result?.ia01_header?.updated_at ?formatDate(result?.ia01_header?.updated_at) : "Tanggal | Jam",
+			result?.ia01_header?.updated_at
+				? formatDate(result?.ia01_header?.updated_at)
+				: "Tanggal | Jam",
 		[result]
 	);
 
@@ -280,53 +297,68 @@ export default function IA01({
 								Pada :
 							</label>
 						</div>
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
-									Kelompok Pekerjaan
-								</label>
-								<input
-									type="text"
-									value={result?.ia01_header?.group || ""}
-									disabled
-									className="w-full rounded-lg px-3 py-2 text-sm bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-								/>
-							</div>
 
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
-									Unit
-								</label>
-								<input
-									type="text"
-									value={result?.ia01_header?.unit || ""}
-									disabled
-									className="w-full rounded-lg px-3 py-2 text-sm bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-								/>
+						<div className="d-flex flex-column gap-4 mb-6">
+							<div className="text-lg font-medium text-gray-900 mb-4">
+								Daftar Tidak Kompeten
 							</div>
+							<div className="d-flex flex-column">
+								<Accordion
+									type="multiple"
+									defaultValue={["criteria-0"]}
+									className="w-full space-y-4"
+								>
+									{incompleteCriteria?.map((criteria, ci) => (
+										<AccordionItem
+											key={ci}
+											value={`criteria-${ci}`}
+											className="rounded-lg border border-gray-200 bg-white shadow-sm"
+										>
+											{/* Criteria Header */}
+											<AccordionTrigger className="px-4 py-2 text-base font-semibold text-gray-900">
+												{criteria.name}
+											</AccordionTrigger>
 
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
-									Elemen
-								</label>
-								<input
-									type="text"
-									value={result?.ia01_header?.element || ""}
-									disabled
-									className="w-full rounded-lg px-3 py-2 text-sm bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-								/>
-							</div>
+											<AccordionContent className="space-y-4 m-3">
+												{criteria.units.map((unit) => (
+													<div
+														key={unit.no}
+														className="rounded-md border border-gray-200 bg-gray-50 p-3"
+													>
+														<div>
+															<div className="text-sm font-medium text-gray-800">
+																<span className="font-bold">Unit {unit.no}:</span> {unit.title}
+															</div>
 
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
-									KUK
-								</label>
-								<input
-									type="text"
-									value={result?.ia01_header?.kuk || ""}
-									disabled
-									className="w-full rounded-lg px-3 py-2 text-sm bg-gray-200 text-gray-500 border border-gray-300 cursor-not-allowed"
-								/>
+															<div className="mt-2 space-y-2 pl-4">
+																{unit.elements.map((element, j) => (
+																	<ul key={j} className="space-y-2">
+																		<span className="text-sm font-medium text-gray-800">
+																			{element.no}. {element.title}
+																		</span>
+																		{element.criterias.map((c, k) => (
+																			<li
+																				key={k}
+																				className="flex items-start gap-2 rounded-md bg-white px-3 py-2"
+																			>
+																				<span className="min-w-[40px] text-blue-600 min-w-8">
+																					{c.no}
+																				</span>
+																				<span className="text-gray-700">
+																					{c.description}
+																				</span>
+																			</li>
+																		))}
+																	</ul>
+																))}
+															</div>
+														</div>
+													</div>
+												))}
+											</AccordionContent>
+										</AccordionItem>
+									))}
+								</Accordion>
 							</div>
 						</div>
 						<div className="flex-grow"></div>
