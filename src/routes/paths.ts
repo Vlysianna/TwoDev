@@ -108,6 +108,8 @@ const routes = {
 		editAsessi: "/admin/edit-asesi",
 		kelolaJadwal: "/admin/kelola-jadwal",
 		tambahJadwal: "/admin/tambah-jadwal",
+		suratTugas: (id_assessment: string | number, assessor_id: string | number) => `/admin/surat-tugas/${id_assessment}/${assessor_id}`,
+		suratTugasPattern: "/admin/surat-tugas/:id_assessment/:assessor_id",
 	},
 	asesor: {
 		root: "/asesor",

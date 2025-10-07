@@ -70,6 +70,7 @@ import BiodataProtectedRoute from "@/components/BiodataProtectedRoute";
 import AsesorIndexRoute from "@/components/AsesorIndexRoute";
 import ResultAsesiAssessmentAdmin from "@/pages/admin/ResultAsesiAssessment";
 import PersetujuanAdmin from "@/pages/admin/Persetujuan";
+import SuratTugas from "@/pages/admin/SuratTugas";
 
 const router = createBrowserRouter(
 	[
@@ -183,6 +184,7 @@ const router = createBrowserRouter(
 						{ path: paths.admin.kelolaJurusan, element: <KelolaJurusan /> },
 						{ path: paths.admin.kelolaJadwal, element: <KelolaJadwal /> },
 						{ path: paths.admin.tambahJadwal, element: <TambahJadwal /> },
+						{ path: paths.admin.suratTugasPattern, element: <SuratTugas /> },
 						{
 							path: paths.admin.okupasi.root,
 							children: [{ index: true, element: <KelolaOkupasi /> }],
