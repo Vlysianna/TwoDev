@@ -15,11 +15,11 @@ export default function Apl02() {
 		useAssessmentParams();
 
 	// console.log("Assessment params:", {
-		id_assessment,
-		id_asesor,
-		id_result,
-		id_asesi,
-	});
+	// 	id_assessment,
+	// 	id_asesor,
+	// 	id_result,
+	// 	id_asesi,
+	// });
 
 	const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
