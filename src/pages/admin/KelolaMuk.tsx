@@ -19,7 +19,7 @@ const KelolaMUK: React.FC = () => {
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [muks, setMuks] = useState<MukType[]>([]);
 	const [approvalOpen, setApprovalOpen] = useState(false);
-	const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
+	const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; backup_admin_id?: number; comment: string } | null>(null);
 
 	const navigate = useNavigate();
 
@@ -58,12 +58,16 @@ const KelolaMUK: React.FC = () => {
 		try {
 			setDeleteLoading(true);
 			if (!approvalData) { setApprovalOpen(true); return; }
-			await axiosInstance.delete(`/assessments/${deletingId}`, {
-				headers: {
-					"x-approver-admin-id": approvalData.approver_admin_id,
-					"x-approval-comment": approvalData.comment || "hapus MUK",
-				}
-			});
+			const headers: Record<string, string> = {
+				"x-approver-admin-id": approvalData.approver_admin_id.toString(),
+				"x-approval-comment": approvalData.comment || "hapus MUK",
+			};
+			
+			if (approvalData.backup_admin_id) {
+				headers["x-backup-admin-id"] = approvalData.backup_admin_id.toString();
+			}
+			
+			await axiosInstance.delete(`/assessments/${deletingId}`, { headers });
 			setDeleteModalOpen(false);
 			setDeletingId(null);
 			setApprovalData(null);

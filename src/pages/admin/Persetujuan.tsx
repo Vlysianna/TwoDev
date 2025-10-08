@@ -19,6 +19,8 @@ type ApprovalItem = {
     comment?: string | null;
     requester_admin_id?: number;
     approver_admin_id?: number;
+    backup_admin_id?: number;
+    approved_by?: number;
     second_approver_admin_id?: number;
     status?: string;
     approved_by_first?: boolean;
@@ -40,7 +42,7 @@ const PersetujuanAdmin: React.FC = () => {
     const [approverLabels, setApproverLabels] = useState<Record<number, string>>({});
     const { user } = useAuth();
     const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
-    const [selectedFilter, setSelectedFilter] = useState<'all' | 'my-requests' | 'my-approvals'>('all');
+    const [selectedFilter, setSelectedFilter] = useState<'all' | 'my-requests' | 'my-approvals' | 'backup-approvals'>('all');
     const [canApprove, setCanApprove] = useState<boolean | null>(null);
     const [expandedIds, setExpandedIds] = useState<number[]>([]);
     // const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -85,6 +87,8 @@ const PersetujuanAdmin: React.FC = () => {
                     comment: it?.comment ?? null,
                     requester_admin_id: Number(it?.requester_admin_id ?? it?.requesterAdminId ?? requester?.admin_id ?? 0) || undefined,
                     approver_admin_id: Number(it?.approver_admin_id ?? it?.approverAdminId ?? 0) || undefined,
+                    backup_admin_id: Number(it?.backup_admin_id ?? it?.backupAdminId ?? 0) || undefined,
+                    approved_by: Number(it?.approved_by ?? it?.approvedBy ?? 0) || undefined,
                     second_approver_admin_id: Number(it?.second_approver_admin_id ?? it?.secondApproverAdminId ?? 0) || undefined,
                     status: it?.status,
                     approved_by_first: Boolean(it?.approved_by_first),
@@ -107,7 +111,7 @@ const PersetujuanAdmin: React.FC = () => {
     };
 
     const applyFilters = (list: ApprovalItem[]) => {
-        let effectiveFilter: 'all' | 'my-requests' | 'my-approvals' = selectedFilter;
+        let effectiveFilter: 'all' | 'my-requests' | 'my-approvals' | 'backup-approvals' = selectedFilter;
         if (canApprove === false) {
             effectiveFilter = 'my-requests';
         }
@@ -118,12 +122,25 @@ const PersetujuanAdmin: React.FC = () => {
             filtered = filtered.filter(item => item.requester_admin_id === currentAdminId);
         } else if (effectiveFilter === 'my-approvals') {
             filtered = filtered.filter(item => item.approver_admin_id === currentAdminId);
+        } else if (effectiveFilter === 'backup-approvals') {
+            filtered = filtered.filter(item => item.backup_admin_id === currentAdminId);
+        } else if (effectiveFilter === 'all') {
+            filtered = filtered.filter(item => 
+                item.requester_admin_id === currentAdminId || 
+                item.approver_admin_id === currentAdminId
+            );
         }
 
         filtered.sort((a, b) => {
             if (effectiveFilter === 'my-approvals') {
                 const aInScope = a.approver_admin_id === currentAdminId;
                 const bInScope = b.approver_admin_id === currentAdminId;
+                if (aInScope !== bInScope) {
+                    return aInScope ? -1 : 1;
+                }
+            } else if (effectiveFilter === 'backup-approvals') {
+                const aInScope = a.backup_admin_id === currentAdminId;
+                const bInScope = b.backup_admin_id === currentAdminId;
                 if (aInScope !== bInScope) {
                     return aInScope ? -1 : 1;
                 }
@@ -179,7 +196,7 @@ const PersetujuanAdmin: React.FC = () => {
             setCanApprove(null);
             return;
         }
-        const approverScope = allItems.some(it => it.approver_admin_id === currentAdminId);
+        const approverScope = allItems.some(it => it.approver_admin_id === currentAdminId || it.backup_admin_id === currentAdminId);
         setCanApprove(approverScope);
     }, [allItems, currentAdminId, approvalsLoaded]);
 
@@ -271,7 +288,11 @@ const PersetujuanAdmin: React.FC = () => {
     };
 
     const resolveApprovers = async (list: ApprovalItem[]) => {
-        const ids = Array.from(new Set(list.map(it => it.approver_admin_id).filter(Boolean))) as number[];
+        const ids = Array.from(new Set([
+            ...list.map(it => it.approver_admin_id).filter(Boolean),
+            ...list.map(it => it.backup_admin_id).filter(Boolean),
+            ...list.map(it => it.approved_by).filter(Boolean)
+        ])) as number[];
         const need = ids.filter((id) => approverLabels[id] === undefined);
         if (need.length === 0) return;
         const updates: Record<number, string> = {};
@@ -437,13 +458,14 @@ const PersetujuanAdmin: React.FC = () => {
                                 <Filter size={16} className="text-gray-600" />
                                 <select
                                     value={canApprove === false ? 'my-requests' : selectedFilter}
-                                    onChange={(e) => setSelectedFilter(e.target.value as 'all' | 'my-requests' | 'my-approvals')}
+                                    onChange={(e) => setSelectedFilter(e.target.value as 'all' | 'my-requests' | 'my-approvals' | 'backup-approvals')}
                                     disabled={canApprove === false}
                                     className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
                                     {canApprove !== false && <option value="all">Semua</option>}
                                     <option value="my-requests">Request Saya</option>
                                     {canApprove !== false && <option value="my-approvals">Butuh Persetujuan Saya</option>}
+                                    {canApprove !== false && <option value="backup-approvals">Backup Persetujuan</option>}
                                 </select>
                             </div>
                             <button
@@ -486,7 +508,7 @@ const PersetujuanAdmin: React.FC = () => {
                                             const isPending = String(it.status || '').toLowerCase() !== 'approved' && String(it.status || '').toLowerCase() !== 'rejected';
 
                                             const isCurrentAdminApprover = currentAdminId !== null &&
-                                                (it.approver_admin_id === currentAdminId);
+                                                (it.approver_admin_id === currentAdminId || it.backup_admin_id === currentAdminId);
 
                                             const canApprove = isPending && isCurrentAdminApprover &&
                                                 Number(it.requester_admin_id) !== currentAdminId;
@@ -556,19 +578,19 @@ const PersetujuanAdmin: React.FC = () => {
                                                                     <div className="rounded-md border border-green-200 bg-green-50 text-green-800 px-3 py-2 inline-flex items-center gap-2">
                                                                         <CheckCircle size={16} />
                                                                         <span className="font-semibold">Disetujui oleh:</span>
-                                                                        <span className="font-medium">{approverLabels[it.approver_admin_id || 0] || '-'}</span>
+                                                                        <span className="font-medium">{approverLabels[it.approved_by || 0] || '-'}</span>
                                                                     </div>
                                                                 ) : String(it.status || '').toLowerCase() === 'rejected' ? (
                                                                     <div className="rounded-md border border-red-200 bg-red-50 text-red-800 px-3 py-2 inline-flex items-center gap-2">
                                                                         <XCircle size={16} />
                                                                         <span className="font-semibold">Ditolak oleh:</span>
-                                                                        <span className="font-medium">{approverLabels[it.approver_admin_id || 0] || '-'}</span>
+                                                                        <span className="font-medium">{approverLabels[it.approved_by || 0] || '-'}</span>
                                                                     </div>
                                                                 ) : (
                                                                     <div className="rounded-md border border-orange-200 bg-orange-50 text-orange-800 px-3 py-2 inline-flex items-center gap-2">
                                                                         <Clock size={16} />
                                                                         <span className="font-semibold">Disetujui oleh:</span>
-                                                                        <span className="font-medium">{approverLabels[it.approver_admin_id || 0] || 'Tidak tersedia'}</span>
+                                                                        <span className="font-medium">- (pending)</span>
                                                                         <span className="ml-2 text-xs font-semibold bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Pending</span>
                                                                     </div>
                                                                 )}

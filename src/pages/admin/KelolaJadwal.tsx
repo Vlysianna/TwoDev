@@ -63,7 +63,7 @@ const KelolaJadwal: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [approvalOpen, setApprovalOpen] = useState(false);
-  const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
+  const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; backup_admin_id?: number; comment: string } | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedJadwal, setSelectedJadwal] = useState<Schedule | null>(null);
 
@@ -129,7 +129,7 @@ const KelolaJadwal: React.FC = () => {
   };
   // edit now handled on separate page
 
-  const handleDelete = async (forcedId?: number, approvalOverride?: { approver_admin_id: number; comment: string }) => {
+  const handleDelete = async (forcedId?: number, approvalOverride?: { approver_admin_id: number; backup_admin_id?: number; comment: string }) => {
     const id = forcedId ?? deleteId;
     if (!id) return;
     try {
@@ -138,12 +138,16 @@ const KelolaJadwal: React.FC = () => {
       setSuccess(null);
       const effectiveApproval = approvalOverride ?? approvalData;
       if (!effectiveApproval) { setApprovalOpen(true); return; }
-      const res = await axiosInstance.delete(`/schedules/${id}`, {
-        headers: {
-          'x-approver-admin-id': effectiveApproval.approver_admin_id,
-          'x-approval-comment': effectiveApproval.comment || 'hapus jadwal',
-        }
-      });
+      const headers: Record<string, string> = {
+        'x-approver-admin-id': effectiveApproval.approver_admin_id.toString(),
+        'x-approval-comment': effectiveApproval.comment || 'hapus jadwal',
+      };
+      
+      if (effectiveApproval.backup_admin_id) {
+        headers['x-backup-admin-id'] = effectiveApproval.backup_admin_id.toString();
+      }
+      
+      const res = await axiosInstance.delete(`/schedules/${id}`, { headers });
       if (res.data?.success) {
         toast.show({ title: 'Berhasil', description: 'Permintaan penghapusan dikirim untuk persetujuan', type: 'success' });
         await fetchSchedules();
