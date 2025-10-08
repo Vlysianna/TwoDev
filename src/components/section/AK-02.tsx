@@ -132,20 +132,20 @@ export default function AK02({
 
 	const loadUnits = async () => {
 		try {
-			console.log("Loading units for result ID:", id_result);
+			// console.log("Loading units for result ID:", id_result);
 			const response = await api.get(`/assessments/ak-02/units/${id_result}`);
-			console.log("Units API response:", response.data);
+			// console.log("Units API response:", response.data);
 
 			if (response.data.success) {
 				const apiUnits = response.data.data.units;
-				console.log("API units:", apiUnits);
+				// console.log("API units:", apiUnits);
 
 				const mappedUnits = apiUnits.map((unit: any) => ({
 					id: unit.id,
 					code: unit.code,
 					title: unit.title,
 				}));
-				console.log("Mapped units:", mappedUnits);
+				// console.log("Mapped units:", mappedUnits);
 
 				setUnits(mappedUnits);
 				return mappedUnits;
@@ -293,7 +293,7 @@ export default function AK02({
 				rows: rows,
 			};
 
-			console.log("Submit data:", submitData);
+			// console.log("Submit data:", submitData);
 
 			const response = await api.post(
 				"/assessments/ak-02/result/send",
@@ -340,7 +340,7 @@ export default function AK02({
 				await loadAK02Data(true);
 			}
 		} catch (error) {
-			console.log("Error Generating QR Code:", error);
+			// console.log("Error Generating QR Code:", error);
 		}
 	};
 
@@ -357,7 +357,7 @@ export default function AK02({
 				await loadAK02Data(true);
 			}
 		} catch (error) {
-			console.log("Error approving assessee:", error);
+			// console.log("Error approving assessee:", error);
 		}
 	};
 

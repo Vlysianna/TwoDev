@@ -14,7 +14,7 @@ export default function Apl02() {
 	const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } =
 		useAssessmentParams();
 
-	console.log("Assessment params:", {
+	// console.log("Assessment params:", {
 		id_assessment,
 		id_asesor,
 		id_result,
@@ -74,7 +74,7 @@ export default function Apl02() {
 				setUnitCompetencies(response.data.data);
 			}
 		} catch (error: any) {
-			console.log("Error fetching unit competencies:", error);
+			// console.log("Error fetching unit competencies:", error);
 			setError("Gagal memuat unit kompetensi");
 		}
 	};
@@ -122,16 +122,16 @@ export default function Apl02() {
 		setQrError(null);
 
 		try {
-			console.log("Mengenerate QR code untuk result:", id_result);
+			// console.log("Mengenerate QR code untuk result:", id_result);
 
 			const response = await api.put(
 				`/assessments/apl-02/result/assessee/${id_result}/approve`
 			);
 
-			console.log("Response generate QR:", response.data);
+			// console.log("Response generate QR:", response.data);
 
 			if (response.data.success && response.data.data) {
-				console.log("✅ QR code berhasil digenerate");
+				// console.log("✅ QR code berhasil digenerate");
 
 				// 🔥 PAKAI DATA DARI RESPONSE APPROVE SAJA!
 				setResultData((prev: any) => ({
@@ -146,7 +146,7 @@ export default function Apl02() {
 				setQrError(response.data.message || "Gagal menghasilkan QR Code");
 			}
 		} catch (error: any) {
-			console.log("Error generating QR code:", error);
+			// console.log("Error generating QR code:", error);
 			const errorMessage =
 				error.response?.data?.message ||
 				error.message ||

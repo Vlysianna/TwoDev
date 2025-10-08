@@ -66,8 +66,8 @@ const RecapAssessmentAdmin: React.FC = () => {
     useEffect(() => {
         const fetchRecapData = async () => {
             if (!scheduleDetailId) return;
-            console.log("Fetching recap data for scheduleDetailId:", scheduleDetailId);
-            console.log("Fetching recap data for scheduleDetailId:", id_asesor);
+            // console.log("Fetching recap data for scheduleDetailId:", scheduleDetailId);
+            // console.log("Fetching recap data for scheduleDetailId:", id_asesor);
 
             setLoading(true);
             try {

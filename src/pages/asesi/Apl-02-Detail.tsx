@@ -257,7 +257,7 @@ export default function Apl02Detail() {
         setUnassessedElements(unassessedInit);
       }
     } catch (error: any) {
-      console.log("Error fetching elements:", error);
+      // console.log("Error fetching elements:", error);
     } finally {
       setLoading(false);
     }
@@ -288,7 +288,7 @@ export default function Apl02Detail() {
       })),
     };
 
-    console.log("Payload:", payload);
+    // console.log("Payload:", payload);
 
     try {
       await api

@@ -65,7 +65,7 @@ export default function AplZeroOne() {
 				payload
 			);
 
-			console.log(result.data);
+			// console.log(result.data);
 
 			localStorage.setItem("asesiId", result.data.data.id);
 

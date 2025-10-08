@@ -76,10 +76,10 @@ export default function LoginForm() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         // If can't get user info, use default redirect
-        toast.show({
-          description: 'Login gagal atau terjadi kesalahan',
-          type: 'error',
-        })
+        // toast.show({
+        //   description: 'Login gagal atau terjadi kesalahan',
+        //   type: 'error',
+        // })
         navigate(from, { replace: true });
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

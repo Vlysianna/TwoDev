@@ -57,7 +57,7 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
                         const userData = userRes?.data?.data || userRes?.data;
                         userDetails[userIdNum] = userData;
                     } catch (error) {
-                        console.log(`Failed to fetch user ${userId}:`, error);
+                        // console.log(`Failed to fetch user ${userId}:`, error);
                     }
                 }));
 

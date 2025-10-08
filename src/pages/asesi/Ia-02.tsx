@@ -84,7 +84,7 @@ export default function Ia02() {
         }
       }
     } catch (error: any) {
-      console.log("Error fetching result:", error);
+      // console.log("Error fetching result:", error);
       setError("Gagal memuat data asesmen");
     }
   };
@@ -126,7 +126,7 @@ export default function Ia02() {
         mutateNavigation();
       }
     } catch (error) {
-      console.log("Error fetching unit competencies:", error);
+      // console.log("Error fetching unit competencies:", error);
     }
   };
 

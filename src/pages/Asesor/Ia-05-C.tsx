@@ -287,7 +287,7 @@ export default function Ia05C() {
         })),
       };
 
-      console.log("Submitting data:", submissionData);
+      // console.log("Submitting data:", submissionData);
 
       const response = await api.post(
         `/assessments/ia-05/result/assessor/send`,

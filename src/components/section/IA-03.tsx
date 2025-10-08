@@ -148,7 +148,7 @@ export default function IA03({
           }
         }
       } catch (error: any) {
-        console.log("Error fetching IA03 result:", error);
+        // console.log("Error fetching IA03 result:", error);
         setError("Gagal memuat data hasil asesmen");
       } finally {
         setLoading(false);
@@ -163,11 +163,11 @@ export default function IA03({
       try {
         setLoading(true);
         const response = await api.get(`/assessments/ia-03/units/${id_result}`);
-        console.log("Units API response:", response.data); // DEBUG
+        // console.log("Units API response:", response.data); // DEBUG
 
         if (response.data.success) {
           setGroups(response.data.data);
-          console.log("Groups data set:", response.data.data); // DEBUG
+          // console.log("Groups data set:", response.data.data); // DEBUG
 
           // Set pertanyaan dari group pertama jika ada
           if (response.data.data.length > 0) {
@@ -175,7 +175,7 @@ export default function IA03({
           }
         }
       } catch (error: any) {
-        console.log("Error fetching IA03 units:", error);
+        // console.log("Error fetching IA03 units:", error);
         setError("Gagal memuat data unit kompetensi");
       } finally {
         setLoading(false);
@@ -186,7 +186,7 @@ export default function IA03({
 
   // PERBAIKAN: Fungsi untuk load questions berdasarkan group
   const loadQuestionsForGroup = (group: GroupIA03) => {
-    console.log("Loading questions for group:", group); // DEBUG
+    // console.log("Loading questions for group:", group); // DEBUG
 
     if (group.questions && group.questions.length > 0) {
       const groupQuestions = group.questions.map((q: QuestionIA03) => ({
@@ -196,11 +196,11 @@ export default function IA03({
         tanggapan: q.result?.answer || "", // PERBAIKAN: Ambil dari q.result.answer
       }));
       setQuestions(groupQuestions);
-      console.log("Questions loaded:", groupQuestions); // DEBUG
+      // console.log("Questions loaded:", groupQuestions); // DEBUG
     } else {
       // Jika tidak ada questions dari API, set default
       setQuestions([{ id: 1, text: "", pencapaian: "", tanggapan: "" }]);
-      console.log("No questions from API, setting default"); // DEBUG
+      // console.log("No questions from API, setting default"); // DEBUG
     }
   };
 
@@ -232,7 +232,7 @@ export default function IA03({
         return response.data.data;
       }
     } catch (error: any) {
-      console.log("Error saving question answer:", error);
+      // console.log("Error saving question answer:", error);
       // Hapus setError di sini karena akan ditangani di handleSaveAllQuestions
       return null;
     }
@@ -256,7 +256,7 @@ export default function IA03({
         if (mutateNavigation) mutateNavigation();
       }
     } catch (error: any) {
-      console.log("Error approving by assessee:", error);
+      // console.log("Error approving by assessee:", error);
       setError("Gagal menyetujui hasil");
     }
   };
@@ -280,7 +280,7 @@ export default function IA03({
         if (mutateNavigation) mutateNavigation();
       }
     } catch (error: any) {
-      console.log("Error approving by assessor:", error);
+      // console.log("Error approving by assessor:", error);
       setError("Gagal menyetujui hasil");
     }
   };
@@ -330,7 +330,7 @@ export default function IA03({
       // Refresh data
       fetchUnits(id_result);
     } catch (error: any) {
-      console.log("Error saving all questions:", error);
+      // console.log("Error saving all questions:", error);
       setError("Gagal menyimpan jawaban");
       toast.show({
         title: "Gagal",
@@ -379,7 +379,7 @@ export default function IA03({
       fetchResult(id_result);
       fetchUnits(id_result); // PERBAIKAN: Ganti fetchGroups dengan fetchUnits
     } else {
-      console.log("Missing required IDs");
+      // console.log("Missing required IDs");
     }
   }, [id_result, fetchUnits, fetchResult]);
 

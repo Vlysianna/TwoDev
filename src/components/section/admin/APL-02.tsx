@@ -39,7 +39,7 @@ export default function APL02({
 		!loadingResult ? `/assessments/apl-02/units/${result?.id}` : null,
 		fetcher
 	);
-	console.log(unitCompetencies);
+	// console.log(unitCompetencies);
 
 	const completedUnits = useMemo(() => {
 		if (unitCompetencies) {

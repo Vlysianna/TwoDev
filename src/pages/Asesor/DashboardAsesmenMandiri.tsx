@@ -103,7 +103,7 @@ export default function DashboardAsesmenMandiri() {
 				`/dashboard/assessor/${id_asesor}/${id_assessment}/${tab}`
 			);
 			if (response.data.success) {
-				console.log(response.data.data);
+				// console.log(response.data.data);
 				setAssesseeData(
 					response.data.data.sort((a: AssesseeData, b: AssesseeData) => {
 						const order = {

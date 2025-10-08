@@ -58,7 +58,7 @@ export default function IA01({
 			const completed = unitData.flatMap((u) =>
 				u.units.filter((u) => u.finished)
 			);
-			console.log(unitData.flatMap((u) => u.units.filter((u) => u.finished)));
+			// console.log(unitData.flatMap((u) => u.units.filter((u) => u.finished)));
 			return completed.length;
 		} else {
 			return 0;

@@ -66,7 +66,7 @@ const ResultAssessment: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  console.log(data);
+  // console.log(data);
 
   const loadData = useCallback(async () => {
     setLoading(true);

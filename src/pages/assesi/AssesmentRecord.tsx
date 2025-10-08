@@ -58,7 +58,7 @@ export default function AssessmentRecord() {
   };
 
   const handleSubmit = () => {
-    console.log("Assessment Record submitted");
+    // console.log("Assessment Record submitted");
   };
 
   return (

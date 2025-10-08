@@ -166,7 +166,7 @@ const TambahJadwal: React.FC = () => {
 				}))
 			};
 
-			console.log("Submitting data:", formattedData);
+			// console.log("Submitting data:", formattedData);
 
 			const scheduleResponse = await axiosInstance.post("/schedules", formattedData);
 

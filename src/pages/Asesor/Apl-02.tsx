@@ -66,7 +66,7 @@ export default function CekApl02() {
                 setUnitCompetencies(response.data.data);
             }
         } catch (error: any) {
-            console.log('Error fetching unit competencies:', error);
+            // console.log('Error fetching unit competencies:', error);
         }
     };
 
@@ -96,7 +96,7 @@ export default function CekApl02() {
         setProcessSuccess(null);
 
         try {
-            console.log("Generate QR...");
+            // console.log("Generate QR...");
             const qrResponse = await api.put(
                 `/assessments/apl-02/result/assessor/${id_result}/approve`
             );
@@ -105,7 +105,7 @@ export default function CekApl02() {
                 throw new Error(qrResponse.data.message || "Gagal generate QR");
             }
 
-            console.log("✅ QR berhasil digenerate");
+            // console.log("✅ QR berhasil digenerate");
 
             // Update state dengan data terbaru dari server
             setResultData(prev => ({
@@ -142,7 +142,7 @@ export default function CekApl02() {
         setProcessSuccess(null);
 
         try {
-            console.log("Simpan rekomendasi:", recommendation === 'continue');
+            // console.log("Simpan rekomendasi:", recommendation === 'continue');
             const saveResponse = await api.post(
                 `/assessments/apl-02/result/send-header`,
                 {
@@ -156,7 +156,7 @@ export default function CekApl02() {
                 setIsSaved(false);
             }
 
-            console.log("✅ Rekomendasi berhasil disimpan");
+            // console.log("✅ Rekomendasi berhasil disimpan");
 
             // Update state dengan data terbaru dari server
             setResultData(prev => ({
@@ -187,7 +187,7 @@ export default function CekApl02() {
         setRecommendation(value);
         setProcessError(null);
         setProcessSuccess(null);
-        console.log("Rekomendasi dipilih:", value);
+        // console.log("Rekomendasi dipilih:", value);
     };
 
     // Cek apakah QR sudah digenerate

@@ -81,7 +81,7 @@ const EditMUK: React.FC = () => {
 		if (loading) {
 			return;
 		}
-		console.log(dataMuk);
+		// console.log(dataMuk);
 		if (dataMuk === undefined) {
 			navigate(routes.admin.muk.root);
 		} else {
@@ -94,7 +94,7 @@ const EditMUK: React.FC = () => {
 	}, [dataMuk, form, loading, navigate]);
 
 	const handleSubmitIA02 = async (id_assessment: string) => {
-		console.log(fileIA02, id_assessment);
+		// console.log(fileIA02, id_assessment);
 		await api
 			.post(
 				`/assessments/ia-02/upload-pdf/${id_assessment}`,

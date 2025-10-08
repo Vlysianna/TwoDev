@@ -55,7 +55,7 @@ export default function CekAk05() {
       const rawData = response.data;
       if (rawData.success) {
         setData(rawData.data);
-        console.log(rawData.data);
+        // console.log(rawData.data);
 
         // Set form values from API data
         setNegatifPositif(
