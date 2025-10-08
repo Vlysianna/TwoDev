@@ -111,8 +111,8 @@ const routes = {
 		tambahJadwal: "/admin/tambah-jadwal",
 		editJadwal: (id: string | number) => `/admin/edit-jadwal/${id}`,
 		editJadwalPattern: "/admin/edit-jadwal/:id",
-		suratTugas: (id_assessment: string | number, assessor_id: string | number) => `/admin/surat-tugas/${id_assessment}/${assessor_id}`,
-		suratTugasPattern: "/admin/surat-tugas/:id_assessment/:assessor_id",
+		suratTugas: (scheduleDetailId: string | number) => `/admin/surat-tugas/${scheduleDetailId}`,
+		suratTugasPattern: "/admin/surat-tugas/:scheduleDetailId",
 	},
 	asesor: {
 		root: "/asesor",
