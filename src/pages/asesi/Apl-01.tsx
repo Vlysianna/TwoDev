@@ -271,7 +271,7 @@ export default function AplZeroOne() {
 														},
 														minLength: {
 															value: 10,
-															message: "No HP harus 10 digit",
+															message: "No HP minimal 10 digit",
 														}
 													})}
 													maxLength={13}
@@ -364,11 +364,10 @@ export default function AplZeroOne() {
 											</div>
 											<div className="">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													No. Telp Rumah <span className="text-red-500">*</span>
+													No. Telp Rumah
 												</label>
 												<input
 													{...register("house_phone_no", {
-														required: "Wajib diisi",
 														pattern: {
 															value: /^\d+$/,
 															message: "No. telp rumah hanya boleh angka",
@@ -377,27 +376,22 @@ export default function AplZeroOne() {
 															value: 13,
 															message: "No. telp rumah maksimal 13 digit",
 														},
-														minLength: {
-															value: 10,
-															message: "No. telp rumah harus 10 digit",
-														},
 													})}
 													maxLength={13}
 													placeholder="Contoh: 0217654321"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.house_phone_no && (
-													<span className="text-red-500 text-sm">{errors.house_phone_no.message || "Wajib diisi"}</span>
+													<span className="text-red-500 text-sm">{errors.house_phone_no.message}</span>
 												)}
 											</div>
 											<div className="">
 												<label className="block text-sm font-medium text-gray-700 mb-2">
-													No. Telp Kantor <span className="text-red-500">*</span>
+													No. Telp Kantor
 												</label>
 												<input
 													{...register("office_phone_no",
 														{
-															required: "Wajib diisi",
 															pattern: {
 																value: /^\d+$/,
 																message: "No. telp kantor hanya boleh angka",
@@ -406,10 +400,6 @@ export default function AplZeroOne() {
 																value: 13,
 																message: "No. telp kantor maksimal 13 digit",
 															},
-															minLength: {
-																value: 10,
-																message: "No. telp kantor harus 10 digit",
-															},
 														}
 													)}
 													maxLength={13}
@@ -417,7 +407,7 @@ export default function AplZeroOne() {
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
 												{errors.office_phone_no && (
-													<span className="text-red-500 text-sm">{errors.office_phone_no.message || "Wajib diisi"}</span>
+													<span className="text-red-500 text-sm">{errors.office_phone_no.message}</span>
 												)}
 											</div>
 											<div className="">
@@ -570,7 +560,7 @@ export default function AplZeroOne() {
 															},
 															minLength: {
 																value: 10,
-																message: "No. telp kantor harus 10 digit",
+																message: "No. telp kantor minimal 10 digit",
 															},
 															pattern: {
 																value: /^\d+$/,
