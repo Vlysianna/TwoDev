@@ -349,12 +349,6 @@ const KelolaJadwal: React.FC = () => {
                             >
                               <Eye size={16} />
                             </button>
-                            {/* Modal View Jadwal */}
-                            <JadwalViewModal
-                              isOpen={showViewModal}
-                              onClose={() => { setShowViewModal(false); setSelectedJadwal(null); }}
-                              jadwal={selectedJadwal as any}
-                            />
                             {/* Edit now handled on a separate page */}
                             <button
                               onClick={() => {
@@ -397,6 +391,12 @@ const KelolaJadwal: React.FC = () => {
           loading={deleteLoading}
         />
       )}
+      {/* Modal View Jadwal */}
+      <JadwalViewModal
+        isOpen={showViewModal}
+        onClose={() => { setShowViewModal(false); setSelectedJadwal(null); }}
+        jadwal={selectedJadwal as any}
+      />
     </div>
   );
 };
