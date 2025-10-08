@@ -116,7 +116,7 @@ const KelolaUser: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
-  const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
+  const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; backup_admin_id?: number; comment: string } | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -243,12 +243,16 @@ const KelolaUser: React.FC = () => {
         setIsApprovalModalOpen(true);
         return;
       }
-      await api.delete(`/user/${userToDelete.id}`, {
-        headers: {
-          'x-approver-admin-id': pendingApprovalData.approver_admin_id,
-          'x-approval-comment': pendingApprovalData.comment,
-        },
-      });
+      const headers: Record<string, string> = {
+        'x-approver-admin-id': pendingApprovalData.approver_admin_id.toString(),
+        'x-approval-comment': pendingApprovalData.comment,
+      };
+      
+      if (pendingApprovalData.backup_admin_id) {
+        headers['x-backup-admin-id'] = pendingApprovalData.backup_admin_id.toString();
+      }
+      
+      await api.delete(`/user/${userToDelete.id}`, { headers });
       await fetchData(); // Refresh the list
       setIsDeleteModalOpen(false);
       setUserToDelete(null);

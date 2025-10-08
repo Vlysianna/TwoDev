@@ -44,7 +44,7 @@ const KelolaOkupasi: React.FC = () => {
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 	const [approvalOpen, setApprovalOpen] = useState<boolean>(false);
-	const [, setApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
+	const [, setApprovalData] = useState<{ approver_admin_id: number; backup_admin_id?: number; comment: string } | null>(null);
 
 	const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -132,16 +132,20 @@ const KelolaOkupasi: React.FC = () => {
 		setIsDeleteModalOpen(true);
 	};
 
-	const performDelete = async (id: number, approval: { approver_admin_id: number; comment: string }) => {
+	const performDelete = async (id: number, approval: { approver_admin_id: number; backup_admin_id?: number; comment: string }) => {
 		try {
 			setDeleteLoading(true);
 			setError(null);
-			await axiosInstance.delete(`/occupations/${id}`, {
-				headers: {
-					"x-approver-admin-id": approval.approver_admin_id,
-					"x-approval-comment": approval.comment || "hapus okupasi",
-				},
-			});
+		const headers: Record<string, string> = {
+			"x-approver-admin-id": approval.approver_admin_id.toString(),
+			"x-approval-comment": approval.comment || "hapus okupasi",
+		};
+		
+		if (approval.backup_admin_id) {
+			headers["x-backup-admin-id"] = approval.backup_admin_id.toString();
+		}
+		
+		await axiosInstance.delete(`/occupations/${id}`, { headers });
 			await fetchOccupations();
 			toast.show({ title: "Berhasil", description: "Permintaan penghapusan dikirim untuk persetujuan", type: "success" });
 		} catch (e) {

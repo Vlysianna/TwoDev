@@ -28,7 +28,7 @@ const KelolaJurusan = () => {
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [schemeToDelete, setSchemeToDelete] = useState<Scheme | null>(null);
 	const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
-	const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; comment: string } | null>(null);
+	const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; backup_admin_id?: number; comment: string } | null>(null);
 	// approval only used for delete now
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [editingScheme, setEditingScheme] = useState<Scheme | null>(null);
@@ -90,12 +90,16 @@ const KelolaJurusan = () => {
 			}
 
 			setDeleteLoading(schemeToDelete.id);
-			await axiosInstance.delete(`/schemes/${schemeToDelete.id}`, {
-				headers: {
-					"x-approver-admin-id": pendingApprovalData.approver_admin_id,
-					"x-approval-comment": pendingApprovalData.comment || "hapus jurusan",
-				},
-			});
+			const headers: Record<string, string> = {
+				"x-approver-admin-id": pendingApprovalData.approver_admin_id.toString(),
+				"x-approval-comment": pendingApprovalData.comment || "hapus jurusan",
+			};
+			
+			if (pendingApprovalData.backup_admin_id) {
+				headers["x-backup-admin-id"] = pendingApprovalData.backup_admin_id.toString();
+			}
+			
+			await axiosInstance.delete(`/schemes/${schemeToDelete.id}`, { headers });
 
 			await fetchSchemes();
 			setIsDeleteModalOpen(false);
