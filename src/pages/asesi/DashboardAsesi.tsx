@@ -5,7 +5,6 @@ import {
 	Clock,
 	ChevronRight,
 	Search,
-	ListFilter,
 	BookOpen,
 	AlertCircle,
 	MapPinned,
@@ -87,33 +86,37 @@ export default function DashboardAsesi() {
 	}, [schedules]);
 
 	useEffect(() => {
-		let filtered = schedules;
+		const filtered = schedules
+			.map(schedule => {
+				// Filter detail per searchTerm
+				const filteredDetails = schedule.schedule_details.filter(detail => {
+					const term = searchTerm.toLowerCase();
+					return (
+						detail.assessor.full_name.toLowerCase().includes(term) ||
+						detail.location.toLowerCase().includes(term) ||
+						schedule.assessment.occupation.name.toLowerCase().includes(term) ||
+						schedule.assessment.occupation.scheme.name.toLowerCase().includes(term)
+					);
+				});
 
-		if (selectedProgram !== "ALL") {
-			filtered = filtered.filter(
-				(sch) => sch.assessment.occupation.scheme.code === selectedProgram
-			);
-		}
+				// Hanya return schedule kalau ada detail yang match
+				if (filteredDetails.length > 0) {
+					return { ...schedule, schedule_details: filteredDetails };
+				}
+				return null;
+			})
+			.filter(Boolean) as typeof schedules; // buang null
 
-		if (searchTerm) {
-			filtered = filtered.filter(
-				(sch) =>
-					sch.assessment.occupation.name
-						.toLowerCase()
-						.includes(searchTerm.toLowerCase()) ||
-					sch.assessment.occupation.scheme.name
-						.toLowerCase()
-						.includes(searchTerm.toLowerCase()) ||
-					sch.schedule_details.some((detail) =>
-						detail.assessor.full_name
-							.toLowerCase()
-							.includes(searchTerm.toLowerCase())
-					)
-			);
-		}
+		// Filter berdasarkan selectedProgram juga
+		const finalFiltered = selectedProgram === "ALL"
+			? filtered
+			: filtered.filter(
+					sch => sch.assessment.occupation.scheme.code === selectedProgram
+				);
 
-		setFilteredSchedules(filtered);
+		setFilteredSchedules(finalFiltered);
 	}, [searchTerm, schedules, selectedProgram]);
+
 
 	const updateProgramFilters = () => {
 		const programCounts = schedules.reduce((acc, sch) => {
@@ -415,14 +418,6 @@ export default function DashboardAsesi() {
 												  )} akan muncul di sini.`
 												: "Assessment akan muncul di sini setelah Anda mendaftar."}
 										</p>
-										{!searchTerm && selectedProgram === "ALL" && (
-											<Link
-												to={paths.asesi.assessment.apl01Pattern}
-												className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-											>
-												Mulai Assessment
-											</Link>
-										)}
 									</div>
 								)}
 							</div>

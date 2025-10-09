@@ -125,7 +125,7 @@ export default function CekAk01() {
         });
       }
     } catch (error) {
-      console.log("Error Generating QR Code:", error);
+      // console.log("Error Generating QR Code:", error);
       toast.show({
         title: "Gagal",
         description: "Gagal generate QR Code",
@@ -165,7 +165,7 @@ export default function CekAk01() {
         });
       }
     } catch (error) {
-      console.log("Error saving data:", error);
+      // console.log("Error saving data:", error);
       toast.show({
         title: "Gagal",
         description: "Terjadi kesalahan saat menyimpan data",

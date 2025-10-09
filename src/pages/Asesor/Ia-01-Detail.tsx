@@ -165,7 +165,7 @@ export default function Ia01Detail() {
         ? `${basePath}?group=${encodeURIComponent(activeGroup)}`
         : basePath;
 
-      console.log("Navigating to:", navigationPath); // Debug log
+      // console.log("Navigating to:", navigationPath); // Debug log
 
       // Force navigation with replace to ensure it works
       navigate(navigationPath, { replace: true });

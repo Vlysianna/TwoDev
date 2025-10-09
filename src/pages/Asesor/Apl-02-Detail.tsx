@@ -73,7 +73,7 @@ export default function CekApl02Detail() {
         setElements(response.data.data);
       }
     } catch (error: any) {
-      console.log("Error fetching elements:", error);
+      // console.log("Error fetching elements:", error);
     } finally {
       setLoading(false);
     }

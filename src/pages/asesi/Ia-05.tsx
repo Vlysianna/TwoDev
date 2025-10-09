@@ -138,7 +138,7 @@ export default function Ia05() {
         setResult(res.data.data);
       }
     } catch (e) {
-      console.log("Gagal memuat data result:", e);
+      // console.log("Gagal memuat data result:", e);
     }
   };
 
@@ -192,7 +192,7 @@ export default function Ia05() {
         navigate(paths.asesi.assessment.Ia05CAssessee(id_assessment, id_asesor));
       }
     } catch (error) {
-      console.log("Belum ada jawaban atau error:", error);
+      // console.log("Belum ada jawaban atau error:", error);
     }
   };
 

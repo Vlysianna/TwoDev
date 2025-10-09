@@ -60,7 +60,7 @@ const Contact: React.FC = () => {
             className="  rounded-lg  flex flex-col gap-4"
             onSubmit={(e) => {
               e.preventDefault();
-              console.log("Form submitted");
+              // console.log("Form submitted");
             }}
           >
             <input

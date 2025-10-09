@@ -66,7 +66,7 @@ const ResultAssessment: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  console.log(data);
+  // console.log(data);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -249,10 +249,10 @@ const ResultAssessment: React.FC = () => {
                                       </div>
                                       <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
                                         <button
-                                          className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                          className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-yellow-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(paths.admin.suratTugas(schedule.assessment.id, String(detail.assessor.id)));
+                                            navigate(paths.admin.suratTugas(detail.id));
                                           }}
                                         >
                                           Surat Tugas <ArrowRight size={16} />
@@ -273,7 +273,7 @@ const ResultAssessment: React.FC = () => {
                                             navigate(paths.admin.resultAssessment.dashboard(schedule.assessment.id, String(detail.assessor.id)));
                                           }}
                                         >
-                                          Lihat Detail Asesmen <ArrowRight size={16} />
+                                          Detail Asesmen <ArrowRight size={16} />
                                         </button>
                                         <button
                                           className="px-2 bg-blue-500 rounded hover:bg-blue-700 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
@@ -282,7 +282,7 @@ const ResultAssessment: React.FC = () => {
                                             navigate(paths.admin.recapAssessmentAdmin(detail.id, String(detail.assessor.id)));
                                           }}
                                         >
-                                          Lihat Berita Acara <ArrowRight size={16} />
+                                          Berita Acara <ArrowRight size={16} />
                                         </button>
                                       </div>
                                     </div>
@@ -352,34 +352,45 @@ const ResultAssessment: React.FC = () => {
                                 <User size={16} className="text-gray-600 mt-0.5 flex-shrink-0" />
                                 <span>{schedule.assessor.full_name}</span>
                               </div>
-                              <div className="flex flex-row justify-between gap-2 px-4">
+                              <div className="flex flex-row justify-between gap-2 px-4 overflow-x-auto pb-2">
                                 <button
-                                  className="text-[#E77D35] text-sm cursor-pointer flex items-center gap-2 py-1"
+                                  className="bg-yellow-600 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
                                   onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(paths.admin.resultAssessment.dashboard(assessment.id, String(schedule.assessor.id)));
-                                  }}
-                                >
-                                  Lihat Detail Asesmen <ArrowRight size={16} />
+                                      e.stopPropagation();
+                                      navigate(paths.admin.suratTugas(schedule.id));
+                                    }}
+                                  >
+                                    Surat Tugas
                                 </button>
-                                
+
                                 <button
-                                  className="text-green-600 text-sm cursor-pointer flex items-center gap-2 py-1"
+                                  className="bg-green-600 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(schedule.assessor.id))}&schedule=${encodeURIComponent(String(schedule.id))}`);
                                   }}
                                 >
-                                  Verifikasi Per Jadwal <ArrowRight size={16} />
+                                  Verifikasi Asesi
                                 </button>
+
                                 <button
-                                  className="text-blue-500 text-sm cursor-pointer flex items-center gap-2 py-1"
+                                  className="bg-[#E77D35] text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(paths.admin.resultAssessment.dashboard(assessment.id, String(schedule.assessor.id)));
+                                  }}
+                                >
+                                  Detail Asesmen
+                                </button>
+                                
+                                <button
+                                  className="bg-blue-500 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     navigate(paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id)));
                                   }}
                                 >
-                                  Lihat Berita Acara <ArrowRight size={16} />
+                                  Berita Acara
                                 </button>
                               </div>
                               {/* <hr className='my-4 border-gray-400'/> */}

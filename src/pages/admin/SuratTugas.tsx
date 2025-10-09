@@ -1,65 +1,73 @@
-import { useFieldArray, useForm } from "react-hook-form";
-import { DownloadIcon, FileText, Trash2 } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
+import { DownloadIcon, FileText } from "lucide-react";
 import Sidebar from "@/components/SideAdmin";
 import NavAdmin from "@/components/NavAdmin";
 import { useParams } from "react-router-dom";
 import api from "@/helper/axios";
 import useToast from "@/components/ui/useToast";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
 
 type SuratTugasFormType = {
 	number: string;
 	LSP_name: string;
-	assigner_name: string;
-	position: string;
-	assessor_id: string;
-	assessment_id: string;
-	activity_name: string;
+	leader_id: number;
+	schedule_detail_id: number;
 	work_unit: string;
-	tuk: string;
-	location: string;
+	activity_name: string;
+	position: string;
+};
+
+type AdminType = {
+	id: number;
+	user_id: number;
 	address: string;
-	date: string[];
-	time: {
-		start: string;
-		end: string;
-	};
-	issued_in: string;
+	phone_no: string;
+	birth_date: string;
+	can_approve: boolean;
+	created_at: string;
+	updated_at: string;
+	full_name: string;
+	email: string;
+	role_id: number;
 };
 
 const STORAGE_KEY = "surat_tugas_form";
 
+const fetcher = (url: string) =>
+	api
+		.get(url, { params: { page: 1, limit: 1000 } })
+		.then((res) => res.data.data);
+
 export default function SuratTugas() {
-	const { id_assessment, assessor_id } = useParams();
+	const { scheduleDetailId } = useParams();
 	const [loading, setLoading] = useState(false);
 	const toast = useToast();
 
-	const defaultValues: SuratTugasFormType = {
-		number: "",
-		LSP_name: "LSP SMKN 24 Jakarta",
-		assigner_name: "",
-		position: "Asesor Kompetensi",
-		assessor_id: assessor_id!,
-		assessment_id: id_assessment!,
-		activity_name: "",
-		work_unit: "SMK Negeri 24 Jakarta",
-		tuk: "TUK RPL SMKN 24 Jakarta",
-		location: "",
-		address: "",
-		date: [""],
-		time: { start: "", end: "" },
-		issued_in: "Jakarta",
-	};
+	const defaultValues: SuratTugasFormType = useMemo(
+		() => ({
+			number: "123/LSPSMKN24JKT/2025",
+			LSP_name: "LSP SMKN 24 Jakarta",
+			leader_id: 0,
+			schedule_detail_id: Number(scheduleDetailId),
+			work_unit: "SMK Negeri 24",
+			activity_name: "USK RPL SMK Negeri 24 Jakarta 2025 KELAS-H",
+			position: "Asesor Kompetensi",
+		}),
+		[scheduleDetailId]
+	);
 
 	const {
 		register,
 		handleSubmit,
-		control,
 		formState: { errors },
 		reset,
+		control,
 	} = useForm<SuratTugasFormType>({
 		defaultValues: defaultValues,
 	});
+
+	const { data: admins, isLoading } = useSWR<AdminType[]>("/admins", fetcher);
 
 	useEffect(() => {
 		const saved = localStorage.getItem(STORAGE_KEY);
@@ -70,19 +78,14 @@ export default function SuratTugas() {
 					...defaultValues,
 					...parsed,
 					...JSON.parse(saved),
-					assessor_id,
-					assessment_id: id_assessment,
+					schedule_detail_id: Number(scheduleDetailId),
 				});
 			} catch {
 				console.warn("Gagal parse data localStorage");
 			}
 		}
-	}, [assessor_id, defaultValues, id_assessment, reset]);
-
-	const { fields, append, remove } = useFieldArray({
-		control,
-		name: "date",
-	});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const onSubmit = async (data: SuratTugasFormType) => {
 		try {
@@ -90,26 +93,20 @@ export default function SuratTugas() {
 
 			const {
 				number,
+				LSP_name,
+				leader_id,
+				work_unit,
 				activity_name,
-				assigner_name,
-				tuk,
-				location,
-				date,
-				time,
-				address,
-				issued_in,
+				position,
 			} = data;
 
 			const saveData = {
 				number,
+				LSP_name,
+				leader_id,
+				work_unit,
 				activity_name,
-				assigner_name,
-				tuk,
-				location,
-				date,
-				time,
-				address,
-				issued_in,
+				position,
 			};
 
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
@@ -155,14 +152,14 @@ export default function SuratTugas() {
 						className="bg-white rounded-lg shadow p-6 transition-all duration-300 hover:shadow-md"
 					>
 						<h2 className="text-lg font-semibold mb-6 border-b pb-3">
-							Tambah Surat Tugas
+							Surat Tugas
 						</h2>
 
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 							{/* Nomor Surat */}
 							<div>
 								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Nomor Surat
+									Nomor Surat <span className="text-red-500">*</span>
 								</label>
 								<input
 									{...register("number", {
@@ -179,22 +176,71 @@ export default function SuratTugas() {
 								)}
 							</div>
 
-							{/* Penandatangan */}
+							{/* Nama LSP */}
 							<div>
 								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Nama Penandatangan
+									Nama LSP <span className="text-red-500">*</span>
 								</label>
 								<input
-									{...register("assigner_name", {
-										required: "Nama penandatangan wajib diisi",
+									{...register("LSP_name", {
+										required: "Nama LSP wajib diisi",
 									})}
 									type="text"
-									placeholder="Dwi Safitri, S.Pd."
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+									placeholder="Nama LSP"
+									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm shadow-sm text-gray-600"
 								/>
-								{errors.assigner_name && (
+								{errors.LSP_name && (
 									<p className="text-red-500 text-xs mt-1">
-										{errors.assigner_name.message}
+										{errors.LSP_name.message}
+									</p>
+								)}
+							</div>
+
+							{/* Admin */}
+							<div>
+								<label className="block text-sm font-medium mb-2 text-gray-700">
+									Admin (Ketua LSP) <span className="text-red-500">*</span>
+								</label>
+								<Controller
+									name="leader_id"
+									control={control}
+									render={({ field }) => (
+										<select
+											{...field}
+											className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm shadow-sm text-gray-600"
+											required
+										>
+											<option value="">Pilih Admin</option>
+											{isLoading ? (
+												<option>Loading...</option>
+											) : (
+												admins?.map((admin) => (
+													<option key={admin.id} value={admin.id}>
+														{admin.full_name}
+													</option>
+												))
+											)}
+										</select>
+									)}
+								/>
+							</div>
+
+							{/* Unit Kerja */}
+							<div>
+								<label className="block text-sm font-medium mb-2 text-gray-700">
+									Unit Kerja <span className="text-red-500">*</span>
+								</label>
+								<input
+									{...register("work_unit", {
+										required: "Unit kerja wajib diisi",
+									})}
+									type="text"
+									placeholder="Unit kerja"
+									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm shadow-sm text-gray-600"
+								/>
+								{errors.work_unit && (
+									<p className="text-red-500 text-xs mt-1">
+										{errors.work_unit.message}
 									</p>
 								)}
 							</div>
@@ -202,14 +248,14 @@ export default function SuratTugas() {
 							{/* Nama Kegiatan */}
 							<div>
 								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Nama Kegiatan
+									Nama Kegiatan <span className="text-red-500">*</span>
 								</label>
 								<input
 									{...register("activity_name", {
 										required: "Nama kegiatan wajib diisi",
 									})}
 									type="text"
-									placeholder="USK RPL SMK Negeri 24 Jakarta 2025"
+									placeholder="Nama kegiatan"
 									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
 								/>
 								{errors.activity_name && (
@@ -219,173 +265,24 @@ export default function SuratTugas() {
 								)}
 							</div>
 
-							{/* Tempat Uji Kompetensi */}
-							<div>
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									TUK
-								</label>
-								<input
-									{...register("tuk", { required: "TUK wajib diisi" })}
-									type="text"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-								/>
-								{errors.tuk && (
-									<p className="text-red-500 text-xs mt-1">
-										{errors.tuk.message}
-									</p>
-								)}
-							</div>
-
-							{/* Lokasi */}
-							<div>
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Lokasi
-								</label>
-								<input
-									{...register("location", { required: "Lokasi wajib diisi" })}
-									type="text"
-									placeholder="SMK Negeri 24 Jakarta"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-								/>
-								{errors.location && (
-									<p className="text-red-500 text-xs mt-1">
-										{errors.location.message}
-									</p>
-								)}
-							</div>
-
-							{/* Alamat */}
-							<div>
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Alamat
-								</label>
-								<input
-									{...register("address", { required: "Alamat wajib diisi" })}
-									type="text"
-									placeholder="Jl. Hankam Raya No.89, Cilangkap, Cipayung"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-								/>
-								{errors.address && (
-									<p className="text-red-500 text-xs mt-1">
-										{errors.address.message}
-									</p>
-								)}
-							</div>
-							{/* Nama LSP */}
-							<div>
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Nama LSP
-								</label>
-								<input
-									{...register("LSP_name")}
-									type="text"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm shadow-sm text-gray-600 cursor-not-allowed"
-								/>
-							</div>
-
 							{/* Jabatan */}
 							<div>
 								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Jabatan
+									Jabatan <span className="text-red-500">*</span>
 								</label>
 								<input
-									{...register("position")}
-									type="text"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm shadow-sm text-gray-600 cursor-not-allowed"
-								/>
-							</div>
-
-							{/* Unit Kerja */}
-							<div>
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Unit Kerja
-								</label>
-								<input
-									{...register("work_unit")}
-									type="text"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm shadow-sm text-gray-600 cursor-not-allowed"
-								/>
-							</div>
-
-							{/* Dikeluarkan di (Issued In) */}
-							<div>
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Dikeluarkan di
-								</label>
-								<input
-									{...register("issued_in", {
-										required: "Lokasi penerbitan wajib diisi",
+									{...register("position", {
+										required: "Jabatan wajib diisi",
 									})}
 									type="text"
-									placeholder="Jakarta"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+									placeholder="Jabatan"
+									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm shadow-sm text-gray-600"
 								/>
-								{errors.issued_in && (
+								{errors.position && (
 									<p className="text-red-500 text-xs mt-1">
-										{errors.issued_in.message}
+										{errors.position.message}
 									</p>
 								)}
-							</div>
-
-							{/* --- Daftar Tanggal --- */}
-							<div className="md:col-span-2">
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Tanggal Asesmen
-								</label>
-								<div className="space-y-2">
-									{fields.map((field, index) => (
-										<div key={field.id} className="flex gap-2">
-											<input
-												{...register(`date.${index}` as const, {
-													required: "Tanggal wajib diisi",
-												})}
-												type="date"
-												className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 flex-1"
-											/>
-											<button
-												type="button"
-												onClick={() => remove(index)}
-												className="text-red-500 hover:text-red-700"
-											>
-												<Trash2 size={16} />
-											</button>
-										</div>
-									))}
-									<button
-										type="button"
-										onClick={() => append("")}
-										className="flex items-center gap-2 px-3 py-1.5 bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600"
-									>
-										+ Tambah Tanggal
-									</button>
-								</div>
-							</div>
-
-							{/* Jam Mulai & Selesai */}
-							<div>
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Jam Mulai
-								</label>
-								<input
-									{...register("time.start", {
-										required: "Jam mulai wajib diisi",
-									})}
-									type="time"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-								/>
-							</div>
-
-							<div>
-								<label className="block text-sm font-medium mb-2 text-gray-700">
-									Jam Selesai
-								</label>
-								<input
-									{...register("time.end", {
-										required: "Jam selesai wajib diisi",
-									})}
-									type="time"
-									className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-								/>
 							</div>
 						</div>
 

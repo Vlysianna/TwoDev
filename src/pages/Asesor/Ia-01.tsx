@@ -35,6 +35,7 @@ export default function Ia01() {
 	const [recommendation, setRecommendation] = useState<
 		"kompeten" | "belum" | null
 	>(null);
+	const [canSave, setCanSave] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [assessment, setAssessment] = useState<any>(null);
@@ -343,7 +344,21 @@ export default function Ia01() {
 		await handleSaveHeader();
 	};
 
+	// TAMBAHKAN state untuk track initial load
+	const [initialLoad, setInitialLoad] = useState(true);
+
+	useEffect(() => {}, [id_result]);
+
 	useEffect(() => {
+		const loadData = async () => {
+			await fetchResultData();
+			setInitialLoad(false);
+		};
+
+		if (id_result) {
+			loadData();
+		}
+
 		if (id_assessment) fetchAssessment();
 		if (id_result) {
 			fetchUnitData();
@@ -520,16 +535,30 @@ export default function Ia01() {
 	}, [recommendation, resultData, incompleteCriteria]);
 
 	useEffect(() => {
-		if (assessorQrValue == "") {
-			if (incompleteCriteria.length > 0) {
-				setRecommendation("belum");
+		if (unitData.length > 0) {
+			
+			// console.log(completedUnits === unitData.length)
+			console.log(isSaved)
+			if (unitData.length > 0 && completedUnits === unitData.length && !assessorQrValue) {
+				setCanSave(true);
+			} else {
+				setCanSave(false);
+				return;
+			}
+
+			if (assessorQrValue == "") {
+				if (incompleteCriteria.length > 0) {
+					setRecommendation("belum");
+				} else {
+					setRecommendation("kompeten");
+				}
 			} else {
 				setRecommendation("kompeten");
 			}
 		} else {
-			setRecommendation("kompeten");
+			setCanSave(false);
 		}
-	}, [assessorQrValue, incompleteCriteria]);
+	}, [assessorQrValue, completedUnits, incompleteCriteria, unitData]);
 
 	useEffect(() => {
 		if (recommendation === "kompeten") {
@@ -562,20 +591,6 @@ export default function Ia01() {
 			}
 		}
 	}, [recommendation]);
-
-	// TAMBAHKAN state untuk track initial load
-	const [initialLoad, setInitialLoad] = useState(true);
-
-	useEffect(() => {
-		const loadData = async () => {
-			await fetchResultData();
-			setInitialLoad(false);
-		};
-
-		if (id_result) {
-			loadData();
-		}
-	}, [id_result]);
 
 	const handleRecommendationChange = (value: "kompeten" | "belum") => {
 		setRecommendation(value);
@@ -856,7 +871,10 @@ export default function Ia01() {
 															>
 																<div>
 																	<div className="text-sm font-medium text-gray-800">
-																		<span className="font-bold">Unit {unit.no}:</span> {unit.title}
+																		<span className="font-bold">
+																			Unit {unit.no}:
+																		</span>{" "}
+																		{unit.title}
 																	</div>
 
 																	<div className="mt-2 space-y-2 pl-4">
@@ -1039,16 +1057,18 @@ export default function Ia01() {
 												<button
 													onClick={handleSaveHeaderClick}
 													disabled={
-														saveProcessing ||
-														!recommendation ||
-														assessorQrValue ||
-														!isHeaderChanged()
+														!canSave &&
+														(saveProcessing ||
+															!recommendation ||
+															assessorQrValue ||
+															!isHeaderChanged())
 													}
 													className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-														saveProcessing ||
-														!recommendation ||
-														assessorQrValue ||
-														!isHeaderChanged()
+														!canSave &&
+														(saveProcessing ||
+															!recommendation ||
+															assessorQrValue ||
+															!isHeaderChanged())
 															? "cursor-not-allowed opacity-50"
 															: "hover:bg-green-700 cursor-pointer"
 													}`}

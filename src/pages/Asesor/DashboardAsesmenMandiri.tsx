@@ -17,13 +17,15 @@ import api from "@/helper/axios";
 import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
+import InputScoreModal from "@/components/InputScoreModal";
+import useToast from "@/components/ui/useToast";
 
 interface AssesseeData {
 	result_id: number;
 	assessment_id: number;
 	assessee_id: number;
 	assessee_name: string;
-	status: 'Belum Tuntas' | 'Menunggu Asesi' | 'Tuntas';
+	status: "Belum Tuntas" | "Menunggu Asesi" | "Tuntas";
 }
 
 interface TabResponse {
@@ -34,7 +36,7 @@ interface TabResponse {
 
 interface Tab {
 	name: string;
-	status: 'Belum Tuntas' | 'Menunggu Asesi' | 'Tuntas' | 'Butuh Persetujuan';
+	status: "Belum Tuntas" | "Menunggu Asesi" | "Tuntas" | "Butuh Persetujuan";
 }
 
 export default function DashboardAsesmenMandiri() {
@@ -45,6 +47,10 @@ export default function DashboardAsesmenMandiri() {
 
 	const [showLeftScroll, setShowLeftScroll] = useState(false);
 	const [showRightScroll, setShowRightScroll] = useState(true);
+	const [isModalPenilaianOpen, setModalPenilaianOpen] = useState(false);
+	const [savingPenilaian, setSavingPenilaian] = useState(false);
+
+	const toast = useToast();
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
@@ -63,6 +69,7 @@ export default function DashboardAsesmenMandiri() {
 
 	useEffect(() => {
 		fetchAssesseeData(selectedTab.toLowerCase());
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedTab]);
 
 	useEffect(() => {
@@ -71,10 +78,12 @@ export default function DashboardAsesmenMandiri() {
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase());
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchTerm]);
 
 	useEffect(() => {
 		fetchTabs();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [user]);
 
 	const fetchTabs = async () => {
@@ -103,13 +112,13 @@ export default function DashboardAsesmenMandiri() {
 				`/dashboard/assessor/${id_asesor}/${id_assessment}/${tab}`
 			);
 			if (response.data.success) {
-				console.log(response.data.data);
+				// console.log(response.data.data);
 				setAssesseeData(
 					response.data.data.sort((a: AssesseeData, b: AssesseeData) => {
 						const order = {
 							"Belum Tuntas": 0,
 							"Menunggu Asesi": 1,
-							"Tuntas": 2,
+							Tuntas: 2,
 						};
 
 						const statusDiff = order[a.status] - order[b.status];
@@ -130,6 +139,43 @@ export default function DashboardAsesmenMandiri() {
 			setError("Gagal memuat data asesi");
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const handleSaveScore = async (score: number, result_id: number) => {
+		try {
+			setSavingPenilaian(true);
+			const response = await api.put(
+				`/assessments/result/input-score/${result_id}`,
+				{
+					score: score,
+				}
+			);
+
+			if (response.data.success) {
+				toast.show({
+					title: "Penilaian berhasil disimpan",
+					type: "success",
+				});
+				setSavingPenilaian(false);
+				setModalPenilaianOpen(false);
+			} else {
+				toast.show({
+					title: "Penilaian gagal disimpan " + response.data.message,
+					type: "error",
+				});
+				setSavingPenilaian(false);
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (error: any) {
+			toast.show({
+				title: `Penilaian gagal disimpan (${error.data.data.message})`,
+				type: "error",
+			});
+			setSavingPenilaian(false);
+		} finally {
+			setSavingPenilaian(false);
 		}
 	};
 
@@ -187,6 +233,8 @@ export default function DashboardAsesmenMandiri() {
 				return "Cek AK-03 >";
 			case "ak-05":
 				return "Cek AK-05 >";
+			case "penilaian":
+				return "Nilai Asesi";
 			default:
 				return "Cek >";
 		}
@@ -198,7 +246,9 @@ export default function DashboardAsesmenMandiri() {
 				navigate(paths.asesor.assessment.cekApl02(id_assessment, assesseeId));
 				break;
 			case "ia-01":
-				navigate(paths.asesor.assessment.ia01(id_assessment, assesseeId));
+				navigate(
+					paths.asesor.assessment.ia01(id_assessment, String(assesseeId))
+				);
 				break;
 			case "ia-02":
 				navigate(paths.asesor.assessment.ia02(id_assessment, assesseeId));
@@ -221,52 +271,55 @@ export default function DashboardAsesmenMandiri() {
 			case "ak-05":
 				navigate(paths.asesor.assessment.ak05(id_assessment, assesseeId));
 				break;
+			case "penilaian":
+				setModalPenilaianOpen(true);
+				break;
 		}
 	};
 
 	const statusClasses: Record<string, string> = {
 		"Belum Tuntas": "text-red-500",
 		"Menunggu Asesi": "text-blue-500",
-		"Tuntas": "text-green-500",
+		Tuntas: "text-green-500",
 		"Butuh Persetujuan": "text-yellow-500",
 	};
 
 	const badgeClasses: Record<string, string> = {
 		"Belum Tuntas": "bg-red-100",
 		"Menunggu Asesi": "bg-blue-100",
-		"Tuntas": "bg-green-100",
+		Tuntas: "bg-green-100",
 		"Butuh Persetujuan": "bg-yellow-100",
 	};
 
 	const statusIcons: Record<string, JSX.Element> = {
 		"Belum Tuntas": <SquareX size={14} />,
 		"Menunggu Asesi": <Loader size={14} />,
-		"Tuntas": <CheckCircle size={14} />,
+		Tuntas: <CheckCircle size={14} />,
 		"Butuh Persetujuan": <SquareCheck size={14} />,
 	};
 
 	// Keterangan untuk setiap status
 	const statusDescriptions = {
-		"Tuntas": {
+		Tuntas: {
 			description: "Formulir telah lengkap dan disetujui",
 			color: "bg-green-500",
-			textColor: "text-green-700"
+			textColor: "text-green-700",
 		},
 		"Menunggu Asesi": {
 			description: "Menunggu respons atau tindakan dari asesi",
 			color: "bg-blue-500",
-			textColor: "text-blue-700"
+			textColor: "text-blue-700",
 		},
 		"Belum Tuntas": {
 			description: "Formulir belum dikerjakan oleh Anda (Asesor)",
 			color: "bg-red-500",
-			textColor: "text-red-700"
+			textColor: "text-red-700",
 		},
 		"Butuh Persetujuan": {
 			description: "Menunggu persetujuan dari Anda (Asesor)",
 			color: "bg-yellow-500",
-			textColor: "text-yellow-700"
-		}
+			textColor: "text-yellow-700",
+		},
 	};
 
 	return (
@@ -299,13 +352,17 @@ export default function DashboardAsesmenMandiri() {
 					{/* Keterangan Status */}
 					<div className="mb-4 p-4 bg-white rounded-lg shadow-sm border">
 						<div className="flex items-center mb-3">
-							<h3 className="text-sm font-semibold text-gray-700 me-2">Keterangan Status Formulir</h3>
+							<h3 className="text-sm font-semibold text-gray-700 me-2">
+								Keterangan Status Formulir
+							</h3>
 							<button
 								onClick={() => setShowStatusInfo(!showStatusInfo)}
 								className="flex items-center text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
 							>
 								<Info size={16} />
-								<span className="ml-1 text-xs sm:text-md">Lihat detail status</span>
+								<span className="ml-1 text-xs sm:text-md">
+									Lihat detail status
+								</span>
 							</button>
 						</div>
 
@@ -323,7 +380,9 @@ export default function DashboardAsesmenMandiri() {
 											<span className={`text-sm font-medium ${info.textColor}`}>
 												{status}
 											</span>
-											<p className="text-xs text-gray-600 mt-1">{info.description}</p>
+											<p className="text-xs text-gray-600 mt-1">
+												{info.description}
+											</p>
 										</div>
 									</div>
 								))}
@@ -375,16 +434,17 @@ export default function DashboardAsesmenMandiri() {
 										key={tab.name}
 										onClick={() => setSelectedTab(tab.name)}
 										className={`flex-shrink-0 px-3 py-2 cursor-pointer rounded-md border-b-2 transition-all duration-200
-    ${selectedTab.toLowerCase() === tab.name.toLowerCase()
-												? "border-orange-800 bg-[#E77D35] text-white font-semibold"
-												: tab.status === "Tuntas"
-													? "border-green-500 text-green-700 font-medium"
-													: tab.status === "Menunggu Asesi"
-														? "border-blue-500 text-blue-600 font-medium"
-														: tab.status === "Butuh Persetujuan"
-															? "border-yellow-500 text-yellow-600 font-medium"
-															: "border-red-500 text-red-600 font-medium"
-											}`}
+    ${
+			selectedTab.toLowerCase() === tab.name.toLowerCase()
+				? "border-orange-800 bg-[#E77D35] text-white font-semibold"
+				: tab.status === "Tuntas"
+				? "border-green-500 text-green-700 font-medium"
+				: tab.status === "Menunggu Asesi"
+				? "border-blue-500 text-blue-600 font-medium"
+				: tab.status === "Butuh Persetujuan"
+				? "border-yellow-500 text-yellow-600 font-medium"
+				: "border-red-500 text-red-600 font-medium"
+		}`}
 									>
 										{tab.name}
 									</button>
@@ -469,7 +529,11 @@ export default function DashboardAsesmenMandiri() {
 												</td>
 												<td className="px-4 py-3 text-sm text-gray-700 text-center">
 													<span
-														className={`inline-flex items-center ${badgeClasses[asesi.status]} gap-1 px-2 py-1 text-center rounded-full text-xs font-medium ${statusClasses[asesi.status]}`}
+														className={`inline-flex items-center ${
+															badgeClasses[asesi.status]
+														} gap-1 px-2 py-1 text-center rounded-full text-xs font-medium ${
+															statusClasses[asesi.status]
+														}`}
 													>
 														{statusIcons[asesi.status]}
 														{asesi.status}
@@ -482,6 +546,23 @@ export default function DashboardAsesmenMandiri() {
 													>
 														{getActionText()}
 													</button>
+
+													{/* Modal Penilaian */}
+													{selectedTab.toLowerCase() === "penilaian" && (
+														<InputScoreModal
+															isOpen={isModalPenilaianOpen}
+															onClose={() => setModalPenilaianOpen(false)}
+															loading={savingPenilaian}
+															title="Input Skor"
+															initialScore={0}
+															onSave={async (score) => {
+																setSavingPenilaian(true);
+																await handleSaveScore(score, asesi.result_id);
+																setSavingPenilaian(false);
+																setModalPenilaianOpen(false);
+															}}
+														/>
+													)}
 												</td>
 											</tr>
 										))

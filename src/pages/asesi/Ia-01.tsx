@@ -41,7 +41,7 @@ export default function Ia01Asesi() {
                 `/assessments/ia-01/result/assessee/${id_result}/approve`
             );
 
-            console.log("Response approve:", response.data);
+            // console.log("Response approve:", response.data);
             setValueQr(getAssesseeUrl(Number(id_asesi)));
             fetchResultData();
             mutateNavigation();
@@ -64,7 +64,7 @@ export default function Ia01Asesi() {
 
     useEffect(() => {
         if (unitData && unitData.length > 0) {
-            console.log(unitData)
+            // console.log(unitData)
             const completed = unitData.filter((unit: any) => unit.finished);
             setCompletedUnits(completed.length);
         }
@@ -88,7 +88,7 @@ export default function Ia01Asesi() {
     const fetchUnitData = async () => {
         try {
             const response = await api.get(`/assessments/ia-01/units/${id_result}`);
-            console.log('fetchUnitData response asesi:', response.data);
+            // console.log('fetchUnitData response asesi:', response.data);
 
             if (response.data.success) {
                 const groupNames = response.data.data.map((group: any) => group.name);
@@ -113,7 +113,7 @@ export default function Ia01Asesi() {
                         group_name: group.name,
                     }))
                 );
-                console.log(flattenedUnits);
+                // console.log(flattenedUnits);
 
                 setUnitData(flattenedUnits);
 
@@ -134,7 +134,7 @@ export default function Ia01Asesi() {
         if (!id_result) return;
         try {
             const response = await api.get(`/assessments/ia-01/result/${id_result}`);
-            console.log('fetchResultData response asesi:', response.data);
+            // console.log('fetchResultData response asesi:', response.data);
 
             if (response.data.success) {
                 setResultData(response.data.data);

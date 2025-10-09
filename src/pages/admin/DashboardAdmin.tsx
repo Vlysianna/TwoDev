@@ -105,7 +105,7 @@ const Dashboard: React.FC = () => {
 
                 // Map data sesuai dengan struktur yang diharapkan
                 const mapped = docs.map((d: any) => {
-                    console.log(d.result);
+                    // console.log(d.result);
                     // Ambil nama asesi dari result.assessee jika ada
                     const assesseeName = d.result?.assessee?.user?.full_name ||
                         d.result?.assessee?.email ||

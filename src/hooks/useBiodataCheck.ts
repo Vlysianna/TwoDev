@@ -64,7 +64,7 @@ export const useBiodataCheck = () => {
       }
       setIsCheckingBiodata(true);
 
-      console.log("Tes");
+      // console.log("Tes");
       try {
         // Get assessor by user id
         let assessor: AssessorData | null = null;
@@ -97,8 +97,8 @@ export const useBiodataCheck = () => {
           }
         }
 
-        console.log("Assessor", assessor);
-        console.log("Detail", assessorDetail);
+        // console.log("Assessor", assessor);
+        // console.log("Detail", assessorDetail);
 
         const isComplete = checkBiodataCompleteness(assessor, assessorDetail);
         setBiodataComplete(isComplete);

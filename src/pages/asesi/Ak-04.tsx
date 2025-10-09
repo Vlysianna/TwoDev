@@ -49,7 +49,7 @@ export default function Ak04() {
 
         try {
             const response = await api.get(`/assessments/ak-04/${id_result}`);
-            console.log('fetchResultData response:', response.data);
+            // console.log('fetchResultData response:', response.data);
 
             if (response.data.success) {
                 setResultData(response.data.data);

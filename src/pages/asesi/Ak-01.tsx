@@ -114,7 +114,7 @@ export default function Ak01() {
 				mutateNavigation();
 			}
 		} catch (error) {
-			console.log("Error Generating QR Code:", error);
+			// console.log("Error Generating QR Code:", error);
 		}
 	};
 

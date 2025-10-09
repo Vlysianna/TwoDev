@@ -140,18 +140,18 @@ export default function Ia05CAssessee() {
   // Handle summary radio (Semua Tercapai/Tidak Tercapai) - Readonly for assessee
   const handleRadioChange = (value: string) => {
     // Asesi tidak bisa mengubah nilai, hanya melihat
-    console.log("Asesi tidak dapat mengubah nilai assessment");
+    // console.log("Asesi tidak dapat mengubah nilai assessment");
   };
 
   // Handle per-question radio - Readonly for assessee
   const handleTableRadioChange = (questionId: number, value: string) => {
     // Asesi tidak bisa mengubah nilai, hanya melihat
-    console.log("Asesi tidak dapat mengubah nilai jawaban");
+    // console.log("Asesi tidak dapat mengubah nilai jawaban");
   };
 
   const handleFeedbackRadioChange = (value: string) => {
     // Asesi tidak bisa mengubah nilai, hanya melihat
-    console.log("Asesi tidak dapat mengubah feedback");
+    // console.log("Asesi tidak dapat mengubah feedback");
   };
 
   const options = [
@@ -166,7 +166,7 @@ export default function Ia05CAssessee() {
 
   const handleSubmit = () => {
     // Asesi tidak bisa submit, hanya melihat
-    console.log("Asesi tidak dapat melakukan submit");
+    // console.log("Asesi tidak dapat melakukan submit");
   };
 
   if (loading) {

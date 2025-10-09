@@ -56,7 +56,7 @@ export default function HasilAsesmen() {
   ];
 
   const handleSubmit = () => {
-    console.log("Form submitted");
+    // console.log("Form submitted");
   };
 
   return (

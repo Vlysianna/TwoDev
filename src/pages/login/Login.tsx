@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Eye, EyeClosed, CheckCircle } from 'lucide-react';
+import { Eye, EyeClosed } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm } from 'react-hook-form';
 import { getAssetPath } from '@/utils/assetPath';
 import api from '@/helper/axios';
+import useToast from '@/components/ui/useToast';
 
 type FormValues = {
   email: string
@@ -22,23 +23,26 @@ export default function LoginForm() {
   } = useForm<FormValues>()
 
   const [showPassword, setShowPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [error, setError] = useState('');
 
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
 
   const from = location.state?.from?.pathname || '/';
 
   // Handle success message and pre-fill email from registration
   useEffect(() => {
     if (location.state?.message) {
-      setSuccessMessage(location.state.message);
+      toast.show({
+        description: location.state.message,
+        type: 'success',
+      });
     }
     if (location.state?.email) {
       setValue('email', location.state.email);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 
   const onSubmit = async (data: FormValues) => {
@@ -46,17 +50,18 @@ export default function LoginForm() {
     const { email, password } = data;
 
     if (!email || !password) {
-      setError('Email dan password harus diisi');
-      setSuccessMessage('');
+      toast.show({
+        description: 'Email dan password harus diisi',
+        type: 'error',
+      })
       return;
     }
 
-    setError('');
-    setSuccessMessage('');
-
     await login(email, password).then(async () => {
-      setSuccessMessage('Login berhasil');
-
+      toast.show({
+        description: 'Login berhasil',
+        type: 'success',
+      })
       // Get user info to check role
       try {
         const response = await api.get('/auth/me');
@@ -68,20 +73,25 @@ export default function LoginForm() {
         } else {
           navigate(from, { replace: true });
         }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         // If can't get user info, use default redirect
+        // toast.show({
+        //   description: 'Login gagal atau terjadi kesalahan',
+        //   type: 'error',
+        // })
         navigate(from, { replace: true });
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }).catch((err: any) => {
       // console.log(err);
       const errorMessage = err.message || 'Terjadi kesalahan';
-      setError(errorMessage);
+      toast.show({
+        description: errorMessage,
+        type: 'error',
+      })
     });
   };
-
-  useEffect(() => {
-    console.log(error);
-  }, [error]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row w-full">
@@ -111,7 +121,7 @@ export default function LoginForm() {
                 type="email"
                 placeholder="Masukkan email anda"
                 className="w-full px-3 py-2 md:py-2.5 bg-[#DADADA33] rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm"
-                {...register("email", { required: "Email wajib diisi" })}
+                {...register("email", { required: "Email wajib diisi", pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i })}
               />
             </div>
 
@@ -125,7 +135,7 @@ export default function LoginForm() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Masukkan password anda"
                   className="w-full px-3 py-2 md:py-2.5 bg-[#DADADA33] rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm pr-10"
-                  {...register("password", { required: "Password wajib diisi" })}
+                  {...register("password", { required: "Password wajib diisi", minLength: 8 })}
                 />
                 <button
                   onClick={() => setShowPassword(!showPassword)}
@@ -140,21 +150,6 @@ export default function LoginForm() {
                 </button>
               </div>
             </div>
-
-            {/* Success Message */}
-            {successMessage && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                {successMessage}
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
 
             {/* Forgot Password */}
             <div className="text-right">

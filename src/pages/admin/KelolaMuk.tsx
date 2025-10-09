@@ -49,7 +49,7 @@ const KelolaMUK: React.FC = () => {
 
 
 	const handleEdit = (id: number) => {
-		console.log("Edit user:", id);
+		// console.log("Edit user:", id);
 		navigate(paths.admin.muk.edit(id));
 	};
 

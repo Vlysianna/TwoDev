@@ -250,7 +250,7 @@ const PersetujuanAdmin: React.FC = () => {
                 const res = await api.get(`/admins/${id}`);
                 adminData[id] = res?.data?.data || res?.data;
             } catch (error) {
-                console.log(`Admin ${id} API error:`, error);
+                // console.log(`Admin ${id} API error:`, error);
             }
         }));
 
@@ -264,7 +264,7 @@ const PersetujuanAdmin: React.FC = () => {
                 const userData = userRes?.data?.data || userRes?.data;
                 userDetails[userIdNum] = userData;
             } catch (error) {
-                console.log(`Failed to fetch user ${userId}:`, error);
+                // console.log(`Failed to fetch user ${userId}:`, error);
             }
         }));
 
@@ -274,7 +274,7 @@ const PersetujuanAdmin: React.FC = () => {
             const userData = userDetails[userId] || {};
             const displayName = userData?.full_name || userData?.name || userData?.email || `Admin #${id}`;
             updates[id] = displayName;
-            console.log(`Admin ${id} (user_id: ${userId}) resolved to:`, displayName);
+            // console.log(`Admin ${id} (user_id: ${userId}) resolved to:`, displayName);
         });
 
         setRequesterLabels(prev => ({ ...prev, ...updates }));
@@ -296,7 +296,7 @@ const PersetujuanAdmin: React.FC = () => {
                 const res = await api.get(`/admins/${id}`);
                 adminData[id] = res?.data?.data || res?.data;
             } catch (error) {
-                console.log(`Admin ${id} API error:`, error);
+                // console.log(`Admin ${id} API error:`, error);
             }
         }));
 
@@ -310,7 +310,7 @@ const PersetujuanAdmin: React.FC = () => {
                 const userData = userRes?.data?.data || userRes?.data;
                 userDetails[userIdNum] = userData;
             } catch (error) {
-                console.log(`Failed to fetch user ${userId}:`, error);
+                // console.log(`Failed to fetch user ${userId}:`, error);
             }
         }));
 

@@ -74,10 +74,10 @@ const JadwalViewModal: React.FC<JadwalViewModalProps> = ({ isOpen, onClose, jadw
   if (!jadwal && !detail) return null;
   const display = detail ?? jadwal;
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} widthClass="max-w-4xl w-full">
+    <BaseModal isOpen={isOpen} onClose={onClose} widthClass="lg:max-w-lg xl:max-w-3xl w-full">
       <div className="bg-white rounded-lg overflow-hidden shadow-lg">
         <div className="bg-[#E77D35] px-14 py-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
             <div>
               <h2 className="text-2xl md:text-3xl font-semibold text-white">Detail Jadwal Asesmen</h2>
               <div className="text-base md:text-lg text-orange-100/90 mt-1">{display?.assessment.occupation.scheme.name} {display?.assessment.occupation.scheme?.code ? `(${display.assessment.occupation.scheme.code})` : ''}</div>
@@ -112,13 +112,13 @@ const JadwalViewModal: React.FC<JadwalViewModalProps> = ({ isOpen, onClose, jadw
               <h3 className="text-sm font-medium text-gray-800 mb-3">Rincian Ruang & Asesor</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 max-h-120 overflow-auto">
                 {detail.schedule_details.map((d) => (
-                  <div key={d.id} className="flex items-start gap-4 p-4 border rounded-xl bg-gray-50 shadow-sm">
+                  <div key={d.id} className="flex items-start gap-4 p-4 border rounded-xl bg-gray-50 shadow-sm md:flex-col">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white border">
                       <div className="text-base md:text-lg font-bold text-gray-700">{(d.assessor?.full_name || 'T').split(' ').map((s: string) => s[0]).slice(0,2).join('')}</div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-base md:text-lg font-semibold text-gray-800 break-words whitespace-normal">{d.assessor?.full_name || 'Tanpa Asesor'}</div>
-                      <div className="flex items-center gap-3 text-sm text-gray-600 mt-2">
+                      <div className="flex items-center gap-1 text-sm text-gray-600 mt-2 flex-wrap">
                         <a className="inline-flex items-center text-sm text-orange-600 hover:underline mt-2" href={d.assessor?.phone_no ? `tel:${d.assessor.phone_no}` : '#'} onClick={(e) => { if(!d.assessor?.phone_no) e.preventDefault(); }}>
                           <Phone size={14} />
                           <span className="font-medium ml-1">{d.assessor?.phone_no || 'Tidak ada nomor'}</span>
