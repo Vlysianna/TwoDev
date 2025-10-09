@@ -11,7 +11,7 @@ interface AdminOption {
 interface ApprovalConfirmModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (data: { approver_admin_id: number; comment: string }) => void;
+    onConfirm: (data: { approver_admin_id: number; backup_admin_id?: number; comment: string }) => void;
     loading?: boolean;
     title?: string;
     subtitle?: string;
@@ -30,6 +30,8 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
     const [approver, setApprover] = useState<number | ''>('');
     const [comment, setComment] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
+    const [currentAdminId, setCurrentAdminId] = useState<number | null>(null);
+    const [currentAdminCanApprove, setCurrentAdminCanApprove] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchAdmins = async () => {
@@ -73,8 +75,15 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
                     .filter((opt: any) => Number(opt._userId) !== currentUserId)
                     .map((opt: any) => ({ id: Number(opt.id), name: String(opt.name) }));
                 setAdmins(options);
+
+                const me = (list as any[]).find((a: any) => Number(a?.user_id) === currentUserId);
+                setCurrentAdminId(me ? Number(me?.id ?? me?.admin_id ?? me?.id_admin ?? 0) : null);
+                const canApproveFlag = (me?.can_approve === true) || (me?.canApprove === true) || (Number(me?.can_approve) === 1) || (Number(me?.canApprove) === 1);
+                setCurrentAdminCanApprove(Boolean(canApproveFlag));
             } catch (e) {
                 setAdmins([]);
+                setCurrentAdminId(null);
+                setCurrentAdminCanApprove(false);
             }
         };
         if (isOpen) {
@@ -96,7 +105,11 @@ const ApprovalConfirmModal: React.FC<ApprovalConfirmModalProps> = ({
             return;
         }
         setError(null);
-        onConfirm({ approver_admin_id: Number(approver), comment });
+        onConfirm({
+            approver_admin_id: Number(approver),
+            backup_admin_id: currentAdminCanApprove && currentAdminId ? currentAdminId : undefined,
+            comment,
+        });
     };
 
     if (!isOpen) return null;

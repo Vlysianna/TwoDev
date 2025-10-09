@@ -32,7 +32,7 @@ type ApprovalItem = {
 const PersetujuanAdmin: React.FC = () => {
     const [items, setItems] = useState<ApprovalItem[]>([]);
     const [allItems, setAllItems] = useState<ApprovalItem[]>([]);
-    const [approvalsLoaded, setApprovalsLoaded] = useState<boolean>(false);
+    // approvalsLoaded removed
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [actingId, setActingId] = useState<number | null>(null);
@@ -102,7 +102,6 @@ const PersetujuanAdmin: React.FC = () => {
             void resolveTargets(list);
             void resolveRequesters(list);
             void resolveApprovers(list);
-            setApprovalsLoaded(true);
         } catch (err: any) {
             setError(err?.response?.data?.message || 'Gagal memuat daftar persetujuan');
         } finally {
@@ -181,9 +180,12 @@ const PersetujuanAdmin: React.FC = () => {
             const found = list.find((a: any) => Number(a?.user?.id ?? a?.user_id) === Number(user?.id));
             if (found) {
                 setCurrentAdminId(Number(found.id));
+                const can = (found?.can_approve === true) || (found?.canApprove === true) || (Number(found?.can_approve) === 1) || (Number(found?.canApprove) === 1);
+                setCanApprove(Boolean(can));
             }
         } catch {
             setCurrentAdminId(null);
+            setCanApprove(null);
         }
     };
 
@@ -191,19 +193,10 @@ const PersetujuanAdmin: React.FC = () => {
         void fetchCurrentAdmin();
     }, [user?.id]);
 
-    useEffect(() => {
-        if (!approvalsLoaded || !currentAdminId) {
-            setCanApprove(null);
-            return;
-        }
-        const approverScope = allItems.some(it => it.approver_admin_id === currentAdminId || it.backup_admin_id === currentAdminId);
-        setCanApprove(approverScope);
-    }, [allItems, currentAdminId, approvalsLoaded]);
-
     const initializedFilterRef = useRef<boolean>(false);
     useEffect(() => {
         if (initializedFilterRef.current) return;
-        if (canApprove === null) return; // wait until permission resolved
+        if (canApprove === null) return;
         if (canApprove === true) {
             setSelectedFilter('all');
         } else {
@@ -510,8 +503,9 @@ const PersetujuanAdmin: React.FC = () => {
                                             const isCurrentAdminApprover = currentAdminId !== null &&
                                                 (it.approver_admin_id === currentAdminId || it.backup_admin_id === currentAdminId);
 
-                                            const canApprove = isPending && isCurrentAdminApprover &&
-                                                Number(it.requester_admin_id) !== currentAdminId;
+                                            const canApproveRow = isPending && isCurrentAdminApprover && (
+                                                Number(it.requester_admin_id) !== currentAdminId || selectedFilter === 'backup-approvals'
+                                            );
 
                                             return (
                                                 <React.Fragment key={it.id}>
@@ -539,7 +533,7 @@ const PersetujuanAdmin: React.FC = () => {
                                                         <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">{it.comment || '-'}</td>
                                                         <td className="px-2 py-3 sm:px-4 lg:px-6">{formatDateIndo(it.created_at)}</td>
                                                         <td className="px-4 py-4 lg:px-6 text-center" onClick={(e) => e.stopPropagation()}>
-                                                            {canApprove ? (
+                                                            {canApproveRow ? (
                                                                 <div className="flex items-center justify-center gap-3">
                                                                     <button
                                                                         onClick={() => requestConfirm(it.id, 'approve')}
