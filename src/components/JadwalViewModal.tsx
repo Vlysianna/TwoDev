@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import BaseModal from './BaseModal';
 import { formatDate } from "@/helper/format-date";
-import { Phone, MapPin, Calendar, Loader2 } from 'lucide-react';
+import { Phone, MapPin, Calendar, Loader2, ArrowRight } from 'lucide-react';
 import api from '@/helper/axios';
+import { useNavigate } from 'react-router-dom';
+import routes from '@/routes/paths';
 
 interface JadwalViewModalProps {
   isOpen: boolean;
@@ -33,6 +35,8 @@ const JadwalViewModal: React.FC<JadwalViewModalProps> = ({ isOpen, onClose, jadw
   const [detail, setDetail] = useState<typeof jadwal | null>(jadwal || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -127,6 +131,17 @@ const JadwalViewModal: React.FC<JadwalViewModalProps> = ({ isOpen, onClose, jadw
                           <MapPin size={14} />
                           <span className="ml-1 text-gray-700">{d.location || '-'}</span>
                         </div>
+                      </div>
+                      <div className="mt-2">
+                        <button
+                          className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-yellow-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(routes.admin.suratTugas(d.id));
+                          }}
+                        >
+                          Surat Tugas <ArrowRight size={16} />
+                        </button>
                       </div>
                     </div>
                   </div>

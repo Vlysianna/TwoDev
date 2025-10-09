@@ -4,8 +4,9 @@ import Navbar from '@/components/NavAdmin';
 import { Link, useNavigate } from 'react-router-dom';
 import paths from "@/routes/paths";
 import api from '@/helper/axios';
-import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, Mail, Phone, MapPin, Calendar, ArrowRight, Users } from 'lucide-react';
+import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, Mail, Phone, MapPin, Calendar, ArrowRight, Users, Download } from 'lucide-react';
 import { formatDate } from "@/helper/format-date";
+import useToast from '@/components/ui/useToast';
 
 // Types & helpers
 interface Assessor {
@@ -55,6 +56,9 @@ const ResultAssessment: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [expandedRows, setExpandedRows] = useState<ExpandedRow[]>([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+	const [loadingExport, setLoadingExport] = useState(false);
+
+  const toast = useToast();
 
   // Handle window resize for responsiveness
   useEffect(() => {
@@ -106,6 +110,39 @@ const ResultAssessment: React.FC = () => {
   const isRowExpanded = (assessmentId: number) => {
     return expandedRows.some(row => row.assessmentId === assessmentId);
   };
+
+  const handleExportPenilaian = async (assessment_id: number) => {
+    try {
+			setLoadingExport(true);
+
+      const res = await api.get(
+        `/assessments/result/evaluation/${assessment_id}/export`,
+				{ responseType: "blob" }
+			);
+			const url = window.URL.createObjectURL(new Blob([res.data]));
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute("download", `penilaian-(${assessment_id}).pdf`);
+			document.body.appendChild(link);
+			link.click();
+			link.remove();
+			window.URL.revokeObjectURL(url);
+			toast.show({
+				title: "Berhasil",
+				description: `Penilaian berhasil diunduh`,
+				type: "success",
+			});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+			toast.show({
+				title: "Gagal",
+				description: err?.response?.data?.message || "Terjadi kesalahan",
+				type: "error",
+			});
+    } finally {
+			setLoadingExport(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F7FAFC] flex">
@@ -181,6 +218,9 @@ const ResultAssessment: React.FC = () => {
                         Jumlah Asesor
                       </th>
                       <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Export
+                      </th>
+                      <th scope="col" className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                         Aksi
                       </th>
                     </tr>
@@ -229,6 +269,17 @@ const ResultAssessment: React.FC = () => {
                                 <span>{schedule.schedule_details.length} Asesor</span>
                               </div>
                             </td>
+                            <td>
+                              <button
+                                className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-yellow-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleExportPenilaian(schedule.assessment.id);
+                                }}
+                              >
+                                {loadingExport ? "Mengunduh..." : <>Export Nilai <Download size={16} /></>}
+                              </button>
+                            </td>
                             <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                             </td>
@@ -238,7 +289,7 @@ const ResultAssessment: React.FC = () => {
                             <>
                               {schedule.schedule_details.map((detail) => (
                                 <tr key={detail.id} className="bg-gray-50">
-                                  <td colSpan={6} className="px-4 lg:px-6 py-1">
+                                  <td colSpan={7} className="px-4 lg:px-6 py-1">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2">
                                       <div className="flex items-center gap-3 flex-wrap">
                                         <MapPin size={16} className="text-gray-600" />
@@ -248,15 +299,6 @@ const ResultAssessment: React.FC = () => {
                                         <span>{detail.assessor.full_name}</span>
                                       </div>
                                       <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
-                                        <button
-                                          className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-yellow-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(paths.admin.suratTugas(detail.id));
-                                          }}
-                                        >
-                                          Surat Tugas <ArrowRight size={16} />
-                                        </button>
                                         <button
                                           className="px-2 bg-green-600 text-white hover:bg-green-700 p-2 rounded hover:bg-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {
@@ -318,6 +360,17 @@ const ResultAssessment: React.FC = () => {
                               <div className="font-semibold">{assessment.assessment.occupation.scheme.name}</div>
                               <div>{assessment.assessment.occupation.name}</div>
                             </div>
+                            <div className="flex items-center w-full mb-2">
+                              <button
+                                className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-yellow-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleExportPenilaian(assessment.id);
+                                }}
+                              >
+                                {loadingExport ? "Mengunduh..." : <>Export Nilai</>}
+                              </button>
+                            </div>
                             <div className="text-sm text-gray-500 mb-2">
                               {formatDate(assessment.start_date)} - {formatDate(assessment.end_date)}
                             </div>
@@ -353,16 +406,6 @@ const ResultAssessment: React.FC = () => {
                                 <span>{schedule.assessor.full_name}</span>
                               </div>
                               <div className="flex flex-row justify-between gap-2 px-4 overflow-x-auto pb-2">
-                                <button
-                                  className="bg-yellow-600 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
-                                  onClick={(e) => {
-                                      e.stopPropagation();
-                                      navigate(paths.admin.suratTugas(schedule.id));
-                                    }}
-                                  >
-                                    Surat Tugas
-                                </button>
-
                                 <button
                                   className="bg-green-600 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
                                   onClick={(e) => {
