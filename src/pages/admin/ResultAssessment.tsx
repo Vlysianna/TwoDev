@@ -369,7 +369,7 @@ const ResultAssessment: React.FC = () => {
                                 className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-yellow-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleExportPenilaian(assessment.id);
+                                  handleExportPenilaian(assessment.assessment.id);
                                 }}
                               >
                                 {loadingExport ? "Mengunduh..." : <>Export Nilai</>}
