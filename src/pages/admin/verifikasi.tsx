@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useCallback } from 'react';
 import api from '@/helper/axios';
+import { formatDateJakartaUS24 } from '@/helper/format-date';
 import { useLocation } from 'react-router-dom';
 import { useToast } from '@/components/ui/useToast';
 
@@ -80,6 +81,7 @@ export default function VerifikasiPage() {
   }, [filter, toast]);
 
   useEffect(() => { void fetchPending(); }, [fetchPending]);
+
 
   const openDetail = async (resultId: number) => {
     try {
@@ -245,7 +247,7 @@ export default function VerifikasiPage() {
                           <td className="px-4 py-4 lg:px-6 hidden md:table-cell">
                             <div className="flex items-center text-gray-500 text-sm">
                               <Calendar size={14} className="mr-2" />
-                              {new Date(row.result?.created_at || '').toLocaleString()}
+                              {formatDateJakartaUS24(row.result?.created_at || '')}
                             </div>
                           </td>
                           <td className="px-4 py-4 lg:px-6">

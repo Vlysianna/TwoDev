@@ -121,7 +121,11 @@ const ResultAssessment: React.FC = () => {
             <div className="flex items-center gap-3 flex-wrap">
               {lastUpdated && (
                 <span className="text-xs text-gray-500">
-                  Update: {lastUpdated.toLocaleTimeString()}
+                  Update: {new Intl.DateTimeFormat('id-ID', {
+                    timeZone: 'Asia/Jakarta',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    hour12: false,
+                  }).format(lastUpdated)}
                 </span>
               )}
               <button

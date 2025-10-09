@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import { ListCheck, AlertCircle, RefreshCw, Clock, CheckCircle, XCircle, Filter, ChevronDown } from 'lucide-react';
+import { ListCheck, AlertCircle, RefreshCw, Clock, CheckCircle, XCircle, Filter, ChevronDown, Calendar } from 'lucide-react';
+import { formatDateJakartaUS24 } from '@/helper/format-date';
 import ConfirmModal from '@/components/ConfirmModal';
 import api from '@/helper/axios';
 import useToast from '@/components/ui/useToast';
@@ -387,47 +388,7 @@ const PersetujuanAdmin: React.FC = () => {
         }
     };
 
-    const formatDateIndo = (input?: string) => {
-        if (!input) return '-';
-        const isoLike = /^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?/.exec(input);
-        if (isoLike) {
-            const [, yyyyStr, mmStr, ddStr, HHStr, MMStr, SSStr] = isoLike;
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-            const yyyy = Number(yyyyStr);
-            const mmIndex = Math.max(1, Number(mmStr)) - 1;
-            const dd = Number(ddStr);
-            const HH = HHStr.padStart(2, '0');
-            const MM = MMStr.padStart(2, '0');
-            const SS = (SSStr || '00').padStart(2, '0');
-            const monthLabel = months[Math.min(11, Math.max(0, mmIndex))];
-            return `${dd.toString().padStart(2, '0')} ${monthLabel} ${yyyy}, ${HH}:${MM}:${SS}`;
-        }
-        if (/^\d{2}:\d{2}:\d{2}$/.test(input)) {
-            return input;
-        }
-        const parts = input.split(':');
-        if (parts.length >= 3) {
-            const HH = parts[parts.length - 3];
-            const mm = parts[parts.length - 2];
-            const ss = parts[parts.length - 1];
-            if (/^\d{2}$/.test(HH) && /^\d{2}$/.test(mm) && /^\d{2}$/.test(ss)) {
-                if (parts[0] === '0000' || parts[1] === '00' || parts[2] === '00') {
-                    return `${HH}:${mm}:${ss}`;
-                }
-                const yyyy = Number(parts[0]);
-                const MM = Math.max(1, Number(parts[1] || '1')) - 1;
-                const dd = Math.max(1, Number(parts[2] || '1'));
-                const date = new Date(yyyy, MM, dd, Number(HH), Number(mm), Number(ss));
-                if (!isNaN(date.getTime())) {
-                    return date.toLocaleString('id-ID', {
-                        day: '2-digit', month: 'short', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit', second: '2-digit'
-                    });
-                }
-            }
-        }
-        return input;
-    };
+    const formatDateIndo = (input?: string) => formatDateJakartaUS24(input || '');
 
     return (
         <div className="min-h-screen bg-[#F7FAFC] flex">
@@ -531,7 +492,12 @@ const PersetujuanAdmin: React.FC = () => {
                                                             })()}
                                                         </td>
                                                         <td className="px-2 py-3 sm:px-4 lg:px-6 break-words whitespace-normal">{it.comment || '-'}</td>
-                                                        <td className="px-2 py-3 sm:px-4 lg:px-6">{formatDateIndo(it.created_at)}</td>
+                                                        <td className="px-2 py-3 sm:px-4 lg:px-6">
+                                                            <div className="flex items-center text-gray-500 text-sm">
+                                                                <Calendar size={14} className="mr-2" />
+                                                                {formatDateIndo(it.created_at)}
+                                                            </div>
+                                                        </td>
                                                         <td className="px-4 py-4 lg:px-6 text-center" onClick={(e) => e.stopPropagation()}>
                                                             {canApproveRow ? (
                                                                 <div className="flex items-center justify-center gap-3">
