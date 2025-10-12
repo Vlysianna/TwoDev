@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import paths from "@/routes/paths";
 import api from '@/helper/axios';
-import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, Mail, Phone, MapPin, Calendar, ArrowRight, Users, Download } from 'lucide-react';
+import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, MapPin, ArrowRight, Users, Download } from 'lucide-react';
 import { formatDate } from "@/helper/format-date";
 import useToast from '@/components/ui/useToast';
 
@@ -56,7 +56,7 @@ const ResultAssessment: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [expandedRows, setExpandedRows] = useState<ExpandedRow[]>([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-	const [loadingExport, setLoadingExport] = useState(false);
+	const [loadingExportId, setLoadingExportId] = useState<number | null>(null);
 
   const toast = useToast();
 
@@ -113,7 +113,7 @@ const ResultAssessment: React.FC = () => {
 
   const handleExportPenilaian = async (assessment_id: number) => {
     try {
-			setLoadingExport(true);
+      setLoadingExportId(assessment_id);
 
       const res = await api.get(
         `/assessments/result/evaluation/${assessment_id}/export`,
@@ -140,7 +140,7 @@ const ResultAssessment: React.FC = () => {
 				type: "error",
 			});
     } finally {
-			setLoadingExport(false);
+			setLoadingExportId(null);
     }
   }
 
@@ -275,13 +275,19 @@ const ResultAssessment: React.FC = () => {
                             </td>
                             <td>
                               <button
-                                className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-yellow-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                className={`px-2 p-2 rounded text-sm flex items-center gap-2 transition-colors
+                                  ${
+                                    schedule.status !== "Selesai" || loadingExportId === schedule.assessment.id
+                                      ? 'bg-yellow-600 text-white cursor-not-allowed opacity-70'
+                                      : 'bg-yellow-600 text-white hover:bg-yellow-800 cursor-pointer'
+                                  }`}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleExportPenilaian(schedule.assessment.id);
                                 }}
+                                disabled={loadingExportId === schedule.assessment.id || schedule.status !== "Selesai"}
                               >
-                                {loadingExport ? "Mengunduh..." : <>Export Nilai <Download size={16} /></>}
+                                {loadingExportId === schedule.assessment.id ? "Mengunduh..." : <>Export Nilai <Download size={16} /></>}
                               </button>
                             </td>
                             <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -346,48 +352,54 @@ const ResultAssessment: React.FC = () => {
 
               {/* Mobile View */}
               <div className="md:hidden">
-                {data.map((assessment) => {
-                  const isExpanded = isRowExpanded(assessment.id);
+                {data.map((schedule) => {
+                  const isExpanded = isRowExpanded(schedule.id);
 
                   return (
-                    <div key={assessment.id} className="border-b border-gray-200">
+                    <div key={schedule.id} className="border-b border-gray-200">
                       <div
                         className="p-4 cursor-pointer hover:bg-gray-50"
-                        onClick={() => toggleRowExpansion(assessment.id)}
+                        onClick={() => toggleRowExpansion(schedule.id)}
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="font-medium text-gray-900 mb-1">
-                              {assessment.assessment.code}
+                              {schedule.assessment.code}
                             </div>
                             <div className="text-sm text-gray-500 mb-2">
-                              <div className="font-semibold">{assessment.assessment.occupation.scheme.name}</div>
-                              <div>{assessment.assessment.occupation.name}</div>
+                              <div className="font-semibold">{schedule.assessment.occupation.scheme.name}</div>
+                              <div>{schedule.assessment.occupation.name}</div>
                             </div>
                             <div className="flex items-center w-full mb-2">
                               <button
-                                className="px-2 bg-yellow-600 text-white hover:bg-green-700 p-2 rounded hover:bg-yellow-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
+                                className={`px-2 p-2 rounded text-sm flex items-center gap-2 transition-colors
+                                  ${
+                                    schedule.status !== "Selesai" || loadingExportId === schedule.assessment.id
+                                      ? 'bg-yellow-600 text-white cursor-not-allowed opacity-70'
+                                      : 'bg-yellow-600 text-white hover:bg-yellow-800 cursor-pointer'
+                                  }`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleExportPenilaian(assessment.assessment.id);
+                                  handleExportPenilaian(schedule.assessment.id);
                                 }}
+                                disabled={loadingExportId === schedule.assessment.id || schedule.status !== 'Selesai'}
                               >
-                                {loadingExport ? "Mengunduh..." : <>Export Nilai</>}
+                                {loadingExportId === schedule.assessment.id ? "Mengunduh..." : <>Export Nilai</>}
                               </button>
                             </div>
                             <div className="text-sm text-gray-500 mb-2">
-                              {formatDate(assessment.start_date)} - {formatDate(assessment.end_date)}
+                              {formatDate(schedule.start_date)} - {formatDate(schedule.end_date)}
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${assessment.status === 'Selesai'
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${schedule.status === 'Selesai'
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-yellow-100 text-yellow-800'
                                 }`}>
-                                {assessment.status}
+                                {schedule.status}
                               </span>
                               <div className="flex items-center gap-1 text-sm text-gray-500">
                                 <Users size={16} />
-                                <span>{assessment.schedule_details.length} Asesor</span>
+                                <span>{schedule.schedule_details.length} Asesor</span>
                               </div>
                             </div>
                           </div>
@@ -399,7 +411,7 @@ const ResultAssessment: React.FC = () => {
 
                       {isExpanded && (
                         <div className="bg-gray-50">
-                          {assessment.schedule_details.map((schedule) => (
+                          {schedule.schedule_details.map((schedule) => (
                             <div key={schedule.id} className="last:mb-0 border-b border-t border-gray-400 py-2 text-sm">
                               {/* <hr className='my-4 border-gray-400' /> */}
                               <div className="flex items-start gap-2 mb-2 px-4">
@@ -424,7 +436,7 @@ const ResultAssessment: React.FC = () => {
                                   className="bg-[#E77D35] text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    navigate(paths.admin.resultAssessment.dashboard(assessment.id, String(schedule.assessor.id)));
+                                    navigate(paths.admin.resultAssessment.dashboard(schedule.id, String(schedule.assessor.id)));
                                   }}
                                 >
                                   Detail Asesmen
