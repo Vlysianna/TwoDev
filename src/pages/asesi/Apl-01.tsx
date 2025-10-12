@@ -369,7 +369,7 @@ export default function AplZeroOne() {
 												<input
 													{...register("house_phone_no", {
 														pattern: {
-															value: /^\d+$/,
+															value: /^[0-9-]+$/,
 															message: "No. telp rumah hanya boleh angka",
 														},
 														maxLength: {
@@ -393,7 +393,7 @@ export default function AplZeroOne() {
 													{...register("office_phone_no",
 														{
 															pattern: {
-																value: /^\d+$/,
+    														value: /^[0-9-]+$/,
 																message: "No. telp kantor hanya boleh angka",
 															},
 															maxLength: {
@@ -563,7 +563,7 @@ export default function AplZeroOne() {
 																message: "No. telp kantor minimal 10 digit",
 															},
 															pattern: {
-																value: /^\d+$/,
+																value: /^[0-9()\-\s]+$/,
 																message: "No. telp kantor hanya boleh angka",
 															}
 														}
