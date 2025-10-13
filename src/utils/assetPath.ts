@@ -1,7 +1,7 @@
 // Helper function untuk asset path
 export const getAssetPath = (path: string) => {
   // Di development, base adalah '/'
-  // Di production dengan subfolder, base adalah '/twodev-fe/'
+  // Di production dengan subfolder, base adalah '/twodev/'
   const base = import.meta.env.BASE_URL || '/';
   
   // Jika path sudah absolute (dimulai dengan http), return as is

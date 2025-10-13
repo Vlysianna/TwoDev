@@ -6,12 +6,12 @@ RewriteEngine On
 # Handle common asset paths that apps might reference without subfolder
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} ^/(img|images|assets|public)/
-RewriteRule ^(.*)$ /twodev-fe/$1 [L]
+RewriteRule ^(.*)$ /twodev/$1 [L]
 
 # Redirect root-level common files to subfolder
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} ^/(.*\.(svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|css|js))$
-RewriteRule ^(.*)$ /twodev-fe/$1 [L]
+RewriteRule ^(.*)$ /twodev/$1 [L]
 
 # Serve static files directly first
 RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json|xml|txt)$ [NC]
@@ -21,7 +21,7 @@ RewriteRule ^(.*)$ - [L]
 # Only redirect if the file doesn't exist AND it's not a static asset
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ /twodev-fe/index.html [L]
+RewriteRule ^(.*)$ /twodev/index.html [L]
 
 # Security headers
 Header always set X-Content-Type-Options nosniff

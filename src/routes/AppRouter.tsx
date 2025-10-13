@@ -423,7 +423,7 @@ const router = createBrowserRouter(
 		},
 	],
 	{
-		basename: "/twodev-fe",
+		basename: "/twodev",
 	}
 );
 
