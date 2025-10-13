@@ -14,6 +14,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 export default function AplZeroOne() {
 	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
+	const assessmentId = localStorage.getItem("assessmentId");
 
 	const { user } = useAuth();
 
@@ -22,8 +23,8 @@ export default function AplZeroOne() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		if (asesiId) navigate(paths.asesi.assessment.dataSertifikasi(id_assessment, id_asesor));
-	}, [asesiId]); 
+		if (asesiId && assessmentId == id_assessment) navigate(paths.asesi.assessment.dataSertifikasi(id_assessment, id_asesor));
+	}, [asesiId, assessmentId, id_asesor, id_assessment]);
 
 	const [loading, setLoading] = useState(false);
 	const [isLocked, setIsLocked] = useState(false);
@@ -53,14 +54,14 @@ export default function AplZeroOne() {
 				...data,
 				user_id: user?.id ?? 0,
 				birth_date: new Date(data.birth_date),
-				jobs: [
+				job: [
 					{
-						institution_name: data.jobs?.[0]?.institution_name || "",
-						address: data.jobs?.[0]?.address || "",
-						postal_code: data.jobs?.[0]?.postal_code || "",
-						position: data.jobs?.[0]?.position || "",
-						phone_no: data.jobs?.[0]?.phone_no || "",
-						job_email: data.jobs?.[0]?.job_email || "",
+						institution_name: data.job?.[0]?.institution_name || "",
+						address: data.job?.[0]?.address || "",
+						postal_code: data.job?.[0]?.postal_code || "",
+						position: data.job?.[0]?.position || "",
+						phone_no: data.job?.[0]?.phone_no || "",
+						job_email: data.job?.[0]?.job_email || "",
 					},
 				],
 			};
@@ -73,6 +74,7 @@ export default function AplZeroOne() {
 			// console.log(result.data);
 
 			localStorage.setItem("asesiId", result.data.data.id);
+			localStorage.setItem("assessmentId", id_assessment ?? "");
 
 			setSuccess("Data berhasil disimpan.");
 			navigate(
@@ -112,10 +114,10 @@ export default function AplZeroOne() {
 							...response.data.data,
 							gender:
 								response.data.data.gender == "male" ? "Laki-laki" : "Perempuan",
-							jobs: [
-								response.data.data.jobs && response.data.data.jobs.position
-									? response.data.data.jobs
-									: { ...(response.data.data.jobs || {}), position: 'Satria' },
+							job: [
+								response.data.data.job && response.data.data.job.position
+									? response.data.data.job
+									: { ...(response.data.data.job || {}), position: 'Satria' },
 							],
 							birth_date: response.data.data.birth_date.split("T")[0],
 						}),
@@ -486,7 +488,7 @@ export default function AplZeroOne() {
 													placeholder="Contoh: PT. Teknologi Maju Indonesia"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
-												{errors.jobs?.[0]?.institution_name && (
+												{errors.job?.[0]?.institution_name && (
 													<span className="text-red-500 text-sm">Wajib diisi</span>
 												)}
 											</div>
@@ -502,7 +504,7 @@ export default function AplZeroOne() {
 														<option value="">Pilih Jabatan</option>
 														<option value="Siswa/Pelajar">Siswa/Pelajar</option>
 													</select>
-													{errors.jobs?.[0]?.position && (
+													{errors.job?.[0]?.position && (
 														<span className="text-red-500 text-sm">Wajib diisi</span>
 													)}
 												</div>
@@ -530,8 +532,8 @@ export default function AplZeroOne() {
 														placeholder="Contoh: 12940"
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													/>
-													{errors.jobs?.[0]?.postal_code && (
-														<span className="text-red-500 text-sm">{errors.jobs?.[0]?.postal_code.message || "Wajib diisi"}</span>
+													{errors.job?.[0]?.postal_code && (
+														<span className="text-red-500 text-sm">{errors.job?.[0]?.postal_code.message || "Wajib diisi"}</span>
 													)}
 												</div>
 											</div>
@@ -547,7 +549,7 @@ export default function AplZeroOne() {
 													placeholder="Contoh: ahmad.rizki@company.com"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
-												{errors.jobs?.[0]?.job_email && (
+												{errors.job?.[0]?.job_email && (
 													<span className="text-red-500 text-sm">Wajib diisi</span>
 												)}
 											</div>
@@ -577,8 +579,8 @@ export default function AplZeroOne() {
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													placeholder="Contoh: 0215566777"
 												/>
-												{errors.jobs?.[0]?.phone_no && (
-													<span className="text-red-500 text-sm">{errors.jobs?.[0]?.phone_no.message || "Wajib diisi"}</span>
+												{errors.job?.[0]?.phone_no && (
+													<span className="text-red-500 text-sm">{errors.job?.[0]?.phone_no.message || "Wajib diisi"}</span>
 												)}
 											</div>
 										</div>
@@ -593,7 +595,7 @@ export default function AplZeroOne() {
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 											placeholder="Contoh: Gedung Tech Plaza Lt. 5, Jl. Sudirman Kav. 25, Jakarta Selatan"
 										/>
-										{errors.jobs?.[0]?.address && (
+										{errors.job?.[0]?.address && (
 											<span className="text-red-500 text-sm">Wajib diisi</span>
 										)}
 									</div>

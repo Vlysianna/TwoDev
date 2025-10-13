@@ -123,6 +123,7 @@ export default function DataSertifikasi() {
 						});
 						mutateNavigation();
 						localStorage.removeItem("asesiId");
+						localStorage.removeItem("assessmentId");
 					} else {
 						toast.show({
 							title: "Gagal",

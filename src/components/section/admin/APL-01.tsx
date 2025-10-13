@@ -25,7 +25,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 		reset({
 			...result,
 			gender: result?.gender == "male" ? "Laki-laki" : "Perempuan",
-			jobs: [result?.jobs || {}],
+			job: [result?.jobs || {}],
 			birth_date: result?.birth_date ? new Date(result?.birth_date) : undefined,
 		});
 	}, [result, reset]);
@@ -282,7 +282,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 										placeholder="Masukkan nama institusi"
 										className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 									/>
-									{errors.jobs?.[0]?.institution_name && (
+									{errors.job?.[0]?.institution_name && (
 										<span className="text-red-500 text-sm">Wajib diisi</span>
 									)}
 								</div>
@@ -296,7 +296,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 											placeholder="Masukkan jabatan"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 										/>
-										{errors.jobs?.[0]?.position && (
+										{errors.job?.[0]?.position && (
 											<span className="text-red-500 text-sm">Wajib diisi</span>
 										)}
 									</div>
@@ -309,7 +309,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 											placeholder="Masukkan kode pos"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 										/>
-										{errors.jobs?.[0]?.postal_code && (
+										{errors.job?.[0]?.postal_code && (
 											<span className="text-red-500 text-sm">Wajib diisi</span>
 										)}
 									</div>
@@ -326,7 +326,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 										placeholder="Masukkan email"
 										className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 									/>
-									{errors.jobs?.[0]?.job_email && (
+									{errors.job?.[0]?.job_email && (
 										<span className="text-red-500 text-sm">Wajib diisi</span>
 									)}
 								</div>
@@ -339,7 +339,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 										className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 										placeholder="Masukkan no. telp kantor"
 									/>
-									{errors.jobs?.[0]?.phone_no && (
+									{errors.job?.[0]?.phone_no && (
 										<span className="text-red-500 text-sm">Wajib diisi</span>
 									)}
 								</div>
@@ -355,7 +355,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 								className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 								placeholder="Masukkan alamat kantor"
 							/>
-							{errors.jobs?.[0]?.address && (
+							{errors.job?.[0]?.address && (
 								<span className="text-red-500 text-sm">Wajib diisi</span>
 							)}
 						</div>
