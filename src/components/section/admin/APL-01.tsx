@@ -25,7 +25,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 		reset({
 			...result,
 			gender: result?.gender == "male" ? "Laki-laki" : "Perempuan",
-			job: [result?.jobs || {}],
+			job: [result?.job || {}],
 			birth_date: result?.birth_date ? new Date(result?.birth_date) : undefined,
 		});
 	}, [result, reset]);
@@ -278,7 +278,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 										Nama Institusi
 									</label>
 									<input
-										{...register("jobs.0.institution_name")}
+										{...register("job.0.institution_name")}
 										placeholder="Masukkan nama institusi"
 										className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 									/>
@@ -292,7 +292,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 											Jabatan
 										</label>
 										<input
-											{...register("jobs.0.position")}
+											{...register("job.0.position")}
 											placeholder="Masukkan jabatan"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 										/>
@@ -305,7 +305,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 											Kode Pos
 										</label>
 										<input
-											{...register("jobs.0.postal_code")}
+											{...register("job.0.postal_code")}
 											placeholder="Masukkan kode pos"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 										/>
@@ -322,7 +322,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 									</label>
 									<input
 										type="email"
-										{...register("jobs.0.job_email")}
+										{...register("job.0.job_email")}
 										placeholder="Masukkan email"
 										className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 									/>
@@ -335,7 +335,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 										No. Telp Kantor
 									</label>
 									<input
-										{...register("jobs.0.phone_no")}
+										{...register("job.0.phone_no")}
 										className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 										placeholder="Masukkan no. telp kantor"
 									/>
@@ -350,7 +350,7 @@ export default function APL01({ id_result }: { id_result: string }) {
 								Alamat Kantor
 							</label>
 							<textarea
-								{...register("jobs.0.address")}
+								{...register("job.0.address")}
 								rows={3}
 								className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 								placeholder="Masukkan alamat kantor"

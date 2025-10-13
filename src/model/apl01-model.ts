@@ -15,7 +15,7 @@ export interface ResultAPL01 {
 	created_at: string;
 	updated_at: string;
 	full_name: string;
-	jobs: JobAssessee;
+	job: JobAssessee;
 }
 
 interface JobAssessee {

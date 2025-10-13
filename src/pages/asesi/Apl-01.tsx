@@ -108,8 +108,9 @@ export default function AplZeroOne() {
 			api
 				.get(`/assessments/apl-01/result/${id_result}`)
 				.then(
-					(response) =>
-						response.data.success &&
+					(response) => {
+						console.log(response.data.data)
+						return response.data.success &&
 						(reset({
 							...response.data.data,
 							gender:
@@ -122,6 +123,7 @@ export default function AplZeroOne() {
 							birth_date: response.data.data.birth_date.split("T")[0],
 						}),
 							setIsLocked(true))
+					}
 				)
 				.catch((error) => console.error(error));
 		};
@@ -484,7 +486,7 @@ export default function AplZeroOne() {
 													Nama Institusi <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("jobs.0.institution_name", { required: true })}
+													{...register("job.0.institution_name", { required: true })}
 													placeholder="Contoh: PT. Teknologi Maju Indonesia"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
@@ -498,7 +500,7 @@ export default function AplZeroOne() {
 														Jabatan <span className="text-red-500">*</span>
 													</label>
 													<select
-														{...register("jobs.0.position", { required: true })}
+														{...register("job.0.position", { required: true })}
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													>
 														<option value="">Pilih Jabatan</option>
@@ -513,7 +515,7 @@ export default function AplZeroOne() {
 														Kode Pos <span className="text-red-500">*</span>
 													</label>
 													<input
-														{...register("jobs.0.postal_code", {
+														{...register("job.0.postal_code", {
 															required: true,
 															maxLength: {
 																value: 5,
@@ -545,7 +547,7 @@ export default function AplZeroOne() {
 												</label>
 												<input
 													type="email"
-													{...register("jobs.0.job_email", { required: true })}
+													{...register("job.0.job_email", { required: true })}
 													placeholder="Contoh: ahmad.rizki@company.com"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
@@ -558,7 +560,7 @@ export default function AplZeroOne() {
 													No. Telp Kantor <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("jobs.0.phone_no",
+													{...register("job.0.phone_no",
 														{
 															required: true,
 															maxLength: {
@@ -590,7 +592,7 @@ export default function AplZeroOne() {
 											Alamat Kantor <span className="text-red-500">*</span>
 										</label>
 										<textarea
-											{...register("jobs.0.address", { required: true })}
+											{...register("job.0.address", { required: true })}
 											rows={3}
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 											placeholder="Contoh: Gedung Tech Plaza Lt. 5, Jl. Sudirman Kav. 25, Jakarta Selatan"

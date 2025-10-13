@@ -45,7 +45,7 @@ interface Assessee {
   address: string;
   postal_code: string;
   educational_qualifications: string;
-  jobs: Job[];
+  job: Job[];
 }
 
 const AssesseeCertificate: React.FC = () => {
@@ -146,7 +146,7 @@ const AssesseeCertificate: React.FC = () => {
     );
   }
 
-  const job = assesseeData.jobs[0];
+  const job = assesseeData.job[0];
 
   return (
     <div className="min-h-screen bg-gray-50">

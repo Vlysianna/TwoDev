@@ -46,7 +46,7 @@ export interface Assessee {
 	address: string;
 	postal_code: string;
 	educational_qualifications: string;
-	jobs?: AssesseeJob;
+	job?: AssesseeJob;
 	created_at?: string;
 	updated_at?: string;
 }
