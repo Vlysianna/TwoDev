@@ -292,8 +292,8 @@ export default function AplZeroOne() {
 													{...register("identity_number", {
 														required: "Wajib diisi",
 														maxLength: {
-															value: 16,
-															message: "NIK maksimal 16 digit",
+															value: 18,
+															message: "NIK maksimal 18 digit",
 														},
 														minLength: {
 															value: 16,
