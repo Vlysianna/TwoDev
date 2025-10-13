@@ -18,11 +18,10 @@ type FormValues = {
 };
 
 export default function DataSertifikasi() {
-	const { id_assessment, id_asesor, id_result, mutateNavigation } = useAssessmentParams();
+	const { id_assessment, id_asesor, id_result, mutateNavigation, id_asesi } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
 
 	const [loading, setLoading] = useState(false);
-	const [isLocked, setIsLocked] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const {
@@ -87,7 +86,7 @@ export default function DataSertifikasi() {
 			const formData = new FormData();
 			formData.append("purpose", data.purpose);
 			formData.append("assessor_id", String(id_asesor));
-			formData.append("assessee_id", String(asesiId));
+			formData.append("assessee_id", String(asesiId ?? id_asesi));
 			formData.append("assessment_id", String(id_assessment));
 
 			if (data.school_report_card) {
@@ -131,11 +130,14 @@ export default function DataSertifikasi() {
 						});
 					}
 				});
-		} catch (error: any) {
-			setError(
-				"Gagal menyimpan data. Silakan coba lagi. " +
-					error.response?.data?.message
-			);
+		} catch (error) {
+			// error type: unknown
+			let msg = "";
+			if (typeof error === "object" && error && "response" in error) {
+				// Use unknown type assertion
+				msg = (error as { response?: { data?: { message?: string } } }).response?.data?.message || "";
+			}
+			setError("Gagal menyimpan data. Silakan coba lagi. " + msg);
 		} finally {
 			setLoading(false);
 		}
@@ -178,11 +180,11 @@ export default function DataSertifikasi() {
 
 					// Set form values based on fetched data
 					if (purpose) setValue("purpose", purpose);
-
-					setIsLocked(true);
+					// Always allow editing
+					// No lock, always editable
 				} else {
 					setResultDocs(null);
-					setIsLocked(false);
+					// No lock, always editable
 				}
 			} catch (err) {
 				console.error("Failed to fetch result data:", err);
@@ -220,7 +222,7 @@ export default function DataSertifikasi() {
 							onSubmit={handleSubmit(onSubmit)}
 							className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6"
 						>
-							<fieldset disabled={isLocked} className="contents">
+							<fieldset disabled={false} className="contents">
 								{error && (
 									<div className="col-span-full bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
 										<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
@@ -252,7 +254,7 @@ export default function DataSertifikasi() {
 																checked={field.value === option}
 																onChange={(e) => field.onChange(e.target.value)}
 																className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
-																disabled={isLocked}
+																disabled={false}
 															/>
 														)}
 													/>
@@ -275,23 +277,21 @@ export default function DataSertifikasi() {
 										</h3>
 										<div className="space-y-6">
 											{supportingFilesStatic.map((file, index) => {
-												const existingFile = resultDocs
-													? resultDocs[file.name]
-													: null;
-
+												const name = file.name as keyof FormValues;
+												const existingFile = resultDocs ? resultDocs[name] : null;
 												return (
 													<div key={index} className="space-y-3">
 														<p className="text-gray-700 text-sm leading-relaxed">
 															{file.title}
 														</p>
 														<Controller
-															name={file.name}
+															name={name}
 															control={control}
 															render={({ field }) => (
 																<FileUploadArea
-																	field={field}
+																	fieldValue={field.value}
+																	onFieldChange={field.onChange}
 																	existingFileName={existingFile}
-																	isLocked={isLocked}
 																/>
 															)}
 														/>
@@ -311,23 +311,21 @@ export default function DataSertifikasi() {
 											</h3>
 											<div className="space-y-6">
 												{administrativeFilesStatic.map((file, index) => {
-													const existingFile = resultDocs
-														? resultDocs[file.name]
-														: null;
-
+													const name = file.name as keyof FormValues;
+													const existingFile = resultDocs ? resultDocs[name] : null;
 													return (
 														<div key={index} className="space-y-3">
 															<p className="text-gray-700 text-sm font-medium">
 																{file.title}
 															</p>
 															<Controller
-																name={file.name}
+																name={name}
 																control={control}
 																render={({ field }) => (
 																	<FileUploadArea
-																		field={field}
+																		fieldValue={field.value}
+																		onFieldChange={field.onChange}
 																		existingFileName={existingFile}
-																		isLocked={isLocked}
 																	/>
 																)}
 															/>
@@ -340,7 +338,7 @@ export default function DataSertifikasi() {
 										<div className="mt-8 pt-4 border-t border-gray-300">
 											<button
 												type="submit"
-												disabled={loading || isLocked}
+												disabled={loading}
 												className="w-full bg-[#E77D35] cursor-pointer hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 rounded-md transition duration-200"
 											>
 												{loading ? "Menyimpan..." : "Simpan"}
@@ -357,27 +355,24 @@ export default function DataSertifikasi() {
 	);
 }
 
-const FileUploadArea = ({
-	field,
-	existingFileName,
-	isLocked,
-}: {
-	field: {
-		value: File | null;
-		onChange: (file: File | null) => void;
-	};
+type FileUploadAreaProps = {
+	fieldValue: File | string | null;
+	onFieldChange: (file: File | null) => void;
 	existingFileName?: string | null;
-	isLocked?: boolean;
-}) => {
+};
+
+const FileUploadArea = ({ fieldValue, onFieldChange, existingFileName }: FileUploadAreaProps) => {
 	const fileRef = useRef<HTMLInputElement | null>(null);
-	const fileData = field.value;
 	const [dragActive, setDragActive] = useState(false);
+
+	// Only show file info if it's a File
+	const fileData = fieldValue instanceof File ? fieldValue : null;
 
 	const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setDragActive(false);
-		if (!isLocked && e.dataTransfer.files && e.dataTransfer.files[0]) {
-			field.onChange(e.dataTransfer.files[0]);
+		if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+			onFieldChange(e.dataTransfer.files[0]);
 		}
 	};
 
@@ -425,18 +420,16 @@ const FileUploadArea = ({
 				{(fileData || existingFileName) && (
 					<button
 						type="button"
-						onClick={() => !isLocked && field.onChange(null)}
-						disabled={isLocked}
-						className={`flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 text-sm font-medium ${isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-red-100"}`}
+						onClick={() => onFieldChange(null)}
+						className={`flex-1 sm:flex-none px-3 py-2 border border-red-300 rounded-md text-red-600 bg-red-50 text-sm font-medium cursor-pointer hover:bg-red-100`}
 					>
 						Hapus
 					</button>
 				)}
 				<button
 					type="button"
-					onClick={() => !isLocked && fileRef.current?.click()}
-					disabled={isLocked}
-					className={`flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 text-sm font-medium ${isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-gray-100"}`}
+					onClick={() => fileRef.current?.click()}
+					className={`flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-gray-50 text-sm font-medium cursor-pointer hover:bg-gray-100`}
 				>
 					{fileData || existingFileName ? "Ganti" : "Pilih File"}
 				</button>
@@ -448,7 +441,7 @@ const FileUploadArea = ({
 				className="hidden"
 				accept=".jpg,.jpeg,.png,.pdf"
 				onChange={(e) =>
-					!isLocked && field.onChange(e.target.files?.[0] || null)
+					onFieldChange(e.target.files?.[0] || null)
 				}
 			/>
 		</div>
