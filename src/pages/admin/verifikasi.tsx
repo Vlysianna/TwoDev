@@ -12,7 +12,8 @@ import {
   RefreshCw,
   FileText,
   FileX,
-  ZoomIn
+  ZoomIn,
+  File
 } from "lucide-react";
 import { useEffect, useState, useCallback } from 'react';
 import api from '@/helper/axios';
@@ -45,6 +46,19 @@ type ResultDetail = {
 
 type PendingDoc = ResultDoc & { result?: ResultDetail };
 
+// Fungsi untuk menentukan jenis file berdasarkan URL/extension
+const getFileType = (url: string): 'image' | 'pdf' | 'unknown' => {
+  if (!url) return 'unknown';
+
+  const extension = url.split('.').pop()?.toLowerCase();
+  if (['jpg', 'jpeg', 'png'].includes(extension || '')) {
+    return 'image';
+  } else if (extension === 'pdf') {
+    return 'pdf';
+  }
+  return 'unknown';
+};
+
 export default function VerifikasiPage() {
   const [items, setItems] = useState<PendingDoc[]>([]);
   const [filter, setFilter] = useState<'pending' | 'approved'>('pending');
@@ -53,12 +67,11 @@ export default function VerifikasiPage() {
   const [docDetails, setDocDetails] = useState<ResultDoc | any>(null);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   const toast = useToast();
   const location = useLocation();
-  // optional query params from ResultAssessment when opening per-schedule
   const searchParams = new URLSearchParams(location.search);
   const queryAssessor = searchParams.get('assessor');
-  // const querySchedule = searchParams.get('schedule');
 
   const fetchPending = useCallback(async () => {
     try {
@@ -82,22 +95,15 @@ export default function VerifikasiPage() {
 
   useEffect(() => { void fetchPending(); }, [fetchPending]);
 
-
   const openDetail = async (resultId: number) => {
     try {
-      // Reset error state
       setImageErrors(new Set());
-
-      // Fetch data detail
       const res = await api.get(`/assessments/apl-01/result/docs/${resultId}`);
       if (res.data.success) {
         setDocDetails(res.data.data);
-
-        // Find the corresponding result data from items
         const resultData = items.find(item =>
           (item.result_id === resultId) || (item.result?.id === resultId)
         )?.result;
-
         setSelected(resultData || { id: resultId });
       }
     } catch (err) {
@@ -114,6 +120,7 @@ export default function VerifikasiPage() {
         setSelected(null);
         setDocDetails(null);
         setSelectedImage(null);
+        setSelectedPdf(null);
         toast.show({ title: 'Berhasil', description: 'Verifikasi disetujui', type: 'success' });
       }
     } catch (err) {
@@ -141,6 +148,59 @@ export default function VerifikasiPage() {
     } catch (error) {
       console.error('Error downloading file:', error);
       toast.show({ title: 'Error', description: 'Gagal mengunduh file', type: 'error' });
+    }
+  };
+
+  // Fungsi untuk menangani klik tombol "Lihat"
+  const handleViewFile = (url: string) => {
+    const fileType = getFileType(url);
+
+    if (fileType === 'image') {
+      setSelectedImage(url);
+      setSelectedPdf(null);
+    } else if (fileType === 'pdf') {
+      // Buka PDF di tab baru
+      window.open(url, '_blank');
+    }
+  };
+
+  // Fungsi untuk render preview dokumen berdasarkan jenis file
+  const renderDocumentPreview = (url: string, label: string) => {
+    const fileType = getFileType(url);
+
+    if (fileType === 'image') {
+      return (
+        <div className="p-4 h-48 overflow-hidden flex items-center justify-center bg-gray-50">
+          {!imageErrors.has(url) ? (
+            <img
+              src={url}
+              alt={label}
+              className="max-h-full max-w-full object-contain"
+              onError={() => handleImageError(url)}
+            />
+          ) : (
+            <div className="text-center p-4">
+              <FileX size={32} className="text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">Gagal memuat gambar</p>
+            </div>
+          )}
+        </div>
+      );
+    } else if (fileType === 'pdf') {
+      return (
+        <div className="p-4 h-48 flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
+          <File size={48} className="text-red-500 mb-3" />
+          <p className="text-sm font-medium text-gray-700 mb-2">File PDF</p>
+          <p className="text-xs text-gray-500 text-center">Klik tombol lihat untuk membuka file PDF</p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="p-4 h-48 flex flex-col items-center justify-center bg-gray-50">
+          <FileX size={32} className="text-gray-400 mx-auto mb-2" />
+          <p className="text-sm text-gray-500">Format file tidak dikenali</p>
+        </div>
+      );
     }
   };
 
@@ -299,6 +359,7 @@ export default function VerifikasiPage() {
                             setDocDetails(null);
                             setImageErrors(new Set());
                             setSelectedImage(null);
+                            setSelectedPdf(null);
                           }}
                           className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-all"
                         >
@@ -332,12 +393,23 @@ export default function VerifikasiPage() {
                                 <div className="flex items-center space-x-2">
                                   <FileText size={16} className="text-orange-500" />
                                   <p className="text-sm font-medium text-gray-700">{field.label}</p>
+                                  {/* Badge jenis file */}
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getFileType(docDetails[field.key]) === 'pdf'
+                                      ? 'bg-red-100 text-red-800'
+                                      : 'bg-blue-100 text-blue-800'
+                                    }`}>
+                                    {getFileType(docDetails[field.key]) === 'pdf' ? 'PDF' : 'Gambar'}
+                                  </span>
                                 </div>
                                 <div className="flex items-center space-x-1">
                                   <button
-                                    onClick={() => setSelectedImage(docDetails[field.key])}
+                                    onClick={() => handleViewFile(docDetails[field.key])}
                                     className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                    title="Lihat gambar"
+                                    title={
+                                      getFileType(docDetails[field.key]) === 'pdf'
+                                        ? "Buka PDF"
+                                        : "Lihat gambar"
+                                    }
                                   >
                                     <ZoomIn size={16} />
                                   </button>
@@ -345,8 +417,6 @@ export default function VerifikasiPage() {
                                     onClick={() => {
                                       const url = docDetails[field.key];
                                       if (!url) return;
-
-                                      // Ambil nama file dari URL, fallback ke key
                                       const filename = url.split('/').pop() || `${field.key}`;
                                       handleDownload(url, filename);
                                     }}
@@ -357,21 +427,7 @@ export default function VerifikasiPage() {
                                   </button>
                                 </div>
                               </div>
-                              <div className="p-4 h-48 overflow-hidden flex items-center justify-center bg-gray-50">
-                                {!imageErrors.has(docDetails[field.key]) ? (
-                                  <img
-                                    src={docDetails[field.key]}
-                                    alt={field.label}
-                                    className="max-h-full max-w-full object-contain"
-                                    onError={() => handleImageError(docDetails[field.key])}
-                                  />
-                                ) : (
-                                  <div className="text-center p-4">
-                                    <FileX size={32} className="text-gray-400 mx-auto mb-2" />
-                                    <p className="text-sm text-gray-500">Gagal memuat gambar</p>
-                                  </div>
-                                )}
-                              </div>
+                              {renderDocumentPreview(docDetails[field.key], field.label)}
                             </div>
                           ) : (
                             <div key={field.key} className="bg-gray-50 border rounded-xl p-4 flex items-center justify-center">
@@ -405,7 +461,7 @@ export default function VerifikasiPage() {
                 </div>
               )}
 
-              {/* Modal Gambar Besar */}
+              {/* Modal Gambar Besar (hanya untuk gambar) */}
               {selectedImage && (
                 <div className="fixed inset-0 flex items-center justify-center backdrop-blur bg-black/80 z-50 p-4">
                   <div className="relative max-w-[90vw] max-h-full">
