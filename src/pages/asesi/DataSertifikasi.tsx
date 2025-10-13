@@ -122,6 +122,7 @@ export default function DataSertifikasi() {
 							type: "success",
 						});
 						mutateNavigation();
+						localStorage.removeItem("asesiId");
 					} else {
 						toast.show({
 							title: "Gagal",

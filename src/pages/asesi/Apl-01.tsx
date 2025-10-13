@@ -13,12 +13,17 @@ import ConfirmModal from "@/components/ConfirmModal";
 
 export default function AplZeroOne() {
 	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
+	const asesiId = localStorage.getItem("asesiId");
 
 	const { user } = useAuth();
 
 	const toast = useToast();
 
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		if (asesiId) navigate(paths.asesi.assessment.dataSertifikasi(id_assessment, id_asesor));
+	}, [asesiId]); 
 
 	const [loading, setLoading] = useState(false);
 	const [isLocked, setIsLocked] = useState(false);
@@ -292,8 +297,8 @@ export default function AplZeroOne() {
 													{...register("identity_number", {
 														required: "Wajib diisi",
 														maxLength: {
-															value: 18,
-															message: "NIK maksimal 18 digit",
+															value: 16,
+															message: "NIK maksimal 16 digit",
 														},
 														minLength: {
 															value: 16,
