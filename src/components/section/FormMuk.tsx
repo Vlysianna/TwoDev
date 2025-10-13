@@ -15,6 +15,7 @@ import { ChevronDown } from "lucide-react";
 import {
   Controller,
   useFieldArray,
+  useFormState,
   type Control,
   type FieldArrayWithId,
   type UseFieldArrayRemove,
@@ -1607,25 +1608,27 @@ function OptionsFieldArray({
     name: `ia05_questions.${qIndex}.options`,
   });
 
-  return (
-    <div className="space-y-2">
-      {fields.map((field, oIndex) => (
-        <div key={field.id} className="flex items-center space-x-2">
-          <input
-            {...control.register?.(
-              `ia05_questions.${qIndex}.options.${oIndex}.option`
-            )}
-            className="flex-1 border border-gray-300 rounded-md px-3 py-1"
-            placeholder={`Opsi ${oIndex + 1}`}
-            disabled={disabled}
-          />
-          <Controller
-            name={`ia05_questions.${qIndex}.options`}
-            control={control}
-            render={({ field: { value, onChange } }) => {
-              const checked = value?.[oIndex]?.is_answer ?? false;
+  const { errors } = useFormState({ control });
 
-              return (
+  const optionsError = errors?.ia05_questions?.[qIndex]?.options;
+
+  return (
+    <Controller
+      name={`ia05_questions.${qIndex}.options`}
+      control={control}
+      rules={{
+        validate: (value) => {
+          const hasAnswer = value?.some((opt) => opt.is_answer);
+          return hasAnswer || "Harus pilih salah satu jawaban";
+        },
+      }}
+      render={({ field: { value, onChange } }) => (
+        <div className="space-y-2">
+          {fields.map((field, oIndex) => {
+            const checked = value?.[oIndex]?.is_answer ?? false;
+
+            return (
+              <div key={field.id} className="flex items-center space-x-2">
                 <input
                   type="radio"
                   name={`ia05_questions-${qIndex}`}
@@ -1640,28 +1643,45 @@ function OptionsFieldArray({
                   }}
                   disabled={disabled}
                 />
-              );
-            }}
-          />
+
+                <input
+                  {...control.register?.(
+                    `ia05_questions.${qIndex}.options.${oIndex}.option`
+                  )}
+                  className="flex-1 border border-gray-300 rounded-md px-3 py-1"
+                  placeholder={`Opsi ${oIndex + 1}`}
+                  disabled={disabled}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => remove(oIndex)}
+                  className="px-3 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+                  disabled={disabled}
+                >
+                  Hapus
+                </button>
+              </div>
+            );
+          })}
+
+          {optionsError && (
+            <p className="text-red-500 text-sm mt-1">
+              {optionsError.root?.message?.toString()}
+            </p>
+          )}
+
           <button
             type="button"
-            onClick={() => remove(oIndex)}
-            className="px-3 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+            onClick={() => append({ option: "", is_answer: false })}
+            className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
             disabled={disabled}
           >
-            Hapus
+            Tambah Opsi
           </button>
         </div>
-      ))}
-
-      <button
-        type="button"
-        onClick={() => append({ option: "", is_answer: false })}
-        className="px-3 py-1 border border-green-500 text-green-500 rounded-md hover:bg-green-50 transition-colors"
-        disabled={disabled}
-      >
-        Tambah Opsi
-      </button>
-    </div>
+      )}
+    />
   );
 }
+
