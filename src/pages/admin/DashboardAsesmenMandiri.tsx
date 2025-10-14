@@ -36,6 +36,7 @@ export default function DashboardAsesmenMandiriAdmin() {
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
+	const [filteredAssesseeData, setFilteredAssesseeData] = useState<AssesseeData[]>([]);
 
 	useEffect(() => {
 		fetchAssesseeData();
@@ -43,13 +44,16 @@ export default function DashboardAsesmenMandiriAdmin() {
 	}, []);
 
 	useEffect(() => {
-		assesseeData.filter((assessee) => {
+		setFilteredAssesseeData(assesseeData);
+	}, [assesseeData]);
+
+	useEffect(() => {
+		setFilteredAssesseeData(assesseeData.filter((assessee) => {
 			return assessee.full_name
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase());
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [searchTerm]);
+		}));
+	}, [searchTerm, assesseeData]);
 
 	const fetchAssesseeData = async () => {
 		try {
@@ -196,6 +200,7 @@ export default function DashboardAsesmenMandiriAdmin() {
 								onChange={(e) => setSearchTerm(e.target.value)}
 								placeholder="Search..."
 								className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-md"
+								autoFocus
 							/>
 							<Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
 						</div>
@@ -240,7 +245,7 @@ export default function DashboardAsesmenMandiriAdmin() {
 												{error}
 											</td>
 										</tr>
-									) : assesseeData.length === 0 ? (
+									) : filteredAssesseeData.length === 0 ? (
 										<tr>
 											<td
 												colSpan={3}
@@ -250,7 +255,7 @@ export default function DashboardAsesmenMandiriAdmin() {
 											</td>
 										</tr>
 									) : (
-										assesseeData.map((asesi, index) => (
+										filteredAssesseeData.map((asesi, index) => (
 											<tr
 												key={asesi.assessee_id}
 												className="hover:bg-gray-50 border-b border-gray-200"

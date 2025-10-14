@@ -13,7 +13,6 @@ export default function APL01({ id_result }: { id_result: string }) {
 		`/assessments/apl-01/result/${id_result}`,
 		fetcher
 	);
-	console.log(id_result);
 
 	const {
 		register,

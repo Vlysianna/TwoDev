@@ -61,6 +61,7 @@ export default function DashboardAsesmenMandiri() {
 		return savedTab || "apl-02";
 	});
 	const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
+	const [filteredAssesseeData, setFilteredAssesseeData] = useState<AssesseeData[]>([]);
 	const [showStatusInfo, setShowStatusInfo] = useState(false);
 
 	useEffect(() => {
@@ -73,13 +74,16 @@ export default function DashboardAsesmenMandiri() {
 	}, [selectedTab]);
 
 	useEffect(() => {
-		assesseeData.filter((assessee) => {
+		setFilteredAssesseeData(assesseeData);
+	}, [assesseeData]);
+
+	useEffect(() => {
+		setFilteredAssesseeData(assesseeData.filter((assessee) => {
 			return assessee.assessee_name
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase());
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [searchTerm]);
+		}));
+	}, [searchTerm, assesseeData]);
 
 	useEffect(() => {
 		fetchTabs();
@@ -462,6 +466,7 @@ export default function DashboardAsesmenMandiri() {
 								onChange={(e) => setSearchTerm(e.target.value)}
 								placeholder="Search..."
 								className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-md"
+								autoFocus
 							/>
 							<Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
 						</div>
@@ -506,7 +511,7 @@ export default function DashboardAsesmenMandiri() {
 												{error}
 											</td>
 										</tr>
-									) : assesseeData.length === 0 ? (
+									) : filteredAssesseeData.length === 0 ? (
 										<tr>
 											<td
 												colSpan={3}
@@ -516,7 +521,7 @@ export default function DashboardAsesmenMandiri() {
 											</td>
 										</tr>
 									) : (
-										assesseeData.map((asesi, index) => (
+										filteredAssesseeData.map((asesi, index) => (
 											<tr
 												key={asesi.assessee_id}
 												className="hover:bg-gray-50 border-b border-gray-200"
