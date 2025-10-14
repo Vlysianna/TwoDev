@@ -77,7 +77,7 @@ export default function APL02({
 				(errorUnitCompetencies && (
 					<div className="lg:col-span-5 mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
 						<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-						<span className="text-red-800">{errorResult}</span>
+						<span className="text-red-800">{errorResult.response.data.message ?? errorResult.message}</span>
 					</div>
 				))}
 

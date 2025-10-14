@@ -74,7 +74,7 @@ export default function DataSertifikasi({ id_result }: { id_result: string }) {
 				{error && (
 					<div className="col-span-full bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
 						<AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-						<span className="text-red-800">{error}</span>
+						<span className="text-red-800">{error.response.data.message ?? error.message}</span>
 					</div>
 				)}
 

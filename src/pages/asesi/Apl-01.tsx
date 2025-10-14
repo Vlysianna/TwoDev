@@ -54,14 +54,14 @@ export default function AplZeroOne() {
 				...data,
 				user_id: user?.id ?? 0,
 				birth_date: new Date(data.birth_date),
-				job: [
+				jobs: [
 					{
-						institution_name: data.job?.[0]?.institution_name || "",
-						address: data.job?.[0]?.address || "",
-						postal_code: data.job?.[0]?.postal_code || "",
-						position: data.job?.[0]?.position || "",
-						phone_no: data.job?.[0]?.phone_no || "",
-						job_email: data.job?.[0]?.job_email || "",
+						institution_name: data.jobs?.[0]?.institution_name || "",
+						address: data.jobs?.[0]?.address || "",
+						postal_code: data.jobs?.[0]?.postal_code || "",
+						position: data.jobs?.[0]?.position || "",
+						phone_no: data.jobs?.[0]?.phone_no || "",
+						job_email: data.jobs?.[0]?.job_email || "",
 					},
 				],
 			};
@@ -115,7 +115,7 @@ export default function AplZeroOne() {
 							...response.data.data,
 							gender:
 								response.data.data.gender == "male" ? "Laki-laki" : "Perempuan",
-							job: [
+							jobs: [
 								response.data.data.job && response.data.data.job.position
 									? response.data.data.job
 									: { ...(response.data.data.job || {}), position: 'Satria' },
@@ -486,11 +486,11 @@ export default function AplZeroOne() {
 													Nama Institusi <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("job.0.institution_name", { required: true })}
+													{...register("jobs.0.institution_name", { required: true })}
 													placeholder="Contoh: PT. Teknologi Maju Indonesia"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
-												{errors.job?.[0]?.institution_name && (
+												{errors.jobs?.[0]?.institution_name && (
 													<span className="text-red-500 text-sm">Wajib diisi</span>
 												)}
 											</div>
@@ -500,13 +500,13 @@ export default function AplZeroOne() {
 														Jabatan <span className="text-red-500">*</span>
 													</label>
 													<select
-														{...register("job.0.position", { required: true })}
+														{...register("jobs.0.position", { required: true })}
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													>
 														<option value="">Pilih Jabatan</option>
 														<option value="Siswa/Pelajar">Siswa/Pelajar</option>
 													</select>
-													{errors.job?.[0]?.position && (
+													{errors.jobs?.[0]?.position && (
 														<span className="text-red-500 text-sm">Wajib diisi</span>
 													)}
 												</div>
@@ -515,7 +515,7 @@ export default function AplZeroOne() {
 														Kode Pos <span className="text-red-500">*</span>
 													</label>
 													<input
-														{...register("job.0.postal_code", {
+														{...register("jobs.0.postal_code", {
 															required: true,
 															maxLength: {
 																value: 5,
@@ -534,8 +534,8 @@ export default function AplZeroOne() {
 														placeholder="Contoh: 12940"
 														className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													/>
-													{errors.job?.[0]?.postal_code && (
-														<span className="text-red-500 text-sm">{errors.job?.[0]?.postal_code.message || "Wajib diisi"}</span>
+													{errors.jobs?.[0]?.postal_code && (
+														<span className="text-red-500 text-sm">{errors.jobs?.[0]?.postal_code.message || "Wajib diisi"}</span>
 													)}
 												</div>
 											</div>
@@ -547,11 +547,11 @@ export default function AplZeroOne() {
 												</label>
 												<input
 													type="email"
-													{...register("job.0.job_email", { required: true })}
+													{...register("jobs.0.job_email", { required: true })}
 													placeholder="Contoh: ahmad.rizki@company.com"
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 												/>
-												{errors.job?.[0]?.job_email && (
+												{errors.jobs?.[0]?.job_email && (
 													<span className="text-red-500 text-sm">Wajib diisi</span>
 												)}
 											</div>
@@ -560,7 +560,7 @@ export default function AplZeroOne() {
 													No. Telp Kantor <span className="text-red-500">*</span>
 												</label>
 												<input
-													{...register("job.0.phone_no",
+													{...register("jobs.0.phone_no",
 														{
 															required: true,
 															maxLength: {
@@ -581,8 +581,8 @@ export default function AplZeroOne() {
 													className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 													placeholder="Contoh: 0215566777"
 												/>
-												{errors.job?.[0]?.phone_no && (
-													<span className="text-red-500 text-sm">{errors.job?.[0]?.phone_no.message || "Wajib diisi"}</span>
+												{errors.jobs?.[0]?.phone_no && (
+													<span className="text-red-500 text-sm">{errors.jobs?.[0]?.phone_no.message || "Wajib diisi"}</span>
 												)}
 											</div>
 										</div>
@@ -592,12 +592,12 @@ export default function AplZeroOne() {
 											Alamat Kantor <span className="text-red-500">*</span>
 										</label>
 										<textarea
-											{...register("job.0.address", { required: true })}
+											{...register("jobs.0.address", { required: true })}
 											rows={3}
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 											placeholder="Contoh: Gedung Tech Plaza Lt. 5, Jl. Sudirman Kav. 25, Jakarta Selatan"
 										/>
-										{errors.job?.[0]?.address && (
+										{errors.jobs?.[0]?.address && (
 											<span className="text-red-500 text-sm">Wajib diisi</span>
 										)}
 									</div>

@@ -26,7 +26,7 @@ export interface AssesseeRequest {
 	address: string;
 	postal_code: string;
 	educational_qualifications: string;
-	job?: AssesseeJob[];
+	jobs?: AssesseeJob[];
 	created_at?: string;
 	updated_at?: string;
 }
