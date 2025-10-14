@@ -4,7 +4,7 @@ import { type AK05ResponseData } from "@/model/ak05-model";
 import { Clock } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import useSWR from "swr";
-import { formatDate } from "@/helper/format-date";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
@@ -157,7 +157,7 @@ export default function AK05({ id_result }: { id_result: string }) {
 						<input
 							type="text"
 							value={
-								data?.result?.result_ak05?.updated_at ? formatDate(data?.result?.result_ak05?.updated_at) : ""
+								data?.result?.result_ak05?.updated_at ? formatDateJakartaUS24(data?.result?.result_ak05?.updated_at) : ""
 							}
 							disabled
 							className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"

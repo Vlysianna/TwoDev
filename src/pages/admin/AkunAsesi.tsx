@@ -9,7 +9,7 @@ import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import AssesseeModal from '@/components/AssesseeModal';
 import api from '@/helper/axios';
-import { formatDate } from "@/helper/format-date";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 
 interface AssesseeItem {
@@ -222,7 +222,7 @@ const KelolaAkunAsesi: React.FC = () => {
                           {user.identity_number || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {user.birth_date ? formatDate(user.birth_date) : '-'}
+                          {user.birth_date ? formatDateJakartaUS24(user.birth_date) : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                           {user.birth_location || '-'}

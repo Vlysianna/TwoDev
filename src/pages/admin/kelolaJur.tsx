@@ -7,7 +7,7 @@ import Sidebar from "@/components/SideAdmin";
 import axiosInstance from "@/helper/axios";
 import { useForm } from "react-hook-form";
 import type { Scheme } from "@/lib/types";
-import { formatDate } from "@/helper/format-date";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 type FormData = {
 	code: string;
@@ -440,14 +440,14 @@ const KelolaJurusan = () => {
 							<div>
 								<label className="text-sm font-medium text-gray-500">Tanggal Dibuat</label>
 								<p className="text-sm text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">
-									{formatDate(selectedScheme.created_at)}
+									{formatDateJakartaUS24(selectedScheme.created_at)}
 								</p>
 							</div>
 
 							<div>
 								<label className="text-sm font-medium text-gray-500">Terakhir Diperbarui</label>
 								<p className="text-sm text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">
-									{formatDate(selectedScheme.updated_at)}
+									{formatDateJakartaUS24(selectedScheme.updated_at)}
 								</p>
 							</div>
 						</div>

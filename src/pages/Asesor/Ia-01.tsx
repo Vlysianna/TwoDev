@@ -17,7 +17,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { getAssessorUrl, getAssesseeUrl } from "@/lib/hashids";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import ConfirmModal from "@/components/ConfirmModal";
-import { formatDate } from "@/helper/format-date";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 import {
 	Accordion,
 	AccordionContent,
@@ -596,7 +596,7 @@ export default function Ia01() {
 		setRecommendation(value);
 	};
 
-	const formattedDate = assesmentDate ? formatDate(assesmentDate) : "";
+	const formattedDate = assesmentDate ? formatDateJakartaUS24(assesmentDate) : "";
 
 	const getFilteredData = () => {
 		return unitData.filter((unit) => unit.group_name === selectedKPekerjaan);

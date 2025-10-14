@@ -8,7 +8,7 @@ import { Calendar, Clock } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useMemo } from "react";
 import useSWR from "swr";
-import { formatDate } from "@/helper/format-date";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 const feedbackOptions = [
 	{ key: "tercapai", label: "Tercapai" },
@@ -40,7 +40,7 @@ export default function IA05({ id_result }: { id_result: string }) {
 	const formattedDate = useMemo(
 		() =>
 			result?.ia05_header.updated_at
-				? formatDate(result.ia05_header.updated_at) : "",
+				? formatDateJakartaUS24(result.ia05_header.updated_at) : "",
 		[result]
 	);
 

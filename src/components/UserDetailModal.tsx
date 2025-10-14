@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, User, Mail, Calendar, MapPin, Phone, IdCard, GraduationCap } from 'lucide-react';
-import { formatDate } from '@/helper/format-date';
+import { formatDateJakartaUS24 } from '@/helper/format-date';
 
 interface Role {
   id: number;
@@ -112,7 +112,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div>
                 <p className="text-sm font-medium text-gray-700">Tanggal Lahir</p>
                 <p className="text-sm text-gray-900">
-                  {user.assessee.birth_date ? formatDate(user.assessee.birth_date) : '-'}
+                  {user.assessee.birth_date ? formatDateJakartaUS24(user.assessee.birth_date) : '-'}
                 </p>
               </div>
             </div>
@@ -210,7 +210,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div>
                 <p className="text-sm font-medium text-gray-700">Tanggal Lahir</p>
                 <p className="text-sm text-gray-900">
-                  {user.assessor.birth_date ? formatDate(user.assessor.birth_date) : '-'}
+                  {user.assessor.birth_date ? formatDateJakartaUS24(user.assessor.birth_date) : '-'}
                 </p>
               </div>
             </div>
@@ -256,7 +256,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div>
                 <p className="text-sm font-medium text-gray-700">Tanggal Lahir</p>
                 <p className="text-sm text-gray-900">
-                  {user.admin.birth_date ? formatDate(user.admin.birth_date) : '-'}
+                  {user.admin.birth_date ? formatDateJakartaUS24(user.admin.birth_date) : '-'}
                 </p>
               </div>
             </div>
@@ -339,7 +339,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 <Calendar className="w-5 h-5 text-gray-400 mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-gray-700">Terdaftar</p>
-                  <p className="text-sm text-gray-900">{formatDate(user.created_at)}</p>
+                  <p className="text-sm text-gray-900">{formatDateJakartaUS24(user.created_at)}</p>
                 </div>
               </div>
             </div>
@@ -349,7 +349,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 <Calendar className="w-5 h-5 text-gray-400 mt-1 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-gray-700">Terakhir Diperbarui</p>
-                  <p className="text-sm text-gray-900">{formatDate(user.updated_at)}</p>
+                  <p className="text-sm text-gray-900">{formatDateJakartaUS24(user.updated_at)}</p>
                 </div>
               </div>
             )}

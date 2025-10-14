@@ -16,7 +16,7 @@ import {
   Mail,
   Shield 
 } from "lucide-react";
-import { formatDate } from "@/helper/format-date";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 interface Job {
   id: number;
@@ -85,7 +85,7 @@ const AssesseeCertificate: React.FC = () => {
       setAssesseeData(data);
 
       // Format tanggal lahir
-      const birthDate = formatDate(data.birth_date.split("T")[0]);
+      const birthDate = formatDateJakartaUS24(data.birth_date);
       setFormattedDate(birthDate);
     } catch (err) {
       console.error("Failed to fetch assessee data:", err);

@@ -20,7 +20,7 @@ import UserDetailModal from '@/components/UserDetailModal';
 // import { useNavigate } from 'react-router-dom';
 import useToast from '@/components/ui/useToast';
 import api from '@/helper/axios';
-import { formatDate } from '@/helper/format-date';
+import { formatDateJakartaUS24 } from '@/helper/format-date';
 
 interface Role {
   id: number;
@@ -552,7 +552,7 @@ const KelolaUser: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {formatDate(user.created_at)}
+                            {formatDateJakartaUS24(user.created_at)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                             <div className="flex items-center justify-center space-x-2">

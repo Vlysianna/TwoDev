@@ -9,7 +9,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import paths from "@/routes/paths";
 import NavbarAsesi from '@/components/NavbarAsesi';
 import ConfirmModal from '@/components/ConfirmModal';
-import { formatDate } from "@/helper/format-date";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { IncompleteGroup } from '@/model/ia01-model';
 
@@ -179,7 +179,7 @@ export default function Ia01Asesi() {
     const filteredData = getFilteredData();
 
     const assesmentDate = resultData?.ia01_header?.updated_at || assessment?.date || '';
-    const formattedDate = assesmentDate ? formatDate(assesmentDate) : "";
+    const formattedDate = assesmentDate ? formatDateJakartaUS24(assesmentDate) : "";
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 

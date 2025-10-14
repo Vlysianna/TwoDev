@@ -10,7 +10,7 @@ import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import ConfirmModal from "@/components/ConfirmModal";
-import { formatDate } from "@/helper/format-date";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 // Main Component
 export default function Ia05CAssessee() {
@@ -44,7 +44,7 @@ export default function Ia05CAssessee() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   // Format date for display
-  const formattedDate = result?.ia05_header.updated_at ? formatDate(result.ia05_header.updated_at) : "";
+  const formattedDate = result?.ia05_header.updated_at ? formatDateJakartaUS24(result.ia05_header.updated_at) : "";
 
   useEffect(() => {
     fetchData();
