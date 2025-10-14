@@ -206,11 +206,11 @@ export default function VerifikasiPage() {
 
   // Daftar field dokumen yang akan ditampilkan
   const documentFields = [
+    { key: 'student_card', label: 'Kartu Pelajar' },
+    { key: 'family_card', label: 'Kartu Keluarga / KTP' },
+    { key: 'id_card', label: 'Pasfoto 3 x 4' },
     { key: 'school_report_card', label: 'Rapor Sekolah' },
     { key: 'field_work_practice_certificate', label: 'Sertifikat Praktik Kerja Lapangan' },
-    { key: 'student_card', label: 'Kartu Pelajar' },
-    { key: 'family_card', label: 'Kartu Keluarga' },
-    { key: 'id_card', label: 'KTP' },
   ];
 
   return (
