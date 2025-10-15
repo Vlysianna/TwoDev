@@ -555,8 +555,6 @@ export default function DashboardAsesmenMandiri() {
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => {
-                              console.log("asesi:", asesi.assessee_id);
-                              console.log("Result:", asesi.result_id);
                               setSelectedAssessee(asesi);
                               handleActionClick(asesi.assessee_id);
                             }}
@@ -592,8 +590,6 @@ export default function DashboardAsesmenMandiri() {
         title="Input Skor"
         initialScore={0}
         onSave={async (score) => {
-          console.log("Saving score:", score);
-          console.log("Selected Assessee:", selectedAssessee?.result_id);
           setSavingPenilaian(true);
           await handleSaveScore(score, selectedAssessee!.result_id);
           setSavingPenilaian(false);
