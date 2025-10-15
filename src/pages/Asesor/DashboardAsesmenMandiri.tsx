@@ -25,6 +25,7 @@ interface AssesseeData {
   result_id: number;
   assessment_id: number;
   assessee_id: number;
+//   score: number;
   assessee_name: string;
   status: "Belum Tuntas" | "Menunggu Asesi" | "Tuntas";
 }
@@ -594,6 +595,7 @@ export default function DashboardAsesmenMandiri() {
           await handleSaveScore(score, selectedAssessee!.result_id);
           setSavingPenilaian(false);
           setModalPenilaianOpen(false);
+		  await fetchAssesseeData(selectedTab.toLowerCase());
         }}
       />
     </div>
