@@ -135,7 +135,7 @@ export default function VerifikasiPage() {
 
   const handleDownload = async (url: string, filename: string) => {
     try {
-      const response = await api.get(url, { responseType: 'blob' });
+      const response = await api.get(import.meta.env.VITE_API_URL + '/' + url, { responseType: 'blob' });
       const blob = new Blob([response.data]);
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -160,7 +160,7 @@ export default function VerifikasiPage() {
       setSelectedPdf(null);
     } else if (fileType === 'pdf') {
       // Buka PDF di tab baru
-      window.open(url, '_blank');
+      window.open(import.meta.env.VITE_API_URL + '/' + url, '_blank');
     }
   };
 
@@ -173,7 +173,7 @@ export default function VerifikasiPage() {
         <div className="p-4 h-48 overflow-hidden flex items-center justify-center bg-gray-50">
           {!imageErrors.has(url) ? (
             <img
-              src={url}
+              src={import.meta.env.VITE_API_URL + '/' + url}
               alt={label}
               className="max-h-full max-w-full object-contain"
               onError={() => handleImageError(url)}
@@ -473,14 +473,14 @@ export default function VerifikasiPage() {
                     </button>
                     <div className="bg-black rounded-lg overflow-hidden">
                       <img
-                        src={selectedImage}
+                        src={import.meta.env.VITE_API_URL + '/' + selectedImage}
                         alt="Preview dokumen"
                         className="max-w-full max-h-[80vh] object-contain"
                       />
                     </div>
                     <div className="mt-4 flex justify-center">
                       <a
-                        href={selectedImage}
+                        href={import.meta.env.VITE_API_URL + '/' + selectedImage}
                         download
                         className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                       >

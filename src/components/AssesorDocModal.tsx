@@ -66,7 +66,7 @@ const AssessorDocumentsModal: React.FC<AssessorDocumentsModalProps> = ({
 
                 <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
                     {documentTypes.map((doc) => {
-                        const url = assessorDetail[doc.key];
+                        const url = import.meta.env.VITE_API_URL + '/' + assessorDetail[doc.key];
                         if (!url) return null;
 
                         const filename = url.split('/').pop() || doc.label;
