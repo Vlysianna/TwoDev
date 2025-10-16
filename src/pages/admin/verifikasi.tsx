@@ -72,11 +72,12 @@ export default function VerifikasiPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const queryAssessor = searchParams.get('assessor');
+  const querySchedule = searchParams.get('schedule');
 
   const fetchPending = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/assessments/verification/${filter === 'pending' ? 'pending' : 'approved'}`);
+      const res = await api.get(`/assessments/verification/${filter === 'pending' ? 'pending' : 'approved'}` + (querySchedule ? `/${querySchedule}` : ''));
       if (res.data.success) {
         let all = res.data.data || [];
         if (queryAssessor) {
