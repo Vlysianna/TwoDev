@@ -12,7 +12,7 @@ import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import NavbarAsesor from "@/components/NavAsesor";
 
 export default function Ia02Assessor() {
-	const { id_result, id_assessment, id_asesi, id_asesor } =
+	const { id_result, id_schedule: id_assessment, id_asesi, id_asesor } =
 		useAssessmentParams();
 
 	const { user } = useAuth();

@@ -35,6 +35,15 @@ export interface Assessor {
 	no_reg_met: string;
 }
 
+export interface Schedule {
+	id: number;
+	assessment_id: number;
+	start_date: string;
+	end_date: string;
+	created_at: string;
+	updated_at: string;
+}
+
 export interface APL02Header {
 	id: number;
 	result_id: number;
@@ -48,6 +57,7 @@ export interface ResultTemplate {
 	assessment: Assessment;
 	assessee: Assessee;
 	assessor: Assessor;
+	schedule: Schedule;
 	tuk: string;
 	is_competent: boolean;
 	created_at: string;

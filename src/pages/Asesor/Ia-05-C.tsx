@@ -14,7 +14,7 @@ import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 // Main Component
 export default function Ia05C() {
-  const { id_assessment, id_asesi, id_asesor, id_result } =
+  const { id_schedule: id_assessment, id_asesi, id_asesor, id_result } =
     useAssessmentParams();
   const { user } = useAuth();
 

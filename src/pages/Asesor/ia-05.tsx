@@ -12,7 +12,7 @@ interface IA05AssesseeAnswerRow { id: number; answers: { id: number; option: str
 interface IA05AnswerKeyRow { id: number; answer: { id: number; option: string } }
 
 export default function IA05Assessor() {
-  const { id_assessment, id_result, id_asesi } = useAssessmentParams();
+  const { id_schedule: id_assessment, id_result, id_asesi } = useAssessmentParams();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<IA05Question[]>([]);
   const [answersMap, setAnswersMap] = useState<Record<number, number>>({});

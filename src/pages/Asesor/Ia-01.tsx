@@ -27,7 +27,7 @@ import {
 import type { IncompleteGroup } from "@/model/ia01-model";
 
 export default function Ia01() {
-	const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams
+	const { id_schedule: id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams
 		? useAssessmentParams()
 		: {};
 	const [selectedKPekerjaan, setSelectedKPekerjaan] = useState<string>("");

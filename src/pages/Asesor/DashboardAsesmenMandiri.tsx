@@ -43,7 +43,7 @@ interface Tab {
 
 export default function DashboardAsesmenMandiri() {
   const { user } = useAuth();
-  const { id_assessment, id_asesor } = useAssessmentParams();
+  const { id_schedule, id_asesor } = useAssessmentParams();
   const navigate = useNavigate();
   const tabsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +62,7 @@ export default function DashboardAsesmenMandiri() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [tabData, setTabData] = useState<TabResponse | null>();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
-    const savedTab = localStorage.getItem(`selectedTab-${id_assessment}`);
+    const savedTab = localStorage.getItem(`selectedTab-${id_schedule}`);
     return savedTab || "apl-02";
   });
   const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
@@ -72,8 +72,8 @@ export default function DashboardAsesmenMandiri() {
   const [showStatusInfo, setShowStatusInfo] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(`selectedTab-${id_assessment}`, selectedTab);
-  }, [selectedTab, id_assessment]);
+    localStorage.setItem(`selectedTab-${id_schedule}`, selectedTab);
+  }, [selectedTab, id_schedule]);
 
   useEffect(() => {
     fetchAssesseeData(selectedTab.toLowerCase());
@@ -101,9 +101,10 @@ export default function DashboardAsesmenMandiri() {
 
   const fetchTabs = async () => {
     try {
+      console.log(id_schedule);
       setLoading(true);
       const response = await api.get(
-        `/assessments/navigation/assessor/${id_assessment}`
+        `/assessments/navigation/assessor/${id_schedule}`
       );
       if (response.data.success) {
         setTabData(response.data.data);
@@ -122,7 +123,7 @@ export default function DashboardAsesmenMandiri() {
     try {
       setLoading(true);
       const response = await api.get(
-        `/dashboard/assessor/${id_asesor}/${id_assessment}/${tab}`
+        `/dashboard/assessor/${id_asesor}/${id_schedule}/${tab}`
       );
       if (response.data.success) {
         // console.log(response.data.data);
@@ -256,33 +257,33 @@ export default function DashboardAsesmenMandiri() {
   const handleActionClick = (assesseeId: number) => {
     switch (selectedTab.toLowerCase()) {
       case "apl-02":
-        navigate(paths.asesor.assessment.cekApl02(id_assessment, assesseeId));
+        navigate(paths.asesor.assessment.cekApl02(id_schedule, assesseeId));
         break;
       case "ia-01":
         navigate(
-          paths.asesor.assessment.ia01(id_assessment, String(assesseeId))
+          paths.asesor.assessment.ia01(id_schedule, String(assesseeId))
         );
         break;
       case "ia-02":
-        navigate(paths.asesor.assessment.ia02(id_assessment, assesseeId));
+        navigate(paths.asesor.assessment.ia02(id_schedule, assesseeId));
         break;
       case "ia-03":
-        navigate(paths.asesor.assessment.ia03(id_assessment, assesseeId));
+        navigate(paths.asesor.assessment.ia03(id_schedule, assesseeId));
         break;
       case "ia-05":
-        navigate(paths.asesor.assessment.ia05(id_assessment, assesseeId));
+        navigate(paths.asesor.assessment.ia05(id_schedule, assesseeId));
         break;
       case "ak-01":
-        navigate(paths.asesor.assessment.ak01(id_assessment, assesseeId));
+        navigate(paths.asesor.assessment.ak01(id_schedule, assesseeId));
         break;
       case "ak-02":
-        navigate(paths.asesor.assessment.ak02(id_assessment, assesseeId));
+        navigate(paths.asesor.assessment.ak02(id_schedule, assesseeId));
         break;
       case "ak-03":
-        navigate(paths.asesor.assessment.ak03(id_assessment, assesseeId));
+        navigate(paths.asesor.assessment.ak03(id_schedule, assesseeId));
         break;
       case "ak-05":
-        navigate(paths.asesor.assessment.ak05(id_assessment, assesseeId));
+        navigate(paths.asesor.assessment.ak05(id_schedule, assesseeId));
         break;
       case "penilaian":
         setModalPenilaianOpen(true);

@@ -14,7 +14,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 export default function CekAk05() {
-  const { id_assessment, id_result, id_asesor } = useAssessmentParams();
+  const { id_schedule: id_assessment, id_result, id_asesor } = useAssessmentParams();
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(false);

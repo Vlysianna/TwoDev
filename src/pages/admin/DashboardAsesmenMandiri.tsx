@@ -36,6 +36,7 @@ export default function DashboardAsesmenMandiriAdmin() {
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [assesseeData, setAssesseeData] = useState<AssesseeData[]>([]);
+	console.log(assesseeData);
 	const [filteredAssesseeData, setFilteredAssesseeData] = useState<AssesseeData[]>([]);
 
 	useEffect(() => {

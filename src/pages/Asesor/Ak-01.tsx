@@ -11,15 +11,15 @@ import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
 import NavbarAsesor from "@/components/NavAsesor";
 import useToast from "@/components/ui/useToast";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 export default function CekAk01() {
-  const { id_assessment, id_result, id_asesi, id_asesor } =
+  const { id_schedule, id_result, id_asesi, id_asesor } =
     useAssessmentParams();
 
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tukError, setTukError] = useState<string | null>(null);
   const [isDataSaved, setIsDataSaved] = useState(false); // State baru untuk melacak apakah data sudah disimpan
 
   const [data, setData] = useState<ResultAK01>({
@@ -51,7 +51,7 @@ export default function CekAk01() {
     tuk: "N/A",
     is_competent: false,
     created_at: "N/A",
-    locations: [],
+    location: "",
     ak01_header: {
       id: 0,
       approved_assessee: false,
@@ -59,15 +59,21 @@ export default function CekAk01() {
       created_at: "N/A",
       updated_at: "N/A",
     },
+    schedule: {
+      id: 20,
+      assessment_id: 17,
+      start_date: new Date().toISOString(),
+      end_date: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
   });
 
-  const [selectedTUK, setSelectedTUK] = useState("");
+  const [TUK, setTUK] = useState("");
   const [selectedEvidences, setSelectedEvidences] = useState<string[]>([]);
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
-  const [selectedTime, setSelectedTime] = useState("07:00");
 
-  const navigate = useNavigate();
   const toast = useToast();
 
   useEffect(() => {
@@ -81,14 +87,15 @@ export default function CekAk01() {
       const response = await api.get(`assessments/ak-01/data/${id_result}`);
       const rawData = response.data;
       if (rawData.success) {
+        console.log(rawData.data);
         setData(rawData.data);
 
         if (rawData.data.ak01_header.rows.length > 0) {
           setSelectedEvidences(
             rawData.data.ak01_header.rows.flatMap((row: any) => row.evidence)
           );
-          setSelectedTUK(
-            rawData.data.locations[rawData.data.locations.length - 1] || ""
+          setTUK(
+            rawData.data.location
           );
           setIsDataSaved(true); // Set state menjadi true jika data sudah ada
         }
@@ -135,13 +142,6 @@ export default function CekAk01() {
   };
 
   const handleOnSubmit = async () => {
-    // Validasi TUK
-    if (!selectedTUK) {
-      setTukError("Lokasi harus dipilih");
-      return;
-    }
-
-    setTukError(null);
 
     const requestData = {
       result_id: id_result,
@@ -195,13 +195,6 @@ export default function CekAk01() {
     });
   };
 
-  const handleTUKChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTUK(e.target.value);
-    if (tukError) {
-      setTukError(null);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -235,7 +228,7 @@ export default function CekAk01() {
           <NavbarAsesor
             title="Persetujuan Asesmen dan Kerahasiaan"
             icon={
-              <Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)} className="text-gray-500 hover:text-gray-600">
+              <Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_schedule)} className="text-gray-500 hover:text-gray-600">
                 <ChevronLeft size={20} />
               </Link>
             }
@@ -292,46 +285,22 @@ export default function CekAk01() {
                   <label className="block mb-2 text-sm font-medium text-gray-700">
                     Pelaksanaan asesmen disepakati pada:
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <input
-                      type="date"
+                      type="datetime-local"
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-                      value={new Date().toISOString().split("T")[0]}
-                      readOnly
-                    />
-                    <input
-                      type="time"
-                      className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-                      value={selectedTime}
-                      onChange={(e) => setSelectedTime(e.target.value)}
-                      disabled={!!assessorQrValue} // Disable jika QR sudah digenerate
+                      value={new Date(data.schedule.start_date)
+                        .toISOString()
+                        .slice(0, 16)}
+                      disabled
                     />
                     <div>
-                      <select
-                        className={`w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500 cursor-pointer ${tukError ? "border border-red-500" : ""}`}
-                        value={selectedTUK}
-                        onChange={handleTUKChange}
-                        onBlur={() => {
-                          if (!selectedTUK) setTukError("Lokasi harus dipilih");
-                        }}
-                        disabled={!!assessorQrValue} // Disable jika QR sudah digenerate
-                      >
-                        <option value="">Pilih Lokasi</option>
-                        {data.locations &&
-                          Array.from(new Set(data.locations))
-                            .sort()
-                            .map((location, index) => (
-                              <option key={index} value={location}>
-                                {location}
-                              </option>
-                            ))}
-                      </select>
-                      {tukError && (
-                        <p className="text-red-500 text-xs mt-1">{tukError}</p>
-                      )}
-                      <p className="text-red-400 text-xs mt-1 italic">
-                        *Anda harus memilih lokasi sebelum melanjutkan
-                      </p>
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
+                        value={TUK}
+                        disabled
+                      />
                     </div>
                   </div>
                 </div>
@@ -462,8 +431,7 @@ export default function CekAk01() {
                     <div className="sm:col-span-2 mt-4 border-t border-gray-200 pt-6 space-y-2">
                       <button
                         type="submit"
-                        className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${!selectedTUK ||
-                          !selectedTime ||
+                        className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${!TUK ||
                           !selectedEvidences ||
                           selectedEvidences.length === 0 ||
                           assessorQrValue // Disable jika QR sudah digenerate
@@ -472,8 +440,7 @@ export default function CekAk01() {
                           }`}
                         onClick={(e) => {
                           if (
-                            !selectedTUK ||
-                            !selectedTime ||
+                            !TUK ||
                             !selectedEvidences ||
                             selectedEvidences.length === 0 ||
                             assessorQrValue // Disable jika QR sudah digenerate
@@ -482,8 +449,7 @@ export default function CekAk01() {
                           handleOnSubmit();
                         }}
                         disabled={
-                          !selectedTUK ||
-                          !selectedTime ||
+                          !TUK ||
                           !selectedEvidences ||
                           selectedEvidences.length === 0 ||
                           !!assessorQrValue // Disable jika QR sudah digenerate
@@ -492,9 +458,6 @@ export default function CekAk01() {
                         <Save size={18} className="mr-2" />
                         {isDataSaved ? "Perbarui Persetujuan" : "Simpan Persetujuan"}
                       </button>
-                      {tukError && (
-                        <p className="text-red-500 text-xs mt-2">{tukError}</p>
-                      )}
                       <button
                         disabled={!isDataSaved || !!assessorQrValue} // Disable jika data belum disimpan atau QR sudah digenerate
                         onClick={() => {

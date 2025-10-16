@@ -11,7 +11,7 @@ import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
 import ConfirmModal from '@/components/ConfirmModal';
 
 export default function CekApl02() {
-    const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams();
+    const { id_schedule, id_asesor, id_result, id_asesi } = useAssessmentParams();
     const { user } = useAuth();
 
     const [loading, setLoading] = useState(false);
@@ -33,10 +33,10 @@ export default function CekApl02() {
     const isComplete = completedUnits === unitCompetencies.length && unitCompetencies.length > 0;
 
     useEffect(() => {
-        fetchAssessment();
+        // fetchAssessment();
         fetchUnitCompetencies();
         fetchResultData();
-    }, [user]);
+    }, [user, id_result]);
 
     useEffect(() => {
         if (unitCompetencies) {
@@ -48,7 +48,7 @@ export default function CekApl02() {
     const fetchAssessment = async () => {
         try {
             setLoading(true);
-            const response = await api.get(`/assessments/${id_assessment}`);
+            const response = await api.get(`/assessments/${id_schedule}`);
             if (response.data.success) {
                 setAssessments(response.data.data);
             }
@@ -60,6 +60,7 @@ export default function CekApl02() {
     };
 
     const fetchUnitCompetencies = async () => {
+        if (!id_result) return;
         try {
             const response = await api.get(`/assessments/apl-02/units/${id_result}`);
             if (response.data.success) {
@@ -74,6 +75,7 @@ export default function CekApl02() {
         if (!id_result) return;
         try {
             const response = await api.get(`/assessments/apl-02/result/${id_result}`);
+            console.log(response.data);
             if (response.data.success) {
                 const result = response.data.data;
                 setResultData(result);
@@ -212,7 +214,7 @@ export default function CekApl02() {
                     <NavbarAsesor
                         title='Asesmen Mandiri - Review APL-02'
                         icon={
-                            <Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_schedule)} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -280,7 +282,7 @@ export default function CekApl02() {
                                                             )}
                                                             <Link
                                                                 to={paths.asesor.assessment.cekApl02Detail(
-                                                                    id_assessment,
+                                                                    id_schedule,
                                                                     id_result || '',
                                                                     id_asesi || '',
                                                                     unit.id,

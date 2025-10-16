@@ -6,7 +6,7 @@ import paths from "@/routes/paths";
 import AK02 from "@/components/section/AK-02";
 
 export default function Ak02() {
-	const { id_assessment, id_result, id_asesi, id_asesor } =
+	const { id_schedule: id_assessment, id_result, id_asesi, id_asesor } =
 		useAssessmentParams();
 
 	return (
