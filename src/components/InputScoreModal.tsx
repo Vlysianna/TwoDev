@@ -24,7 +24,7 @@ const InputScoreModal: React.FC<InputScoreModalProps> = ({
   initialScore = 0,
 }) => {
   const { control, handleSubmit, formState } = useForm<FormValues>({
-    defaultValues: { score: initialScore },
+    values: { score: initialScore },
     mode: 'onChange',
   });
 

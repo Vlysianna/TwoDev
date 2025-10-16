@@ -25,7 +25,7 @@ interface AssesseeData {
   result_id: number;
   assessment_id: number;
   assessee_id: number;
-//   score: number;
+  score: number;
   assessee_name: string;
   status: "Belum Tuntas" | "Menunggu Asesi" | "Tuntas";
 }
@@ -589,13 +589,13 @@ export default function DashboardAsesmenMandiri() {
         onClose={() => setModalPenilaianOpen(false)}
         loading={savingPenilaian}
         title="Input Skor"
-        initialScore={0}
+        initialScore={selectedAssessee?.score ?? 0}
         onSave={async (score) => {
           setSavingPenilaian(true);
           await handleSaveScore(score, selectedAssessee!.result_id);
           setSavingPenilaian(false);
           setModalPenilaianOpen(false);
-		  await fetchAssesseeData(selectedTab.toLowerCase());
+		      await fetchAssesseeData(selectedTab.toLowerCase());
         }}
       />
     </div>
