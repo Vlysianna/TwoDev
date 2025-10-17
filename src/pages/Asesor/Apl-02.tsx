@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Monitor, ChevronLeft, ChevronRight, AlertCircle, Save, QrCode } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
@@ -16,10 +16,13 @@ export default function CekApl02() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [assessments, setAssessments] = useState<any>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [unitCompetencies, setUnitCompetencies] = useState<any[]>([]);
     const [completedUnits, setCompletedUnits] = useState<number>(0);
     const [recommendation, setRecommendation] = useState<'continue' | 'stop' | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [resultData, setResultData] = useState<any>(null);
     const [qrProcessing, setQrProcessing] = useState(false);
     const [saveProcessing, setSaveProcessing] = useState(false);
@@ -33,13 +36,20 @@ export default function CekApl02() {
     const isComplete = completedUnits === unitCompetencies.length && unitCompetencies.length > 0;
 
     useEffect(() => {
-        // fetchAssessment();
         fetchUnitCompetencies();
         fetchResultData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, id_result]);
 
     useEffect(() => {
+        if (resultData)
+            fetchAssessment();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [resultData])
+
+    useEffect(() => {
         if (unitCompetencies) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const completed = unitCompetencies.filter((unit: any) => unit.finished);
             setCompletedUnits(completed.length);
         }
@@ -48,10 +58,11 @@ export default function CekApl02() {
     const fetchAssessment = async () => {
         try {
             setLoading(true);
-            const response = await api.get(`/assessments/${id_schedule}`);
+            const response = await api.get(`/assessments/${resultData.assessment.id}`);
             if (response.data.success) {
                 setAssessments(response.data.data);
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         } catch (error: any) {
             setError('Gagal memuat data asesmen');
         } finally {
@@ -66,6 +77,7 @@ export default function CekApl02() {
             if (response.data.success) {
                 setUnitCompetencies(response.data.data);
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         } catch (error: any) {
             // console.log('Error fetching unit competencies:', error);
         }
@@ -75,7 +87,6 @@ export default function CekApl02() {
         if (!id_result) return;
         try {
             const response = await api.get(`/assessments/apl-02/result/${id_result}`);
-            console.log(response.data);
             if (response.data.success) {
                 const result = response.data.data;
                 setResultData(result);
@@ -110,7 +121,8 @@ export default function CekApl02() {
             // console.log("✅ QR berhasil digenerate");
 
             // Update state dengan data terbaru dari server
-            setResultData(prev => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setResultData((prev: any) => ({
                 ...prev,
                 apl02_header: {
                     ...prev.apl02_header,
@@ -121,6 +133,7 @@ export default function CekApl02() {
             setProcessSuccess("QR Code berhasil digenerate");
             setTimeout(() => setProcessSuccess(null), 3000);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Error generating QR:", error);
             if (error.response) {
@@ -161,7 +174,8 @@ export default function CekApl02() {
             // console.log("✅ Rekomendasi berhasil disimpan");
 
             // Update state dengan data terbaru dari server
-            setResultData(prev => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setResultData((prev: any) => ({
                 ...prev,
                 apl02_header: {
                     ...prev.apl02_header,
@@ -173,6 +187,7 @@ export default function CekApl02() {
             setIsSaved(true);
             setTimeout(() => setProcessSuccess(null), 3000);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Error saving recommendation:", error);
             if (error.response) {

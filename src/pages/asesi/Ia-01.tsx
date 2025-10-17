@@ -9,7 +9,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import paths from "@/routes/paths";
 import NavbarAsesi from '@/components/NavbarAsesi';
 import ConfirmModal from '@/components/ConfirmModal';
-import { formatDateJakartaUS24 } from "@/helper/format-date";
+import { formatDateInputLocal } from "@/helper/format-date";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { IncompleteGroup } from '@/model/ia01-model';
 
@@ -54,13 +54,17 @@ export default function Ia01Asesi() {
     };
 
     useEffect(() => {
-        if (id_assessment) fetchAssessment();
         if (id_result) {
             fetchUnitData();
 			fetchIncompleteCriteria();
         }
         fetchResultData();
-    }, [id_assessment, id_result]);
+    }, [id_result]);
+
+    useEffect(() => {
+        if (resultData) 
+            fetchAssessment();
+    }, [resultData])
 
     useEffect(() => {
         if (unitData && unitData.length > 0) {
@@ -73,7 +77,7 @@ export default function Ia01Asesi() {
     const fetchAssessment = async () => {
         try {
             setLoading(true);
-            const response = await api.get(`/assessments/${id_assessment}`);
+            const response = await api.get(`/assessments/${resultData.assessment.id}`);
             if (response.data.success) {
                 setAssessment(response.data.data);
             }
@@ -179,7 +183,7 @@ export default function Ia01Asesi() {
     const filteredData = getFilteredData();
 
     const assesmentDate = resultData?.ia01_header?.updated_at || assessment?.date || '';
-    const formattedDate = assesmentDate ? formatDateJakartaUS24(assesmentDate) : "";
+    const formattedDate = assesmentDate ? formatDateInputLocal(assesmentDate) : "";
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 

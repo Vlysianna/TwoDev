@@ -10,7 +10,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import useSWR from "swr";
-import { formatDateJakartaUS24 } from "@/helper/format-date";
+import { formatDateInputLocal, formatDateJakartaUS24 } from "@/helper/format-date";
 import {
 	Accordion,
 	AccordionContent,
@@ -47,8 +47,8 @@ export default function IA01({
 
 	const formattedDate = useMemo(
 		() =>
-			result?.ia01_header?.updated_at
-				? formatDateJakartaUS24(result?.ia01_header?.updated_at)
+			result?.schedule.end_date
+				? formatDateInputLocal(result?.schedule.end_date).slice(0, 10)
 				: "Tanggal | Jam",
 		[result]
 	);
@@ -377,7 +377,7 @@ export default function IA01({
 							</div>
 							<div className="relative">
 								<input
-									type="text"
+									type="date"
 									value={formattedDate}
 									className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
 									readOnly
@@ -408,7 +408,7 @@ export default function IA01({
 							</div>
 							<div className="relative">
 								<input
-									type="text"
+									type="date"
 									value={formattedDate}
 									className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
 									readOnly

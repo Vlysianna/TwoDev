@@ -17,7 +17,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { getAssessorUrl, getAssesseeUrl } from "@/lib/hashids";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import ConfirmModal from "@/components/ConfirmModal";
-import { formatDateJakartaUS24 } from "@/helper/format-date";
+import { formatDateInputLocal } from "@/helper/format-date";
 import {
 	Accordion,
 	AccordionContent,
@@ -27,7 +27,7 @@ import {
 import type { IncompleteGroup } from "@/model/ia01-model";
 
 export default function Ia01() {
-	const { id_schedule: id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams
+	const { id_schedule, id_asesor, id_result, id_asesi } = useAssessmentParams
 		? useAssessmentParams()
 		: {};
 	const [selectedKPekerjaan, setSelectedKPekerjaan] = useState<string>("");
@@ -359,12 +359,16 @@ export default function Ia01() {
 			loadData();
 		}
 
-		if (id_assessment) fetchAssessment();
 		if (id_result) {
 			fetchUnitData();
 			fetchIncompleteCriteria();
 		}
-	}, [id_assessment, id_result]);
+	}, [id_schedule, id_result]);
+
+	useEffect(() => {
+		if (resultData) 
+			fetchAssessment();
+	}, [resultData])
 
 	useEffect(() => {
 		if (unitData && unitData.length > 0) {
@@ -374,10 +378,9 @@ export default function Ia01() {
 	}, [unitData]);
 
 	const fetchAssessment = async () => {
-		if (!id_assessment) return;
 		try {
 			setLoading(true);
-			const response = await api.get(`/assessments/${id_assessment}`);
+			const response = await api.get(`/assessments/${resultData.assessment.id}`);
 			if (response.data.success) {
 				setAssessment(response.data.data);
 			}
@@ -451,7 +454,7 @@ export default function Ia01() {
 					setUnitField(response.data.data.ia01_header.unit || "");
 					setElementField(response.data.data.ia01_header.element || "");
 					setKukField(response.data.data.ia01_header.kuk || "");
-					setAssesmentDate(response.data.data.ia01_header.updated_at || "");
+					setAssesmentDate(response.data.data.schedule.end_date || "");
 
 					// Sync recommendation
 					if (
@@ -596,7 +599,7 @@ export default function Ia01() {
 		setRecommendation(value);
 	};
 
-	const formattedDate = assesmentDate ? formatDateJakartaUS24(assesmentDate) : "";
+	const formattedDate = assesmentDate ? formatDateInputLocal(assesmentDate) : "";
 
 	const getFilteredData = () => {
 		return unitData.filter((unit) => unit.group_name === selectedKPekerjaan);
@@ -627,7 +630,7 @@ export default function Ia01() {
 						icon={
 							<Link
 								to={paths.asesor.assessment.dashboardAsesmenMandiri(
-									id_assessment!
+									id_schedule!
 								)}
 								className="text-gray-500 hover:text-gray-600"
 							>
@@ -764,7 +767,7 @@ export default function Ia01() {
 										<Link
 											to={
 												paths.asesor.assessment.ia01Detail(
-													id_assessment ?? "-",
+													id_schedule ?? "-",
 													id_result ?? "-",
 													id_asesi ?? "-",
 													unit.id
@@ -926,7 +929,7 @@ export default function Ia01() {
 										</div>
 										<div className="relative mb-4">
 											<input
-												type="text"
+												type="datetime-local"
 												value={formattedDate}
 												className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
 												readOnly
@@ -958,7 +961,7 @@ export default function Ia01() {
 										</div>
 										<div className="relative">
 											<input
-												type="text"
+												type="datetime-local"
 												value={formattedDate}
 												className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
 												readOnly

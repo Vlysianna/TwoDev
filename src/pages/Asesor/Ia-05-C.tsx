@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, ChevronLeft, Clock, QrCode, Save } from "lucide-react";
 import NavbarAsesor from "../../components/NavAsesor";
 import { Link } from "react-router-dom";
@@ -10,7 +10,7 @@ import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
 import ConfirmModal from "@/components/ConfirmModal";
-import { formatDateJakartaUS24 } from "@/helper/format-date";
+import { formatDateInputLocal } from "@/helper/format-date";
 
 // Main Component
 export default function Ia05C() {
@@ -22,15 +22,12 @@ export default function Ia05C() {
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<number, string>
   >({});
-  // Assessment summary radio: 'assesment1' = Semua Tercapai, 'assesment3' = Tidak Tercapai
-  const [selectedValue, setSelectedValue] = useState<string>("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [result, setResult] = useState<ResultIA05 | null>(null);
   const [assesseeAnswers, setAssesseeAnswers] = useState<AssesseeAnswer[]>([]);
-  const [isAnswer, setIsAnswer] = useState<boolean>(false);
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
 
@@ -58,11 +55,12 @@ export default function Ia05C() {
   });
 
   // Format date for display
-  const formattedDate = result?.ia05_header.updated_at
-    ? formatDateJakartaUS24(result.ia05_header.updated_at) : "";
+  const formattedDate = result?.schedule.end_date
+    ? formatDateInputLocal(result.schedule.end_date) : "";
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchData = async () => {
@@ -180,6 +178,7 @@ export default function Ia05C() {
         setProcessError("Gagal menyimpan data: " + response.data.message);
         setIsSaved(false);
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setProcessError(
         "Gagal menyimpan data: " +
@@ -207,37 +206,18 @@ export default function Ia05C() {
         fetchData();
         setTimeout(() => setProcessSuccess(null), 3000);
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setProcessError("Gagal generate QR Code");
     } finally {
       setQrProcessing(false);
     }
   };
-
-  // Handle summary radio (Semua Tercapai/Tidak Tercapai)
-  const handleRadioChange = (value: string) => {
-    setSelectedValue(value);
-    // If 'Semua Tercapai', set all answers to 'Ya'; if 'Tidak Tercapai', set all to 'Tidak'
-    if (value === "assesment1") {
-      const allYes: Record<number, string> = {};
-      assesseeAnswers.forEach((answer) => {
-        allYes[answer.id] = "Ya";
-      });
-      setSelectedAnswers(allYes);
-    } else if (value === "assesment3") {
-      const allNo: Record<number, string> = {};
-      assesseeAnswers.forEach((answer) => {
-        allNo[answer.id] = "Tidak";
-      });
-      setSelectedAnswers(allNo);
-    }
-  };
-
+  
   // Handle per-question radio
   const handleTableRadioChange = (questionId: number, value: string) => {
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: value }));
     // If user manually changes a row, unset the summary radio
-    setSelectedValue("");
   };
 
   const handleFeedbackRadioChange = (value: string) => {
@@ -260,55 +240,10 @@ export default function Ia05C() {
     }
   };
 
-  const options = [
-    { key: "assesment1", label: "Semua Tercapai" },
-    { key: "assesment3", label: "Tidak Tercapai" },
-  ];
-
   const feedbackOptions = [
     { key: "tercapai", label: "Tercapai" },
     { key: "belum-tercapai", label: "Belum Tercapai" },
   ];
-
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
-
-      // Prepare data for submission in the correct format
-      const submissionData = {
-        result_id: Number(id_result),
-        is_achieved: feedbackResult,
-        unit: feedbackResult ? null : unitField,
-        element: feedbackResult ? null : elementField,
-        kuk: feedbackResult ? null : kukField,
-        results: assesseeAnswers.map((answer) => ({
-          option_id: answer.answers.id,
-          approved: selectedAnswers[answer.id] === "Ya",
-        })),
-      };
-
-      // console.log("Submitting data:", submissionData);
-
-      const response = await api.post(
-        `/assessments/ia-05/result/assessor/send`,
-        submissionData
-      );
-
-      if (response.data.success) {
-        fetchData(); // Refresh data
-      } else {
-        setError("Gagal menyimpan data: " + response.data.message);
-      }
-    } catch (error: any) {
-      setError(
-        "Gagal menyimpan data: " +
-        (error.response?.data?.message || error.message)
-      );
-      console.error("Submit error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Handler tombol simpan: buka modal dulu
   const handleSaveFeedbackClick = () => {
@@ -656,7 +591,7 @@ export default function Ia05C() {
                     </div>
                     <div className="relative">
                       <input
-                        type="text"
+                        type="datetime-local"
                         value={formattedDate}
                         className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
                         readOnly
@@ -688,7 +623,7 @@ export default function Ia05C() {
                     </div>
                     <div className="relative">
                       <input
-                        type="text"
+                        type="datetime-local"
                         value={formattedDate}
                         className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
                         readOnly

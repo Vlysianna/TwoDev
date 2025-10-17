@@ -1,4 +1,4 @@
-import { ChevronLeft, House } from "lucide-react";
+import { House } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";

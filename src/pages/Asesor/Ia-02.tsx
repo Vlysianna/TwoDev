@@ -10,6 +10,7 @@ import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import NavbarAsesor from "@/components/NavAsesor";
+import { formatDateInputLocal } from "@/helper/format-date";
 
 export default function Ia02Assessor() {
 	const { id_result, id_schedule: id_assessment, id_asesi, id_asesor } =
@@ -238,7 +239,7 @@ export default function Ia02Assessor() {
 											type="date"
 											placeholder="Tanggal"
 											className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-											value={result.ia02_header.updated_at.split("T")[0]}
+											value={formatDateInputLocal(result?.schedule?.end_date).slice(0, 10)}
 											disabled
 										/>
 									</div>
@@ -261,7 +262,7 @@ export default function Ia02Assessor() {
 											type="date"
 											placeholder="Tanggal"
 											className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-											value={result.ia02_header.updated_at.split("T")[0]}
+											value={formatDateInputLocal(result?.schedule?.end_date).slice(0, 10)}
 											disabled
 										/>
 									</div>

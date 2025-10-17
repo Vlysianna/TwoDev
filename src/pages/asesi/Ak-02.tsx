@@ -3,12 +3,12 @@ import ConfirmModal from "@/components/ConfirmModal";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import AK02 from "@/components/section/AK-02";
 import paths from "@/routes/paths";
-import { ChevronLeft, House } from "lucide-react";
+import { House } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Ak02() {
-	const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } =
+	const { id_asesor, id_result, id_asesi, mutateNavigation } =
 		useAssessmentParams();
 
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -47,7 +47,6 @@ export default function Ak02() {
 				<main className='m-4'>
 					<AK02
 						isAssessee={true}
-						id_assessment={id_assessment}
 						id_result={id_result}
 						id_asesi={id_asesi}
 						id_asesor={id_asesor}

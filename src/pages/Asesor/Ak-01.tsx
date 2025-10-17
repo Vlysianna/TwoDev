@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FileCheck2, ChevronLeft, AlertCircle, Check, Save, QrCode } from "lucide-react";
-import NavbarAsesi from "@/components/NavbarAsesi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
@@ -11,7 +10,7 @@ import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
 import NavbarAsesor from "@/components/NavAsesor";
 import useToast from "@/components/ui/useToast";
-import { formatDateJakartaUS24 } from "@/helper/format-date";
+import { formatDateInputLocal } from "@/helper/format-date";
 
 export default function CekAk01() {
   const { id_schedule, id_result, id_asesi, id_asesor } =
@@ -289,9 +288,7 @@ export default function CekAk01() {
                     <input
                       type="datetime-local"
                       className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-                      value={new Date(data.schedule.start_date)
-                        .toISOString()
-                        .slice(0, 16)}
+                      value={formatDateInputLocal(data.schedule.start_date)}
                       disabled
                     />
                     <div>

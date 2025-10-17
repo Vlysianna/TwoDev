@@ -6,7 +6,7 @@ import paths from "@/routes/paths";
 import AK02 from "@/components/section/AK-02";
 
 export default function Ak02() {
-	const { id_schedule: id_assessment, id_result, id_asesi, id_asesor } =
+	const { id_schedule, id_result, id_asesi, id_asesor } =
 		useAssessmentParams();
 
 	return (
@@ -18,7 +18,7 @@ export default function Ak02() {
 						icon={
 							<Link
 								to={paths.asesor.assessment.dashboardAsesmenMandiri(
-									id_assessment
+									id_schedule
 								)}
 								className="text-gray-500 hover:text-gray-600"
 							>
@@ -31,7 +31,6 @@ export default function Ak02() {
 				<main className='m-4'>
 					<AK02
 						isAssessee={false}
-						id_assessment={id_assessment}
 						id_result={id_result!}
 						id_asesi={id_asesi!}
 						id_asesor={id_asesor!}
