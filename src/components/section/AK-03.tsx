@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { AK03Question, AssessmentData } from "@/model/ak03-model";
 import { Controller, useForm } from "react-hook-form";
 import ConfirmModal from "../ConfirmModal";
+import { formatDateInputLocal } from "@/helper/format-date";
 
 const defaultQuestions: AK03Question[] = [
 	{
@@ -99,10 +100,10 @@ export default function AK03({
 	const [filteredData, setFilteredQuestions] = useState<AK03Question[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filterKompeten, setFilterKompeten] = useState("all");
-	const [catatanUmum, setCatatanUmum] = useState("");
 	const [showNotif, setShowNotif] = useState(false);
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false); 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [pendingSubmitData, setPendingSubmitData] = useState<any>(null); 
 
 	const {
@@ -125,6 +126,7 @@ export default function AK03({
 
 	useEffect(() => {
 		if (user) fetchData();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [user, id_result]);
 
 	const fetchData = async () => {
@@ -150,13 +152,13 @@ export default function AK03({
 						? defaultQuestions
 						: rawData.data.result_ak03?.answers
 				);
-				setCatatanUmum(rawData.data.result_ak03?.comment || "");
 				reset({
 					answers,
 					catatanUmum: rawData.data.result_ak03?.comment || "",
 				});
 				setIsSubmitted(rawData.data.result_ak03?.answers.length > 0);
 			}
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			setErrorMessage(
 				error.response?.data?.message || "Gagal memuat data AK-03"
@@ -180,10 +182,12 @@ export default function AK03({
 		);
 	}, [questions, searchTerm, filterKompeten, getValues]);
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const prepareSubmitData = (data: any) => {
 		return {
 			result_id: parseInt(id_result),
 			comment: (data.catatanUmum || "").trim() || "-", // Perbaikan di sini
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			items: data.answers.map((a: any, i: number) => ({
 				question: questions[i]?.question || defaultQuestions[i]?.question || "",
 				answer: a.answer === "ya",
@@ -192,10 +196,12 @@ export default function AK03({
 		};
 	};
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const onSubmit = async (data: any) => {
 		if (!isAssessee || isAdmin || isSubmitted) return;
 
 		// Validasi apakah semua pertanyaan sudah dijawab
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const hasUnanswered = data.answers.some((a: any) => !a.answer);
 		if (hasUnanswered) {
 			setErrorMessage("Harap jawab semua pertanyaan sebelum menyimpan");
@@ -209,6 +215,7 @@ export default function AK03({
 			// Tampilkan modal konfirmasi dan simpan data pending
 			setPendingSubmitData(payload);
 			setShowConfirmModal(true);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 		} catch (error: any) {
 			setErrorMessage("Terjadi kesalahan dalam mempersiapkan data");
 		}
@@ -228,6 +235,7 @@ export default function AK03({
 			} else {
 				setErrorMessage(response.data.message || "Gagal menyimpan data.");
 			}
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			setErrorMessage(error.response?.data?.message || "Gagal menyimpan data.");
 		} finally {
@@ -236,11 +244,12 @@ export default function AK03({
 		}
 	};
 
-	const handleFilterChange = (value) => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const handleFilterChange = (value: any) => {
 		setFilterKompeten(value);
 
 		// Update semua answer + comment
-		filteredData.forEach((item, idx) => {
+		filteredData.forEach((_, idx) => {
 			setValue(`answers.${idx}.answer`, value); // isi ya/tidak
 			setValue(
 				`answers.${idx}.comment`,
@@ -367,13 +376,7 @@ export default function AK03({
 							type="date"
 							className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
 							readOnly
-							defaultValue={
-								formData?.schedule?.start_date
-									? new Date(formData?.schedule?.start_date)
-											.toISOString()
-											.split("T")[0]
-									: ""
-							}
+							value={formatDateInputLocal(formData?.schedule?.start_date).slice(0, 10)}
 						/>
 					</div>
 
@@ -385,13 +388,7 @@ export default function AK03({
 							type="date"
 							className="w-full px-3 py-2 bg-[#F5F5F5] rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
 							readOnly
-							defaultValue={
-								formData?.schedule?.end_date
-									? new Date(formData?.schedule?.end_date)
-											.toISOString()
-											.split("T")[0]
-									: ""
-							}
+							value={formatDateInputLocal(formData?.schedule?.end_date).slice(0, 10)}
 						/>
 					</div>
 				</div>

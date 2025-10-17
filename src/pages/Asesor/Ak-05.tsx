@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { NotepadText, ChevronLeft, AlertCircle, Clock, Save } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, AlertCircle, Clock, Save } from "lucide-react";
 import NavbarAsesor from "@/components/NavAsesor";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -8,13 +8,12 @@ import api from "@/helper/axios";
 import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssessorUrl } from "@/lib/hashids";
-import type { AK05ApiResponse, AK05ResponseData } from "@/model/ak05-model";
-import { Description } from "@radix-ui/react-dialog";
+import type { AK05ResponseData } from "@/model/ak05-model";
 import ConfirmModal from "@/components/ConfirmModal";
-import { formatDateJakartaUS24 } from "@/helper/format-date";
+import { formatDateInputLocal } from "@/helper/format-date";
 
 export default function CekAk05() {
-  const { id_assessment, id_result, id_asesor } = useAssessmentParams();
+  const { id_schedule: id_assessment, id_result, id_asesor } = useAssessmentParams();
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -37,6 +36,7 @@ export default function CekAk05() {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Fungsi untuk mengubah status kompeten dan mengisi deskripsi otomatis
@@ -125,6 +125,7 @@ export default function CekAk05() {
         setError("Gagal menyimpan data");
         setDataSaved(false);
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Terjadi kesalahan saat menyimpan data");
       setDataSaved(false);
@@ -446,10 +447,8 @@ export default function CekAk05() {
               <div>
                 <h2 className="text-sm font-medium mb-3">Tanggal</h2>
                 <input
-                  type="text"
-                  value={
-                    formatDateJakartaUS24(data.result.result_ak05.updated_at) || "N/A"
-                  }
+                  type="date"
+                  value={formatDateInputLocal(data.result.schedule.end_date).slice(0, 10) || "N/A" }
                   disabled
                   className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
                 />

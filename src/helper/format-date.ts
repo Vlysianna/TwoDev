@@ -17,6 +17,23 @@ export const formatDate = (date?: string | null) => {
 	}
 };
 
+export const formatDateInputLocal = (date?: string | null) => {
+	if (!date) return "";
+	try {
+		const dateObj = new Date(date);
+		if (Number.isNaN(dateObj.getTime())) return "";
+
+		// Ubah ke zona waktu Jakarta (UTC+7)
+		const jakartaOffset = 7 * 60; // dalam menit
+		const localDate = new Date(dateObj.getTime() + (jakartaOffset * 60000));
+
+		// Hasil format sesuai datetime-local: YYYY-MM-DDTHH:mm
+		return localDate.toISOString().slice(0, 16);
+	} catch {
+		return "";
+	}
+};
+
 // Shared helpers for Jakarta date formatting in US style
 const parseIsoLike = (input?: string | null) => {
     if (!input) return null;

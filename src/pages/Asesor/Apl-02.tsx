@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Monitor, ChevronLeft, ChevronRight, AlertCircle, Save, QrCode } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import paths from '@/routes/paths';
@@ -11,15 +11,18 @@ import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
 import ConfirmModal from '@/components/ConfirmModal';
 
 export default function CekApl02() {
-    const { id_assessment, id_asesor, id_result, id_asesi } = useAssessmentParams();
+    const { id_schedule, id_asesor, id_result, id_asesi } = useAssessmentParams();
     const { user } = useAuth();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [assessments, setAssessments] = useState<any>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [unitCompetencies, setUnitCompetencies] = useState<any[]>([]);
     const [completedUnits, setCompletedUnits] = useState<number>(0);
     const [recommendation, setRecommendation] = useState<'continue' | 'stop' | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [resultData, setResultData] = useState<any>(null);
     const [qrProcessing, setQrProcessing] = useState(false);
     const [saveProcessing, setSaveProcessing] = useState(false);
@@ -33,13 +36,20 @@ export default function CekApl02() {
     const isComplete = completedUnits === unitCompetencies.length && unitCompetencies.length > 0;
 
     useEffect(() => {
-        fetchAssessment();
         fetchUnitCompetencies();
         fetchResultData();
-    }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, id_result]);
+
+    useEffect(() => {
+        if (resultData)
+            fetchAssessment();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [resultData])
 
     useEffect(() => {
         if (unitCompetencies) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const completed = unitCompetencies.filter((unit: any) => unit.finished);
             setCompletedUnits(completed.length);
         }
@@ -48,10 +58,11 @@ export default function CekApl02() {
     const fetchAssessment = async () => {
         try {
             setLoading(true);
-            const response = await api.get(`/assessments/${id_assessment}`);
+            const response = await api.get(`/assessments/${resultData.assessment.id}`);
             if (response.data.success) {
                 setAssessments(response.data.data);
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         } catch (error: any) {
             setError('Gagal memuat data asesmen');
         } finally {
@@ -60,11 +71,13 @@ export default function CekApl02() {
     };
 
     const fetchUnitCompetencies = async () => {
+        if (!id_result) return;
         try {
             const response = await api.get(`/assessments/apl-02/units/${id_result}`);
             if (response.data.success) {
                 setUnitCompetencies(response.data.data);
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
         } catch (error: any) {
             // console.log('Error fetching unit competencies:', error);
         }
@@ -108,7 +121,8 @@ export default function CekApl02() {
             // console.log("✅ QR berhasil digenerate");
 
             // Update state dengan data terbaru dari server
-            setResultData(prev => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setResultData((prev: any) => ({
                 ...prev,
                 apl02_header: {
                     ...prev.apl02_header,
@@ -119,6 +133,7 @@ export default function CekApl02() {
             setProcessSuccess("QR Code berhasil digenerate");
             setTimeout(() => setProcessSuccess(null), 3000);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Error generating QR:", error);
             if (error.response) {
@@ -159,7 +174,8 @@ export default function CekApl02() {
             // console.log("✅ Rekomendasi berhasil disimpan");
 
             // Update state dengan data terbaru dari server
-            setResultData(prev => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setResultData((prev: any) => ({
                 ...prev,
                 apl02_header: {
                     ...prev.apl02_header,
@@ -171,6 +187,7 @@ export default function CekApl02() {
             setIsSaved(true);
             setTimeout(() => setProcessSuccess(null), 3000);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Error saving recommendation:", error);
             if (error.response) {
@@ -212,7 +229,7 @@ export default function CekApl02() {
                     <NavbarAsesor
                         title='Asesmen Mandiri - Review APL-02'
                         icon={
-                            <Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)} className="text-gray-500 hover:text-gray-600">
+                            <Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_schedule)} className="text-gray-500 hover:text-gray-600">
                                 <ChevronLeft size={20} />
                             </Link>
                         }
@@ -280,7 +297,7 @@ export default function CekApl02() {
                                                             )}
                                                             <Link
                                                                 to={paths.asesor.assessment.cekApl02Detail(
-                                                                    id_assessment,
+                                                                    id_schedule,
                                                                     id_result || '',
                                                                     id_asesi || '',
                                                                     unit.id,

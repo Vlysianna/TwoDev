@@ -27,37 +27,6 @@ interface Evidence {
     evidence: string;
 }
 
-interface Assessment {
-    id: number;
-    code: string;
-    occupation: Occupation;
-}
-
-interface Occupation {
-    id: number;
-    name: string;
-    scheme: Scheme;
-}
-
-interface Scheme {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface Assessee {
-    id: number;
-    name: string;
-    email: string;
-}
-
-interface Assessor {
-    id: number;
-    name: string;
-    email: string;
-    no_reg_met: string;
-}
-
 export interface UnitCompetensi {
     id: number;
     code: string;

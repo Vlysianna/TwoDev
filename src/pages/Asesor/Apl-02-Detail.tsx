@@ -52,7 +52,7 @@ const evidenceOptions: EvidenceOptionType[] = [
 
 export default function CekApl02Detail() {
   const { id_unit, unit_number } = useParams();
-  const { id_assessment, id_result, id_asesi } = useAssessmentParams();
+  const { id_schedule: id_assessment, id_result, id_asesi } = useAssessmentParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterKompeten, setFilterKompeten] = useState("all");
   const [elements, setElements] = useState<AssessmentElement[]>([]);

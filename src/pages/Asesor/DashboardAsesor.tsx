@@ -33,6 +33,7 @@ const DashboardAsesor: React.FC = () => {
 	}
 
 	interface Schedule {
+		id: number;
 		start_date?: string;
 		end_date?: string;
 		assessment?: { id: number; occupation?: AssessmentOccupation };
@@ -41,6 +42,7 @@ const DashboardAsesor: React.FC = () => {
 
 	interface Card {
 		id: number;
+		idDetail: number;
 		title: string;
 		subtitle?: string;
 		status?: string;
@@ -96,7 +98,8 @@ const DashboardAsesor: React.FC = () => {
 					(sch.schedule_details || []).forEach((detail) => {
 						if (assessor && detail.assessor?.id === assessor.id) {
 							assigned.push({
-								id: detail.id,
+								id: sch.id,
+								idDetail: detail.id,
 								title:
 									sch.assessment?.occupation?.scheme?.name ||
 									sch.assessment?.occupation?.name ||
@@ -306,7 +309,7 @@ const DashboardAsesor: React.FC = () => {
 							visibleCards.map((card) => {
 								return (
 									<div
-										key={card.id}
+										key={card.idDetail}
 										className={`bg-white rounded-lg shadow-sm border-b-4 ${card.borderColor} hover:shadow-md transition-shadow`}
 									>
 										{/* Header */}
@@ -365,7 +368,7 @@ const DashboardAsesor: React.FC = () => {
 												</div>
 												<div className="flex items-center space-x-2">
 													<Link
-														to={paths.asesor.recapAssessment(card.id)}
+														to={paths.asesor.recapAssessment(card.idDetail)}
 														className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
 														title="Recap Assessment"
 													>
@@ -373,7 +376,7 @@ const DashboardAsesor: React.FC = () => {
 													</Link>
 													<Link
 														to={paths.asesor.assessment.dashboardAsesmenMandiri(
-															card.idAssessment || 0
+															card.id || 0
 														)}
 														className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
 														title="Dashboard Assessment"

@@ -126,79 +126,79 @@ const routes = {
 		recapAssessmentPattern: "/asesor/recap-assessment/:scheduleDetailId",
 		assessment: {
 			root: "/asesor/assessment",
-			dashboardAsesmenMandiri: (id_assessment: string | number) =>
-				`/asesor/assessment/${id_assessment}`,
-			dashboardAsesmenMandiriPattern: "/asesor/assessment/:id_assessment",
+			dashboardAsesmenMandiri: (id_schedule: string | number) =>
+				`/asesor/assessment/${id_schedule}`,
+			dashboardAsesmenMandiriPattern: "/asesor/assessment/:id_schedule",
 			faktaIntegritas: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_asesi: string | number
-			) => `/asesor/assessment/${id_assessment}/${id_asesi}/fakta-integritas`,
+			) => `/asesor/assessment/${id_schedule}/${id_asesi}/fakta-integritas`,
 			faktaIntegritasPattern:
-				"/asesor/assessment/:id_assessment/:id_asesi/fakta-integritas",
-			cekApl02: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/cek-apl-02`,
-			cekApl02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/cek-apl-02",
+				"/asesor/assessment/:id_schedule/:id_asesi/fakta-integritas",
+			cekApl02: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/cek-apl-02`,
+			cekApl02Pattern: "/asesor/assessment/:id_schedule/:id_asesi/cek-apl-02",
 			cekApl02Detail: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_result: string | number,
 				id_asesi: string | number,
 				id_unit: string | number,
 				unit_number?: string | number
 			) =>
-				`/asesor/assessment/${id_assessment}/${id_result}/${id_asesi}/cek-apl-02-detail/${id_unit}/${unit_number}`,
+				`/asesor/assessment/${id_schedule}/${id_result}/${id_asesi}/cek-apl-02-detail/${id_unit}/${unit_number}`,
 			cekApl02DetailPattern:
-				"/asesor/assessment/:id_assessment/:id_result/:id_asesi/cek-apl-02-detail/:id_unit/:unit_number",
-			ia01: (id_assessment: string, id_asesi: string, activeGroup?: string) =>
-				`/asesor/assessment/${id_assessment}/ia-01/${id_asesi}${activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''}`,
-			ia01Pattern: "/asesor/assessment/:id_assessment/ia-01/:id_asesi",
+				"/asesor/assessment/:id_schedule/:id_result/:id_asesi/cek-apl-02-detail/:id_unit/:unit_number",
+			ia01: (id_schedule: string, id_asesi: string, activeGroup?: string) =>
+				`/asesor/assessment/${id_schedule}/ia-01/${id_asesi}${activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''}`,
+			ia01Pattern: "/asesor/assessment/:id_schedule/ia-01/:id_asesi",
 
 			ia01Detail: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_result: string | number,
 				id_asesi: string | number,
 				id_unit: string | number
 			) =>
-				`/asesor/assessment/${id_assessment}/ia-01-detail/${id_result}/${id_asesi}/${id_unit}`,
-			ia01DetailPattern: "/asesor/assessment/:id_assessment/ia-01-detail/:id_result/:id_asesi/:id_unit",
-			ia02: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-02`,
-			ia02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-02",
-			ia05: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-05`,
-			ia05Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-05",
-			ia03: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-03`,
-			ia03Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-03",
-			ak01: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ak-01`,
-			ak01Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ak-01",
-			ak02: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ak-02`,
-			ak02Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ak-02",
-			ak03: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ak-03`,
-			ak03Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ak-03",
-			ak05: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ak-05`,
-			ak05Pattern: "/asesor/assessment/:id_assessment/:id_asesi/ak-05",
+				`/asesor/assessment/${id_schedule}/ia-01-detail/${id_result}/${id_asesi}/${id_unit}`,
+			ia01DetailPattern: "/asesor/assessment/:id_schedule/ia-01-detail/:id_result/:id_asesi/:id_unit",
+			ia02: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/ia-02`,
+			ia02Pattern: "/asesor/assessment/:id_schedule/:id_asesi/ia-02",
+			ia05: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/ia-05`,
+			ia05Pattern: "/asesor/assessment/:id_schedule/:id_asesi/ia-05",
+			ia03: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/ia-03`,
+			ia03Pattern: "/asesor/assessment/:id_schedule/:id_asesi/ia-03",
+			ak01: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/ak-01`,
+			ak01Pattern: "/asesor/assessment/:id_schedule/:id_asesi/ak-01",
+			ak02: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/ak-02`,
+			ak02Pattern: "/asesor/assessment/:id_schedule/:id_asesi/ak-02",
+			ak03: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/ak-03`,
+			ak03Pattern: "/asesor/assessment/:id_schedule/:id_asesi/ak-03",
+			ak05: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/ak-05`,
+			ak05Pattern: "/asesor/assessment/:id_schedule/:id_asesi/ak-05",
 			dataSertifikasi: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_asesi: string | number
-			) => `/asesor/assessment/${id_assessment}/${id_asesi}/data-sertifikasi`,
+			) => `/asesor/assessment/${id_schedule}/${id_asesi}/data-sertifikasi`,
 			dataSertifikasiPattern:
-				"/asesor/assessment/:id_assessment/:id_asesi/data-sertifikasi",
-			ia05c: (id_assessment: string | number, id_asesi: string | number) =>
-				`/asesor/assessment/${id_assessment}/${id_asesi}/ia-05-c`,
-			ia05cPattern: "/asesor/assessment/:id_assessment/:id_asesi/ia-05-c",
+				"/asesor/assessment/:id_schedule/:id_asesi/data-sertifikasi",
+			ia05c: (id_schedule: string | number, id_asesi: string | number) =>
+				`/asesor/assessment/${id_schedule}/${id_asesi}/ia-05-c`,
+			ia05cPattern: "/asesor/assessment/:id_schedule/:id_asesi/ia-05-c",
 			lembarJawaban: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_asesi: string | number
-			) => `/asesor/assessment/${id_assessment}/${id_asesi}/lembar-jawaban`,
+			) => `/asesor/assessment/${id_schedule}/${id_asesi}/lembar-jawaban`,
 			lembarJawabanPattern:
-				"/asesor/assessment/:id_assessment/:id_asesi/lembar-jawaban",
-			recapAssessment: (id_assessment: string | number) =>
-				`/asesor/assessment/${id_assessment}/recap`,
-			recapAssessmentPattern: "/asesor/assessment/:id_assessment/recap",
+				"/asesor/assessment/:id_schedule/:id_asesi/lembar-jawaban",
+			recapAssessment: (id_schedule: string | number) =>
+				`/asesor/assessment/${id_schedule}/recap`,
+			recapAssessmentPattern: "/asesor/assessment/:id_schedule/recap",
 		},
 		dataAsesor: "/asesor/data-asesor",
 	},

@@ -2,17 +2,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import type { ResultAK02, UnitCompetensi } from "@/model/ak02-model";
-import routes from "@/routes/paths";
-import { AlertCircle, Calendar, Check, Clock, FileText, QrCode, Save } from "lucide-react";
+import { AlertCircle, Calendar, Check, Clock, QrCode, Save } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import ConfirmModal from "@/components/ConfirmModal";
 import useToast from "../ui/useToast";
-import { formatDateJakartaUS24 } from "@/helper/format-date";
+import { formatDateInputLocal, formatDateJakartaUS24 } from "@/helper/format-date";
 
 // Evidence types
-export const evidenceTypes = [
+const evidenceTypes = [
 	"Observasi Demonstrasi",
 	"Portofolio",
 	"Pernyataan Pihak Ketiga",
@@ -26,7 +24,6 @@ export const evidenceTypes = [
 export default function AK02({
 	isAssessee,
 	isAdmin,
-	id_assessment,
 	id_result,
 	id_asesi,
 	id_asesor,
@@ -34,58 +31,18 @@ export default function AK02({
 }: {
 	isAssessee: boolean;
 	isAdmin?: boolean;
-	id_assessment: string;
 	id_result: string;
 	id_asesi: string;
 	id_asesor: string;
 	mutateNavigation?: () => void;
 }) {
 	const { user } = useAuth();
-	const navigate = useNavigate();
 	// Loading and error states
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	// Data state
-	const [data, setData] = useState<ResultAK02>({
-		id: 0,
-		assessment: {
-			id: 0,
-			code: "N/A",
-			occupation: {
-				id: 0,
-				name: "N/A",
-				scheme: {
-					id: 0,
-					name: "N/A",
-					code: "N/A",
-				},
-			},
-		},
-		assessee: {
-			id: 0,
-			name: "N/A",
-			email: "N/A",
-		},
-		assessor: {
-			id: 0,
-			name: "N/A",
-			email: "N/A",
-			no_reg_met: "N/A",
-		},
-		tuk: "N/A",
-		is_competent: false,
-		created_at: "N/A",
-		ak02_headers: {
-			id: 0,
-			approved_assessee: false,
-			approved_assessor: false,
-			is_competent: null,
-			follow_up: "",
-			comment: "",
-			rows: [],
-		},
-	});
+	const [data, setData] = useState<ResultAK02 | null>(null);
 
 	const [units, setUnits] = useState<UnitCompetensi[]>([]);
 
@@ -106,7 +63,6 @@ export default function AK02({
 	const [pendingValue, setPendingValue] = useState<string>("");
 	const [hasBeenSaved, setHasBeenSaved] = useState(false);
 
-	const [saveHeaderError, setSaveHeaderError] = useState<string | null>(null);
 	const toast = useToast();
 
 
@@ -114,6 +70,7 @@ export default function AK02({
 		if (user) {
 			fetchData();
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [user]);
 
 	const fetchData = async () => {
@@ -137,10 +94,11 @@ export default function AK02({
 			const response = await api.get(`/assessments/ak-02/units/${id_result}`);
 			// console.log("Units API response:", response.data);
 
-			if (response.data.success) {
-				const apiUnits = response.data.data.units;
+			if (response.data?.success) {
+				const apiUnits = response.data?.data?.units;
 				// console.log("API units:", apiUnits);
 
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const mappedUnits = apiUnits.map((unit: any) => ({
 					id: unit.id,
 					code: unit.code,
@@ -167,7 +125,7 @@ export default function AK02({
 				setData(rawData.data);
 
 				if (!preserveFormState) {
-					const ak02Headers = rawData.data.ak02_headers;
+					const ak02Headers = rawData.data?.ak02_headers;
 					if (ak02Headers.is_competent !== null) {
 						setAssessmentResult(
 							ak02Headers.is_competent ? "kompeten" : "belum-kompeten"
@@ -178,12 +136,12 @@ export default function AK02({
 				}
 
 				// Generate QR codes if already approved
-				if (rawData.data.ak02_headers.approved_assessor) {
+				if (rawData.data?.ak02_headers.approved_assessor) {
 					setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
 					setHasBeenSaved(false);
 				}
 
-				if (rawData.data.ak02_headers.approved_assessee) {
+				if (rawData.data?.ak02_headers.approved_assessee) {
 					setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
 				}
 			} else {
@@ -196,14 +154,16 @@ export default function AK02({
 	};
 
 	useEffect(() => {
-		if (units.length > 0 && data.ak02_headers.rows.length > 0) {
+		if (units.length > 0 && data && data.ak02_headers.rows.length > 0) {
 			const newSelectedOptions: Record<string, boolean> = {};
 
-			data.ak02_headers.rows.forEach((row: any) => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			data?.ak02_headers.rows.forEach((row: any) => {
 				// Find unit index by matching unit ID
 				const unitIndex = units.findIndex((unit) => unit.id === row.unit_id);
 				if (unitIndex !== -1) {
 					// For each evidence in this row
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					row.evidences.forEach((evidence: any) => {
 						// Find evidence type index
 						const evidenceIndex = evidenceTypes.indexOf(evidence.evidence);
@@ -216,7 +176,8 @@ export default function AK02({
 			});
 			setSelectedOptions(newSelectedOptions);
 		}
-	}, [units, data.ak02_headers.rows]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [units, data?.ak02_headers.rows]);
 
 	const handleCheckboxChange = (unitIndex: number, evidenceIndex: number) => {
 		if (isAssessee || isAdmin) return;
@@ -256,6 +217,7 @@ export default function AK02({
 		}
 
 		try {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const rows: any[] = [];
 
 			Object.entries(selectedOptions).forEach(([key, isSelected]) => {
@@ -302,7 +264,7 @@ export default function AK02({
 				submitData
 			);
 
-			if (response.data.success) {
+			if (response.data?.success) {
 				toast?.show({
 					type: "success",
 					title: "Berhasil",
@@ -313,17 +275,18 @@ export default function AK02({
 				toast?.show({
 					type: "error",
 					title: "Gagal",
-					description: response.data.message || "Terjadi kesalahan",
+					description: response.data?.message || "Terjadi kesalahan",
 				});
 			}
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			console.error("Submit error:", error);
 
 			// Show detailed error message
 			if (error.response?.data?.message) {
-				alert(`Error: ${error.response.data.message}`);
+				alert(`Error: ${error.response.data?.message}`);
 			} else if (error.response?.data?.error) {
-				alert(`Error: ${error.response.data.error}`);
+				alert(`Error: ${error.response.data?.error}`);
 			} else {
 				alert("Terjadi kesalahan saat menyimpan data");
 			}
@@ -336,12 +299,13 @@ export default function AK02({
 			const response = await api.put(
 				`/assessments/ak-02/result/assessor/${id_result}/approve`
 			);
-			if (response.data.success) {
+			if (response.data?.success) {
 				setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
 				if (mutateNavigation) mutateNavigation();
 				// Reload data but preserve form state
 				await loadAK02Data(true);
 			}
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (error) {
 			// console.log("Error Generating QR Code:", error);
 		}
@@ -353,12 +317,13 @@ export default function AK02({
 			const response = await api.put(
 				`/assessments/ak-02/result/assessee/${id_result}/approve`
 			);
-			if (response.data.success) {
+			if (response.data?.success) {
 				setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
 				if (mutateNavigation) mutateNavigation();
 				// Reload data but preserve form state
 				await loadAK02Data(true);
 			}
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		} catch (error) {
 			// console.log("Error approving assessee:", error);
 		}
@@ -482,16 +447,16 @@ export default function AK02({
 									type="checkbox"
 									checked={isChecked(unitIndex, evidenceIndex)}
 									onChange={() => handleCheckboxChange(unitIndex, evidenceIndex)}
-									disabled={isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor} // Disable jika asesi atau asesor sudah approve
+									disabled={isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor} // Disable jika asesi atau asesor sudah approve
 									className="hidden peer"
 								/>
 								<span
 									className={`w-5 h-5 flex items-center justify-center rounded border-2 border-gray-300 transition
-          ${isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor
+          ${isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor
 											? "opacity-60 cursor-not-allowed"
 											: "peer-checked:bg-[#E77D35] peer-checked:border-[#E77D35] hover:border-gray-400"
 										}
-          ${isChecked(unitIndex, evidenceIndex) && (isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor)
+          ${isChecked(unitIndex, evidenceIndex) && (isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor)
 											? "bg-gray-300 border-gray-300" // Tampilan checked tapi disabled
 											: ""
 										}
@@ -555,7 +520,7 @@ export default function AK02({
 
 					<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
 						<div className="px-3 py-1 rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533] sm:ml-5">
-							{data.assessment.code}
+							{data?.assessment.code}
 						</div>
 					</div>
 				</div>
@@ -564,17 +529,17 @@ export default function AK02({
 					<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
 						<div className="flex flex-wrap">
 							<span className="font-semibold mr-1">Asesi:</span>
-							<span>{data.assessee.name}</span>
+							<span>{data?.assessee.name}</span>
 						</div>
 						<div className="flex flex-wrap">
 							<span className="font-semibold mr-1">Asesor:</span>
-							<span>{data.assessor.name}</span>
+							<span>{data?.assessor.name}</span>
 						</div>
 					</div>
 
 					<div className="flex flex-col xl:flex-row xl:items-center space-y-1 xl:space-y-0 xl:space-x-2 text-gray-600 text-sm lg:ml-auto">
 						<span className="whitespace-nowrap">
-							{data.created_at ? formatDateJakartaUS24(data.created_at) : "-"}
+							{data?.created_at ? formatDateJakartaUS24(data?.created_at) : "-"}
 						</span>
 					</div>
 				</div>
@@ -627,16 +592,16 @@ export default function AK02({
 														type="checkbox"
 														checked={isChecked(unitIndex, evidenceIndex)}
 														onChange={() => handleCheckboxChange(unitIndex, evidenceIndex)}
-														disabled={isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor} // Disable jika asesi atau asesor sudah approve
+														disabled={isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor} // Disable jika asesi atau asesor sudah approve
 														className="hidden peer"
 													/>
 													<span
 														className={`w-5 h-5 flex items-center justify-center rounded border-2 border-gray-300 transition
-          ${isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor
+          ${isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor
 																? "opacity-60 cursor-not-allowed"
 																: "peer-checked:bg-[#E77D35] peer-checked:border-[#E77D35] hover:border-gray-400"
 															}
-          ${isChecked(unitIndex, evidenceIndex) && (isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor)
+          ${isChecked(unitIndex, evidenceIndex) && (isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor)
 																? "bg-[#E77D35] border-orange-500" // Tampilan checked tapi disabled
 																: ""
 															}
@@ -671,7 +636,7 @@ export default function AK02({
 							<>
 								<label
 									className={`flex items-start space-x-3 transition
-    ${isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
+    ${isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
   `}
 								>
 									<input
@@ -680,7 +645,7 @@ export default function AK02({
 										checked={assessmentResult === "kompeten"}
 										onChange={() => handleAssessmentResultChange("kompeten")}
 										className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-										disabled={isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor}
+										disabled={isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor}
 									/>
 									<span
 										className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
@@ -694,7 +659,7 @@ export default function AK02({
 
 								<label
 									className={`flex items-start space-x-3 transition
-    ${isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
+    ${isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
   `}
 								>
 									<input
@@ -703,7 +668,7 @@ export default function AK02({
 										checked={assessmentResult === "belum-kompeten"}
 										onChange={() => handleAssessmentResultChange("belum-kompeten")}
 										className="mt-1 w-4 h-4 text-[#E77D35] border-gray-300 focus:ring-[#E77D35]"
-										disabled={isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor}
+										disabled={isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor}
 									/>
 									<span
 										className={`text-sm text-gray-700 leading-relaxed transition-all duration-300
@@ -736,8 +701,8 @@ export default function AK02({
 						<textarea
 							value={followUp}
 							onChange={(e) => setFollowUp(e.target.value)}
-							disabled={isAssessee || isAdmin || assessmentResult === 'kompeten' || !!data.ak02_headers?.approved_assessor} // Tambahkan kondisi approved_assessor
-							className={`w-full resize-none border-none outline-none text-sm ${isAssessee || isAdmin || assessmentResult === 'kompeten' || !!data.ak02_headers?.approved_assessor
+							disabled={isAssessee || isAdmin || assessmentResult === 'kompeten' || !!data?.ak02_headers?.approved_assessor} // Tambahkan kondisi approved_assessor
+							className={`w-full resize-none border-none outline-none text-sm ${isAssessee || isAdmin || assessmentResult === 'kompeten' || !!data?.ak02_headers?.approved_assessor
 								? 'bg-gray-100 text-gray-500 cursor-not-allowed'
 								: ''
 								}`}
@@ -763,8 +728,8 @@ export default function AK02({
 						<textarea
 							value={assessorComments}
 							onChange={(e) => setAssessorComments(e.target.value)}
-							disabled={isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor} // Tambahkan kondisi approved_assessor
-							className={`w-full resize-none border-none outline-none text-sm ${isAssessee || isAdmin || !!data.ak02_headers?.approved_assessor
+							disabled={isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor} // Tambahkan kondisi approved_assessor
+							className={`w-full resize-none border-none outline-none text-sm ${isAssessee || isAdmin || !!data?.ak02_headers?.approved_assessor
 								? 'text-gray-500 cursor-not-allowed'
 								: ''
 								}`}
@@ -797,8 +762,8 @@ export default function AK02({
 								</div>
 								<div className="relative mb-4">
 									<input
-										type="text"
-										value={new Date().toLocaleDateString('id-ID')}
+										type="date"
+										value={formatDateInputLocal(data?.schedule.end_date).slice(0, 10)}
 										className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
 										readOnly
 									/>
@@ -827,8 +792,8 @@ export default function AK02({
 								</div>
 								<div className="relative">
 									<input
-										type="text"
-										value={new Date().toLocaleDateString('id-ID')}
+										type="date"
+										value={formatDateInputLocal(data?.schedule.end_date).slice(0, 10)}
 										className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
 										readOnly
 									/>
@@ -911,9 +876,6 @@ export default function AK02({
 							{/* Section bawah tombol (full width, col-span-2) */}
 							{!isAssessee && !isAdmin && (
 								<div className="col-span-1 sm:col-span-2 mt-8 flex flex-col items-center gap-4">
-									{saveHeaderError && (
-										<span className="text-red-500 text-sm text-center">{saveHeaderError}</span>
-									)}
 
 									{/* Tombol Simpan Rekomendasi */}
 									<div className="w-full flex flex-col gap-4">
@@ -927,7 +889,7 @@ export default function AK02({
 											</div>
 											<button
 												onClick={handleSaveClick}
-												disabled={isAssessee || isAdmin || !assessmentResult || assessorQrValue}
+												disabled={isAssessee || isAdmin || assessmentResult === "" || assessorQrValue !== ""}
 												className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${isAssessee || isAdmin || !assessmentResult || assessorQrValue
 													? "cursor-not-allowed opacity-50"
 													: "hover:bg-green-700 cursor-pointer"
@@ -942,8 +904,8 @@ export default function AK02({
 										<div>
 											<button
 												onClick={handleGenerateQRCode}
-												disabled={isAssessee || isAdmin || assessorQrValue || !data.ak02_headers || !hasBeenSaved}
-												className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${isAssessee || isAdmin || assessorQrValue || !data.ak02_headers || !hasBeenSaved
+												disabled={isAssessee || isAdmin || assessorQrValue !== "" || !data?.ak02_headers || !hasBeenSaved}
+												className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${isAssessee || isAdmin || assessorQrValue || !data?.ak02_headers || !hasBeenSaved
 													? "cursor-not-allowed opacity-50"
 													: "hover:bg-orange-600 cursor-pointer"
 													}`}

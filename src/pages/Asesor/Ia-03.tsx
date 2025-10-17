@@ -6,7 +6,7 @@ import { useAssessmentParams } from "@/components/AssessmentAsesorProvider";
 import IA03 from "@/components/section/IA-03";
 
 export default function Ia03() {
-	const { id_result, id_assessment } =
+	const { id_result, id_schedule: id_assessment } =
 		useAssessmentParams();
 
 	return (

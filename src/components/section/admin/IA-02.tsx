@@ -1,4 +1,5 @@
 import api from "@/helper/axios";
+import { formatDateInputLocal } from "@/helper/format-date";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import type { ResultIA02 } from "@/model/ia02-model";
 import { Clock } from "lucide-react";
@@ -138,7 +139,7 @@ export default function IA02({
 									type="date"
 									placeholder="Tanggal"
 									className="w-full sm:w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-2 sm:mt-0"
-									value={result?.ia02_header.updated_at.split("T")[0]}
+									value={formatDateInputLocal(result?.schedule?.end_date).slice(0, 10)}
 									disabled
 								/>
 							</div>
@@ -161,7 +162,7 @@ export default function IA02({
 									type="date"
 									placeholder="Tanggal"
 									className="w-full sm:w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-2 sm:mt-0"
-									value={result?.ia02_header.updated_at.split("T")[0]}
+									value={formatDateInputLocal(result?.schedule?.end_date).slice(0, 10)}
 									disabled
 								/>
 							</div>

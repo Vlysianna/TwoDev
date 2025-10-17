@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, Clock, Loader2, AlertCircle, KeyRound } from 'lucide-react';
+import { ChevronLeft, Clock, Loader2, KeyRound } from 'lucide-react';
 import NavbarAsesor from '@/components/NavAsesor';
 import { useAssessmentParams } from '@/components/AssessmentAsesorProvider';
 import api from '@/helper/axios';
@@ -12,7 +12,7 @@ interface IA05AssesseeAnswerRow { id: number; answers: { id: number; option: str
 interface IA05AnswerKeyRow { id: number; answer: { id: number; option: string } }
 
 export default function IA05Assessor() {
-  const { id_assessment, id_result, id_asesi } = useAssessmentParams();
+  const { id_schedule, id_result, id_asesi } = useAssessmentParams();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<IA05Question[]>([]);
   const [answersMap, setAnswersMap] = useState<Record<number, number>>({});
@@ -21,16 +21,16 @@ export default function IA05Assessor() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id_assessment || !id_result) return;
+    if (!id_schedule || !id_result) return;
     let cancelled = false;
     (async () => {
       try {
         setLoading(true);
         setError(null);
         const [qRes, aRes, kRes] = await Promise.all([
-          api.get(`/assessments/ia-05/questions/${id_assessment}`),
+          api.get(`/assessments/ia-05/questions/${id_schedule}`),
           api.get(`/assessments/ia-05/result/answers/${id_result}`),
-          api.get(`/assessments/ia-05/result/answers/keys/${id_assessment}`)
+          api.get(`/assessments/ia-05/result/answers/keys/${id_schedule}`)
         ]);
         if (cancelled) return;
         const qData: IA05Question[] = qRes.data?.data || [];
@@ -57,7 +57,7 @@ export default function IA05Assessor() {
       }
     })();
     return () => { cancelled = true; };
-  }, [id_assessment, id_result]);
+  }, [id_schedule, id_result]);
 
   const totalQuestions = questions.length;
   const answeredCount = questions.filter(q => answersMap[q.id] !== undefined).length;
@@ -69,7 +69,7 @@ export default function IA05Assessor() {
         <div className="bg-white rounded-lg shadow-sm">
           <NavbarAsesor
             title="Lembar Jawaban Pilihan Ganda"
-            icon={<Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_assessment)}><ChevronLeft size={20} /></Link>}
+            icon={<Link to={paths.asesor.assessment.dashboardAsesmenMandiri(id_schedule)}><ChevronLeft size={20} /></Link>}
           />
         </div>
 
@@ -132,8 +132,8 @@ export default function IA05Assessor() {
             <div className="flex justify-end mt-8">
               <button
                 className="bg-[#E77D35] hover:bg-orange-600 text-white text-sm font-medium px-8 py-2 rounded-md transition-colors duration-200 cursor-pointer"
-                onClick={() => navigate(paths.asesor.assessment.ia05c(id_assessment || '', id_asesi || ''))}
-                disabled={!id_assessment || !id_asesi}
+                onClick={() => navigate(paths.asesor.assessment.ia05c(id_schedule || '', id_asesi || ''))}
+                disabled={!id_schedule || !id_asesi}
               >
                 Lanjut
               </button>

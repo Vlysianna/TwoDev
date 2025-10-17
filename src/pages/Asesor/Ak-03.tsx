@@ -6,7 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Ak03() {
-	const { id_assessment, id_result } = useAssessmentParams();
+	const { id_schedule: id_assessment, id_result } = useAssessmentParams();
 
 	return (
 		<div className="min-h-screen bg-gray-50">

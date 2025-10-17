@@ -21,7 +21,7 @@ interface ElementIA01 {
 
 export default function Ia01Detail() {
   const { id_unit } = useParams();
-  const { id_assessment, id_result, id_asesi } = useAssessmentParams();
+  const { id_schedule: id_assessment, id_result, id_asesi } = useAssessmentParams();
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
