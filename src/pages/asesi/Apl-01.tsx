@@ -12,9 +12,9 @@ import useToast from "@/components/ui/useToast";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function AplZeroOne() {
-	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
+	const { id_schedule: id_assessment, id_asesor, id_result } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
-	const assessmentId = localStorage.getItem("assessmentId");
+	const scheduleId = localStorage.getItem("scheduleId");
 
 	const { user } = useAuth();
 
@@ -23,8 +23,8 @@ export default function AplZeroOne() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		if (asesiId && assessmentId == id_assessment) navigate(paths.asesi.assessment.dataSertifikasi(id_assessment, id_asesor));
-	}, [asesiId, assessmentId, id_asesor, id_assessment]);
+		if (asesiId && scheduleId == id_assessment) navigate(paths.asesi.assessment.dataSertifikasi(id_assessment, id_asesor));
+	}, [asesiId, scheduleId, id_asesor, id_assessment]);
 
 	const [loading, setLoading] = useState(false);
 	const [isLocked, setIsLocked] = useState(false);
@@ -74,7 +74,7 @@ export default function AplZeroOne() {
 			// console.log(result.data);
 
 			localStorage.setItem("asesiId", result.data.data.id);
-			localStorage.setItem("assessmentId", id_assessment ?? "");
+			localStorage.setItem("scheduleId", id_assessment ?? "");
 
 			setSuccess("Data berhasil disimpan.");
 			navigate(

@@ -32,7 +32,7 @@ const PenilaianLanjut: React.FC<{ value?: string }> = ({ value = "" }) => {
 
 export default function Ia01AsesiDetail() {
   const { id_unit } = useParams();
-  const { id_assessment, id_result, id_asesor } = useAssessmentParams();
+  const { id_schedule: id_assessment, id_result, id_asesor } = useAssessmentParams();
   const [elements, setElements] = useState<ElementIA01[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

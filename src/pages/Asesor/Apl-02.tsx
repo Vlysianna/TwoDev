@@ -58,6 +58,7 @@ export default function CekApl02() {
     const fetchAssessment = async () => {
         try {
             setLoading(true);
+            console.log(resultData);
             const response = await api.get(`/assessments/${resultData.assessment.id}`);
             if (response.data.success) {
                 setAssessments(response.data.data);

@@ -18,7 +18,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import { formatDateInputLocal } from "@/helper/format-date";
 
 export default function Ia02() {
-  const { id_result, id_assessment, id_asesi, id_asesor, mutateNavigation } =
+  const { id_result, id_schedule: id_assessment, id_asesi, id_asesor, mutateNavigation } =
     useAssessmentParams();
 
   const { user } = useAuth();

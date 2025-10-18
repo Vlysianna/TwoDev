@@ -17,8 +17,9 @@ import api from "@/helper/axios";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/helper/initial";
 import { formatDate } from "@/helper/format-date";
+import type { Schedule } from "@/lib/types";
 
-interface Schedule {
+interface ScheduleResponse {
 	id: number;
 	assessment: {
 		id: number;
@@ -35,6 +36,7 @@ interface Schedule {
 	};
 	start_date: string;
 	end_date: string;
+	schedule: Schedule;
 	schedule_details: Array<{
 		id: number;
 		assessor: {
@@ -55,11 +57,11 @@ interface ProgramFilter {
 
 export default function DashboardAsesi() {
 	const { user } = useAuth();
-	const [schedules, setSchedule] = useState<Schedule[]>([]);
+	const [schedules, setSchedule] = useState<ScheduleResponse[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
+	const [filteredSchedules, setFilteredSchedules] = useState<ScheduleResponse[]>([]);
 	const [selectedProgram, setSelectedProgram] = useState<string>("ALL");
 	const [programFilters, setProgramFilters] = useState<ProgramFilter[]>([]);
 
@@ -164,7 +166,7 @@ export default function DashboardAsesi() {
 		return programNames[code as keyof typeof programNames] || code;
 	};
 
-	const getStatusFromSchedule = (schedule: Schedule) => {
+	const getStatusFromSchedule = (schedule: ScheduleResponse) => {
 		const now = new Date();
 		const start = new Date(schedule.start_date);
 		const end = new Date(schedule.end_date);
@@ -388,7 +390,7 @@ export default function DashboardAsesi() {
 															</div>
 															<Link
 																to={paths.asesi.assessment.apl01(
-																	schedule.assessment.id,
+																	schedule.id,
 																	detail.assessor.id
 																)}
 																className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors group-hover:scale-110 transform"

@@ -18,7 +18,7 @@ type FormValues = {
 };
 
 export default function DataSertifikasi() {
-	const { id_assessment, id_asesor, id_result, mutateNavigation, id_asesi } = useAssessmentParams();
+	const { id_schedule: id_assessment, id_asesor, id_result, mutateNavigation, id_asesi } = useAssessmentParams();
 	const asesiId = localStorage.getItem("asesiId");
 
 	const [loading, setLoading] = useState(false);
@@ -87,7 +87,7 @@ export default function DataSertifikasi() {
 			formData.append("purpose", data.purpose);
 			formData.append("assessor_id", String(id_asesor));
 			formData.append("assessee_id", String(asesiId ?? id_asesi));
-			formData.append("assessment_id", String(id_assessment));
+			formData.append("schedule_id", String(id_assessment));
 
 			if (data.school_report_card) {
 				formData.append("school_report_card", data.school_report_card);
@@ -123,7 +123,7 @@ export default function DataSertifikasi() {
 						});
 						mutateNavigation();
 						localStorage.removeItem("asesiId");
-						localStorage.removeItem("assessmentId");
+						localStorage.removeItem("scheduleId");
 					} else {
 						toast.show({
 							title: "Gagal",

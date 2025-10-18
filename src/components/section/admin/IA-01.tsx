@@ -118,7 +118,6 @@ export default function IA01({
 							{result?.assessor?.name || "-"}
 						</span>
 					</div>
-					<span className="text-sm text-gray-500">{formattedDate}</span>
 				</div>
 			</div>
 			<div className="bg-white mt-4 rounded-lg shadow-sm border p-6">

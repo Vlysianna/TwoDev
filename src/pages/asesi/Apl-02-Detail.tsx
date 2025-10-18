@@ -69,7 +69,7 @@ const evidenceOptions: EvidenceOptionType[] = [
 
 export default function Apl02Detail() {
   const { id_unit, unit_number } = useParams();
-  const { id_assessment, id_asesor, id_result } = useAssessmentParams();
+  const { id_schedule: id_assessment, id_asesor, id_result } = useAssessmentParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 

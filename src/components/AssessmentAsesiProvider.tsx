@@ -15,7 +15,7 @@ import useSWR from "swr";
 import StatusDetailModal from "./StatusDetailModal";
 
 type AssessmentParams = {
-	id_assessment: string;
+	id_schedule: string;
 	id_asesor: string;
 	id_asesi: string;
 	id_result: string;
@@ -73,17 +73,17 @@ export default function AssessmentAsesiProvider({
 }: {
 	children: JSX.Element | JSX.Element[];
 }) {
-	const { id_assessment, id_asesor, id_unit } = useParams();
+	const { id_schedule, id_asesor, id_unit } = useParams();
 
 	// const { user } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 
 	useEffect(() => {
-		if (!id_assessment || !id_asesor) {
+		if (!id_schedule || !id_asesor) {
 			navigate(routes.asesi.dashboard);
 		}
-	}, [id_assessment, id_asesor, navigate]);
+	}, [id_schedule, id_asesor, navigate]);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [approveData, setApproveData] = useState<any[] | undefined>(undefined);
@@ -100,7 +100,7 @@ export default function AssessmentAsesiProvider({
 
 			try {
 				const response = await api.get(
-					`/assessments/apl-01/results/${id_assessment}`
+					`/assessments/apl-01/results/${id_schedule}`
 				);
 
 				if (response.data.success) {
@@ -120,7 +120,7 @@ export default function AssessmentAsesiProvider({
 	}, []);
 
 	const { data: result, isLoading: loadingResult, error: errorResult } = useSWR(
-		`assessments/result/${id_assessment}/${id_asesor}/0`,
+		`assessments/result/${id_schedule}/${id_asesor}/0`,
 		fetcherResult
 	);
 
@@ -135,7 +135,7 @@ export default function AssessmentAsesiProvider({
 
 	useEffect(() => {
 		// console.log(approveData);
-		if (!id_assessment || !id_asesor) {
+		if (!id_schedule || !id_asesor) {
 			navigate(routes.asesi.dashboard, { replace: true });
 			return;
 		}
@@ -154,7 +154,7 @@ export default function AssessmentAsesiProvider({
 					if (
 						location.pathname ===
 						routes.asesi.assessment.apl02_detail(
-							id_assessment,
+							id_schedule,
 							id_asesor,
 							id_unit!
 						)
@@ -168,7 +168,7 @@ export default function AssessmentAsesiProvider({
 					return location.pathname;
 				} else {
 					return routes.asesi.assessment.dataSertifikasi(
-						id_assessment,
+						id_schedule,
 						id_asesor
 					);
 				}
@@ -190,7 +190,7 @@ export default function AssessmentAsesiProvider({
 	};
 
 	const { data: navigation, isLoading: loadingNavigation, error: errorNavigation, mutate: mutateNavigation } = useSWR(
-		`/assessments/navigation/assessee/${id_assessment}/${id_asesor}/${result?.assessee?.id}`,
+		`/assessments/navigation/assessee/${id_schedule}/${id_asesor}/${result?.assessee?.id}`,
 		fetcherTabs
 	);
 
@@ -200,93 +200,93 @@ export default function AssessmentAsesiProvider({
 	const tabItems: AssessmentRoute[] = useMemo(() => [
 		{
 			value: routes.asesi.assessment.apl01(
-				id_assessment ?? "",
+				id_schedule ?? "",
 				id_asesor ?? ""
 			),
 			label: "APL-01",
 			disabled: false,
-			to: routes.asesi.assessment.apl01(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.apl01(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.dataSertifikasi(
-				id_assessment ?? "",
+				id_schedule ?? "",
 				id_asesor ?? ""
 			),
 			label: "Data Sertifikasi",
 			disabled: false,
 			to: routes.asesi.assessment.dataSertifikasi(
-				id_assessment ?? "",
+				id_schedule ?? "",
 				id_asesor ?? ""
 			),
 		},
 		{
 			value: routes.asesi.assessment.apl02(
-				id_assessment ?? "",
+				id_schedule ?? "",
 				id_asesor ?? ""
 			),
 			label: "APL-02",
 			disabled: false,
-			to: routes.asesi.assessment.apl02(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.apl02(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
-			value: routes.asesi.assessment.ak04(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ak04(id_schedule ?? "", id_asesor ?? ""),
 			label: "AK-04",
 			disabled: false,
-			to: routes.asesi.assessment.ak04(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ak04(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
-			value: routes.asesi.assessment.ak01(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ak01(id_schedule ?? "", id_asesor ?? ""),
 			label: "AK-01",
 			disabled: false,
-			to: routes.asesi.assessment.ak01(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ak01(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
-			value: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ia02(id_schedule ?? "", id_asesor ?? ""),
 			label: "IA-02",
 			disabled: false,
-			to: routes.asesi.assessment.ia02(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ia02(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
 			value: routes.asesi.assessment.ia01Asesi(
-				id_assessment ?? "",
+				id_schedule ?? "",
 				id_asesor ?? ""
 			),
 			label: "IA-01",
 			disabled: false,
 			to: routes.asesi.assessment.ia01Asesi(
-				id_assessment ?? "",
+				id_schedule ?? "",
 				id_asesor ?? ""
 			),
 		},
 		{
-			value: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ia03(id_schedule ?? "", id_asesor ?? ""),
 			label: "IA-03",
 			disabled: false,
-			to: routes.asesi.assessment.ia03(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ia03(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
-			value: routes.asesi.assessment.ia05(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ia05(id_schedule ?? "", id_asesor ?? ""),
 			label: "IA-05",
 			disabled: false,
-			to: routes.asesi.assessment.ia05(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ia05(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
-			value: routes.asesi.assessment.ak02(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ak02(id_schedule ?? "", id_asesor ?? ""),
 			label: "AK-02",
 			disabled: false,
-			to: routes.asesi.assessment.ak02(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ak02(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
-			value: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ak03(id_schedule ?? "", id_asesor ?? ""),
 			label: "AK-03",
 			disabled: false,
-			to: routes.asesi.assessment.ak03(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ak03(id_schedule ?? "", id_asesor ?? ""),
 		},
 		{
-			value: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
+			value: routes.asesi.assessment.ak05(id_schedule ?? "", id_asesor ?? ""),
 			label: "AK-05",
 			disabled: false,
-			to: routes.asesi.assessment.ak05(id_assessment ?? "", id_asesor ?? ""),
+			to: routes.asesi.assessment.ak05(id_schedule ?? "", id_asesor ?? ""),
 		},
 	], []);
 
@@ -332,7 +332,7 @@ export default function AssessmentAsesiProvider({
 			) : (
 				<AssessmentContext.Provider
 					value={{
-						id_assessment: id_assessment!,
+						id_schedule: id_schedule!,
 						id_asesor: id_asesor!,
 						id_result: result?.id,
 						id_asesi: result?.assessee.id,

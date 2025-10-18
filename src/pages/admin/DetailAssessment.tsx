@@ -34,7 +34,7 @@ interface Tab {
 
 export default function DetailAssessmentAdmin() {
     const { user } = useAuth();
-    const { id_assessment, id_asesor } = useAssessmentParams();
+    const { id_schedule: id_assessment, id_asesor } = useAssessmentParams();
     const navigate = useNavigate();
     const tabsContainerRef = useRef<HTMLDivElement>(null);
 
