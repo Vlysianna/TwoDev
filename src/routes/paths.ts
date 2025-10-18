@@ -35,54 +35,55 @@ const routes = {
 		recapAssessmentAdminPattern: "/admin/recap-assessment/:scheduleDetailId/:id_asesor",
 		resultAssessment: {
 			root: "/admin/result-assessment",
-			dashboard: (id_assessment: string | number, id_asesor: string | number) =>
-				`/admin/result-assessment/${id_assessment}/${id_asesor}`,
-			dashboardPattern: "/admin/result-assessment/:id_assessment/:id_asesor",
-			resultAsesi: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}`,
-			resultAsesiPattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi",
-			apl01: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/apl-01`,
-			apl01Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/apl-01",
-			apl02: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/apl-02`,
-			apl02Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/apl-02",
-			apl02Detail: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number, id_unit: string | number, unit_number?: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/apl-02-detail/${id_unit}/${unit_number}`,
-			apl02DetailPattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/apl-02-detail/:id_unit/:unit_number",
-			ia01: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number, activeGroup?: string) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ia-01${activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''}`,
-			ia01Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ia-01",
-			ia01Detail: (id_assessment: string | number, id_result: string | number, id_asesor: string | number, id_asesi: string | number, id_unit: string | number) => 
-				`/admin/result-assessment/${id_assessment}/ia-01-detail/${id_result}/${id_asesor}/${id_asesi}/${id_unit}`,
-			ia01DetailPattern: "/admin/result-assessment/:id_assessment/ia-01-detail/:id_result/:id_asesor/:id_asesi/:id_unit",
-			ia02: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ia-02`,
-			ia02Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ia-02",
-			ia03: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ia-03`,
-			ia03Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ia-03",
-			ia05: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ia-05`,
-			ia05Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ia-05",
-			ia05c: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ia-05-c`,
-			ia05cPattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ia-05-c",
-			ak01: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ak-01`,
-			ak01Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ak-01",
-			ak02: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ak-02`,
-			ak02Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ak-02",
-			ak03: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ak-03`,
-			ak03Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ak-03",
-			ak05: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/ak-05`,
-			ak05Pattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/ak-05",
-			dataSertifikasi: (id_assessment: string | number, id_asesor: string | number, id_asesi: string | number) => 
-				`/admin/result-assessment/${id_assessment}/${id_asesor}/${id_asesi}/data-sertifikasi`,
-			dataSertifikasiPattern: "/admin/result-assessment/:id_assessment/:id_asesor/:id_asesi/data-sertifikasi"
+
+			dashboard: (id_schedule: string | number, id_asesor: string | number) =>
+				`/admin/result-assessment/${id_schedule}/${id_asesor}`,
+			dashboardPattern: "/admin/result-assessment/:id_schedule/:id_asesor",
+			resultAsesi: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}`,
+			resultAsesiPattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi",
+			apl01: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/apl-01`,
+			apl01Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/apl-01",
+			apl02: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/apl-02`,
+			apl02Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/apl-02",
+			apl02Detail: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number, id_unit: string | number, unit_number?: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/apl-02-detail/${id_unit}/${unit_number}`,
+			apl02DetailPattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/apl-02-detail/:id_unit/:unit_number",
+			ia01: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number, activeGroup?: string) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ia-01${activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''}`,
+			ia01Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ia-01",
+			ia01Detail: (id_schedule: string | number, id_result: string | number, id_asesor: string | number, id_asesi: string | number, id_unit: string | number) => 
+				`/admin/result-assessment/${id_schedule}/ia-01-detail/${id_result}/${id_asesor}/${id_asesi}/${id_unit}`,
+			ia01DetailPattern: "/admin/result-assessment/:id_schedule/ia-01-detail/:id_result/:id_asesor/:id_asesi/:id_unit",
+			ia02: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ia-02`,
+			ia02Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ia-02",
+			ia03: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ia-03`,
+			ia03Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ia-03",
+			ia05: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ia-05`,
+			ia05Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ia-05",
+			ia05c: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ia-05-c`,
+			ia05cPattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ia-05-c",
+			ak01: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ak-01`,
+			ak01Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ak-01",
+			ak02: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ak-02`,
+			ak02Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ak-02",
+			ak03: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ak-03`,
+			ak03Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ak-03",
+			ak05: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/ak-05`,
+			ak05Pattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/ak-05",
+			dataSertifikasi: (id_schedule: string | number, id_asesor: string | number, id_asesi: string | number) => 
+				`/admin/result-assessment/${id_schedule}/${id_asesor}/${id_asesi}/data-sertifikasi`,
+			dataSertifikasiPattern: "/admin/result-assessment/:id_schedule/:id_asesor/:id_asesi/data-sertifikasi"
 		},
 		editAsesor: "/admin/edit-asesor",
 		createAsesor: "/admin/asesor/create",
@@ -95,9 +96,9 @@ const routes = {
 		muk: {
 			root: "/admin/muk",
 			tambah: "/admin/muk/tambah",
-			editPattern: "/admin/muk/edit/:id_assessment",
-			edit: (id_assessment: string | number) =>
-				`/admin/muk/edit/${id_assessment}`,
+			editPattern: "/admin/muk/edit/:id_schedule",
+			edit: (id_schedule: string | number) =>
+				`/admin/muk/edit/${id_schedule}`,
 		},
 		kelolaJurusan: "/admin/kelolaJur",
 		okupasi: {
@@ -207,72 +208,72 @@ const routes = {
 		dashboard: "/asesi",
 		assessment: {
 			root: "/asesi/assessment",
-			apl01: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-01`,
-			apl01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/apl-01",
+			apl01: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/apl-01`,
+			apl01Pattern: "/asesi/assessment/:id_schedule/:id_asesor/apl-01",
 			dataSertifikasi: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_asesor: string | number
-			) => `/asesi/assessment/${id_assessment}/${id_asesor}/data-sertifikasi`,
+			) => `/asesi/assessment/${id_schedule}/${id_asesor}/data-sertifikasi`,
 			dataSertifikasiPattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/data-sertifikasi",
-			apl02: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-02`,
-			apl02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/apl-02",
+				"/asesi/assessment/:id_schedule/:id_asesor/data-sertifikasi",
+			apl02: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/apl-02`,
+			apl02Pattern: "/asesi/assessment/:id_schedule/:id_asesor/apl-02",
 			apl02_detail: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_asesor: string | number,
 				id_unit: string | number,
 				unit_number?: string | number
 			) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/apl-02-detail/${id_unit}/${unit_number}`,
+				`/asesi/assessment/${id_schedule}/${id_asesor}/apl-02-detail/${id_unit}/${unit_number}`,
 			apl02DetailPattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/apl-02-detail/:id_unit/:unit_number",
-			frak03: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/fr.ak.03`,
-			frak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/fr.ak.03",
-			ia01Asesi: (id_assessment: string | number, id_asesor: string | number, activeGroup?: string) =>
-				`/asesi/assessment/${id_assessment}/ia-01/${id_asesor}${activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''}`,
-			ia01Pattern: "/asesi/assessment/:id_assessment/ia-01/:id_asesor",
+				"/asesi/assessment/:id_schedule/:id_asesor/apl-02-detail/:id_unit/:unit_number",
+			frak03: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/fr.ak.03`,
+			frak03Pattern: "/asesi/assessment/:id_schedule/:id_asesor/fr.ak.03",
+			ia01Asesi: (id_schedule: string | number, id_asesor: string | number, activeGroup?: string) =>
+				`/asesi/assessment/${id_schedule}/ia-01/${id_asesor}${activeGroup ? `?group=${encodeURIComponent(activeGroup)}` : ''}`,
+			ia01Pattern: "/asesi/assessment/:id_schedule/ia-01/:id_asesor",
 			ia01AsesiDetail: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_result: string | number,
 				id_asesor: string | number,
 				id_unit: string | number
 			) =>
-				`/asesi/assessment/${id_assessment}/ia-01-detail/${id_result}/${id_asesor}/${id_unit}`,
+				`/asesi/assessment/${id_schedule}/ia-01-detail/${id_result}/${id_asesor}/${id_unit}`,
 			ia01AsesiDetailPattern:
-				"/asesi/assessment/:id_assessment/ia-01-detail/:id_result/:id_asesor/:id_unit",
-			ia02: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-02`,
-			ia02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-02",
-			ia03: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-03`,
-			ia03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-03",
-			ia05: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ia-05`,
-			ia05Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ia-05",
+				"/asesi/assessment/:id_schedule/ia-01-detail/:id_result/:id_asesor/:id_unit",
+			ia02: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/ia-02`,
+			ia02Pattern: "/asesi/assessment/:id_schedule/:id_asesor/ia-02",
+			ia03: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/ia-03`,
+			ia03Pattern: "/asesi/assessment/:id_schedule/:id_asesor/ia-03",
+			ia05: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/ia-05`,
+			ia05Pattern: "/asesi/assessment/:id_schedule/:id_asesor/ia-05",
 			Ia05CAssessee: (
-				id_assessment: string | number,
+				id_schedule: string | number,
 				id_asesor: string | number
-			) => `/asesi/assessment/${id_assessment}/${id_asesor}/ia-05-c`,
+			) => `/asesi/assessment/${id_schedule}/${id_asesor}/ia-05-c`,
 			ia05CAssesseePattern:
-				"/asesi/assessment/:id_assessment/:id_asesor/ia-05-c",
-			ak01: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-01`,
-			ak01Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-01",
-			ak02: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-02`,
-			ak02Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-02",
-			ak03: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-03`,
-			ak03Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-03",
-			ak04: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-04`,
-			ak04Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-04",
-			ak05: (id_assessment: string | number, id_asesor: string | number) =>
-				`/asesi/assessment/${id_assessment}/${id_asesor}/ak-05`,
-			ak05Pattern: "/asesi/assessment/:id_assessment/:id_asesor/ak-05",
+				"/asesi/assessment/:id_schedule/:id_asesor/ia-05-c",
+			ak01: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/ak-01`,
+			ak01Pattern: "/asesi/assessment/:id_schedule/:id_asesor/ak-01",
+			ak02: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/ak-02`,
+			ak02Pattern: "/asesi/assessment/:id_schedule/:id_asesor/ak-02",
+			ak03: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/ak-03`,
+			ak03Pattern: "/asesi/assessment/:id_schedule/:id_asesor/ak-03",
+			ak04: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/ak-04`,
+			ak04Pattern: "/asesi/assessment/:id_schedule/:id_asesor/ak-04",
+			ak05: (id_schedule: string | number, id_asesor: string | number) =>
+				`/asesi/assessment/${id_schedule}/${id_asesor}/ak-05`,
+			ak05Pattern: "/asesi/assessment/:id_schedule/:id_asesor/ak-05",
 		},
 		asesmenDiikuti: "/asesi/riwayat",
 		ak04: "/asesi/ak-04",

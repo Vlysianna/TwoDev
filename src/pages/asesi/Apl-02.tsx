@@ -11,7 +11,7 @@ import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Apl02() {
-	const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } =
+	const { id_schedule: id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } =
 		useAssessmentParams();
 
 	// console.log("Assessment params:", {
@@ -33,13 +33,18 @@ export default function Apl02() {
 
 	useEffect(() => {
 		if (id_assessment && id_result) {
-			fetchAssessment();
 			fetchUnitCompetencies();
 		} else {
 			console.error("Missing required params:", { id_assessment, id_result });
 			// setError("Parameter asesmen tidak lengkap");
 		}
 	}, [user, id_assessment, id_result]);
+
+	useEffect(() => {
+		if (resultData) {
+			fetchAssessment();
+		}
+	}, [resultData]);
 
 	useEffect(() => {
 		if (unitCompetencies) {
@@ -51,7 +56,8 @@ export default function Apl02() {
 	const fetchAssessment = async () => {
 		try {
 			setLoading(true);
-			const response = await api.get(`/assessments/${id_assessment}`);
+			// console.log(resultData);
+			const response = await api.get(`/assessments/${resultData.assessment.id}`);
 			if (response.data.success) {
 				setAssessments(response.data.data);
 			}
@@ -88,10 +94,12 @@ export default function Apl02() {
 
 				// simpan ke state resultData
 				setResultData({
+					schedule: data.schedule,
 					approved_assessee: data.apl02_header?.approved_assessee,
 					approved_assessor: data.apl02_header?.approved_assessor,
 					is_continue: data.apl02_header?.is_continue,
 					assessee: data.assessee,
+					assessment: data.assessment,
 				});
 			}
 		} catch (err: any) {

@@ -10,9 +10,10 @@ import type { ResultAK01 } from "@/model/ak01-model";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import { QRCodeCanvas } from "qrcode.react";
 import ConfirmModal from "@/components/ConfirmModal";
+import { formatDateInputLocal } from "@/helper/format-date";
 
 export default function Ak01() {
-	const { id_result, id_assessment, id_asesi, id_asesor, mutateNavigation } =
+	const { id_result, id_asesi, id_asesor, mutateNavigation } =
 		useAssessmentParams();
 
 	const { user } = useAuth();
@@ -76,6 +77,7 @@ export default function Ak01() {
 			const rawData = response.data;
 			if (rawData.success) {
 				setData(rawData.data);
+				console.log(rawData.data);
 
 				if (rawData.data.ak01_header.rows.length > 0) {
 					setSelectedEvidences(
@@ -244,18 +246,12 @@ export default function Ak01() {
 									<label className="block mb-2 text-sm font-medium text-gray-700">
 										Pelaksanaan asesmen disepakati pada:
 									</label>
-									<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<input
-											type="date"
+											type="datetime-local"
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-											value={new Date().toISOString().split("T")[0]}
-											readOnly
-										/>
-										<input
-											type="time"
-											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-											value={selectedTime}
-											readOnly
+											value={formatDateInputLocal(data?.schedule?.start_date)}
+											disabled
 										/>
 										<input
 											type="text"

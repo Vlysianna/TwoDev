@@ -12,7 +12,7 @@ import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 export default function Ak04() {
     // Menggunakan default empty object jika useAssessmentParams undefined
-    const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
+    const { id_schedule: id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
     const [resultData, setResultData] = useState<any>(null);
     const [valueQr, setValueQr] = useState('');
     const [submitting, setSubmitting] = useState(false);

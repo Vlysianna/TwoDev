@@ -17,7 +17,7 @@ import api from "@/helper/axios";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Ia05() {
-  const { id_asesor, id_result, id_assessment, mutateNavigation } = useAssessmentParams();
+  const { id_asesor, id_result, id_schedule: id_assessment, mutateNavigation } = useAssessmentParams();
 
   const { user } = useAuth();
   const navigate = useNavigate();

@@ -41,7 +41,7 @@ interface Tab {
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
 export default function ResultAsesiAssessment() {
-	const { id_assessment, id_asesor, id_result } = useAssessmentParams();
+	const { id_schedule: id_assessment, id_asesor, id_result } = useAssessmentParams();
 	const tabsContainerRef = useRef<HTMLDivElement>(null);
 
 	const [showLeftScroll, setShowLeftScroll] = useState(false);

@@ -322,7 +322,7 @@ const ResultAssessment: React.FC = () => {
                                           className="px-2 bg-[#E77D35] rounded hover:bg-orange-600 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(paths.admin.resultAssessment.dashboard(schedule.assessment.id, String(detail.assessor.id)));
+                                            navigate(paths.admin.resultAssessment.dashboard(schedule.id, String(detail.assessor.id)));
                                           }}
                                         >
                                           Detail Asesmen <ArrowRight size={16} />

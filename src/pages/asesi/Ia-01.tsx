@@ -14,7 +14,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import type { IncompleteGroup } from '@/model/ia01-model';
 
 export default function Ia01Asesi() {
-    const { id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
+    const { id_schedule: id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } = useAssessmentParams();
     const [selectedKPekerjaan, setSelectedKPekerjaan] = useState('');
     const [groupList, setGroupList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -183,7 +183,7 @@ export default function Ia01Asesi() {
     const filteredData = getFilteredData();
 
     const assesmentDate = resultData?.ia01_header?.updated_at || assessment?.date || '';
-    const formattedDate = assesmentDate ? formatDateInputLocal(assesmentDate) : "";
+    const formattedDate = assesmentDate ? formatDateInputLocal(assesmentDate).slice(0, 10) : "";
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
@@ -254,11 +254,6 @@ export default function Ia01Asesi() {
                                     {/* Kode */}
                                     <span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
                                         {assessment?.code || "N/A"}
-                                    </span>
-
-                                    {/* Tanggal */}
-                                    <span className="text-sm text-gray-500">
-                                        {assessment?.date || '24 Oktober 2025 | 07:00 - 15:00'}
                                     </span>
                                 </div>
                             </div>
@@ -462,7 +457,7 @@ export default function Ia01Asesi() {
                                     </div>
                                     <div className="relative">
                                         <input
-                                            type="text"
+                                            type="date"
                                             value={formattedDate}
                                             className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
                                             readOnly
@@ -493,7 +488,7 @@ export default function Ia01Asesi() {
                                     </div>
                                     <div className="relative">
                                         <input
-                                            type="text"
+                                            type="date"
                                             value={formattedDate}
                                             className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm text-gray-700"
                                             readOnly

@@ -7,7 +7,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useEffect, useState } from "react";
 import ConfirmModal from "@/components/ConfirmModal";
 import useToast from "../ui/useToast";
-import { formatDateInputLocal, formatDateJakartaUS24 } from "@/helper/format-date";
+import { formatDateInputLocal } from "@/helper/format-date";
 
 // Evidence types
 const evidenceTypes = [
@@ -537,11 +537,6 @@ export default function AK02({
 						</div>
 					</div>
 
-					<div className="flex flex-col xl:flex-row xl:items-center space-y-1 xl:space-y-0 xl:space-x-2 text-gray-600 text-sm lg:ml-auto">
-						<span className="whitespace-nowrap">
-							{data?.created_at ? formatDateJakartaUS24(data?.created_at) : "-"}
-						</span>
-					</div>
 				</div>
 			</div>
 

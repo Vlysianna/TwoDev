@@ -11,7 +11,7 @@ import {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 type AssessmentParams = {
-    id_assessment: string;
+    id_schedule: string;
     id_asesi?: string | null;
     id_asesor?: string | null;
     id_result?: string | null;
@@ -35,7 +35,7 @@ export default function AssessmentAdminProvider({
 }: {
     children: JSX.Element | JSX.Element[];
 }) {
-    const { id_assessment, id_asesor, id_asesi } = useParams();
+    const { id_assessment: id_schedule, id_asesor, id_asesi } = useParams();
     const [resultData, setResultData] = useState<any[] | undefined>(undefined);
 
     const { user } = useAuth();
@@ -48,7 +48,7 @@ export default function AssessmentAdminProvider({
         const fetchResult = async () => {
             try {
                 setLoading(true);
-                const resp = await api.get(`/assessments/result/${id_assessment}/${id_asesor}/${id_asesi}`);
+                const resp = await api.get(`/assessments/result/${id_schedule}/${id_asesor}/${id_asesi}`);
                 if (resp.data.success) {
                     const data = resp.data.data;
                     setResultData(data);
@@ -64,17 +64,17 @@ export default function AssessmentAdminProvider({
             }
         };
 
-        if (id_assessment && id_asesor && id_asesi) fetchResult();
-    }, [user, id_assessment, id_asesor, id_asesi]);
+        if (id_schedule && id_asesor && id_asesi) fetchResult();
+    }, [user, id_schedule, id_asesor, id_asesi]);
 
     useEffect(() => {
         if (location.pathname == routes.admin.resultAssessment.root) return;
-        if (!id_assessment || !id_asesor) {
+        if (!id_schedule || !id_asesor) {
             navigate(routes.admin.resultAssessment.root, {
                 replace: true,
             });
         }
-    }, [id_assessment, navigate, location]);
+    }, [id_schedule, navigate, location]);
 
     if (loading) {
         return (
@@ -95,7 +95,7 @@ export default function AssessmentAdminProvider({
     return (
         <AssessmentContext.Provider
             value={{
-                id_assessment: id_assessment!,
+                id_schedule: id_schedule!,
                 id_asesi: id_asesi || null,
                 id_asesor: id_asesor!,
                 id_result: resultData && resultData.length > 0
