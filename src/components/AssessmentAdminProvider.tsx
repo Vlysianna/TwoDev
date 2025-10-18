@@ -35,7 +35,7 @@ export default function AssessmentAdminProvider({
 }: {
     children: JSX.Element | JSX.Element[];
 }) {
-    const { id_assessment: id_schedule, id_asesor, id_asesi } = useParams();
+    const { id_schedule, id_asesor, id_asesi } = useParams();
     const [resultData, setResultData] = useState<any[] | undefined>(undefined);
 
     const { user } = useAuth();
