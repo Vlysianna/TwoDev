@@ -18,7 +18,7 @@ import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 import api from '@/helper/axios';
 import { useToast } from '@/components/ui/useToast';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { getAssetPath } from '@/utils/assetPath';
 import { formatDate } from "@/helper/format-date";
@@ -328,7 +328,7 @@ const Dashboard: React.FC = () => {
                     {/* Statistics Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         {/* Jurusan Card */}
-                        <div className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 p-6 transition-all duration-300 hover:border-orange-200">
+                        <Link to={paths.admin.kelolaJurusan} className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 p-6 transition-all duration-300 hover:border-orange-200">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-gradient-to-br from-[#E77D35] to-orange-500 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
                                     <img src={getAssetPath('/skema.svg')} alt="skema" className="w-6 h-6" />
@@ -339,20 +339,19 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
                             <div className="mt-4 pt-4 border-t border-gray-100">
-                                <button
-                                    onClick={() => navigate(paths.admin.kelolaJurusan)}
+                                <div
                                     className="text-sm text-gray-500 hover:text-orange-600 flex items-center justify-between w-full group-hover:text-orange-500 transition-colors"
                                 >
                                     <span>Lihat Detail</span>
                                     <span className="transform group-hover:translate-x-1 transition-transform">→</span>
-                                </button>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
 
                         {/* Assasmen Card */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <Link to={paths.admin.muk.root} className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 p-6 transition-all duration-300 hover:border-orange-200">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
+                                <div className="w-12 h-12 bg-gradient-to-br from-[#E77D35] to-orange-500 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
                                     <img src={getAssetPath('/assesmen.svg')} alt="assesmen" className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -361,16 +360,16 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
                             <hr className="my-4" />
-                            <button onClick={() => navigate(paths.admin.muk.root)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                            <div className="text-sm text-gray-500 hover:text-orange-600 flex items-center justify-between w-full group-hover:text-orange-500 transition-colors">
                                 Lihat Detail
-                                <span>→</span>
-                            </button>
-                        </div>
+                                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </Link>
 
                         {/* Assesor Card */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <Link to={paths.admin.kelolaAkunAsesor} className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 p-6 transition-all duration-300 hover:border-orange-200">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
+                                <div className="w-12 h-12 bg-gradient-to-br from-[#E77D35] to-orange-500 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
                                     <img src={getAssetPath('/asesor.svg')} alt="asesor" className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -379,16 +378,16 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
                             <hr className="my-4" />
-                            <button onClick={() => navigate(paths.admin.kelolaAkunAsesor)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                            <div className="text-sm text-gray-500 hover:text-orange-600 flex items-center justify-between w-full group-hover:text-orange-500 transition-colors">
                                 Lihat Detail
-                                <span>→</span>
-                            </button>
-                        </div>
+                                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </Link>
 
                         {/* Asesi Card */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <Link to={paths.admin.kelolaAkunAsesi} className="group bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 p-6 transition-all duration-300 hover:border-orange-200">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-[#E77D35] rounded-lg flex items-center justify-center">
+                                <div className="w-12 h-12 bg-gradient-to-br from-[#E77D35] to-orange-500 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
                                     <img src={getAssetPath('/asesi.svg')} alt="asesi" className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -397,11 +396,11 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
                             <hr className="my-4" />
-                            <button onClick={() => navigate(paths.admin.kelolaAkunAsesi)} className="text-sm text-gray-500 hover:text-[#E77D35] flex items-center justify-between w-full">
+                            <div className="text-sm text-gray-500 hover:text-orange-600 flex items-center justify-between w-full group-hover:text-orange-500 transition-colors">
                                 Lihat Detail
-                                <span>→</span>
-                            </button>
-                        </div>
+                                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </Link>
                     </div>
 
                     {/* Jadwal Assasmen Table */}
@@ -412,13 +411,13 @@ const Dashboard: React.FC = () => {
                                     <h2 className="text-xl font-semibold text-gray-900 mb-1">Jadwal Assasmen</h2>
                                     <p className="text-sm text-gray-500">Daftar jadwal assessment yang akan datang</p>
                                 </div>
-                                <button
-                                    onClick={() => navigate(paths.admin.kelolaJadwal)}
+                                <Link
+                                    to={paths.admin.kelolaJadwal}
                                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all"
                                 >
                                     Lihat Semua
                                     <span className="text-lg">→</span>
-                                </button>
+                                </Link>
                             </div>
                         </div>
 
@@ -527,13 +526,13 @@ const Dashboard: React.FC = () => {
                                     <h2 className="text-xl font-semibold text-gray-900 mb-1">Verifikasi Approval</h2>
                                     <p className="text-sm text-gray-500">Daftar pengajuan yang membutuhkan verifikasi</p>
                                 </div>
-                                <button
-                                    onClick={() => navigate(paths.admin.verifikasi)}
+                                <Link
+                                    to={paths.admin.verifikasi}
                                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all"
                                 >
                                     Lihat Semua
                                     <span className="text-lg">→</span>
-                                </button>
+                                </Link>
                             </div>
                         </div>
 

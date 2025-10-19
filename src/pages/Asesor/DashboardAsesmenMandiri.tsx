@@ -254,6 +254,28 @@ export default function DashboardAsesmenMandiri() {
     }
   };
 
+  const getRouteName = (tab: string) => {
+    switch (tab.toLowerCase()) {
+      case "apl-02": return "cekApl02";
+      case "ia-01": return "ia01";
+      case "ia-02": return "ia02";
+      case "ia-03": return "ia03";
+      case "ia-05": return "ia05";
+      case "ak-01": return "ak01";
+      case "ak-02": return "ak02";
+      case "ak-03": return "ak03";
+      case "ak-05": return "ak05";
+      default: return "";
+    }
+  };
+
+  const routeKey = getRouteName(selectedTab) as keyof typeof paths.asesor.assessment;
+
+  const pathFn = paths.asesor.assessment[routeKey] as (
+    id_schedule: number | string,
+    assesseeId: number | string
+  ) => string;
+
   const handleActionClick = (assesseeId: number) => {
     switch (selectedTab.toLowerCase()) {
       case "apl-02":
@@ -555,25 +577,23 @@ export default function DashboardAsesmenMandiri() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <button
-                            onClick={() => {
-                              setSelectedAssessee(asesi);
-                              handleActionClick(asesi.assessee_id);
-                            }}
-                            className="text-[#E77D35] underline text-sm hover:text-orange-600 cursor-pointer"
-                          >
-                            {getActionText()}
-                          </button>
 
                           {/* Modal Penilaian */}
-                          {selectedTab.toLowerCase() === "penilaian" && (
+                          {selectedTab.toLowerCase() !== "penilaian" ? (
+                            <Link
+                              to={pathFn ? pathFn(id_schedule, asesi.assessee_id) : ""}
+                              className="text-[#E77D35] underline text-sm hover:text-orange-600 cursor-pointer"
+                            >
+                              {getActionText()}
+                            </Link>
+                          ) : (
                             <button
                               className="text-[#E77D35] underline text-sm hover:text-orange-600 cursor-pointer"
                               onClick={() => {
                                 setSelectedAssessee(asesi);
                                 setModalPenilaianOpen(true);
                               }}
-                            ></button>
+                            >{getActionText()}</button>
                           )}
                         </td>
                       </tr>

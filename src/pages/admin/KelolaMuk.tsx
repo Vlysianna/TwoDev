@@ -21,8 +21,6 @@ const KelolaMUK: React.FC = () => {
 	const [approvalOpen, setApprovalOpen] = useState(false);
 	const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; backup_admin_id?: number; comment: string } | null>(null);
 
-	const navigate = useNavigate();
-
 	useEffect(() => {
 		fetchMuk();
 	}, []);
@@ -44,13 +42,6 @@ const KelolaMUK: React.FC = () => {
 		} finally {
 			setLoading(false);
 		}
-	};
-
-
-
-	const handleEdit = (id: number) => {
-		// console.log("Edit user:", id);
-		navigate(paths.admin.muk.edit(id));
 	};
 
 	const confirmDelete = async () => {
@@ -232,13 +223,13 @@ const KelolaMUK: React.FC = () => {
 												</td>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-center">
 													<div className="flex items-center justify-center space-x-2">
-														<button
-															onClick={() => handleEdit(muk.id)}
+														<Link
+															to={paths.admin.muk.edit(muk.id)}
 															className="p-2 text-orange-500 hover:bg-orange-50 rounded-md transition-colors"
 															title="Edit"
 														>
 															<Edit3 size={16} />
-														</button>
+														</Link>
 														<button
 															onClick={() => {
 																setDeletingId(muk.id);

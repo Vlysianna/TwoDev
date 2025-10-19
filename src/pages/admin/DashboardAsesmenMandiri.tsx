@@ -284,12 +284,12 @@ export default function DashboardAsesmenMandiriAdmin() {
 																"assessee_name",
 																asesi.full_name
 															);
-															navigate(
-																routes.admin.resultAssessment.resultAsesi(
+															window.open(
+																paths.basename + routes.admin.resultAssessment.resultAsesi(
 																	id_assessment,
 																	id_asesor!,
 																	asesi.assessee_id
-																)
+																),
 															);
 														}}
 														className="text-[#E77D35] underline text-sm hover:text-orange-600 cursor-pointer"

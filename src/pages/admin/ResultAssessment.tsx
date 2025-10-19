@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import paths from "@/routes/paths";
 import api from '@/helper/axios';
 import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, MapPin, ArrowRight, Users, Download } from 'lucide-react';
@@ -277,17 +277,17 @@ const ResultAssessment: React.FC = () => {
                               <button
                                 className={`px-2 p-2 rounded text-sm flex items-center gap-2 transition-colors
                                   ${
-                                    schedule.status !== "Selesai" || loadingExportId === schedule.assessment.id
+                                    schedule.status !== "Selesai" || loadingExportId === schedule.id
                                       ? 'bg-yellow-600 text-white cursor-not-allowed opacity-70'
                                       : 'bg-yellow-600 text-white hover:bg-yellow-800 cursor-pointer'
                                   }`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleExportPenilaian(schedule.assessment.id);
+                                  handleExportPenilaian(schedule.id);
                                 }}
-                                disabled={loadingExportId === schedule.assessment.id || schedule.status !== "Selesai"}
+                                disabled={loadingExportId === schedule.id || schedule.status !== "Selesai"}
                               >
-                                {loadingExportId === schedule.assessment.id ? "Mengunduh..." : <>Export Nilai <Download size={16} /></>}
+                                {loadingExportId === schedule.id ? "Mengunduh..." : <>Export Nilai <Download size={16} /></>}
                               </button>
                             </td>
                             <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -309,33 +309,24 @@ const ResultAssessment: React.FC = () => {
                                         <span>{detail.assessor.full_name}</span>
                                       </div>
                                       <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
-                                        <button
+                                        <Link
+                                          to={`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(detail.assessor.id))}&schedule=${encodeURIComponent(String(detail.id))}`}
                                           className="px-2 bg-green-600 text-white hover:bg-green-700 p-2 rounded hover:bg-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(detail.assessor.id))}&schedule=${encodeURIComponent(String(detail.id))}`);
-                                          }}
                                         >
                                           Verifikasi Assesi <ArrowRight size={16} />
-                                        </button>
-                                        <button
+                                        </Link>
+                                        <Link
+                                          to={paths.admin.resultAssessment.dashboard(schedule.id, String(detail.assessor.id))}
                                           className="px-2 bg-[#E77D35] rounded hover:bg-orange-600 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(paths.admin.resultAssessment.dashboard(schedule.id, String(detail.assessor.id)));
-                                          }}
                                         >
                                           Detail Asesmen <ArrowRight size={16} />
-                                        </button>
-                                        <button
+                                        </Link>
+                                        <Link
+                                          to={paths.admin.recapAssessmentAdmin(detail.id, String(detail.assessor.id))}
                                           className="px-2 bg-blue-500 rounded hover:bg-blue-700 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(paths.admin.recapAssessmentAdmin(detail.id, String(detail.assessor.id)));
-                                          }}
                                         >
                                           Berita Acara <ArrowRight size={16} />
-                                        </button>
+                                        </Link>
                                       </div>
                                     </div>
                                   </td>
@@ -374,17 +365,17 @@ const ResultAssessment: React.FC = () => {
                               <button
                                 className={`px-2 p-2 rounded text-sm flex items-center gap-2 transition-colors
                                   ${
-                                    schedule.status !== "Selesai" || loadingExportId === schedule.assessment.id
+                                    schedule.status !== "Selesai" || loadingExportId === schedule.id
                                       ? 'bg-yellow-600 text-white cursor-not-allowed opacity-70'
                                       : 'bg-yellow-600 text-white hover:bg-yellow-800 cursor-pointer'
                                   }`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleExportPenilaian(schedule.assessment.id);
+                                  handleExportPenilaian(schedule.id);
                                 }}
-                                disabled={loadingExportId === schedule.assessment.id || schedule.status !== 'Selesai'}
+                                disabled={loadingExportId === schedule.id || schedule.status !== 'Selesai'}
                               >
-                                {loadingExportId === schedule.assessment.id ? "Mengunduh..." : <>Export Nilai</>}
+                                {loadingExportId === schedule.id ? "Mengunduh..." : <>Export Nilai</>}
                               </button>
                             </div>
                             <div className="text-sm text-gray-500 mb-2">
@@ -422,35 +413,26 @@ const ResultAssessment: React.FC = () => {
                                 <span>{schedule.assessor.full_name}</span>
                               </div>
                               <div className="flex flex-row justify-between gap-2 px-4 overflow-x-auto pb-2">
-                                <button
+                                <Link
+                                  to={`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(schedule.assessor.id))}&schedule=${encodeURIComponent(String(schedule.id))}`}
                                   className="bg-green-600 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(schedule.assessor.id))}&schedule=${encodeURIComponent(String(schedule.id))}`);
-                                  }}
                                 >
                                   Verifikasi Asesi
-                                </button>
+                                </Link>
 
-                                <button
+                                <Link
+                                  to={paths.admin.resultAssessment.dashboard(schedule.id, String(schedule.assessor.id))}
                                   className="bg-[#E77D35] text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(paths.admin.resultAssessment.dashboard(schedule.id, String(schedule.assessor.id)));
-                                  }}
                                 >
                                   Detail Asesmen
-                                </button>
+                                </Link>
                                 
-                                <button
+                                <Link
+                                  to={paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id))}
                                   className="bg-blue-500 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id)));
-                                  }}
                                 >
                                   Berita Acara
-                                </button>
+                                </Link>
                               </div>
                               {/* <hr className='my-4 border-gray-400'/> */}
                             </div>

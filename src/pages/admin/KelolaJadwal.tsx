@@ -117,11 +117,6 @@ const KelolaJadwal: React.FC = () => {
     }
   };
 
-  const navigate = useNavigate();
-  const handleEdit = (id: number) => {
-    navigate(paths.admin.editJadwal(id));
-  };
-
   const handleView = (id: number) => {
     const jadwal = schedules.find(s => s.id === id) || null;
     setSelectedJadwal(jadwal);
@@ -335,13 +330,13 @@ const KelolaJadwal: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <div className="flex items-center justify-center space-x-2">
-                            <button
-                              onClick={() => handleEdit(schedule.id)}
+                            <Link
+                              to={paths.admin.editJadwal(schedule.id)}
                               className="p-2 text-orange-500 hover:bg-orange-50 rounded-md transition-colors"
                               title="Edit"
                             >
                               <Edit3 size={16} />
-                            </button>
+                            </Link>
                             <button
                               onClick={() => handleView(schedule.id)}
                               className="p-2 text-orange-600 hover:bg-gray-100 rounded-md transition-colors"

@@ -313,10 +313,6 @@ const router = createBrowserRouter(
 								element: <DashboardAsesmenMandiri />,
 							},
 							{
-								path: paths.asesor.assessment.faktaIntegritasPattern,
-								element: <FaktaIntegritas />,
-							},
-							{
 								path: paths.asesor.assessment.cekApl02Pattern,
 								element: <Apl02Asesor />,
 							},
@@ -364,10 +360,6 @@ const router = createBrowserRouter(
 								path: paths.asesor.assessment.ia05cPattern,
 								element: <Ia05CAsesor />,
 							},
-							{
-								path: paths.asesor.assessment.lembarJawabanPattern,
-								// element: <LembarJawaban />,
-							},
 						],
 					},
 					
@@ -383,14 +375,6 @@ const router = createBrowserRouter(
 								<DashboardAsesor />
 							</BiodataProtectedRoute>
 						) 
-					},
-					{
-						path: paths.asesor.dashboardPenilaian,
-						element: (
-							<BiodataProtectedRoute>
-								<DashboardPenilaian />
-							</BiodataProtectedRoute>
-						),
 					},
 					{ 
 						path: paths.asesor.assessmentReceipt, 
@@ -423,7 +407,7 @@ const router = createBrowserRouter(
 		},
 	],
 	{
-		basename: "/twodev",
+		basename: paths.basename,
 	}
 );
 

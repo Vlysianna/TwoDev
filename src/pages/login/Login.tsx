@@ -150,14 +150,7 @@ export default function LoginForm() {
                 </button>
               </div>
             </div>
-
-            {/* Forgot Password */}
-            <div className="text-right">
-              <button type="button" className="text-xs md:text-sm text-black-500 hover:text-gray-700 hover:cursor-pointer font-small">
-                Lupa password?
-              </button>
-            </div>
-
+            
             {/* Sign In Button */}
             <button
               type="submit"

@@ -1,5 +1,6 @@
 const routes = {
 	root: "/",
+	basename: "/twodev",
 	public: {
 		root: "/public",
 		dataAsesi: "/public/data-asesi/:encodedId",
