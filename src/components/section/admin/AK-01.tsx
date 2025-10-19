@@ -1,4 +1,5 @@
 import api from "@/helper/axios";
+import { formatDateInputLocal } from "@/helper/format-date";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
 import type { ResultAK01 } from "@/model/ak01-model";
 import { Check, FileCheck2 } from "lucide-react";
@@ -81,28 +82,11 @@ export default function AK01({ id_result }: { id_result: string }) {
 						<label className="block mb-2 text-sm font-medium text-gray-700">
 							Pelaksanaan asesmen disepakati pada:
 						</label>
-						<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<input
-								type="date"
+								type="datetime-local"
 								className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-								value={
-									result?.ak01_header?.created_at &&
-									new Date(result?.ak01_header?.created_at)
-										.toISOString()
-										.split("T")[0]
-								}
-								readOnly
-							/>
-							<input
-								type="time"
-								className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-								value={
-									result?.ak01_header?.created_at &&
-									new Date(result?.ak01_header?.created_at)
-										.toISOString()
-										.split("T")[1]
-										.split("Z")[0]
-								}
+								value={formatDateInputLocal(result?.schedule.start_date)}
 								readOnly
 							/>
 							<input

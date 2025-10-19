@@ -69,13 +69,13 @@ export const useBiodataAdminCheck = () => {
       // Redirect if not complete and not on biodata page
       if (!isComplete && location.pathname !== paths.admin.biodata) {
         if (location.pathname.startsWith('/admin')) {
-          navigate(paths.admin.biodata, {
-            replace: true,
-            state: {
-              from: location.pathname,
-              message: 'Harap lengkapi biodata admin terlebih dahulu untuk mengakses fitur admin.'
-            }
-          });
+          // navigate(paths.admin.biodata, {
+          //   replace: true,
+          //   state: {
+          //     from: location.pathname,
+          //     message: 'Harap lengkapi biodata admin terlebih dahulu untuk mengakses fitur admin.'
+          //   }
+          // });
         }
       }
       setIsCheckingBiodata(false);
