@@ -92,7 +92,7 @@ export default function AK01({ id_result }: { id_result: string }) {
 							<input
 								type="text"
 								className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
-								value={result?.tuk}
+								value={result?.location}
 								readOnly
 							/>
 						</div>

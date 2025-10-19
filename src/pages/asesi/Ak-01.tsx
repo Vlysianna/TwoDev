@@ -83,9 +83,9 @@ export default function Ak01() {
 					setSelectedEvidences(
 						rawData.data.ak01_header.rows.flatMap((row: any) => row.evidence)
 					);
-					setSelectedTUK(
-						rawData.data.locations[rawData.data.locations.length - 1] || ""
-					);
+          setSelectedTUK(
+            rawData.data.location
+          );
 				}
 
 				if (rawData.data.ak01_header.approved_assessor) {

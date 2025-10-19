@@ -1,7 +1,7 @@
 import type { ResultTemplate } from "@/lib/types";
 
 export interface ResultAK01 extends ResultTemplate {
-    locations: string[]
+    location: string;
     ak01_header: AK01Header;
 }
 
