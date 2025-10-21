@@ -86,7 +86,7 @@ export default function CekAk01() {
       const response = await api.get(`assessments/ak-01/data/${id_result}`);
       const rawData = response.data;
       if (rawData.success) {
-        console.log(rawData.data);
+        // console.log(rawData.data);
         setData(rawData.data);
 
         if (rawData.data.ak01_header.rows.length > 0) {
