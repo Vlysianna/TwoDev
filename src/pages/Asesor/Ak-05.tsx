@@ -305,7 +305,7 @@ export default function CekAk05() {
                             type="radio"
                             name="rekom"
                             value="true"
-                            disabled={data?.result?.result_ak05?.approved_assessor}
+                            disabled
                             checked={isCompetent === true}
                             onChange={() => handleCompetentChange(true)}
                           />
@@ -316,7 +316,7 @@ export default function CekAk05() {
                             type="radio"
                             name="rekom"
                             value="false"
-                            disabled={data?.result?.result_ak05?.approved_assessor}
+                            disabled
                             checked={isCompetent === false}
                             onChange={() => handleCompetentChange(false)}
                           />
