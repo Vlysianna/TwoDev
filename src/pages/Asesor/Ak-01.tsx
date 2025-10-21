@@ -86,18 +86,19 @@ export default function CekAk01() {
       const response = await api.get(`assessments/ak-01/data/${id_result}`);
       const rawData = response.data;
       if (rawData.success) {
-        // console.log(rawData.data);
+        console.log(rawData.data);
         setData(rawData.data);
 
         if (rawData.data.ak01_header.rows.length > 0) {
           setSelectedEvidences(
             rawData.data.ak01_header.rows.flatMap((row: any) => row.evidence)
           );
-          setTUK(
-            rawData.data.location
-          );
           setIsDataSaved(true); // Set state menjadi true jika data sudah ada
         }
+        
+        setTUK(
+          rawData.data.location
+        );
 
         if (rawData.data.ak01_header.approved_assessor) {
           setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
@@ -428,7 +429,7 @@ export default function CekAk01() {
                     <div className="sm:col-span-2 mt-4 border-t border-gray-200 pt-6 space-y-2">
                       <button
                         type="submit"
-                        className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                        className={`flex items-center justify-center w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${!TUK ||
                           !selectedEvidences ||
                           selectedEvidences.length === 0 ||
                           assessorQrValue // Disable jika QR sudah digenerate
@@ -437,16 +438,16 @@ export default function CekAk01() {
                           }`}
                         onClick={(e) => {
                           if (
+                            !TUK ||
                             !selectedEvidences ||
                             selectedEvidences.length === 0 ||
                             assessorQrValue // Disable jika QR sudah digenerate
-                          ) {
+                          )
                             e.preventDefault();
-                            return;
-                          }
                           handleOnSubmit();
                         }}
                         disabled={
+                          !TUK ||
                           !selectedEvidences ||
                           selectedEvidences.length === 0 ||
                           !!assessorQrValue // Disable jika QR sudah digenerate

@@ -83,10 +83,11 @@ export default function Ak01() {
 					setSelectedEvidences(
 						rawData.data.ak01_header.rows.flatMap((row: any) => row.evidence)
 					);
-          setSelectedTUK(
-            rawData.data.location
-          );
 				}
+				
+				setSelectedTUK(
+					rawData.data.location
+				);
 
 				if (rawData.data.ak01_header.approved_assessor) {
 					setAssessorQrValue(getAssessorUrl(Number(id_asesor)));
