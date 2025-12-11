@@ -61,7 +61,7 @@ export default function FormMuk({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [form.watch("scheme_id"), occupations]
   );
-  
+
   const toast = useToast();
 
   const {
@@ -140,9 +140,11 @@ export default function FormMuk({
       });
       setOpenValueAPL02("item-1");
     } catch (err) {
-      toast.show({description: 
-        "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
-    });
+      toast.show({
+        description:
+          "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " +
+          err,
+      });
     }
     e.target.value = "";
   }
@@ -164,7 +166,9 @@ export default function FormMuk({
     } catch (err) {
       toast.show({
         title: "Gagal",
-        description: "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+        description:
+          "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " +
+          err,
       });
     }
     e.target.value = "";
@@ -193,7 +197,9 @@ export default function FormMuk({
     } catch (err) {
       toast.show({
         title: "Gagal",
-        description: "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+        description:
+          "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " +
+          err,
       });
     }
     e.target.value = "";
@@ -216,7 +222,9 @@ export default function FormMuk({
       setOpenValueIA05("item-1");
     } catch (err) {
       toast.show({
-        description: "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+        description:
+          "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " +
+          err,
       });
     }
     e.target.value = "";
@@ -252,7 +260,9 @@ export default function FormMuk({
     } catch (err) {
       toast.show({
         title: "Gagal",
-        description: "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " + err
+        description:
+          "Gagal membaca file .docx. Pastikan dokumen memiliki tabel unit/elemen yang benar. " +
+          err,
       });
     }
     e.target.value = "";
@@ -260,7 +270,7 @@ export default function FormMuk({
 
   useEffect(() => {
     setValue("code", currentCode ?? "");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCode]);
 
   return (
@@ -316,9 +326,7 @@ export default function FormMuk({
                     required: "Pilih Okupasi wajib diisi",
                   })}
                   className={`w-full px-3 py-2 border rounded-md appearance-none ${
-                    errors.occupation_id
-                      ? "border-red-500"
-                      : "border-gray-300"
+                    errors.occupation_id ? "border-red-500" : "border-gray-300"
                   }`}
                   disabled={disabled}
                 >
@@ -881,7 +889,6 @@ function validateSchemaNumber(doc: Document): boolean {
 }
 
 function parseHTMLToAPL02(html: string): UnitAPL02[] {
-  
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
@@ -1184,31 +1191,30 @@ function parseHTMLToIA03(html: string): IA03Group[] {
 
   const groups: IA03Group[] = [];
 
-  // Cari node yang mengandung FR.IA.03.
+  // Cari FR.IA.03.
   const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
     el.textContent?.includes("FR.IA.03.")
   );
+  if (!anchorNode) throw new Error("FR.IA.03 tidak ditemukan!");
 
-  if (!anchorNode) {
-    throw new Error("FR.IA.03. tidak ditemukan!");
-  }
-
-  // Mulai dari node ini, cari semua table setelahnya
+  // Ambil semua tabel setelah anchorNode
   const tables: HTMLTableElement[] = [];
   let next: Element | null = anchorNode;
   while (next) {
-    if (next.tagName === "TABLE") {
-      tables.push(next as HTMLTableElement);
-    }
+    if (next.tagName === "TABLE") tables.push(next as HTMLTableElement);
     next = next.nextElementSibling;
   }
 
+  let kelompokFound = false;
+
+  // ==== MODE 1: Kelompok Pekerjaan ====
   for (let i = 0; i < tables.length; i++) {
     const table = tables[i];
     const firstCell = table.querySelector("td p strong")?.textContent?.trim();
 
     if (firstCell && firstCell.startsWith("Kelompok Pekerjaan")) {
-      // --- Kelompok ditemukan ---
+      kelompokFound = true;
+
       const groupName = firstCell;
       const units: UnitIA03[] = [];
 
@@ -1222,40 +1228,80 @@ function parseHTMLToIA03(html: string): IA03Group[] {
           );
           const code = cells[1].textContent?.trim() || "";
           const title = cells[2].textContent?.trim() || "";
-          if (no) {
-            units.push({ unit_code: code, title });
-          }
+          if (no) units.push({ unit_code: code, title });
         }
       });
 
-      // --- Cari tabel pertanyaan setelah tabel kelompok ini ---
+      // Tabel pertanyaan setelah kelompok
       let qa_ia03: IA03Question[] = [];
       const nextTable = tables[i + 1];
       if (nextTable) {
-        const rowsQ = Array.from(nextTable.querySelectorAll("tr"));
-        qa_ia03 = rowsQ
-          .map((row) => {
-            const cells = Array.from(row.querySelectorAll("td"));
-            if (cells.length >= 2) {
-              const noText = cells[0].textContent?.trim();
-              const question = cells[1].textContent?.trim();
-              if (noText && /^\d+/.test(noText) && question) {
-                return { question };
-              }
-            }
-            return null;
-          })
-          .filter((q): q is IA03Question => q !== null);
+        qa_ia03 = extractQuestionsFromTable(nextTable);
       }
 
-      groups.push({
-        name: groupName,
-        units,
-        qa_ia03,
-      });
+      groups.push({ name: groupName, units, qa_ia03 });
     }
   }
+
+  // ==== MODE 2: Jika tidak ada kelompok, carikan "Pertanyaan" ====
+  if (!kelompokFound) {
+    let startIndex = -1;
+
+    // Cari tabel yang mengandung tulisan "Pertanyaan"
+    for (let i = 0; i < tables.length; i++) {
+      if (tables[i].textContent?.toLowerCase().includes("pertanyaan")) {
+        startIndex = i;
+        break;
+      }
+    }
+
+    if (startIndex === -1) {
+      throw new Error('Tidak ada "Pertanyaan" ditemukan!');
+    }
+
+    const qa_ia03: IA03Question[] = [];
+
+    // Ambil dari tabel Pertanyaan + tabel sesudahnya (biasanya banyak baris)
+    for (let i = startIndex; i < tables.length; i++) {
+      qa_ia03.push(...extractQuestionsFromTable(tables[i]));
+    }
+
+    groups.push({
+      name: "FR.IA.03 – Mode Pertanyaan Langsung",
+      units: [],
+      qa_ia03,
+    });
+  }
+
   return groups;
+}
+
+function extractQuestionsFromTable(tbl: HTMLTableElement): IA03Question[] {
+  const result: IA03Question[] = [];
+
+  const rows = Array.from(tbl.querySelectorAll("tr"));
+
+  rows.forEach((row) => {
+    const cells = Array.from(row.querySelectorAll("td"));
+    if (cells.length < 2) return;
+
+    const col1 = cells[0].textContent?.trim() || "";
+    const col2 = cells[1].textContent?.trim() || "";
+
+    // Pertanyaan versi lama: "1." → pertanyaan di kolom kedua
+    if (/^\d+/.test(col1) && col2.length > 3) {
+      result.push({ question: col2 });
+      return;
+    }
+
+    // Pertanyaan versi baru: nomor kosong → pertanyaan ada di kol2
+    if (!col1 && col2.length > 3 && !col2.toLowerCase().includes("tanggapan")) {
+      result.push({ question: col2 });
+      return;
+    }
+  });
+
+  return result;
 }
 
 function parseHTMLToIA05A(html: string): IA05Question[] {
@@ -1684,4 +1730,3 @@ function OptionsFieldArray({
     />
   );
 }
-
