@@ -266,7 +266,7 @@ export default function ResultAsesiAssessment() {
 									) : (
 										<>
 											<Download className="w-4 h-4 mr-2" />
-											Export PDF ({selectedTab.toUpperCase()})
+											Export
 										</>
 									)}
 								</button>
@@ -277,7 +277,7 @@ export default function ResultAsesiAssessment() {
 									title="Export PDF belum tersedia untuk form ini"
 								>
 									<Download className="w-4 h-4 mr-2" />
-									Export ({selectedTab.toUpperCase()}) - Belum Tersedia
+									Export
 								</button>
 							)}
 						</div>
