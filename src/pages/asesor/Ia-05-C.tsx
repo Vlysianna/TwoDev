@@ -46,6 +46,7 @@ export default function Ia05C() {
   // State untuk modal konfirmasi
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingValue, setPendingValue] = useState<string>("");
+  const [showQRConfirmModal, setShowQRConfirmModal] = useState(false);
 
   // State untuk validasi form
   const [formErrors, setFormErrors] = useState({
@@ -188,6 +189,17 @@ export default function Ia05C() {
     } finally {
       setSaveProcessing(false);
     }
+  };
+
+  // Handler untuk membuka modal konfirmasi Generate QR
+  const handleGenerateQRClick = () => {
+    setShowQRConfirmModal(true);
+  };
+
+  // Handler konfirmasi Generate QR
+  const handleConfirmGenerateQR = async () => {
+    setShowQRConfirmModal(false);
+    await handleGenerateQRCode();
   };
 
   // Ubah handleGenerateQRCode agar hanya bisa jika sudah simpan
@@ -725,7 +737,7 @@ export default function Ia05C() {
 
                     {/* Generate QR Button - Full width */}
                     <button
-                      onClick={handleGenerateQRCode}
+                      onClick={handleGenerateQRClick}
                       disabled={qrProcessing || !!assessorQrValue || !isSaved}
                       className={`w-full bg-[#E77D35] text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md
     flex items-center justify-center
@@ -748,7 +760,7 @@ export default function Ia05C() {
           </div>
         </main>
 
-        {/* Modal Konfirmasi */}
+        {/* Modal Konfirmasi Simpan */}
         <ConfirmModal
           isOpen={showConfirmModal}
           onClose={() => setShowConfirmModal(false)}
@@ -787,6 +799,25 @@ export default function Ia05C() {
           confirmText="Simpan"
           cancelText="Batal"
           type="warning"
+        />
+
+        {/* Modal Konfirmasi Generate QR dengan Countdown */}
+        <ConfirmModal
+          isOpen={showQRConfirmModal}
+          onClose={() => setShowQRConfirmModal(false)}
+          onConfirm={handleConfirmGenerateQR}
+          title="Konfirmasi Generate QR"
+          message={
+            <>
+              <strong>Perhatian!</strong><br />
+              Setelah generate QR, data tidak dapat diubah lagi.<br />
+              Pastikan semua data sudah benar sebelum melanjutkan.
+            </>
+          }
+          confirmText="Generate QR"
+          cancelText="Batal"
+          type="danger"
+          countdown={5}
         />
       </div>
     </div>

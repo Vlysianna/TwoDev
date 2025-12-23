@@ -38,6 +38,8 @@ interface Tab {
 	status: "Belum Tuntas" | "Menunggu Asesi" | "Tuntas";
 }
 
+const EXPORTABLE_TABS = ["apl-01", "apl-02", "ia-01", "ak-01", "ak-02"];
+
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
 export default function ResultAsesiAssessment() {
@@ -173,17 +175,23 @@ export default function ResultAsesiAssessment() {
 				`/assessments/${tab}/result/${id_result}/export`,
 				{ responseType: "blob" }
 			);
+			
+			// Ambil nama asesi dari localStorage dan sanitize untuk nama file
+			const assesseeName = localStorage.getItem("assessee_name") || "";
+			const sanitizedName = assesseeName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+			const fileName = sanitizedName ? `${tab.toUpperCase()}_${sanitizedName}.pdf` : `${tab.toUpperCase()}.pdf`;
+			
 			const url = window.URL.createObjectURL(new Blob([res.data]));
 			const link = document.createElement("a");
 			link.href = url;
-			link.setAttribute("download", `hasil-assesmen(${tab}).pdf`);
+			link.setAttribute("download", fileName);
 			document.body.appendChild(link);
 			link.click();
 			link.remove();
 			window.URL.revokeObjectURL(url);
 			toast.show({
 				title: "Berhasil",
-				description: `Hasil Asesmen (${tab}) berhasil diunduh`,
+				description: `${tab.toUpperCase()}${assesseeName ? ` - ${assesseeName}` : ""} berhasil diunduh`,
 				type: "success",
 			});
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -241,19 +249,37 @@ export default function ResultAsesiAssessment() {
 							</div>
 						</div>
 						<div className="p-4">
-							<button
-								onClick={() => handleExport(selectedTab)}
-								className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
-							>
-								{loadingExport ? (
-									"Mengunduh..."
-								) : (
-									<>
-										<Download className="w-4 h-4 mr-2" />
-										Export ({selectedTab})
-									</>
-								)}
-							</button>
+							{EXPORTABLE_TABS.includes(selectedTab.toLowerCase()) ? (
+								<button
+									onClick={() => handleExport(selectedTab)}
+									disabled={loadingExport}
+									className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{loadingExport ? (
+										<>
+											<svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+												<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+												<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+											</svg>
+											Mengunduh...
+										</>
+									) : (
+										<>
+											<Download className="w-4 h-4 mr-2" />
+											Export PDF ({selectedTab.toUpperCase()})
+										</>
+									)}
+								</button>
+							) : (
+								<button
+									disabled
+									className="flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed"
+									title="Export PDF belum tersedia untuk form ini"
+								>
+									<Download className="w-4 h-4 mr-2" />
+									Export ({selectedTab.toUpperCase()}) - Belum Tersedia
+								</button>
+							)}
 						</div>
 					</div>
 

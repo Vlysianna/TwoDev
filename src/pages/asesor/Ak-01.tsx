@@ -11,6 +11,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import NavbarAsesor from "@/components/NavAsesor";
 import useToast from "@/components/ui/useToast";
 import { formatDateInputLocal } from "@/helper/format-date";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function CekAk01() {
   const { id_schedule, id_result, id_asesi, id_asesor } =
@@ -20,6 +21,7 @@ export default function CekAk01() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDataSaved, setIsDataSaved] = useState(false); // State baru untuk melacak apakah data sudah disimpan
+  const [showQRConfirmModal, setShowQRConfirmModal] = useState(false);
 
   const [data, setData] = useState<ResultAK01>({
     id: 0,
@@ -116,6 +118,17 @@ export default function CekAk01() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handler untuk membuka modal konfirmasi Generate QR
+  const handleGenerateQRClick = () => {
+    setShowQRConfirmModal(true);
+  };
+
+  // Handler konfirmasi Generate QR
+  const handleConfirmGenerateQR = async () => {
+    setShowQRConfirmModal(false);
+    await handleGenerateQRCode();
   };
 
   const handleGenerateQRCode = async () => {
@@ -459,7 +472,7 @@ export default function CekAk01() {
                       <button
                         disabled={!isDataSaved || !!assessorQrValue} // Disable jika data belum disimpan atau QR sudah digenerate
                         onClick={() => {
-                          if (isDataSaved && !assessorQrValue) handleGenerateQRCode();
+                          if (isDataSaved && !assessorQrValue) handleGenerateQRClick();
                         }}
                         className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!isDataSaved || assessorQrValue ? "cursor-not-allowed opacity-50" : "hover:bg-orange-600 cursor-pointer"
                           }`}
@@ -474,6 +487,25 @@ export default function CekAk01() {
             </div>
           </div>
         </main>
+
+        {/* Modal Konfirmasi Generate QR dengan Countdown */}
+        <ConfirmModal
+          isOpen={showQRConfirmModal}
+          onClose={() => setShowQRConfirmModal(false)}
+          onConfirm={handleConfirmGenerateQR}
+          title="Konfirmasi Generate QR"
+          message={
+            <>
+              <strong>Perhatian!</strong><br />
+              Setelah generate QR, data tidak dapat diubah lagi.<br />
+              Pastikan semua data sudah benar sebelum melanjutkan.
+            </>
+          }
+          confirmText="Generate QR"
+          cancelText="Batal"
+          type="danger"
+          countdown={5}
+        />
       </div>
     </div>
   );

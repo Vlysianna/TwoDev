@@ -1,6 +1,7 @@
 import { ChevronLeft, Clock, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
+import ConfirmModal from "@/components/ConfirmModal";
 import { Link } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,6 +59,7 @@ export default function Ia02Assessor() {
 	const [assesseeQrValue, setAssesseeQrValue] = useState("");
 	const [assessorQrValue, setAssessorQrValue] = useState("");
 	const [generatingPdf, setGeneratingPdf] = useState(false);
+	const [showQRConfirmModal, setShowQRConfirmModal] = useState(false);
 
 	useEffect(() => {
 		if (id_result && id_assessment) {
@@ -110,6 +112,17 @@ export default function Ia02Assessor() {
 		} finally {
 			setGeneratingPdf(false);
 		}
+	};
+
+	// Handler untuk membuka modal konfirmasi Generate QR
+	const handleGenerateQRClick = () => {
+		setShowQRConfirmModal(true);
+	};
+
+	// Handler konfirmasi Generate QR
+	const handleConfirmGenerateQR = async () => {
+		setShowQRConfirmModal(false);
+		await handleGenerateQRCode();
 	};
 
 	const handleGenerateQRCode = async () => {
@@ -336,7 +349,7 @@ export default function Ia02Assessor() {
 										<button
 											disabled={assessorQrValue !== ""}
 											onClick={() => {
-												if (!assessorQrValue) handleGenerateQRCode();
+												if (!assessorQrValue) handleGenerateQRClick();
 											}}
 											className={`block cursor-pointer text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assessorQrValue ? "hover:bg-orange-600" : "cursor-not-allowed opacity-50"
 												}`}
@@ -349,6 +362,25 @@ export default function Ia02Assessor() {
 						</div>
 					</div>
 				</main>
+
+				{/* Modal Konfirmasi Generate QR dengan Countdown */}
+				<ConfirmModal
+					isOpen={showQRConfirmModal}
+					onClose={() => setShowQRConfirmModal(false)}
+					onConfirm={handleConfirmGenerateQR}
+					title="Konfirmasi Persetujuan"
+					message={
+						<>
+							<strong>Perhatian!</strong><br />
+							Setelah menyetujui, data tidak dapat diubah lagi.<br />
+							Pastikan semua data sudah benar sebelum melanjutkan.
+						</>
+					}
+					confirmText="Setujui"
+					cancelText="Batal"
+					type="danger"
+					countdown={5}
+				/>
 			</div>
 		</div>
 	);

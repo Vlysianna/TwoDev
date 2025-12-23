@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmModalProps {
@@ -11,6 +11,7 @@ interface ConfirmModalProps {
   cancelText?: string;
   type?: 'danger' | 'warning' | 'info' | 'success';
   icon?: React.ReactNode;
+  countdown?: number; 
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -23,8 +24,37 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   cancelText = 'Batalkan',
   type = 'warning',
   icon,
+  countdown = 0,
 }) => {
+  const [remainingTime, setRemainingTime] = useState(countdown);
+
+  // Reset countdown when modal opens
+  useEffect(() => {
+    if (isOpen && countdown > 0) {
+      setRemainingTime(countdown);
+    }
+  }, [isOpen, countdown]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!isOpen || remainingTime <= 0) return;
+
+    const timer = setInterval(() => {
+      setRemainingTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOpen, remainingTime]);
+
   if (!isOpen) return null;
+
+  const isCountdownActive = countdown > 0 && remainingTime > 0;
 
   const getDefaultIcon = () => {
     switch (type) {
@@ -78,9 +108,10 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             </button>
             <button
               onClick={onConfirm}
-              className={`flex-1 ${getButtonColor()} text-white py-2 px-4 rounded-lg transition-colors cursor-pointer`}
+              disabled={isCountdownActive}
+              className={`flex-1 ${isCountdownActive ? 'bg-gray-400 cursor-not-allowed' : getButtonColor()} text-white py-2 px-4 rounded-lg transition-colors ${!isCountdownActive && 'cursor-pointer'}`}
             >
-              {confirmText}
+              {isCountdownActive ? `${confirmText} (${remainingTime}s)` : confirmText}
             </button>
           </div>
         </div>

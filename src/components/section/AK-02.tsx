@@ -60,6 +60,7 @@ export default function AK02({
 
 	// Modal state
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [showQRConfirmModal, setShowQRConfirmModal] = useState(false);
 	const [pendingValue, setPendingValue] = useState<string>("");
 	const [hasBeenSaved, setHasBeenSaved] = useState(false);
 
@@ -345,6 +346,17 @@ export default function AK02({
 	const handleConfirmSave = async () => {
 		setShowConfirmModal(false);
 		await handleSubmit();
+	};
+
+	// Handler untuk membuka modal konfirmasi Generate QR
+	const handleGenerateQRClick = () => {
+		setShowQRConfirmModal(true);
+	};
+
+	// Handler konfirmasi Generate QR
+	const handleConfirmGenerateQR = async () => {
+		setShowQRConfirmModal(false);
+		await handleGenerateQRCode();
 	};
 
 	// Fungsi untuk memeriksa apakah setiap unit memiliki minimal satu bukti
@@ -898,7 +910,7 @@ export default function AK02({
 										{/* Generate QR */}
 										<div>
 											<button
-												onClick={handleGenerateQRCode}
+												onClick={handleGenerateQRClick}
 												disabled={isAssessee || isAdmin || assessorQrValue !== "" || !data?.ak02_headers || !hasBeenSaved}
 												className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${isAssessee || isAdmin || assessorQrValue || !data?.ak02_headers || !hasBeenSaved
 													? "cursor-not-allowed opacity-50"
@@ -935,6 +947,25 @@ export default function AK02({
 				confirmText="Simpan"
 				cancelText="Batal"
 				type="warning"
+			/>
+
+			{/* Modal Konfirmasi Generate QR dengan Countdown */}
+			<ConfirmModal
+				isOpen={showQRConfirmModal}
+				onClose={() => setShowQRConfirmModal(false)}
+				onConfirm={handleConfirmGenerateQR}
+				title="Konfirmasi Generate QR"
+				message={
+					<>
+						<strong>Perhatian!</strong><br />
+						Setelah generate QR, data tidak dapat diubah lagi.<br />
+						Pastikan semua data sudah benar sebelum melanjutkan.
+					</>
+				}
+				confirmText="Generate QR"
+				cancelText="Batal"
+				type="danger"
+				countdown={5}
 			/>
 		</div>
 	);
