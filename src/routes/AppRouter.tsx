@@ -72,6 +72,7 @@ import AsesorIndexRoute from "@/components/AsesorIndexRoute";
 import ResultAsesiAssessmentAdmin from "@/pages/admin/ResultAsesiAssessment";
 import PersetujuanAdmin from "@/pages/admin/Persetujuan";
 import SuratTugas from "@/pages/admin/SuratTugas";
+import SignatureRequiredRoute from "@/components/SignatureRequiredRoute";
 
 const router = createBrowserRouter(
 	[
@@ -121,7 +122,9 @@ const router = createBrowserRouter(
 					path: paths.admin.root,
 					element: (
 						<ProtectedRoute allowedRoles={[1]}>
-							<Outlet />
+							<SignatureRequiredRoute>
+								<Outlet />
+							</SignatureRequiredRoute>
 						</ProtectedRoute>
 					),
 					children: [
@@ -288,7 +291,9 @@ const router = createBrowserRouter(
 				path: paths.asesor.root,
 				element: (
 					<ProtectedRoute allowedRoles={[2]}>
-						<Outlet />
+						<SignatureRequiredRoute>
+							<Outlet />
+						</SignatureRequiredRoute>
 					</ProtectedRoute>
 				),
 				children: [

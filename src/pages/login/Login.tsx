@@ -57,23 +57,65 @@ export default function LoginForm() {
       return;
     }
 
-    await login(email, password).then(async () => {
+    try {
+      const loginResponse = await api.post('/auth/login', {
+        email,
+        password,
+      });
+
+      if (!loginResponse.data.success) {
+        throw new Error(loginResponse.data.message || 'Login failed');
+      }
+
+      const { user: loginUser, token } = loginResponse.data.data;
+      
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      await login(email, password);
+      
       toast.show({
         description: 'Login berhasil',
         type: 'success',
-      })
-      // Get user info to check role
+      });
+      
+      // Get user info to check role and signature using token
       try {
         const response = await api.get('/auth/me');
-        const userRole = response.data.data.role_id;
+        const userData = response.data.data;
+        const userRole = userData.role_id;
+        const signature = userData.signature;
 
-        // For asesor users, always redirect to asesor root to ensure biodata check
-        if (userRole === 2 && from.startsWith('/asesor') && from !== '/asesor') {
-          navigate('/asesor', { replace: true });
+        const needsSignature = (userRole === 1 || userRole === 2) && (!signature || signature.trim() === '');
+
+        if (needsSignature) {
+          if (userRole === 1) {
+            // Admin
+            navigate(paths.admin.profile, { 
+              replace: true,
+              state: { 
+                message: 'Harap upload tanda tangan terlebih dahulu untuk melanjutkan.',
+                from: from 
+              }
+            });
+          } else if (userRole === 2) {
+            // Assessor
+            navigate(paths.asesor.profile, { 
+              replace: true,
+              state: { 
+                message: 'Harap upload tanda tangan terlebih dahulu untuk melanjutkan.',
+                from: from 
+              }
+            });
+          } else {
+            navigate(from, { replace: true });
+          }
         } else {
-          navigate(from, { replace: true });
+          if (userRole === 2 && from.startsWith('/asesor') && from !== '/asesor') {
+            navigate('/asesor', { replace: true });
+          } else {
+            navigate(from, { replace: true });
+          }
         }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         // If can't get user info, use default redirect
         // toast.show({
@@ -83,14 +125,14 @@ export default function LoginForm() {
         navigate(from, { replace: true });
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }).catch((err: any) => {
+    } catch (err: any) {
       // console.log(err);
-      const errorMessage = err.message || 'Terjadi kesalahan';
+      const errorMessage = err.response?.data?.message || err.message || 'Terjadi kesalahan';
       toast.show({
         description: errorMessage,
         type: 'error',
-      })
-    });
+      });
+    }
   };
 
   return (

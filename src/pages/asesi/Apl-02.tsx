@@ -6,8 +6,7 @@ import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
-import { QRCodeCanvas } from "qrcode.react";
-import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
+import SignatureDisplay from "@/components/SignatureDisplay";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function Apl02() {
@@ -99,6 +98,7 @@ export default function Apl02() {
 					approved_assessor: data.apl02_header?.approved_assessor,
 					is_continue: data.apl02_header?.is_continue,
 					assessee: data.assessee,
+					assessor: data.assessor,
 					assessment: data.assessment,
 				});
 			}
@@ -148,6 +148,7 @@ export default function Apl02() {
 					approved_assessor: response.data.data.approved_assessor,
 					is_continue: response.data.data.is_continue,
 					assessee: response.data.data.assessee,
+					assessor: response.data.data.assessor || prev.assessor,
 				}));
 				mutateNavigation();
 			} else {
@@ -171,17 +172,15 @@ export default function Apl02() {
 		unitCompetencies.length > 0 &&
 		completedUnits === unitCompetencies.length;
 
-	// Cek apakah QR sudah digenerate
+	// Cek apakah signature sudah digenerate
 	const isQrGenerated = resultData?.approved_assessee;
 
 	// PERUBAHAN: Cek apakah asesor sudah approve
 	const isAssessorApproved = resultData?.approved_assessor;
 
-	// Generate URL untuk QR code
-	const assesseeQrValue = isQrGenerated ? getAssesseeUrl(Number(id_asesi)) : "";
-	const assessorQrValue = isAssessorApproved
-		? getAssessorUrl(Number(id_asesor))
-		: "";
+	// Get signature URLs from assessee and assessor data
+	const assesseeSignature = resultData?.assessee?.signature || null;
+	const assessorSignature = resultData?.assessor?.signature || null;
 
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const navigate = useNavigate();
@@ -421,39 +420,25 @@ export default function Apl02() {
 											</div>
 										</div>
 
-										{/* QR Code Section - Asesi dan Asesor */}
+										{/* Signature Section - Asesi dan Asesor */}
 										<div className="mb-6 flex justify-center gap-4 flex-col md:flex-row">
-											{/* QR Code Asesi */}
+											{/* Signature Asesi */}
 											<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
 												<h4 className="text-sm font-semibold text-gray-800">
-													QR Code Asesi
+													Tanda Tangan Asesi
 												</h4>
-												{isQrGenerated ? (
-													<>
-														<QRCodeCanvas
-															key={isQrGenerated ? "generated" : "not-generated"} // Force re-render
-															value={assesseeQrValue}
-															size={100}
-															className="w-32 h-32 object-contain"
-														/>
-														<div className="text-green-600 font-semibold text-xs">
-															Sebagai Asesi, Anda sudah setuju
-														</div>
-													</>
-												) : (
-													<div className="w-32 h-32 bg-gray-100 flex items-center justify-center flex-col">
-														<span className="text-gray-400 text-xs text-center mb-2">
-															QR Code Asesi
-														</span>
-														<span className="text-gray-400 text-xs text-center">
-															{isCompletionFull && !isAssessorApproved
-																? "Menunggu persetujuan asesor"
-																: isCompletionFull
-																	? "Klik generate untuk membuat QR Code"
-																	: "Selesaikan semua unit"}
-														</span>
-													</div>
-												)}
+												<SignatureDisplay
+													signatureUrl={assesseeSignature}
+													userName={resultData?.assessee?.name || '-'}
+													isApproved={isQrGenerated}
+													loadingText="Klik generate untuk membuat tanda tangan"
+													placeholderText={isCompletionFull && !isAssessorApproved
+														? "Menunggu persetujuan asesor"
+														: isCompletionFull
+															? "Klik generate untuk membuat tanda tangan"
+															: "Selesaikan semua unit"}
+													approvedText="Sebagai Asesi, Anda sudah setuju"
+												/>
 												<button
 													onClick={handleGenerateQRCode}
 													disabled={
@@ -461,7 +446,7 @@ export default function Apl02() {
 														isQrGenerated ||
 														generatingQr ||
 														!id_result ||
-														!isAssessorApproved // PERUBAHAN: Tambah kondisi ini
+														!isAssessorApproved
 													}
 													className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 text-sm ${!isCompletionFull ||
 														isQrGenerated ||
@@ -476,7 +461,7 @@ export default function Apl02() {
 														? "Generating..."
 														: isQrGenerated
 															? "Telah Digenerate"
-															: "Generate QR"}
+															: "Generate Tanda Tangan"}
 												</button>
 												{qrError && (
 													<div className="text-red-500 text-xs mt-1">
@@ -485,29 +470,18 @@ export default function Apl02() {
 												)}
 											</div>
 
-											{/* QR Code Asesor */}
+											{/* Signature Asesor */}
 											<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
 												<h4 className="text-sm font-semibold text-gray-800">
-													QR Code Asesor
+													Tanda Tangan Asesor
 												</h4>
-												{isAssessorApproved ? (
-													<>
-														<QRCodeCanvas
-															value={assessorQrValue}
-															size={100}
-															className="w-32 h-32 object-contain"
-														/>
-														<div className="text-green-600 font-semibold text-xs">
-															Sudah disetujui Asesor
-														</div>
-													</>
-												) : (
-													<div className="w-32 h-32 bg-gray-100 flex items-center justify-center">
-														<span className="text-gray-400 text-xs text-center">
-															Menunggu persetujuan asesor
-														</span>
-													</div>
-												)}
+												<SignatureDisplay
+													signatureUrl={assessorSignature}
+													userName={resultData?.assessor?.name || '-'}
+													isApproved={isAssessorApproved}
+													placeholderText="Menunggu persetujuan asesor"
+													approvedText="Sudah disetujui Asesor"
+												/>
 											</div>
 										</div>
 									</div>

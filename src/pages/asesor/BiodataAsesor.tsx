@@ -28,7 +28,8 @@ export default function BiodataAsesor() {
     bank_book_cover: null,      // Cover Buku Tabungan
     certificate: null,          // Sertifikat Asesor
     id_card: null,              // Pas Foto
-    national_id: null           // KTP/KK
+    national_id: null,          // KTP/KK
+    signature: null             // Tanda Tangan
   });
 
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
@@ -105,6 +106,12 @@ export default function BiodataAsesor() {
               id_card: resp.data.data.detail.id_card || '',
               national_id: resp.data.data.detail.national_id || ''
             });
+          }
+          if (resp.data.data.signature) {
+            setFilePreviews(prev => ({
+              ...prev,
+              signature: resp.data.data.signature
+            }));
           }
 
           // Load additional data from localStorage
@@ -613,6 +620,41 @@ export default function BiodataAsesor() {
                   <div className="text-xs text-gray-500 mt-2">
                     {files.national_id ? files.national_id.name : filePreviews.national_id ?
                       <a href={filePreviews.national_id} target="_blank" rel="noreferrer" className="text-blue-600 underline">Lihat file terupload</a> :
+                      'Belum ada file terpilih'}
+                  </div>
+                </div>
+
+                {/* Tanda Tangan */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Tanda Tangan <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors space-y-3 sm:space-y-0">
+                    <div className="flex items-center space-x-3">
+                      <Upload className="text-gray-400 flex-shrink-0" size={20} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-700">Pilih file atau drag & drop di sini</p>
+                        <p className="text-xs text-gray-500 break-words">JPEG, PNG, maksimal 5MB</p>
+                      </div>
+                    </div>
+                    <label className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0 self-start sm:self-auto cursor-pointer">
+                      <input type="file" className="hidden" onChange={handleFileChange('signature')} accept=".jpg,.jpeg,.png" />
+                      Pilih File
+                    </label>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {files.signature ? files.signature.name : filePreviews.signature ?
+                      (filePreviews.signature.startsWith('http') ? (
+                        <a href={filePreviews.signature} target="_blank" rel="noreferrer" className="text-blue-600 underline">Lihat file terupload</a>
+                      ) : (
+                        <div className="mt-2">
+                          <img 
+                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/${filePreviews.signature}`} 
+                            alt="Tanda Tangan" 
+                            className="w-32 h-32 border border-gray-300 rounded object-contain"
+                          />
+                        </div>
+                      )) :
                       'Belum ada file terpilih'}
                   </div>
                 </div>

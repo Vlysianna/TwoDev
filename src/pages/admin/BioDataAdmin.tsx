@@ -20,6 +20,8 @@ const BioDataAdmin: React.FC = () => {
     phone_no: '',
     birth_date: '',
   });
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -93,6 +95,15 @@ const BioDataAdmin: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSignatureFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setSignaturePreview(previewUrl);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -105,15 +116,20 @@ const BioDataAdmin: React.FC = () => {
       return;
     }
       try {
-        const payload = {
-          address: formData.address,
-          phone_no: formData.phone_no,
-          birth_date: formData.birth_date,
-        };
+        const formDataToSend = new FormData();
+        formDataToSend.append('user_id', String(user.id));
+        formDataToSend.append('address', formData.address);
+        formDataToSend.append('phone_no', formData.phone_no);
+        formDataToSend.append('birth_date', formData.birth_date);
+        if (signatureFile) {
+          formDataToSend.append('signature', signatureFile);
+        }
+
         // Backend expects user_id in the create payload for /admins
-        const response = await api.post('/admins', {
-          ...payload,
-          user_id: user.id,
+        const response = await api.post('/admins', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         });
       if (response.data?.success) {
         setSuccessMessage('Biodata berhasil disimpan');
@@ -191,6 +207,27 @@ const BioDataAdmin: React.FC = () => {
                 className="w-full border border-gray-300 rounded px-3 py-2"
                 required
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Tanda Tangan <span className="text-red-500">*</span></label>
+              <input 
+                type="file" 
+                accept="image/png,image/jpeg,image/jpg" 
+                onChange={handleSignatureChange}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+              />
+              {signaturePreview && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-600 mb-1">Preview:</p>
+                  <div className="w-40 h-40 border-2 border-gray-300 rounded flex items-center justify-center bg-white">
+                    <img
+                      src={signaturePreview}
+                      alt="Tanda Tangan"
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             {errorMessage && (
               <div className="text-red-600 text-sm">{errorMessage}</div>

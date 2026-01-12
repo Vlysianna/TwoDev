@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { QRCodeCanvas } from 'qrcode.react';
+import SignatureDisplay from './SignatureDisplay';
 import ConfirmModal from './ConfirmModal';
 import StatusModal from './StatusModal';
 
 interface BarcodeGeneratorProps {
   qrValue?: string;
+  signatureUrl?: string | null;
   userName?: string;
   isApproved?: boolean;
   onGenerate: () => Promise<void>;
@@ -17,12 +18,13 @@ interface BarcodeGeneratorProps {
 
 const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
   qrValue,
+  signatureUrl,
   userName = '-',
   isApproved = false,
   onGenerate,
-  loadingText = 'QR Code akan muncul di sini',
+  loadingText = 'Tanda tangan akan muncul di sini',
   placeholderText = 'Menunggu persetujuan',
-  buttonText = 'Generate QR Code',
+  buttonText = 'Generate Tanda Tangan',
   approvedText = 'Sudah disetujui',
   userRole = 'User',
 }) => {
@@ -43,11 +45,11 @@ const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
     try {
       await onGenerate();
       setStatusType('success');
-      setStatusMessage('QR Code berhasil dibuat! Sekarang Anda dapat menggunakan QR Code untuk akses selanjutnya.');
+      setStatusMessage('Tanda tangan berhasil dibuat! Sekarang Anda dapat menggunakan tanda tangan untuk verifikasi.');
       setShowStatusModal(true);
     } catch {
       setStatusType('error');
-      setStatusMessage('Gagal membuat QR Code. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.');
+      setStatusMessage('Gagal membuat tanda tangan. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.');
       setShowStatusModal(true);
     } finally {
       setIsGenerating(false);
@@ -57,28 +59,18 @@ const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
   return (
     <>
       <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-        {/* QR Code Display */}
-        {qrValue ? (
-          <QRCodeCanvas
-            value={qrValue}
-            size={100}
-            className="w-40 h-40 object-contain"
-          />
-        ) : (
-          <div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
-            <span className="text-gray-400 text-sm text-center">
-              {isApproved ? loadingText : placeholderText}
-            </span>
-          </div>
-        )}
-
-        {/* User Name */}
-        <span className="text-sm font-semibold text-gray-800">
-          {userName}
-        </span>
+        {/* Signature Display */}
+        <SignatureDisplay
+          signatureUrl={signatureUrl}
+          userName={userName}
+          isApproved={isApproved}
+          loadingText={loadingText}
+          placeholderText={placeholderText}
+          approvedText={approvedText}
+        />
 
         {/* Status or Button */}
-        {isApproved && !qrValue && (
+        {isApproved && !signatureUrl && (
           <button
             disabled={isGenerating}
             onClick={handleGenerateClick}
@@ -98,13 +90,6 @@ const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
             )}
           </button>
         )}
-
-        {/* Status Text */}
-        {isApproved && qrValue && (
-          <span className="text-green-600 font-semibold text-sm mt-2">
-            {approvedText}
-          </span>
-        )}
       </div>
 
       {/* Confirmation Modal */}
@@ -112,8 +97,8 @@ const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleConfirmGenerate}
-        title="Konfirmasi Generate QR Code"
-        message={`Apakah Anda yakin ingin membuat QR Code untuk ${userRole.toLowerCase()} ${userName}? QR Code ini akan digunakan untuk verifikasi dan akses sistem.`}
+        title="Konfirmasi Generate Tanda Tangan"
+        message={`Apakah Anda yakin ingin membuat tanda tangan untuk ${userRole.toLowerCase()} ${userName}? Tanda tangan ini akan digunakan untuk verifikasi dan akses sistem.`}
         confirmText="Ya, Generate"
         cancelText="Batalkan"
         type="info"
@@ -124,7 +109,7 @@ const BarcodeGenerator: React.FC<BarcodeGeneratorProps> = ({
         isOpen={showStatusModal}
         onClose={() => setShowStatusModal(false)}
         type={statusType}
-        title={statusType === 'success' ? 'QR Code Berhasil Dibuat!' : 'Gagal Membuat QR Code'}
+        title={statusType === 'success' ? 'Tanda Tangan Berhasil Dibuat!' : 'Gagal Membuat Tanda Tangan'}
         message={statusMessage}
         confirmText="OK"
       />
