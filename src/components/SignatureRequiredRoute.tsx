@@ -3,6 +3,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/helper/axios';
 import paths from '@/routes/paths';
+import useBiodataAdminCheck from '@/hooks/useBiodataAdminCheck';
+import useBiodataCheck from '@/hooks/useBiodataCheck';
 
 interface SignatureRequiredRouteProps {
     children: React.ReactNode;
@@ -11,6 +13,8 @@ interface SignatureRequiredRouteProps {
 const SignatureRequiredRoute: React.FC<SignatureRequiredRouteProps> = ({ children }) => {
     const { user, isAuthenticated, isLoading } = useAuth();
     const location = useLocation();
+    const biodataAdmin = useBiodataAdminCheck();
+    const biodataAsesor = useBiodataCheck();
     const [isCheckingSignature, setIsCheckingSignature] = useState(true);
     const [hasSignature, setHasSignature] = useState<boolean | null>(null);
 
@@ -18,14 +22,18 @@ const SignatureRequiredRoute: React.FC<SignatureRequiredRouteProps> = ({ childre
     const isBiodataPage = location.pathname.includes('/biodata');
     const isAuthPage = location.pathname.includes('/auth/');
     const isPublicPage = location.pathname.includes('/public/');
-    const shouldSkipCheck = isProfilePage || isBiodataPage || isAuthPage || isPublicPage;
+    const shouldSkipCheck = (isProfilePage && (biodataAdmin.biodataComplete || biodataAsesor.biodataComplete)) || isBiodataPage || isAuthPage || isPublicPage;
 
     const getProfilePath = (roleId: number): string => {
         switch (roleId) {
             case 1:
-                return paths.admin.profile;
+                return biodataAdmin.biodataComplete 
+                    ? paths.admin.profile
+                    : paths.admin.biodata;
             case 2:
-                return paths.asesor.profile;
+                return biodataAsesor.biodataComplete
+                    ? paths.admin.biodata
+                    : paths.asesor.profile;
             default:
                 return '/';
         }
@@ -36,7 +44,7 @@ const SignatureRequiredRoute: React.FC<SignatureRequiredRouteProps> = ({ childre
         const isBiodataPage = location.pathname.includes('/biodata');
         const isAuthPage = location.pathname.includes('/auth/');
         const isPublicPage = location.pathname.includes('/public/');
-        const shouldSkip = isProfilePage || isBiodataPage || isAuthPage || isPublicPage;
+        const shouldSkip = (isProfilePage && (biodataAdmin.biodataComplete || biodataAsesor.biodataComplete)) || isBiodataPage || isAuthPage || isPublicPage;
 
         setHasSignature(null);
         setIsCheckingSignature(true);
@@ -107,14 +115,14 @@ const SignatureRequiredRoute: React.FC<SignatureRequiredRouteProps> = ({ childre
 
     if (hasSignature !== true) {
         const profilePath = getProfilePath(user.role_id);
-        const shouldAddMessage = location.pathname !== profilePath;
+        // const shouldAddMessage = location.pathname !== profilePath;
         return (
             <Navigate
                 to={profilePath}
                 replace
                 state={{
                     from: location.pathname,
-                    ...(shouldAddMessage && { message: 'Harap upload tanda tangan terlebih dahulu untuk mengakses halaman ini.' })
+                    // ...(shouldAddMessage && { message: 'Harap upload tanda tangan terlebih dahulu untuk mengakses halaman ini.' })
                 }}
             />
         );

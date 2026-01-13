@@ -38,7 +38,7 @@ interface Tab {
 	status: "Belum Tuntas" | "Menunggu Asesi" | "Tuntas";
 }
 
-const EXPORTABLE_TABS = ["apl-01", "apl-02", "ia-01", "ak-01", "ak-02"];
+const EXPORTABLE_TABS = ["apl-01", "apl-02", "ia-01", "ia-03", "ia-05", "ak-01", "ak-02", "ak-05"];
 
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
@@ -110,9 +110,12 @@ export default function ResultAsesiAssessment() {
 		if (!id_result || !id_assessment) return <></>;
 		switch (selectedTab.toLowerCase()) {
 			case "apl-01":
-				return <APL01 id_result={id_result} />;
-			case "data sertifikasi":
-				return <DataSertifikasi id_result={id_result} />;
+				return (
+					<>
+						<APL01 id_result={id_result} />
+						<DataSertifikasi id_result={id_result} />
+					</>
+				)
 			case "apl-02":
 				return <APL02 id_result={id_result} handleDetail={handleDetail} />;
 			case "ia-01":

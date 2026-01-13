@@ -209,6 +209,7 @@ const Profile: React.FC = () => {
                 accept="image/png,image/jpeg,image/jpg"
                 onChange={handleSignatureChange}
                 className="w-full border border-gray-300 rounded px-3 py-2"
+                required
               />
               {(signaturePreview || existingSignature) && (
                 <div className="mt-2">

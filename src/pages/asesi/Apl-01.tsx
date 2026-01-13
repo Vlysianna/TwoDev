@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, CheckCircle, ChevronLeft, House, Info } from "lucide-react";
+import { AlertCircle, CheckCircle, House } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
 import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
@@ -24,21 +24,20 @@ export default function AplZeroOne() {
 
 	useEffect(() => {
 		if (asesiId && scheduleId == id_assessment) navigate(paths.asesi.assessment.dataSertifikasi(id_assessment, id_asesor));
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [asesiId, scheduleId, id_asesor, id_assessment]);
 
 	const [loading, setLoading] = useState(false);
 	const [isLocked, setIsLocked] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
-	const [signatureFile, setSignatureFile] = useState<File | null>(null);
-	const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
-	const [existingSignature, setExistingSignature] = useState<string | null>(null);
 
 	const {
 		register,
 		handleSubmit,
 		control,
 		formState: { errors },
+		watch,
 		reset,
 	} = useForm<AssesseeRequest>({
 		defaultValues: {
@@ -46,50 +45,39 @@ export default function AplZeroOne() {
 			full_name: user?.full_name,
 		},
 	});
+	
+	const signature = watch("signature");
 
 	const onSubmit = async (data: AssesseeRequest) => {
+		data.signature = data.signature?.[0];
 		try {
 			setLoading(true);
 			setError(null);
 			setSuccess(null);
 
-			const formData = new FormData();
-			formData.append('user_id', String(user?.id ?? 0));
-			formData.append('full_name', data.full_name || '');
-			formData.append('identity_number', data.identity_number || '');
-			formData.append('birth_date', new Date(data.birth_date).toISOString());
-			formData.append('birth_location', data.birth_location || '');
-			formData.append('gender', data.gender === 'Laki-laki' ? 'male' : 'female');
-			formData.append('nationality', data.nationality || '');
-			formData.append('phone_no', data.phone_no || '');
-			if (data.house_phone_no) formData.append('house_phone_no', data.house_phone_no);
-			if (data.office_phone_no) formData.append('office_phone_no', data.office_phone_no);
-			formData.append('address', data.address || '');
-			if (data.postal_code) formData.append('postal_code', data.postal_code);
-			formData.append('educational_qualifications', data.educational_qualifications || '');
-			
-			if (data.jobs && data.jobs[0]) {
-				formData.append('jobs', JSON.stringify([{
-					institution_name: data.jobs[0].institution_name || "",
-					address: data.jobs[0].address || "",
-					postal_code: data.jobs[0].postal_code || "",
-					position: data.jobs[0].position || "",
-					phone_no: data.jobs[0].phone_no || "",
-					job_email: data.jobs[0].job_email || "",
-				}]));
-			}
-
-			if (signatureFile) {
-				formData.append('signature', signatureFile);
-			}
+			const payload: AssesseeRequest = {
+				...data,
+				user_id: user?.id ?? 0,
+				birth_date: new Date(data.birth_date),
+				jobs: [
+					{
+						institution_name: data.jobs?.[0]?.institution_name || "",
+						address: data.jobs?.[0]?.address || "",
+						postal_code: data.jobs?.[0]?.postal_code || "",
+						position: data.jobs?.[0]?.position || "",
+						phone_no: data.jobs?.[0]?.phone_no || "",
+						job_email: data.jobs?.[0]?.job_email || "",
+					},
+				],
+			};
 
 			const result = await api.post(
 				"/assessments/apl-01/create-self-data",
-				formData,
+				payload,
 				{
 					headers: {
-						'Content-Type': 'multipart/form-data',
-					},
+						'Content-Type': 'multipart/form-data'
+					}
 				}
 			);
 
@@ -118,7 +106,8 @@ export default function AplZeroOne() {
 					type: "error",
 				});
 			}
-		} catch (err: any) {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (error) {
 			setError("Gagal menyimpan data. Silakan coba lagi.");
 		} finally {
 			setLoading(false);
@@ -132,9 +121,6 @@ export default function AplZeroOne() {
 				.then(
 					(response) => {
 						console.log(response.data.data)
-						if (response.data.data.signature) {
-							setExistingSignature(response.data.data.signature);
-						}
 						return response.data.success &&
 						(reset({
 							...response.data.data,
@@ -154,6 +140,7 @@ export default function AplZeroOne() {
 		};
 
 		fetchAssesseeData();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -474,7 +461,7 @@ export default function AplZeroOne() {
 											</div>
 										</div>
 									</div>
-									<div className="">
+									<div className="mb-3">
 										<label className="block text-sm font-medium text-gray-700 mb-2">
 											Kualifikasi Pendidikan <span className="text-red-500">*</span>
 										</label>
@@ -498,32 +485,23 @@ export default function AplZeroOne() {
 											Tanda Tangan <span className="text-red-500">*</span>
 										</label>
 										<input
+                      {...register("signature", {
+                        required: true,
+                      })}
 											type="file"
 											accept="image/png,image/jpeg,image/jpg"
-											onChange={(e) => {
-												const file = e.target.files?.[0];
-												if (file) {
-													setSignatureFile(file);
-													const previewUrl = URL.createObjectURL(file);
-													setSignaturePreview(previewUrl);
-												}
-											}}
 											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 										/>
-										{(signaturePreview || existingSignature) && (
-											<div className="mt-2">
-												<p className="text-xs text-gray-600 mb-1">Preview:</p>
-												<div className="w-40 h-40 border-2 border-gray-300 rounded flex items-center justify-center bg-white">
-													<img
-														src={signaturePreview || (existingSignature?.startsWith('http') ? existingSignature : `${import.meta.env.VITE_API_URL || 'http://localhost:3000/twodev/api/'}/${existingSignature}`)}
-														alt="Tanda Tangan"
-														className="max-w-full max-h-full object-contain"
-														onError={(e) => {
-															(e.target as HTMLImageElement).style.display = 'none';
-														}}
-													/>
-												</div>
-											</div>
+										{errors.signature && (
+											<span className="text-red-500 text-sm">
+												Wajib diisi
+											</span>
+										)}
+										{signature?.[0] && (
+											<img
+												src={URL.createObjectURL(signature[0])}
+												className="w-40 h-40 object-contain border"
+											/>
 										)}
 									</div>
 								</div>

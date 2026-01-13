@@ -76,6 +76,7 @@ export default function CekApl02() {
         if (!id_result) return;
         try {
             const response = await api.get(`/assessments/apl-02/units/${id_result}`);
+            console.log(response);
             if (response.data.success) {
                 setUnitCompetencies(response.data.data);
             }
