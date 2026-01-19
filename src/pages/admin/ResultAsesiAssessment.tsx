@@ -26,6 +26,7 @@ import AK05 from "@/components/section/admin/AK-05";
 import APL02Detail from "@/components/section/admin/APL-02-Detail";
 import IA01Detail from "@/components/section/admin/IA-01-Detail";
 import useToast from "@/components/ui/useToast";
+import { handleViewPDF } from "@/helper/ia02";
 
 interface TabResponse {
 	assessment_id: number;
@@ -38,7 +39,7 @@ interface Tab {
 	status: "Belum Tuntas" | "Menunggu Asesi" | "Tuntas";
 }
 
-const EXPORTABLE_TABS = ["apl-01", "apl-02", "ia-01", "ia-03", "ia-05", "ak-01", "ak-02", "ak-05"];
+const EXPORTABLE_TABS = ["apl-01", "apl-02", "ia-01", "ia-02", "ia-03", "ia-05", "ak-01", "ak-02", "ak-03", "ak-05"];
 
 const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
 
@@ -54,6 +55,8 @@ export default function ResultAsesiAssessment() {
 	const [selectedDetailTab, setSelectedDetailTab] = useState<string>("");
 	const [loadingExport, setLoadingExport] = useState(false);
 	const [idUnit, setIdUnit] = useState<string>("");
+
+  const [generatingPdfIA02, setGeneratingPdfIA02] = useState(false);
 
 	const toast = useToast();
 
@@ -253,26 +256,60 @@ export default function ResultAsesiAssessment() {
 						</div>
 						<div className="p-4">
 							{EXPORTABLE_TABS.includes(selectedTab.toLowerCase()) ? (
-								<button
-									onClick={() => handleExport(selectedTab)}
-									disabled={loadingExport}
-									className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{loadingExport ? (
-										<>
-											<svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-												<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-												<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-											</svg>
-											Mengunduh...
-										</>
-									) : (
-										<>
-											<Download className="w-4 h-4 mr-2" />
-											Export
-										</>
-									)}
-								</button>
+								<>
+								 {selectedTab.toLowerCase() !== "ia-02" ? (
+									<button
+										onClick={() => handleExport(selectedTab)}
+										disabled={loadingExport}
+										className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										{loadingExport ? (
+											<>
+												<svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+													<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+													<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+												</svg>
+												Mengunduh...
+											</>
+										) : (
+											<>
+												<Download className="w-4 h-4 mr-2" />
+												Export
+											</>
+										)}
+									</button>
+								 ) : (
+									<div className="flex flex-col sm:flex-row gap-3">
+										<button
+											onClick={() => handleExport(selectedTab)}
+											disabled={loadingExport}
+											className="flex items-center justify-center px-4 py-2 bg-[#E77D35] text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+										>
+											{loadingExport ? (
+												<>
+													<svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+														<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+														<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+													</svg>
+													Mengunduh...
+												</>
+											) : (
+												<>
+													<Download className="w-4 h-4 mr-2" />
+													Export
+												</>
+											)}
+										</button>
+										<button
+											onClick={() => handleViewPDF(setGeneratingPdfIA02, id_assessment, true)}
+											disabled={generatingPdfIA02}
+											className="flex items-center justify-center gap-2 bg-[#E77D35] cursor-pointer text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+										>
+											Lihat PDF
+										</button>
+									</div>
+								 )}
+								</>
 							) : (
 								<button
 									disabled

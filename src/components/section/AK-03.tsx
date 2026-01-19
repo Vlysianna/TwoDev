@@ -139,6 +139,7 @@ export default function AK03({
 
 			if (rawData.success) {
 				setFormData(rawData.data);
+				console.log(rawData.data);
 				const answers =
 					rawData.data.result_ak03?.answers?.map((a: AK03Question) => ({
 						id: a.id,
