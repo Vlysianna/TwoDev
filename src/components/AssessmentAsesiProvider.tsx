@@ -5,6 +5,7 @@ import {
 	useContext,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 	type JSX,
 } from "react";
@@ -41,8 +42,8 @@ export function useAssessmentParams() {
 	return ctx;
 }
 
-const fetcherTabs = (url: string) => api.get(url).then((res) => res.data.data);
-const fetcherResult = (url: string) => api.get(url).then((res) => res.data.data[0]);
+const fetcherTabs = (url: string) => api.get(url).then((res) => res.data?.data ?? null);
+const fetcherResult = (url: string) => api.get(url).then((res) => res.data?.data?.[0] ?? null);
 
 const StatusIndicator = ({ status }: { status: string }) => {
 	let icon = null;
@@ -78,6 +79,11 @@ export default function AssessmentAsesiProvider({
 	// const { user } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
+
+	const asesiId = localStorage.getItem("asesiId");
+	const scheduleId = localStorage.getItem("scheduleId");
+
+	const navRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (!id_schedule || !id_asesor) {
@@ -123,6 +129,14 @@ export default function AssessmentAsesiProvider({
 		`assessments/result/${id_schedule}/${id_asesor}/0`,
 		fetcherResult
 	);
+
+	useEffect(() => {
+		if (!result) return;
+		if (asesiId && scheduleId == result.schedule.id) {
+			localStorage.removeItem("asesiId");
+			localStorage.removeItem("scheduleId");
+		}
+	}, [asesiId, result, scheduleId]);
 
 	useEffect(() => {
 		if (approveData == undefined || !result) return;
@@ -321,6 +335,22 @@ export default function AssessmentAsesiProvider({
 		return filtered;
 	}, [navigation, tabItems]);
 
+	useEffect(() => {
+   	function handleClick(e: MouseEvent) {
+    	if (!(e.target instanceof Node)) return;
+
+			const el = navRef.current;
+			if (!el) return;
+
+			if (!el.contains(e.target)) {
+				setIsTabsOpen(false);
+			}
+		}
+
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [navRef]);
+
 	const [showStatusModal, setShowStatusModal] = useState(false);
 
 	return (
@@ -363,6 +393,7 @@ export default function AssessmentAsesiProvider({
 							<AnimatePresence>
 								{isTabsOpen && (
 									<motion.div
+										ref={navRef}
 										initial={{ opacity: 0, x: -80, scale: 0.95 }}
 										animate={{ opacity: 1, x: 0, scale: 1 }}
 										exit={{ opacity: 0, x: -80, scale: 0.95 }}

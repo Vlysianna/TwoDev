@@ -29,7 +29,7 @@ export interface AssesseeRequest {
 	jobs?: AssesseeJob[];
 	created_at?: string;
 	updated_at?: string;
-	signature: File;
+	signature: FileList | string;
 }
 
 export interface Assessee {

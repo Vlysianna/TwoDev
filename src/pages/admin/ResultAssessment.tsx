@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import paths from "@/routes/paths";
 import api from '@/helper/axios';
 import { FileText, Loader2, RefreshCcw, ChevronDown, ChevronRight, User, MapPin, ArrowRight, Users, Download } from 'lucide-react';
@@ -309,24 +309,24 @@ const ResultAssessment: React.FC = () => {
                                         <span>{detail.assessor.full_name}</span>
                                       </div>
                                       <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
-                                        <Link
-                                          to={`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(detail.assessor.id))}&schedule=${encodeURIComponent(String(detail.id))}`}
+                                        <button
+                                          onClick={() => window.open(`${paths.basename}${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(detail.assessor.id))}&schedule=${encodeURIComponent(String(detail.id))}`, '_blank')}
                                           className="px-2 bg-green-600 text-white hover:bg-green-700 p-2 rounded hover:bg-green-800 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                         >
                                           Verifikasi Assesi <ArrowRight size={16} />
-                                        </Link>
-                                        <Link
-                                          to={paths.admin.resultAssessment.dashboard(schedule.id, String(detail.assessor.id))}
+                                        </button>
+                                        <button
+                                          onClick={() => window.open(paths.basename + paths.admin.resultAssessment.dashboard(schedule.id, String(detail.assessor.id)), '_blank')}
                                           className="px-2 bg-[#E77D35] rounded hover:bg-orange-600 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                         >
                                           Detail Asesmen <ArrowRight size={16} />
-                                        </Link>
-                                        <Link
-                                          to={paths.admin.recapAssessmentAdmin(detail.id, String(detail.assessor.id))}
+                                        </button>
+                                        <button
+                                          onClick={() => window.open(paths.basename + paths.admin.recapAssessmentAdmin(detail.id, String(detail.assessor.id)), '_blank')}
                                           className="px-2 bg-blue-500 rounded hover:bg-blue-700 text-white p-2 transition-colors text-sm cursor-pointer flex items-center gap-2"
                                         >
                                           Berita Acara <ArrowRight size={16} />
-                                        </Link>
+                                        </button>
                                       </div>
                                     </div>
                                   </td>
@@ -413,26 +413,26 @@ const ResultAssessment: React.FC = () => {
                                 <span>{schedule.assessor.full_name}</span>
                               </div>
                               <div className="flex flex-row justify-between gap-2 px-4 overflow-x-auto pb-2">
-                                <Link
-                                  to={`${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(schedule.assessor.id))}&schedule=${encodeURIComponent(String(schedule.id))}`}
+                                <button
+                                  onClick={() => window.open(`${paths.basename}${paths.admin.verifikasi}?assessor=${encodeURIComponent(String(schedule.assessor.id))}&schedule=${encodeURIComponent(String(schedule.id))}`, '_blank')}
                                   className="bg-green-600 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
                                 >
                                   Verifikasi Asesi
-                                </Link>
+                                </button>
 
-                                <Link
-                                  to={paths.admin.resultAssessment.dashboard(schedule.id, String(schedule.assessor.id))}
+                                <button
+                                  onClick={() => window.open(paths.basename + paths.admin.resultAssessment.dashboard(schedule.id, String(schedule.assessor.id)), '_blank')}
                                   className="bg-[#E77D35] text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
                                 >
                                   Detail Asesmen
-                                </Link>
-                                
-                                <Link
-                                  to={paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id))}
+                                </button>
+
+                                <button
+                                  onClick={() => window.open(paths.basename + paths.admin.recapAssessmentAdmin(schedule.id, String(schedule.assessor.id)), '_blank')}
                                   className="bg-blue-500 text-white p-3 text-sm rounded cursor-pointer flex items-center gap-2 py-1"
                                 >
                                   Berita Acara
-                                </Link>
+                                </button>
                               </div>
                               {/* <hr className='my-4 border-gray-400'/> */}
                             </div>

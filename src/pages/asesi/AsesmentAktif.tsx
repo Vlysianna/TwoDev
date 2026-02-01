@@ -192,17 +192,17 @@ export default function AsessmentAktif() {
 													Banding Asesmen
 												</Link>
 											) : (
-												assessment.status === "On Going" && (
-													<Link
-														to={paths.asesi.assessment.apl01(
-															assessment.detail.assessment.id,
-                              assessment.detail.schedule_details.assessor.id
-														)}
-														className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors group-hover:scale-110 transform"
-													>
-														<ChevronRight className="w-4 h-4 text-white" />
-													</Link>
-												)
+												// assessment.status === "On Going" && (
+												<Link
+													to={paths.asesi.assessment.apl01(
+														assessment.detail.id,
+														assessment.detail.schedule_details.assessor.id
+													)}
+													className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors group-hover:scale-110 transform"
+												>
+													<ChevronRight className="w-4 h-4 text-white" />
+												</Link>
+												// )
 											)}
 										</div>
 									</div>

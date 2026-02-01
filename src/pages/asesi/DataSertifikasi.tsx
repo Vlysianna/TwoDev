@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Upload, ChevronLeft, AlertCircle } from "lucide-react";
+import { Upload, ChevronLeft, AlertCircle, Home } from "lucide-react";
 import NavbarAsesi from "../../components/NavbarAsesi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import api from "@/helper/axios";
 import { useForm, Controller } from "react-hook-form";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
 import useToast from "@/components/ui/useToast";
+import ConfirmModal from "@/components/ConfirmModal";
 
 type FormValues = {
 	purpose: string;
@@ -19,8 +20,11 @@ type FormValues = {
 
 export default function DataSertifikasi() {
 	const { id_schedule: id_assessment, id_asesor, id_result, mutateNavigation, id_asesi } = useAssessmentParams();
+	const navigate = useNavigate();
 	const asesiId = localStorage.getItem("asesiId");
+	const scheduleId = localStorage.getItem("scheduleId");
 
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -122,8 +126,6 @@ export default function DataSertifikasi() {
 							type: "success",
 						});
 						mutateNavigation();
-						localStorage.removeItem("asesiId");
-						localStorage.removeItem("scheduleId");
 					} else {
 						toast.show({
 							title: "Gagal",
@@ -210,11 +212,27 @@ export default function DataSertifikasi() {
 									id_assessment ?? 0,
 									id_asesor ?? 0
 								)}
+								onClick={(e) => {
+									if (!(asesiId && scheduleId == id_assessment)) return;
+									e.preventDefault();
+									setIsConfirmOpen(true);
+								}}
 								className="text-gray-500 hover:text-gray-600"
 							>
-								<ChevronLeft size={20} />
+								{!(asesiId && scheduleId == id_assessment) ? <ChevronLeft size={20} /> : <Home size={20} />}
 							</Link>
 						}
+					/>
+					<ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+						onConfirm={() => {
+							setIsConfirmOpen(false);
+							navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+						}}
+						title="Konfirmasi"
+						message="Apakah Anda yakin ingin kembali ke Dashboard?"
+						confirmText="Ya, kembali"
+						cancelText="Batal"
+						type="warning"
 					/>
 				</div>
 

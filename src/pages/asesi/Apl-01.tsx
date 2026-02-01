@@ -49,13 +49,13 @@ export default function AplZeroOne() {
 	const signature = watch("signature");
 
 	const onSubmit = async (data: AssesseeRequest) => {
-		data.signature = data.signature?.[0];
+		const signature = data.signature?.[0];
 		try {
 			setLoading(true);
 			setError(null);
 			setSuccess(null);
 
-			const payload: AssesseeRequest = {
+			const payload = {
 				...data,
 				user_id: user?.id ?? 0,
 				birth_date: new Date(data.birth_date),
@@ -69,6 +69,7 @@ export default function AplZeroOne() {
 						job_email: data.jobs?.[0]?.job_email || "",
 					},
 				],
+				signature: signature
 			};
 
 			const result = await api.post(
@@ -120,12 +121,12 @@ export default function AplZeroOne() {
 				.get(`/assessments/apl-01/result/${id_result}`)
 				.then(
 					(response) => {
-						console.log(response.data.data)
+						// console.log(response.data.data)
 						return response.data.success &&
 						(reset({
 							...response.data.data,
 							gender:
-								response.data.data.gender == "male" ? "Laki-laki" : "Perempuan",
+								response.data.data.gender == "male" ? "Laki-laki" : response.data.data.gender == "female" ? "Perempuan" : "",
 							jobs: [
 								response.data.data.job && response.data.data.job.position
 									? response.data.data.job
@@ -133,7 +134,7 @@ export default function AplZeroOne() {
 							],
 							birth_date: response.data.data.birth_date.split("T")[0],
 						}),
-							setIsLocked(true))
+						setIsLocked(true))
 					}
 				)
 				.catch((error) => console.error(error));
@@ -192,9 +193,9 @@ export default function AplZeroOne() {
 						)}
 
 						<form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-							<fieldset disabled={isLocked}>
-								{/* Data Pribadi */}
-								<div>
+							{/* Data Pribadi */}
+							<div>
+								<fieldset disabled={isLocked}>
 									<h2 className="text-2xl font-semibold text-gray-900 mb-2">
 										Data Pribadi
 									</h2>
@@ -414,7 +415,7 @@ export default function AplZeroOne() {
 													{...register("office_phone_no",
 														{
 															pattern: {
-    														value: /^[0-9-]+$/,
+																value: /^[0-9-]+$/,
 																message: "No. telp kantor hanya boleh angka",
 															},
 															maxLength: {
@@ -480,32 +481,40 @@ export default function AplZeroOne() {
 											<span className="text-red-500 text-sm">Wajib diisi</span>
 										)}
 									</div>
-									<div className="">
-										<label className="block text-sm font-medium text-gray-700 mb-2">
-											Tanda Tangan <span className="text-red-500">*</span>
-										</label>
-										<input
-                      {...register("signature", {
-                        required: true,
-                      })}
-											type="file"
-											accept="image/png,image/jpeg,image/jpg"
-											className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-										/>
-										{errors.signature && (
-											<span className="text-red-500 text-sm">
-												Wajib diisi
-											</span>
-										)}
-										{signature?.[0] && (
-											<img
-												src={URL.createObjectURL(signature[0])}
-												className="w-40 h-40 object-contain border"
-											/>
-										)}
-									</div>
-								</div>
+								</fieldset>
 
+								<div className="">
+									<label className="block text-sm font-medium text-gray-700 mb-2">
+										Tanda Tangan <span className="text-red-500">*</span>
+									</label>
+									<input
+										{...register("signature", {
+											required: true,
+										})}
+										type="file"
+										accept="image/png,image/jpeg,image/jpg"
+										className="w-full px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									/>
+									{errors.signature && (
+										<span className="text-red-500 text-sm">
+											Wajib diisi
+										</span>
+									)}
+									{signature?.[0] && (
+										<img
+											src={
+												typeof signature === "string" 
+													? import.meta.env.VITE_API_URL + '/' + signature 
+													: URL.createObjectURL(signature[0])
+											}
+											className="w-40 h-40 object-contain border"
+										/>
+									)}
+								</div>
+							</div>
+
+
+							<fieldset disabled={isLocked}>
 								{/* Data Pekerjaan */}
 								<div className="mt-8">
 									<h2 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -638,17 +647,17 @@ export default function AplZeroOne() {
 										)}
 									</div>
 								</div>
-
-								<div className="flex justify-end">
-									<button
-										type="submit"
-										disabled={loading || isLocked}
-										className="bg-[#E77D35] hover:bg-orange-600 text-white py-2 px-8 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed"
-									>
-										{loading ? "Menyimpan..." : "Simpan"}
-									</button>
-								</div>
 							</fieldset>
+
+							<div className="flex justify-end">
+								<button
+									type="submit"
+									disabled={loading}
+									className="bg-[#E77D35] hover:bg-orange-600 text-white py-2 px-8 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed"
+								>
+									{loading ? "Menyimpan..." : "Simpan"}
+								</button>
+							</div>
 						</form>
 					</div>
 				</main>
