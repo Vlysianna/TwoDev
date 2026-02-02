@@ -1,24 +1,17 @@
 import { useState, useEffect } from "react";
-import { Monitor, ChevronLeft, ChevronRight, AlertCircle, House } from "lucide-react";
+import { Monitor, ChevronRight, AlertCircle, House } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import NavbarAsesi from "@/components/NavbarAsesi";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
-import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
-import SignatureDisplay from "@/components/SignatureDisplay";
-import ConfirmModal from "@/components/ConfirmModal";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider"; import ConfirmModal from "@/components/ConfirmModal";
+import { QRCodeCanvas } from "qrcode.react";
+import { getAssesseeUrl } from "@/lib/hashids";
 
 export default function Apl02() {
 	const { id_schedule: id_assessment, id_asesor, id_result, id_asesi, mutateNavigation } =
 		useAssessmentParams();
-
-	// console.log("Assessment params:", {
-	// 	id_assessment,
-	// 	id_asesor,
-	// 	id_result,
-	// 	id_asesi,
-	// });
 
 	const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
@@ -26,9 +19,11 @@ export default function Apl02() {
 	const [assessments, setAssessments] = useState<any>();
 	const [unitCompetencies, setUnitCompetencies] = useState<any[]>([]);
 	const [completedUnits, setCompletedUnits] = useState<number>(0);
-	const [resultData, setResultData] = useState<any>(null);
+	const [resultData, setResultData] = useState<any>();
 	const [generatingQr, setGeneratingQr] = useState(false);
 	const [qrError, setQrError] = useState<string | null>(null);
+	const [assesseeQrValue, setAssesseeQrValue] = useState("");
+	const [assessorQrValue, setAssessorQrValue] = useState("");
 
 	useEffect(() => {
 		if (id_assessment && id_result) {
@@ -60,7 +55,7 @@ export default function Apl02() {
 			if (response.data.success) {
 				setAssessments(response.data.data);
 			}
-		} catch (error: any) {
+		} catch {
 			setError("Gagal memuat data asesmen");
 		} finally {
 			setLoading(false);
@@ -78,7 +73,7 @@ export default function Apl02() {
 			if (response.data.success) {
 				setUnitCompetencies(response.data.data);
 			}
-		} catch (error: any) {
+		} catch {
 			// console.log("Error fetching unit competencies:", error);
 			setError("Gagal memuat unit kompetensi");
 		}
@@ -91,8 +86,7 @@ export default function Apl02() {
 			if (response.data.success) {
 				const data = response.data.data;
 
-				// simpan ke state resultData
-				setResultData({
+				const newData = {
 					schedule: data.schedule,
 					approved_assessee: data.apl02_header?.approved_assessee,
 					approved_assessor: data.apl02_header?.approved_assessor,
@@ -100,7 +94,12 @@ export default function Apl02() {
 					assessee: data.assessee,
 					assessor: data.assessor,
 					assessment: data.assessment,
-				});
+				};
+
+				setResultData(newData);
+
+				if (newData.approved_assessee) setAssesseeQrValue(getAssesseeUrl(newData.assessee.id));
+				if (newData.approved_assessor) setAssessorQrValue(getAssesseeUrl(newData.assessor.id));
 			}
 		} catch (err: any) {
 			console.error("Gagal fetch result data:", err);
@@ -114,15 +113,8 @@ export default function Apl02() {
 	}, [id_result]);
 
 	const handleGenerateQRCode = async () => {
-		if (!isCompletionFull) return;
-		if (!id_result) {
-			setQrError("ID result tidak valid");
-			return;
-		}
-
-		// PERUBAHAN: Cek apakah asesor sudah approve
-		if (!resultData?.approved_assessor) {
-			setQrError("Menunggu persetujuan asesor terlebih dahulu");
+		if (!isCompletionFull || !id_result || !assessorQrValue || assesseeQrValue) {
+			console.warn("Kondisi belum terpenuhi untuk generate QR Code");
 			return;
 		}
 
@@ -130,37 +122,20 @@ export default function Apl02() {
 		setQrError(null);
 
 		try {
-			// console.log("Mengenerate QR code untuk result:", id_result);
+			const response = await api.put(`/assessments/apl-02/result/assessee/${id_result}/approve`);
 
-			const response = await api.put(
-				`/assessments/apl-02/result/assessee/${id_result}/approve`
-			);
+			if (response.data.success) {
+				setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
 
-			// console.log("Response generate QR:", response.data);
-
-			if (response.data.success && response.data.data) {
-				// console.log("✅ QR code berhasil digenerate");
-
-				// 🔥 PAKAI DATA DARI RESPONSE APPROVE SAJA!
 				setResultData((prev: any) => ({
 					...prev,
-					approved_assessee: response.data.data.approved_assessee,
-					approved_assessor: response.data.data.approved_assessor,
-					is_continue: response.data.data.is_continue,
-					assessee: response.data.data.assessee,
-					assessor: response.data.data.assessor || prev.assessor,
+					approved_assessee: true,
 				}));
 				mutateNavigation();
-			} else {
-				setQrError(response.data.message || "Gagal menghasilkan QR Code");
 			}
 		} catch (error: any) {
-			// console.log("Error generating QR code:", error);
-			const errorMessage =
-				error.response?.data?.message ||
-				error.message ||
-				"Gagal menghasilkan QR Code";
-			setQrError(errorMessage);
+			console.error("Error generating QR:", error);
+			setQrError(error.response?.data?.message || "Gagal menghasilkan QR Code");
 		} finally {
 			setGeneratingQr(false);
 		}
@@ -172,15 +147,8 @@ export default function Apl02() {
 		unitCompetencies.length > 0 &&
 		completedUnits === unitCompetencies.length;
 
-	// Cek apakah signature sudah digenerate
-	const isQrGenerated = resultData?.approved_assessee;
-
 	// PERUBAHAN: Cek apakah asesor sudah approve
 	const isAssessorApproved = resultData?.approved_assessor;
-
-	// Get signature URLs from assessee and assessor data
-	const assesseeSignature = resultData?.assessee?.signature || null;
-	const assessorSignature = resultData?.assessor?.signature || null;
 
 	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 	const navigate = useNavigate();
@@ -420,70 +388,95 @@ export default function Apl02() {
 											</div>
 										</div>
 
-										{/* Signature Section - Asesi dan Asesor */}
-										<div className="mb-6 flex justify-center gap-4 flex-col md:flex-row">
-											{/* Signature Asesi */}
-											<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
-												<h4 className="text-sm font-semibold text-gray-800">
-													Tanda Tangan Asesi
-												</h4>
-												<SignatureDisplay
-													signatureUrl={assesseeSignature}
-													userName={resultData?.assessee?.name || '-'}
-													isApproved={isQrGenerated}
-													loadingText="Klik generate untuk membuat tanda tangan"
-													placeholderText={isCompletionFull && !isAssessorApproved
-														? "Menunggu persetujuan asesor"
-														: isCompletionFull
-															? "Klik generate untuk membuat tanda tangan"
-															: "Selesaikan semua unit"}
-													approvedText="Sebagai Asesi, Anda sudah setuju"
-												/>
-												<button
-													onClick={handleGenerateQRCode}
-													disabled={
-														!isCompletionFull ||
-														isQrGenerated ||
-														generatingQr ||
-														!id_result ||
-														!isAssessorApproved
-													}
-													className={`block text-center bg-[#E77D35] text-white font-medium py-2 px-3 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 text-sm ${!isCompletionFull ||
-														isQrGenerated ||
-														generatingQr ||
-														!id_result ||
-														!isAssessorApproved
-														? "cursor-not-allowed opacity-50"
-														: "hover:bg-orange-600 cursor-pointer"
-														}`}
-												>
-													{generatingQr
-														? "Generating..."
-														: isQrGenerated
-															? "Telah Digenerate"
-															: "Generate Tanda Tangan"}
-												</button>
-												{qrError && (
-													<div className="text-red-500 text-xs mt-1">
-														{qrError}
-													</div>
-												)}
-											</div>
+										{/* QR Code Section - Asesi dan Asesor */}
+										<div className="mb-6">
+											<div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+												{/* QR Code Asesi */}
+												<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+													<h4 className="text-sm font-semibold text-gray-800 text-center">
+														QR Code Asesi
+													</h4>
 
-											{/* Signature Asesor */}
-											<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
-												<h4 className="text-sm font-semibold text-gray-800">
-													Tanda Tangan Asesor
-												</h4>
-												<SignatureDisplay
-													signatureUrl={assessorSignature}
-													userName={resultData?.assessor?.name || '-'}
-													isApproved={isAssessorApproved}
-													placeholderText="Menunggu persetujuan asesor"
-													approvedText="Sudah disetujui Asesor"
-												/>
+													{assesseeQrValue ? (
+														<>
+															<QRCodeCanvas
+																value={assesseeQrValue}
+																size={120}
+																className="w-40 h-40 object-contain"
+															/>
+															<div className="text-green-600 font-semibold text-xs text-center">
+																Sebagai Asesi, Anda sudah setuju
+															</div>
+														</>
+													) : (
+														<div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+															<span className="text-gray-400 text-xs text-center">
+																QR Code Asesi
+															</span>
+															<span className="text-gray-400 text-xs text-center">
+																Klik tombol "Setujui"
+															</span>
+														</div>
+													)}
+
+													<span className="text-sm font-semibold text-gray-800 text-center">
+														{resultData?.assessee?.name}
+													</span>
+
+													{/* Tombol Setujui */}
+													{!assesseeQrValue && (
+														<button
+															disabled={!assessorQrValue || generatingQr || !isCompletionFull}
+															onClick={handleGenerateQRCode}
+															className={`flex items-center justify-center w-full bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${assessorQrValue && !generatingQr && isCompletionFull
+																? "hover:bg-orange-600 cursor-pointer"
+																: "cursor-not-allowed opacity-50"
+																}`}
+														>
+															{generatingQr ? "Memproses..." : "Setujui"}
+														</button>
+													)}
+
+													{/* Error Message */}
+													{qrError && (
+														<div className="text-red-600 text-xs text-center">
+															{qrError}
+														</div>
+													)}
+												</div>
+
+												{/* QR Code Asesor */}
+												<div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-5 flex-col gap-4">
+													<h4 className="text-sm font-semibold text-gray-800 text-center">
+														QR Code Asesor
+													</h4>
+
+													{assessorQrValue ? (
+														<>
+															<QRCodeCanvas
+																value={assessorQrValue}
+																size={120}
+																className="w-40 h-40 object-contain"
+															/>
+															<div className="text-green-600 font-semibold text-xs text-center">
+																Sudah disetujui Asesor
+															</div>
+														</>
+													) : (
+														<div className="w-40 h-40 bg-gray-100 flex items-center justify-center">
+															<span className="text-gray-400 text-xs text-center">
+																Menunggu persetujuan asesor
+															</span>
+														</div>
+													)}
+
+													<span className="text-sm font-semibold text-gray-800 text-center">
+														{resultData?.assessor?.name}
+													</span>
+												</div>
 											</div>
 										</div>
+
 									</div>
 								</div>
 							</>
