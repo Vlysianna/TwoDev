@@ -21,7 +21,7 @@ export default function CekApl02() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [unitCompetencies, setUnitCompetencies] = useState<any[]>([]);
     const [completedUnits, setCompletedUnits] = useState<number>(0);
-    const [recommendation, setRecommendation] = useState<'continue' | 'stop' | null>(null);
+    const [recommendation, setRecommendation] = useState<'continue' | 'stop' | null>('continue');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [resultData, setResultData] = useState<any>(null);
     const [qrProcessing, setQrProcessing] = useState(false);
@@ -540,7 +540,7 @@ export default function CekApl02() {
                     message={
                         <>
                             Anda akan menyimpan pilihan berikut:{" "}
-                            <br /><strong>{pendingValue}</strong>
+                            <br /><strong className={recommendation === "stop" ? "text-red-500 text-base" : ""}>{pendingValue}</strong>
                         </>
                     }
                     confirmText="Simpan"
