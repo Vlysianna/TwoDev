@@ -8,6 +8,7 @@ import {
   SquareX,
   Loader,
   Info,
+  Plus,
 } from "lucide-react";
 import SidebarAsesor from "@/components/SideAsesor";
 import NavAsesor from "@/components/NavAsesor";
@@ -20,6 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import InputScoreModal from "@/components/InputScoreModal";
 import useToast from "@/components/ui/useToast";
 import { set } from "react-hook-form";
+import InputNoteModal from "@/components/InputNoteModal";
 
 interface AssesseeData {
   result_id: number;
@@ -50,7 +52,11 @@ export default function DashboardAsesmenMandiri() {
   const [showLeftScroll, setShowLeftScroll] = useState(false);
   const [showRightScroll, setShowRightScroll] = useState(true);
   const [isModalPenilaianOpen, setModalPenilaianOpen] = useState(false);
+  const [isModalNoteOpen, setModalNoteOpen] = useState(false);
   const [savingPenilaian, setSavingPenilaian] = useState(false);
+  const [savingNote, setSavingNote] = useState(false);
+  const [hasNote, setHasNote] = useState(false);
+  const [noteValue, setNoteValue] = useState<string>("");
   const [selectedAssessee, setSelectedAssessee] = useState<AssesseeData | null>(
     null
   );
@@ -98,6 +104,22 @@ export default function DashboardAsesmenMandiri() {
     fetchTabs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+  useEffect(() => {
+    if (tabData?.assessment_id) {
+      api.get(`/assessments/report/${tabData.assessment_id}`)
+        .then(res => {
+          const report = res.data.data;
+          if (report?.statement?.trim()) {
+            setHasNote(true);
+            setNoteValue(report.statement);
+          } else {
+            setHasNote(false);
+            setNoteValue("");
+          }
+        });
+    }
+  }, [tabData]);
+
 
   const fetchTabs = async () => {
     try {
@@ -190,6 +212,36 @@ export default function DashboardAsesmenMandiri() {
       setSavingPenilaian(false);
     } finally {
       setSavingPenilaian(false);
+    }
+  };
+
+  const handleSaveNote = async (assessment_id: number, note: string) => {
+    try {
+      const response = await api.post(
+        `/assessments/report`,
+        {
+          assessment_id,
+          is_competent: 1,
+          statement: note,
+        }
+      );
+
+      if (response.data.success) {
+        toast.show({
+          title: "Catatan berhasil disimpan",
+          type: "success",
+        });
+      } else {
+        toast.show({
+          title: "Catatan gagal disimpan",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      toast.show({
+        title: "Terjadi kesalahan saat menyimpan catatan",
+        type: "error",
+      });
     }
   };
 
@@ -438,30 +490,31 @@ export default function DashboardAsesmenMandiri() {
           </div>
 
           {/* Tab Buttons dengan Scroll Horizontal */}
-          <div className="relative mb-6">
-            {/* Scroll buttons */}
+          <div className="relative mb-6 h-[52px] flex items-center">
+            {/* Scroll Left Button */}
             {showLeftScroll && (
               <button
                 onClick={() => scrollTabs("left")}
-                className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-1 shadow-md"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-1 shadow-md"
               >
                 <ChevronLeft size={20} />
               </button>
             )}
 
+            {/* Scroll Right Button */}
             {showRightScroll && (
               <button
                 onClick={() => scrollTabs("right")}
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-1 shadow-md"
+                className="absolute right-14 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-1 shadow-md"
               >
                 <ChevronRight size={20} />
               </button>
             )}
 
-            {/* Container tab dengan scroll horizontal */}
+            {/* Tabs */}
             <div
               ref={tabsContainerRef}
-              className="flex overflow-x-auto scrollbar-hide space-x-2 pb-2"
+              className="flex flex-1 overflow-x-auto scrollbar-hide space-x-2 pr-16"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {tabData &&
@@ -469,22 +522,41 @@ export default function DashboardAsesmenMandiri() {
                   <button
                     key={tab.name}
                     onClick={() => setSelectedTab(tab.name)}
-                    className={`flex-shrink-0 px-3 py-2 cursor-pointer rounded-md border-b-2 transition-all duration-200
-    ${
-      selectedTab.toLowerCase() === tab.name.toLowerCase()
-        ? "border-orange-800 bg-[#E77D35] text-white font-semibold"
-        : tab.status === "Tuntas"
-        ? "border-green-500 text-green-700 font-medium"
-        : tab.status === "Menunggu Asesi"
-        ? "border-blue-500 text-blue-600 font-medium"
-        : tab.status === "Butuh Persetujuan"
-        ? "border-yellow-500 text-yellow-600 font-medium"
-        : "border-red-500 text-red-600 font-medium"
-    }`}
+                    className={`flex-shrink-0 px-3 py-2 rounded-md border-b-2 transition-all duration-200 whitespace-nowrap
+            ${selectedTab.toLowerCase() === tab.name.toLowerCase()
+                        ? "border-orange-800 bg-[#E77D35] text-white font-semibold"
+                        : tab.status === "Tuntas"
+                          ? "border-green-500 text-green-700 font-medium"
+                          : tab.status === "Menunggu Asesi"
+                            ? "border-blue-500 text-blue-600 font-medium"
+                            : tab.status === "Butuh Persetujuan"
+                              ? "border-yellow-500 text-yellow-600 font-medium"
+                              : "border-red-500 text-red-600 font-medium"
+                      }`}
                   >
                     {tab.name}
                   </button>
                 ))}
+            </div>
+
+            {/* Add Note Button (Fixed Right) */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2">
+              <button
+                onClick={() => setModalNoteOpen(true)}
+                className="
+                  flex items-center gap-2
+                  bg-[#E77D35] text-white
+                  px-3 py-2 rounded-md
+                  hover:bg-orange-600
+                  whitespace-nowrap
+                "
+                title={hasNote ? "Edit Catatan Berita Acara" : "Tambahkan Catatan Berita Acara"}
+              >
+                <Plus size={18} />
+                <span className="hidden sm:inline">
+                  {hasNote ? "Edit Catatan Berita Acara" : "Tambahkan Catatan Berita Acara"}
+                </span>
+              </button>
             </div>
           </div>
 
@@ -566,11 +638,9 @@ export default function DashboardAsesmenMandiri() {
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-700 text-center">
                           <span
-                            className={`inline-flex items-center ${
-                              badgeClasses[asesi.status]
-                            } gap-1 px-2 py-1 text-center rounded-full text-xs font-medium ${
-                              statusClasses[asesi.status]
-                            }`}
+                            className={`inline-flex items-center ${badgeClasses[asesi.status]
+                              } gap-1 px-2 py-1 text-center rounded-full text-xs font-medium ${statusClasses[asesi.status]
+                              }`}
                           >
                             {statusIcons[asesi.status]}
                             {asesi.status}
@@ -618,6 +688,26 @@ export default function DashboardAsesmenMandiri() {
           setModalPenilaianOpen(false);
 		      await fetchAssesseeData(selectedTab.toLowerCase());
         }}
+      />
+      <InputNoteModal
+        isOpen={isModalNoteOpen}
+        onClose={() => setModalNoteOpen(false)}
+        onSave={async (note) => {
+          if (!tabData?.assessment_id) {
+            toast.show({ title: "Assessment ID tidak ditemukan", type: "error" });
+            return;
+          }
+
+          setSavingNote(true);
+          await handleSaveNote(tabData.assessment_id, note);
+          setSavingNote(false);
+          setHasNote(true);
+          setNoteValue(note); // update state
+          setModalNoteOpen(false);
+        }}
+        loading={savingNote}
+        title={hasNote ? "Edit Catatan" : "Input Catatan"}
+        initialNote={noteValue} // ✅ kirim note lama
       />
     </div>
   );
