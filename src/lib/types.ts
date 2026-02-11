@@ -1,88 +1,64 @@
-export type SkemaType = {
-	occupation_id: number;
+export interface Assessment {
+	id: number;
 	code: string;
-	uc_apl02s: UnitAPL02[];
-	groups_ia01: IA01Group[];
-	groups_ia02: IA02Group[];
-	groups_ia03: IA03Group[];
-	ia05_questions: IA05Question[];
-};
+	occupation: Occupation;
+	occupation_id: number;
+}
 
-export type UnitAPL02 = {
-	unit_code: string;
-	title: string;
-	elements: ElementAPL02[];
-};
-
-export type ElementAPL02 = {
-	id: string;
-	title: string;
-	details: ItemElementAPL02[];
-};
-
-export type ItemElementAPL02 = {
-	id: string;
-	description: string;
-};
-
-export type IA01Group = {
+export type Occupation = {
+	id: number;
+	scheme_id: number;
 	name: string;
-	units: UnitIA01[];
+	created_at: string;
+	updated_at: string;
+	scheme: Scheme;
 };
 
-export type IA02Group = {
+export type Scheme = {
+	id: number;
+	code: string;
 	name: string;
-	scenario: string;
-	duration: number;
-	units: UnitIA02[];
-	tools: {
-		name: string;
-	}[];
+	created_at: string;
+	updated_at: string;
 };
 
-export type UnitIA01 = {
-	unit_code: string;
-	title: string;
-	elements: ElementIA01[];
-};
-
-export type ElementIA01 = {
-	id: string;
-	title: string;
-	details: ItemElementIA01[];
-};
-
-export type ItemElementIA01 = {
-	id: string;
-	description: string;
-	benchmark: string;
-};
-
-export type UnitIA02 = {
-	unit_code: string;
-	title: string;
-};
-
-export type IA03Group = {
+export interface Assessee {
+	id: number;
 	name: string;
-	units: UnitIA03[];
-	qa_ia03: IA03Question[];
-};
+	email: string;
+}
 
-export type UnitIA03 = {
-	unit_code: string;
-	title: string;
-};
+export interface Assessor {
+	id: number;
+	name: string;
+	email: string;
+	no_reg_met: string;
+}
 
-export type IA03Question = {
-	question: string;
-};
+export interface Schedule {
+	id: number;
+	assessment_id: number;
+	start_date: string;
+	end_date: string;
+	created_at: string;
+	updated_at: string;
+}
 
-export type IA05Question = {
-	order: number;
-	question: string;
-	options: {
-		option: string;
-		is_answer: boolean;
-	}[];
-};
+export interface APL02Header {
+	id: number;
+	result_id: number;
+	approved_assessee: boolean;
+	approved_assessor: boolean;
+	is_continue: boolean;
+}
+
+export interface ResultTemplate {
+	id: number;
+	assessment: Assessment;
+	assessee: Assessee;
+	assessor: Assessor;
+	schedule: Schedule;
+	tuk: string;
+	is_competent: boolean;
+	created_at: string;
+}

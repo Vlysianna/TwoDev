@@ -11,7 +11,7 @@ import {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 type AssessmentParams = {
-  id_assessment: string;
+  id_schedule: string;
   id_asesi?: string | null;
   id_asesor?: string | null;
   id_result?: string | null;
@@ -41,7 +41,7 @@ export default function AssessmentAsesorProvider({
 }: {
   children: JSX.Element | JSX.Element[];
 }) {
-  const { id_assessment, id_asesi } = useParams();
+  const { id_schedule, id_asesi } = useParams();
   const [assessorData, setAssessorData] = useState<AssessorData | undefined>(undefined);
   const [resultData, setResultData] = useState<any[] | undefined>(undefined);
 
@@ -65,7 +65,7 @@ export default function AssessmentAsesorProvider({
           const data = resp.data.data;
           setAssessorData(data);
 
-          if (id_assessment && id_asesi) {
+          if (id_schedule && id_asesi) {
             await fetchResult(data.id);
           }
         } else {
@@ -82,7 +82,7 @@ export default function AssessmentAsesorProvider({
 
     const fetchResult = async (assessorId: number) => {
       try {
-        const resp = await api.get(`/assessments/result/${id_assessment}/${assessorId}/${id_asesi}`);
+        const resp = await api.get(`/assessments/result/${id_schedule}/${assessorId}/${id_asesi}`);
         if (resp.data.success) {
           const data = resp.data.data;
           setResultData(data);
@@ -97,15 +97,15 @@ export default function AssessmentAsesorProvider({
     };
 
     fetchAssessorData();
-  }, [user, id_assessment, id_asesi]);
+  }, [user, id_schedule, id_asesi]);
 
   useEffect(() => {
-    if (!id_assessment) {
+    if (!id_schedule) {
       navigate(routes.asesor.dashboardAsesor, {
         replace: true,
       });
     }
-  }, [id_assessment, navigate, location]);
+  }, [id_schedule, navigate, location]);
 
   if (loading) {
     return (
@@ -126,7 +126,7 @@ export default function AssessmentAsesorProvider({
   return (
     <AssessmentContext.Provider
       value={{
-        id_assessment: id_assessment!,
+        id_schedule: id_schedule!,
         id_asesi: id_asesi || null,
         id_asesor: assessorData ? String(assessorData.id) : null,
         id_result: resultData && resultData.length > 0 

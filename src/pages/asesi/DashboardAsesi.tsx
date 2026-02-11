@@ -1,465 +1,578 @@
 import { useState, useEffect } from "react";
 import SidebarAsesi from "@/components/SideAsesi";
 import {
-	LayoutDashboard,
-	Clock,
-	ChevronRight,
-	Search,
-	ListFilter,
-	BookOpen,
-	AlertCircle,
-	MapPinned,
+  LayoutDashboard,
+  Clock,
+  ChevronRight,
+  Search,
+  BookOpen,
+  AlertCircle,
+  MapPinned,
+  Info,
+  Calendar,
+  User,
 } from "lucide-react";
 import NavbarAsesi from "@/components/NavbarAsesi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/helper/axios";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { getInitials } from "@/helper/initial";
+import { formatDate } from "@/helper/format-date";
+import type { Schedule } from "@/lib/types";
 
-interface Schedule {
-	id: number;
-	assessment: {
-		id: number;
-		code: string;
-		occupation: {
-			id: number;
-			name: string;
-			scheme: {
-				id: number;
-				code: string;
-				name: string;
-			};
-		};
-	};
-	start_date: string;
-	end_date: string;
-	schedule_details: Array<{
-		id: number;
-		assessor: {
-			id: number;
-			full_name: string;
-			phone_no: string;
-		};
-		location: string;
-	}>;
+interface ScheduleResponse {
+  id: number;
+  assessment: {
+    id: number;
+    code: string;
+    occupation: {
+      id: number;
+      name: string;
+      scheme: {
+        id: number;
+        code: string;
+        name: string;
+      };
+    };
+  };
+  start_date: string;
+  end_date: string;
+  schedule: Schedule;
+  schedule_details: Array<{
+    id: number;
+    assessor: {
+      id: number;
+      full_name: string;
+      phone_no: string;
+    };
+    location: string;
+  }>;
 }
 
 interface ProgramFilter {
-	code: string;
-	name: string;
-	count: number;
-	color: string;
+  code: string;
+  name: string;
+  count: number;
+  color: string;
 }
 
 export default function DashboardAsesi() {
-	const { user } = useAuth();
-	const [schedules, setSchedule] = useState<Schedule[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
-	const [selectedProgram, setSelectedProgram] = useState<string>("ALL");
-	const [programFilters, setProgramFilters] = useState<ProgramFilter[]>([]);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [schedules, setSchedule] = useState<ScheduleResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredSchedules, setFilteredSchedules] = useState<
+    ScheduleResponse[]
+  >([]);
+  const [selectedProgram, setSelectedProgram] = useState<string>("ALL");
+  const [programFilters, setProgramFilters] = useState<ProgramFilter[]>([]);
 
-	const fetchAssessments = async () => {
-		try {
-			const response = await api.get("/schedules/active");
-			if (response.data.success) {
-				setSchedule(response.data.data);
-			}
-		} catch (error) {
-			console.error("Failed to fetch assessments:", error);
-			setError("Gagal memuat data asesmen.");
-		} finally {
-			setLoading(false);
-		}
-	};
+  // Modal state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedAssessment, setSelectedAssessment] = useState<{
+    schedule: ScheduleResponse;
+    detail: ScheduleResponse["schedule_details"][0];
+  } | null>(null);
 
-	useEffect(() => {
-		fetchAssessments();
-	}, [user]);
+  const fetchAssessments = async () => {
+    try {
+      const response = await api.get("/schedules/active");
+      if (response.data.success) {
+        setSchedule(response.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch assessments:", error);
+      setError("Gagal memuat data asesmen.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-	useEffect(() => {
-		updateProgramFilters();
-	}, [schedules]);
+  useEffect(() => {
+    fetchAssessments();
+  }, [user]);
 
-	useEffect(() => {
-		let filtered = schedules;
+  useEffect(() => {
+    updateProgramFilters();
+  }, [schedules]);
 
-		if (selectedProgram !== "ALL") {
-			filtered = filtered.filter(
-				(sch) => sch.assessment.occupation.scheme.code === selectedProgram
-			);
-		}
+  useEffect(() => {
+    const filtered = schedules
+      .map((schedule) => {
+        // Filter detail per searchTerm
+        const filteredDetails = schedule.schedule_details.filter((detail) => {
+          const term = searchTerm.toLowerCase();
+          return (
+            detail.assessor.full_name.toLowerCase().includes(term) ||
+            detail.location.toLowerCase().includes(term) ||
+            schedule.assessment.occupation.name.toLowerCase().includes(term) ||
+            schedule.assessment.occupation.scheme.name
+              .toLowerCase()
+              .includes(term)
+          );
+        });
 
-		if (searchTerm) {
-			filtered = filtered.filter(
-				(sch) =>
-					sch.assessment.occupation.name
-						.toLowerCase()
-						.includes(searchTerm.toLowerCase()) ||
-					sch.assessment.occupation.scheme.name
-						.toLowerCase()
-						.includes(searchTerm.toLowerCase()) ||
-					sch.schedule_details.some((detail) =>
-						detail.assessor.full_name
-							.toLowerCase()
-							.includes(searchTerm.toLowerCase())
-					)
-			);
-		}
+        // Hanya return schedule kalau ada detail yang match
+        if (filteredDetails.length > 0) {
+          return { ...schedule, schedule_details: filteredDetails };
+        }
+        return null;
+      })
+      .filter(Boolean) as typeof schedules; // buang null
 
-		setFilteredSchedules(filtered);
-	}, [searchTerm, schedules, selectedProgram]);
+    // Filter berdasarkan selectedProgram juga
+    const finalFiltered =
+      selectedProgram === "ALL"
+        ? filtered
+        : filtered.filter(
+            (sch) => sch.assessment.occupation.scheme.code === selectedProgram,
+          );
 
-	const updateProgramFilters = () => {
-		const programCounts = schedules.reduce((acc, sch) => {
-			const program = sch.assessment.occupation.scheme.code;
-			acc[program] = (acc[program] || 0) + 1;
-			return acc;
-		}, {} as Record<string, number>);
+    setFilteredSchedules(finalFiltered);
+  }, [searchTerm, schedules, selectedProgram]);
 
-		const programColors = {
-			RPL: "bg-orange-500",
-			TBG: "bg-green-500",
-			TBS: "bg-pink-500",
-			PH: "bg-purple-500",
-			ULW: "bg-teal-500",
-			TKJ: "bg-indigo-500",
-			MM: "bg-red-500",
-			OTKP: "bg-yellow-500",
-			AKL: "bg-blue-500",
-		};
+  const updateProgramFilters = () => {
+    const programCounts = schedules.reduce(
+      (acc, sch) => {
+        const program = sch.assessment.occupation.scheme.code;
+        acc[program] = (acc[program] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-		const filters: ProgramFilter[] = Object.entries(programCounts).map(
-			([program, count]) => ({
-				code: program,
-				name: getProgramFullName(program),
-				count,
-				color:
-					programColors[program as keyof typeof programColors] || "bg-gray-500",
-			})
-		);
+    const programColors = {
+      RPL: "bg-orange-500",
+      TBG: "bg-green-500",
+      TBS: "bg-pink-500",
+      PH: "bg-purple-500",
+      ULW: "bg-teal-500",
+      TKJ: "bg-indigo-500",
+      MM: "bg-red-500",
+      OTKP: "bg-yellow-500",
+      AKL: "bg-blue-500",
+    };
 
-		filters.sort((a, b) => b.count - a.count);
-		setProgramFilters(filters);
-	};
+    const filters: ProgramFilter[] = Object.entries(programCounts).map(
+      ([program, count]) => ({
+        code: program,
+        name: getProgramFullName(program),
+        count,
+        color:
+          programColors[program as keyof typeof programColors] || "bg-gray-500",
+      }),
+    );
 
-	const getProgramFullName = (code: string): string => {
-		const programNames = {
-			RPL: "Rekayasa Perangkat Lunak",
-			TBG: "Tata Boga",
-			TBS: "Tata Busana",
-			PH: "Perhotelan",
-			ULW: "Usaha Layanan Wisata",
-			OTKP: "Otomatisasi Tata Kelola Perkantoran",
-			AKL: "Akuntansi Keuangan Lembaga",
-		};
-		return programNames[code as keyof typeof programNames] || code;
-	};
+    filters.sort((a, b) => b.count - a.count);
+    setProgramFilters(filters);
+  };
 
-	const getStatusFromSchedule = (schedule: Schedule) => {
-		const now = new Date();
-		const start = new Date(schedule.start_date);
-		const end = new Date(schedule.end_date);
+  const getProgramFullName = (code: string): string => {
+    const programNames = {
+      RPL: "Rekayasa Perangkat Lunak",
+      TBG: "Tata Boga",
+      TBS: "Tata Busana",
+      PH: "Perhotelan",
+      ULW: "Usaha Layanan Wisata",
+      OTKP: "Otomatisasi Tata Kelola Perkantoran",
+      AKL: "Akuntansi Keuangan Lembaga",
+    };
+    return programNames[code as keyof typeof programNames] || code;
+  };
 
-		if (now < start) return "Menunggu";
-		if (now >= start && now <= end) return "Aktif";
-		return "Selesai";
-	};
+  const getStatusFromSchedule = (schedule: ScheduleResponse) => {
+    const now = new Date();
+    const start = new Date(schedule.start_date);
+    const end = new Date(schedule.end_date);
 
-	const formatDateFromSchedule = (
-		schedule: Schedule,
-		type: "start" | "end"
-	) => {
-		const dateString =
-			type === "start" ? schedule.start_date : schedule.end_date;
-		if (!dateString) return "TBD";
-		const date = new Date(dateString);
-		return date.toLocaleDateString("id-ID", {
-			day: "numeric",
-			month: "short",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	};
+    if (now < start) return "Menunggu";
+    if (now >= start && now <= end) return "Aktif";
+    return "Selesai";
+  };
 
-	const getInitials = (name: string) => {
-		return name
-			.split(" ")
-			.map((n) => n[0])
-			.join("")
-			.toUpperCase()
-			.substring(0, 2);
-	};
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Aktif":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "Menunggu":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+      case "Selesai":
+        return "text-gray-600 bg-gray-50 border-gray-200";
+      default:
+        return "text-blue-600 bg-blue-50 border-blue-200";
+    }
+  };
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case "Aktif":
-				return "text-green-600 bg-green-50 border-green-200";
-			case "Menunggu":
-				return "text-yellow-600 bg-yellow-50 border-yellow-200";
-			case "Selesai":
-				return "text-gray-600 bg-gray-50 border-gray-200";
-			default:
-				return "text-blue-600 bg-blue-50 border-blue-200";
-		}
-	};
+  const handleAssessmentClick = (
+    schedule: ScheduleResponse,
+    detail: ScheduleResponse["schedule_details"][0],
+  ) => {
+    setSelectedAssessment({ schedule, detail });
+    setShowConfirmModal(true);
+  };
 
-	return (
-		<div className="flex min-h-screen bg-gray-50">
-			<div className="inset-y-0 left-0 lg:w-64 md:w-0 bg-white shadow-md">
-				<SidebarAsesi />
-			</div>
+  const handleConfirmEnter = () => {
+    if (selectedAssessment) {
+      navigate(
+        paths.asesi.assessment.apl01(
+          selectedAssessment.schedule.id,
+          selectedAssessment.detail.assessor.id,
+        ),
+      );
+    }
+    setShowConfirmModal(false);
+    setSelectedAssessment(null);
+  };
 
-			<div className="flex-1">
-				<div className="sticky top-0 z-10 bg-white shadow-sm">
-					<NavbarAsesi
-						title="Dashboard Asesi"
-						icon={<LayoutDashboard size={25} />}
-					/>
-				</div>
+  const handleCancelEnter = () => {
+    setShowConfirmModal(false);
+    setSelectedAssessment(null);
+  };
 
-				<div className="p-6">
-					{error && (
-						<div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center">
-							<AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
-							<span className="text-yellow-800">{error}</span>
-						</div>
-					)}
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <div className="inset-y-0 left-0 lg:w-64 md:w-0 bg-white shadow-md">
+        <SidebarAsesi />
+      </div>
 
-					<main>
-						{/* Header */}
-						<div className="mb-6 p-4 flex flex-col md:flex-row md:items-center gap-4">
-							<div className="flex items-center space-x-2">
-								<span className="text-gray-600">Selamat datang,</span>
-								<span className="font-semibold text-gray-900">
-									{user?.email?.split("@")[0] || "Asesi"}!
-								</span>
-							</div>
+      <div className="flex-1">
+        <div className="sticky top-0 z-10 bg-white shadow-sm">
+          <NavbarAsesi
+            title="Dashboard Asesi"
+            icon={<LayoutDashboard size={25} />}
+          />
+        </div>
 
-							<div className="flex items-center gap-4">
-								<div className="relative w-full md:w-80">
-									<input
-										type="text"
-										placeholder="Search..."
-										className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-										value={searchTerm}
-										onChange={(e) => setSearchTerm(e.target.value)}
-									/>
-									<Search
-										className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-										size={16}
-									/>
-								</div>
+        <div className="p-6">
+          {error && (
+            <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center">
+              <AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
+              <span className="text-yellow-800">{error}</span>
+            </div>
+          )}
 
-								<button className="flex-shrink-0 flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
-									<ListFilter className="w-4 h-4 text-gray-600" />
-									<span className="text-gray-600">Filter</span>
-								</button>
-							</div>
-						</div>
+          <main>
+            {/* Header */}
+            <div className="mb-6 p-4 flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-600">Selamat datang,</span>
+                <span className="font-semibold text-gray-900">
+                  {user?.full_name || "Asesi"}!
+                </span>
+              </div>
 
-						{/* Program Filter */}
-						<div className="mb-6 px-4">
-							<div className="flex flex-wrap items-center gap-2">
-								<button
-									onClick={() => setSelectedProgram("ALL")}
-									className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-										selectedProgram === "ALL"
-											? "bg-blue-500 text-white"
-											: "text-gray-700 hover:bg-gray-50"
-									}`}
-								>
-									Semua
-									<span
-										className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-											selectedProgram === "ALL"
-												? "bg-blue-600 text-white"
-												: "bg-gray-200 text-gray-600"
-										}`}
-									>
-										{schedules.length}
-									</span>
-								</button>
+              <div className="flex items-center gap-4">
+                <div className="relative w-full md:w-80">
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <Search
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
+                </div>
+              </div>
+            </div>
 
-								{programFilters.map((filter) => (
-									<button
-										key={filter.code}
-										onClick={() => setSelectedProgram(filter.code)}
-										className={`flex items-center px-2 py-2 rounded-lg text-sm font-medium transition-all ${
-											selectedProgram === filter.code
-												? `${filter.color} text-white`
-												: "text-gray-700 hover:bg-gray-50"
-										}`}
-									>
-										{filter.code}
-										<span
-											className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-												selectedProgram === filter.code
-													? "text-white"
-													: "text-gray-600"
-											}`}
-										>
-											( {filter.count} )
-										</span>
-									</button>
-								))}
-							</div>
+            {/* Program Filter */}
+            <div className="mb-6 px-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setSelectedProgram("ALL")}
+                  className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedProgram === "ALL"
+                      ? "bg-blue-500 text-white"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  Semua
+                  <span
+                    className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                      selectedProgram === "ALL"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {schedules.length}
+                  </span>
+                </button>
 
-							{selectedProgram !== "ALL" && (
-								<div className="mt-3 text-sm text-gray-600">
-									Menampilkan {filteredSchedules.length} assessment dari jurusan{" "}
-									<span className="font-semibold">
-										{getProgramFullName(selectedProgram)} ({selectedProgram})
-									</span>
-								</div>
-							)}
-						</div>
+                {programFilters.map((filter) => (
+                  <button
+                    key={filter.code}
+                    onClick={() => setSelectedProgram(filter.code)}
+                    className={`flex items-center px-2 py-2 rounded-lg text-sm font-medium transition-all ${
+                      selectedProgram === filter.code
+                        ? `${filter.color} text-white`
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {filter.code}
+                    <span
+                      className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                        selectedProgram === filter.code
+                          ? "text-white"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      ( {filter.count} )
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-						{/* Content */}
-						{loading ? (
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-								{[1, 2, 3].map((i) => (
-									<div
-										key={i}
-										className="bg-white rounded-lg shadow-sm border animate-pulse"
-									>
-										<div className="p-4 border-b border-gray-100">
-											<div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-											<div className="h-3 bg-gray-200 rounded w-1/2"></div>
-										</div>
-										<div className="p-4">
-											<div className="h-20 bg-gray-200 rounded"></div>
-										</div>
-									</div>
-								))}
-							</div>
-						) : (
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-								{filteredSchedules.length > 0 ? (
-									filteredSchedules.map((schedule) =>
-										schedule.schedule_details.map((detail) => {
-											const status = getStatusFromSchedule(schedule);
-											return (
-												<div
-													key={detail.id}
-													className="bg-white rounded-lg shadow-sm border-b-4 hover:shadow-md transition-all duration-200 group"
-												>
-													<div className="p-4 border-b border-gray-100">
-														<div className="flex items-start justify-between mb-3">
-															<div className="flex-1">
-																<h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-																	{schedule.assessment.occupation.scheme.name}
-																</h3>
-																<p className="text-sm text-gray-600 mt-1">
-																	{schedule.assessment.occupation.name}
-																</p>
-															</div>
-															<div className="ml-2">
-																<span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
-																	{schedule.assessment.occupation.scheme.code}
-																</span>
-															</div>
-														</div>
+              {selectedProgram !== "ALL" && (
+                <div className="mt-3 text-sm text-gray-600">
+                  Menampilkan {filteredSchedules.length} assessment dari jurusan{" "}
+                  <span className="font-semibold">
+                    {getProgramFullName(selectedProgram)} ({selectedProgram})
+                  </span>
+                </div>
+              )}
+            </div>
 
-														<div
-															className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(
-																status
-															)}`}
-														>
-															<Clock className="w-3 h-3 mr-1" />
-															{status}
-														</div>
-													</div>
+            {/* Content */}
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="bg-white rounded-lg shadow-sm border animate-pulse"
+                  >
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                    <div className="p-4">
+                      <div className="h-20 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredSchedules.length > 0 ? (
+                  filteredSchedules.map((schedule) =>
+                    schedule.schedule_details.map((detail) => {
+                      const status = getStatusFromSchedule(schedule);
+                      return (
+                        <div
+                          key={detail.id}
+                          className="bg-white rounded-lg shadow-sm border-b-4 hover:shadow-md transition-all duration-200 group"
+                        >
+                          <div className="p-4 border-b border-gray-100">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                  {schedule.assessment.occupation.scheme.name}
+                                </h3>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {schedule.assessment.occupation.name}
+                                </p>
+                              </div>
+                              <div className="ml-2">
+                                <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                  {schedule.assessment.occupation.scheme.code}
+                                </span>
+                              </div>
+                            </div>
 
-													<div className="px-4 py-2">
-														<div className="flex justify-between text-xs text-gray-500 mb-2">
-															<span>
-																Mulai:{" "}
-																{formatDateFromSchedule(schedule, "start")}
-															</span>
-															<span>
-																Selesai:{" "}
-																{formatDateFromSchedule(schedule, "end")}
-															</span>
-														</div>
-														{/* Progress Line */}
-														<div className="relative">
-															<div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-300 transform -translate-y-1/2"></div>
-															<div className="flex justify-between items-center relative">
-																<div className="w-3 h-3 bg-white border-2 border-blue-500 rounded-full"></div>
-																<div className="w-3 h-3 bg-white border-2 border-gray-300 rounded-full"></div>
-															</div>
-														</div>
-														<div className="pt-5 flex items-center">
-															<MapPinned className="w-5 h-5 mr-1" />
-															<span className="text-sm">{detail.location}</span>
-														</div>
-													</div>
+                            <div
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(
+                                status,
+                              )}`}
+                            >
+                              <Clock className="w-3 h-3 mr-1" />
+                              {status}
+                            </div>
+                          </div>
 
-													<div className="px-4 pb-4 pt-4">
-														<div className="flex items-center space-x-3">
-															<Avatar>
-																<AvatarImage src="" />
-																<AvatarFallback>
-																	{getInitials(detail.assessor.full_name)}
-																</AvatarFallback>
-															</Avatar>
-															<div className="flex-1">
-																<p className="text-sm font-medium text-gray-900">
-																	{detail.assessor.full_name}
-																</p>
-																<p className="text-xs text-gray-500">Asesor</p>
-															</div>
-															<Link
-																to={paths.asesi.assessment.apl01(
-																	schedule.assessment.id,
-																	detail.assessor.id
-																)}
-																className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors group-hover:scale-110 transform"
-															>
-																<ChevronRight className="w-4 h-4 text-white" />
-															</Link>
-														</div>
-													</div>
-												</div>
-											);
-										})
-									)
-								) : (
-									<div className="col-span-full text-center py-12">
-										<BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-										<h3 className="text-lg font-medium text-gray-900 mb-2">
-											{selectedProgram !== "ALL"
-												? `Belum ada assessment untuk ${selectedProgram}`
-												: "Belum ada assessment"}
-										</h3>
-										<p className="text-gray-600 mb-4">
-											{searchTerm
-												? "Tidak ada assessment yang sesuai dengan pencarian Anda."
-												: selectedProgram !== "ALL"
-												? `Assessment untuk jurusan ${getProgramFullName(
-														selectedProgram
-												  )} akan muncul di sini.`
-												: "Assessment akan muncul di sini setelah Anda mendaftar."}
-										</p>
-										{!searchTerm && selectedProgram === "ALL" && (
-											<Link
-												to={paths.asesi.assessment.apl01Pattern}
-												className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-											>
-												Mulai Assessment
-											</Link>
-										)}
-									</div>
-								)}
-							</div>
-						)}
-					</main>
-				</div>
-			</div>
-		</div>
-	);
+                          <div className="px-4 py-2">
+                            <div className="flex justify-between text-xs text-gray-500 mb-2">
+                              <span>
+                                Mulai: {formatDate(schedule.start_date)}
+                              </span>
+                              <span>
+                                Selesai: {formatDate(schedule.end_date)}
+                              </span>
+                            </div>
+                            {/* Progress Line */}
+                            <div className="relative">
+                              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-300 transform -translate-y-1/2"></div>
+                              <div className="flex justify-between items-center relative">
+                                <div className="w-3 h-3 bg-white border-2 border-blue-500 rounded-full"></div>
+                                <div className="w-3 h-3 bg-white border-2 border-gray-300 rounded-full"></div>
+                              </div>
+                            </div>
+                            <div className="pt-5 flex items-center">
+                              <MapPinned className="w-5 h-5 mr-1" />
+                              <span className="text-sm">{detail.location}</span>
+                            </div>
+                          </div>
+
+                          <div className="px-4 pb-4 pt-4">
+                            <div className="flex items-center space-x-3">
+                              <Avatar>
+                                <AvatarImage src="" />
+                                <AvatarFallback>
+                                  {getInitials(detail.assessor.full_name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {detail.assessor.full_name}
+                                </p>
+                                <p className="text-xs text-gray-500">Asesor</p>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  handleAssessmentClick(schedule, detail)
+                                }
+                                className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors group-hover:scale-110 transform"
+                              >
+                                <ChevronRight className="w-4 h-4 text-white" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }),
+                  )
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      {selectedProgram !== "ALL"
+                        ? `Belum ada assessment untuk ${selectedProgram}`
+                        : "Belum ada assessment"}
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      {searchTerm
+                        ? "Tidak ada assessment yang sesuai dengan pencarian Anda."
+                        : selectedProgram !== "ALL"
+                          ? `Assessment untuk jurusan ${getProgramFullName(
+                              selectedProgram,
+                            )} akan muncul di sini.`
+                          : "Assessment akan muncul di sini setelah Anda mendaftar."}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </main>
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Info className="w-5 h-5 text-blue-500" />
+              Konfirmasi Masuk Assessment
+            </DialogTitle>
+            <DialogDescription>
+              Anda akan memasuki jadwal assessment. Pastikan Anda sudah siap
+              untuk memulai.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedAssessment && (
+            <div className="space-y-4 py-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 mb-2">
+                  {
+                    selectedAssessment.schedule.assessment.occupation.scheme
+                      .name
+                  }
+                </h4>
+                <p className="text-sm text-blue-700 mb-3">
+                  {selectedAssessment.schedule.assessment.occupation.name}
+                </p>
+
+                <div className="grid grid-cols-1 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-blue-600" />
+                    <span className="text-blue-800">
+                      <strong>Periode:</strong>{" "}
+                      {formatDate(selectedAssessment.schedule.start_date)} -{" "}
+                      {formatDate(selectedAssessment.schedule.end_date)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-blue-600" />
+                    <span className="text-blue-800">
+                      <strong>Asesor:</strong>{" "}
+                      {selectedAssessment.detail.assessor.full_name}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <MapPinned className="w-4 h-4 text-blue-600" />
+                    <span className="text-blue-800">
+                      <strong>Lokasi:</strong>{" "}
+                      {selectedAssessment.detail.location}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                  <div className="text-sm text-yellow-800">
+                    <p className="font-medium mb-1">
+                      Penting untuk diperhatikan:
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-xs">
+                      <li>
+                        Pastikan Anda telah menyiapkan semua dokumen yang
+                        diperlukan
+                      </li>
+                      <li>Periksa koneksi internet Anda stabil</li>
+                      <li>
+                        Assessment yang sudah dimulai tidak dapat dibatalkan
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <button
+              onClick={handleCancelEnter}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              Batalkan
+            </button>
+            <button
+              onClick={handleConfirmEnter}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              Ya, Masuk Assessment
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }

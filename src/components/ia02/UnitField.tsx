@@ -10,7 +10,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "../ui/accordion";
-import type { SkemaType } from "@/lib/types";
+import type { MukTypeInput } from "@/model/muk-model";
 import { useState } from "react";
 
 export default function UnitField({
@@ -19,19 +19,21 @@ export default function UnitField({
 	groupIndex,
 	useForm,
 	removeUnit,
+	disabled = false,
 }: {
 	unitFields: FieldArrayWithId<
-		SkemaType,
+		MukTypeInput,
 		`groups_ia02.${number}.units`,
 		"id"
 	>[];
 	unitIndex: number;
 	groupIndex: number;
 	useForm: {
-		control: Control<SkemaType>;
-		register: UseFormRegister<SkemaType>;
+		control: Control<MukTypeInput>;
+		register: UseFormRegister<MukTypeInput>;
 	};
 	removeUnit: UseFieldArrayRemove;
+	disabled?: boolean;
 }) {
 	const { register } = useForm;
 	const field = unitFields[unitIndex];
@@ -69,6 +71,7 @@ export default function UnitField({
 							type="button"
 							onClick={() => removeUnit(unitIndex)}
 							className="px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+							disabled={disabled}
 						>
 							Hapus Unit
 						</button>
@@ -89,6 +92,7 @@ export default function UnitField({
 												marginTop: "0.25em",
 											}}
 											className="w-full px-3 py-2 border rounded-md border-gray-300"
+											disabled={disabled}
 										/>
 									</label>
 								</div>
@@ -105,6 +109,7 @@ export default function UnitField({
 												marginTop: "0.25em",
 											}}
 											className="w-full px-3 py-2 border rounded-md border-gray-300"
+											disabled={disabled}
 										/>
 									</label>
 								</div>
@@ -116,3 +121,4 @@ export default function UnitField({
 		</div>
 	);
 }
+

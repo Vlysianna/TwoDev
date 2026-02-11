@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/helper/axios';
-import { ChevronDown, Calendar, Eye, EyeOff, EyeClosed } from 'lucide-react';
+import { ChevronDown, Calendar, Eye, EyeOff, EyeClosed, User } from 'lucide-react';
 import Sidebar from '@/components/SideAdmin';
 import Navbar from '@/components/NavAdmin';
 
@@ -171,7 +171,7 @@ const EditAsesi: React.FC = () => {
     <div className="min-h-screen bg-[#F7FAFC] flex">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar />
+        <Navbar title="Edit Akun Asesi" icon={<User size={20} />} />
 
         <main className="flex-1 overflow-auto p-6">
           {/* Breadcrumb */}

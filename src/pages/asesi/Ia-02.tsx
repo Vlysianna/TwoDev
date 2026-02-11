@@ -1,22 +1,28 @@
-import { ChevronLeft, Clock, AlertCircle, Monitor } from "lucide-react";
+import {
+  ChevronLeft,
+  Clock,
+  AlertCircle,
+  House,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import NavbarAsesi from "@/components/NavbarAsesi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import paths from "@/routes/paths";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
-import type { GroupIA, ResultIA02 } from "@/model/ia02-model";
+import type { ResultIA02 } from "@/model/ia02-model";
 import api from "@/helper/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAssesseeUrl, getAssessorUrl } from "@/lib/hashids";
+import ConfirmModal from "@/components/ConfirmModal";
+import { formatDateInputLocal } from "@/helper/format-date";
 
 export default function Ia02() {
-  const { id_result, id_assessment, id_asesi, id_asesor } =
+  const { id_result, id_schedule: id_assessment, id_asesi, id_asesor, mutateNavigation } =
     useAssessmentParams();
 
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ResultIA02>({
     id: 0,
     assessment: {
@@ -54,16 +60,13 @@ export default function Ia02() {
       updated_at: "0000-00-00T00:00:00.000Z",
     },
   });
-  const [groups, setGroups] = useState<GroupIA[]>([]);
-
-  const [selectedGroup, setSelectedGroup] = useState(0);
   const [assesseeQrValue, setAssesseeQrValue] = useState("");
   const [assessorQrValue, setAssessorQrValue] = useState("");
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   useEffect(() => {
     if (id_result && id_assessment) {
       fetchResult(id_result);
-      fetchGroup(id_assessment);
     }
   }, [user]);
 
@@ -82,25 +85,35 @@ export default function Ia02() {
         }
       }
     } catch (error: any) {
-      console.log("Error fetching result:", error);
+      // console.log("Error fetching result:", error);
       setError("Gagal memuat data asesmen");
     }
   };
 
-  const fetchGroup = async (id_assessment: string) => {
+  const handleViewPDF = async () => {
     try {
-      setLoading(true);
+      setGeneratingPdf(true);
       const response = await api.get(
-        `/assessments/ia-02/units/${id_assessment}`
+        `/assessments/ia-02/pdf/${id_assessment}`,
+        {
+          responseType: "blob",
+        }
       );
-      if (response.data.success) {
-        setGroups(response.data.data);
-      }
-    } catch (error: any) {
-      console.log("Error fetching group:", error);
-      setError("Gagal memuat data asesmen");
+
+      // Create blob and open in new tab
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+
+      // Clean up after a delay
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error("Error viewing PDF:", error);
+      setError("Gagal membuka PDF");
     } finally {
-      setLoading(false);
+      setGeneratingPdf(false);
     }
   };
 
@@ -111,9 +124,10 @@ export default function Ia02() {
       );
       if (response.data.success) {
         setAssesseeQrValue(getAssesseeUrl(Number(id_asesi)));
+        mutateNavigation();
       }
     } catch (error) {
-      console.log("Error fetching unit competencies:", error);
+      // console.log("Error fetching unit competencies:", error);
     }
   };
 
@@ -124,26 +138,40 @@ export default function Ia02() {
     "Seluruh proses kerja mengacu kepada SOP/WI yang dipersyaratkan (Jika Ada)",
   ];
 
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm mb-5">
+        <div className="bg-white rounded-lg shadow-sm">
           <NavbarAsesi
-            title="Ceklis Observasi Aktivitas di Tempat Kerja atau di Tempat Kerja Simulasi - FR.IA.02"
+            title="Tugas Praktik Demonstrasi - FR.IA.02"
             icon={
-              <Link
-                to={paths.asesi.assessment.ak01(id_assessment, id_asesor)}
+              <Link to={paths.asesi.dashboard} onClick={(e) => {
+                e.preventDefault(); // cegah auto navigasi
+                setIsConfirmOpen(true);
+              }}
                 className="text-gray-500 hover:text-gray-600"
               >
-                <ChevronLeft size={20} />
+                <House size={20} />
               </Link>
             }
           />
+          <ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+            onConfirm={() => {
+              setIsConfirmOpen(false);
+              navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+            }}
+            title="Konfirmasi"
+            message="Apakah Anda yakin ingin kembali ke Dashboard?"
+            confirmText="Ya, kembali"
+            cancelText="Batal"
+            type="warning"
+          />
         </div>
 
-        {/* Content */}
-        <div className="px-4 sm:px-6 pb-7">
+        <main className='m-4'>
           {/* Error State */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
@@ -152,45 +180,42 @@ export default function Ia02() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Header Info */}
             <div className="mb-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
                 {/* Kiri */}
-                <div className="flex-1">
-                  <h2 className="text-sm font-medium text-gray-800 flex items-center gap-2">
-                    Skema Sertifikasi ( Okupasi )
-                    <span className="text-gray-400 text-xs flex items-center gap-1">
-                      <Clock size={14} />
-                      {result.tuk}
-                    </span>
+                <div className="flex items-center space-x-3 flex-wrap">
+                  <h2 className="text-lg font-bold text-gray-800">
+                    Skema Sertifikasi {result.assessment.occupation.name}
                   </h2>
-
-                  {/* Asesi & Asesor */}
-                  <div className="text-sm text-gray-500 mt-1">
-                    Asesi:{" "}
-                    <span className="text-gray-800">
-                      {result.assessee.name}
-                    </span>{" "}
-                    &nbsp;|&nbsp; Asesor:{" "}
-                    <span className="text-gray-800">
-                      {result.assessor.name}
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-5 h-5 text-gray-400" />
+                    <span className="text-sm text-gray-600 capitalize">
+                      {result.tuk || "Sewaktu"}
                     </span>
                   </div>
                 </div>
 
                 {/* Kanan */}
-                <div className="flex-1 text-left sm:text-right">
-                  <div className="flex flex-col sm:items-end gap-1">
-                    {/* Skema + kode */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
-                      <p className="text-sm text-gray-800 font-medium">
-                        {result.assessment.occupation.name}
-                      </p>
-                      <p className="text-xs text-[#E77D35] bg-[#E77D3533] px-2 py-0.5 rounded w-fit">
-                        {result.assessment.code}
-                      </p>
-                    </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
+                  <span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
+                    {result.assessment.code}
+                  </span>
+                </div>
+              </div>
+
+              {/* Detail Asesi - Asesor - Waktu */}
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
+                {/* Asesi & Asesor */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+                  <div className="flex flex-wrap">
+                    <span className="xs-text mr-1">Asesi:</span>
+                    <span>{result.assessee.name || "N/A"}</span>
+                  </div>
+                  <div className="flex flex-wrap">
+                    <span className="xs-text mr-1">Asesor:</span>
+                    <span>{result.assessor.name || "N/A"}</span>
                   </div>
                 </div>
               </div>
@@ -206,108 +231,30 @@ export default function Ia02() {
                   <li key={index}>{item}</li>
                 ))}
               </ol>
-            </div>
-          </div>
-
-          {/* Skenario Tugas Praktik Demonstrasi */}
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-            <h3 className="text-sm font-medium text-gray-800 mb-6">
-              B. Skenario Tugas Praktik Demonstrasi
-            </h3>
-
-            {loading ? (
-              <div className="flex items-center justify-center h-40">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+              {/* PDF Options */}
+              <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={handleViewPDF}
+                  disabled={generatingPdf}
+                  className="flex items-center justify-center gap-2 bg-[#E77D35] cursor-pointer text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Lihat PDF
+                </button>
               </div>
-            ) : (
-              <>
-                {/* Tabs */}
-                <div className="flex gap-2 mb-6 overflow-x-auto">
-                  {groups.map((group, index) => (
-                    <button
-                      key={index}
-                      className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer whitespace-nowrap ${
-                        index === selectedGroup
-                          ? "bg-[#E77D35] text-white"
-                          : "text-gray-600 hover:text-gray-800"
-                      }`}
-                      onClick={() => setSelectedGroup(index)}
-                    >
-                      {group.name}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Unit Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {groups[selectedGroup]?.units?.map((unit, index) => (
-                    <div
-                      key={unit.id}
-                      className="bg-gray-50 rounded-lg p-4 border hover:shadow-sm transition-shadow"
-                    >
-                      <div className="flex items-center mb-3">
-                        <div className="rounded-lg mr-3 flex-shrink-0">
-                          <Monitor size={16} className="text-[#E77D35]" />
-                        </div>
-                        <h4 className="font-medium text-[#E77D35] text-sm">
-                          Unit kompetensi {1 + index}
-                        </h4>
-                      </div>
-
-                      <h5 className="font-medium text-gray-800 mb-2 text-sm leading-tight">
-                        {unit.title}
-                      </h5>
-
-                      <p className="text-xs text-gray-500">{unit.unit_code}</p>
-                    </div>
-                  )) ?? (
-                    <div className="col-span-full text-center py-8 text-gray-500">
-                      Tidak ada unit kompetensi tersedia untuk kelompok
-                      pekerjaan ini.
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Keterangan */}
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
-            <div className="pt-4">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Skenario Tugas Praktik Demonstrasi
-              </h3>
-              <p className="text-sm text-gray-700">
-                {groups[selectedGroup]?.scenario ??
-                  "Tidak ada skenario tugas praktik demonstrasi tersedia untuk kelompok pekerjaan ini."}
-              </p>
-              <ol className="list-disc list-inside text-sm text-gray-700 space-y-1 my-2">
-                {groups[selectedGroup]?.tools?.map((tool, index) => (
-                  <li key={index}>{tool.name}</li>
-                )) ?? (
-                  <li>
-                    Tidak ada alat dan perlengkapan yang tersedia untuk kelompok
-                    pekerjaan ini.
-                  </li>
-                )}
-              </ol>
-              <h3 className="text-xl font-semibold text-gray-800 my-3">
-                Waktu : {groups[selectedGroup]?.duration ?? "0"} Menit
-              </h3>
             </div>
           </div>
 
-          {/* Validasi anjay */}
+          {/* Validasi */}
           <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 items-start">
               {/* Bagian kiri (2 kolom) */}
-              <div className="lg:col-span-4 space-y-4">
+              <div className="lg:col-span-3 space-y-4">
                 {/* Asesi */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asesi
                   </label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <input
                       type="text"
                       placeholder="Nama Asesi"
@@ -318,8 +265,8 @@ export default function Ia02() {
                     <input
                       type="date"
                       placeholder="Tanggal"
-                      className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={result.ia02_header.updated_at.split("T")[0]}
+                      className="w-full sm:w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-2 sm:mt-0"
+                      value={formatDateInputLocal(result?.schedule?.end_date).slice(0, 10)}
                       disabled
                     />
                   </div>
@@ -330,7 +277,7 @@ export default function Ia02() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asesor
                   </label>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <input
                       type="text"
                       placeholder="Nama Asesor"
@@ -341,8 +288,8 @@ export default function Ia02() {
                     <input
                       type="date"
                       placeholder="Tanggal"
-                      className="w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={result.ia02_header.updated_at.split("T")[0]}
+                      className="w-full sm:w-48 px-3 py-2 bg-[#DADADA33] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mt-2 sm:mt-0"
+                      value={formatDateInputLocal(result?.schedule?.end_date).slice(0, 10)}
                       disabled
                     />
                   </div>
@@ -361,16 +308,27 @@ export default function Ia02() {
               </div>
 
               {/* QR Code Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:col-span-2">
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:col-span-3 gap-4">
                 <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                  {assesseeQrValue && (
-                    <QRCodeCanvas
-                      value={assesseeQrValue}
-                      size={156}
-                      className="w-40 h-40 object-contain"
-                    >
-                      {assesseeQrValue}
-                    </QRCodeCanvas>
+                  <h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesi</h4>
+                  {assesseeQrValue ? (
+                    <>
+                      <QRCodeCanvas
+                        value={assesseeQrValue}
+                        size={156}
+                        className="w-40 h-40 object-contain"
+                      >
+                        {assesseeQrValue}
+                      </QRCodeCanvas>
+                      <div className="text-green-600 font-semibold text-xs text-center">
+                        Sebagai Asesi, Anda sudah setuju
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+                      <span className="text-gray-400 text-xs text-center">QR Code Asesi</span>
+                      <span className="text-gray-400 text-xs text-center">Klik tombol "Generate QR"</span>
+                    </div>
                   )}
                   <span className="text-sm font-semibold text-gray-800">
                     {result.assessee.name}
@@ -382,25 +340,34 @@ export default function Ia02() {
                         if (!assesseeQrValue && assessorQrValue)
                           handleGenerateQRCode();
                       }}
-                      className={`block text-center bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-                        !assesseeQrValue && assessorQrValue
-                          ? "hover:bg-orange-600"
-                          : "cursor-not-allowed opacity-50"
-                      }`}
+                      className={`block text-center cursor-pointer bg-[#E77D35] text-white font-medium py-3 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${!assesseeQrValue && assessorQrValue
+                        ? "hover:bg-orange-600"
+                        : "cursor-not-allowed opacity-50"
+                        }`}
                     >
                       Setujui
                     </button>
                   )}
                 </div>
                 <div className="p-4 bg-white border rounded-lg w-full flex items-center justify-center py-10 flex-col gap-4">
-                  {assessorQrValue && (
-                    <QRCodeCanvas
-                      value={assessorQrValue}
-                      size={156}
-                      className="w-40 h-40 object-contain"
-                    >
-                      {assessorQrValue}
-                    </QRCodeCanvas>
+                  <h4 className="text-sm font-semibold text-gray-800 text-center">QR Code Asesor</h4>
+                  {assessorQrValue ? (
+                    <>
+                      <QRCodeCanvas
+                        value={assessorQrValue}
+                        size={156}
+                        className="w-40 h-40 object-contain"
+                      >
+                        {assessorQrValue}
+                      </QRCodeCanvas>
+                      <div className="text-green-600 font-semibold text-xs text-center">
+                        Sebagai Asesor, Anda sudah setuju
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-40 h-40 bg-gray-100 flex items-center justify-center flex-col gap-1">
+                      <span className="text-gray-400 text-xs text-center">Menunggu persetujuan asesi</span>
+                    </div>
                   )}
                   <span className="text-sm font-semibold text-gray-800">
                     {result.assessor.name}
@@ -409,7 +376,7 @@ export default function Ia02() {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

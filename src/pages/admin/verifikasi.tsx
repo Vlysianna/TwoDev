@@ -1,8 +1,24 @@
 import Navbar from '../../components/NavAdmin';
 import Sidebar from '../../components/SideAdmin';
-import { Eye, SquareCheck } from "lucide-react";
+import {
+  Eye,
+  SquareCheck,
+  Download,
+  X,
+  Check,
+  Clock,
+  CheckCircle,
+  Calendar,
+  RefreshCw,
+  FileText,
+  FileX,
+  ZoomIn,
+  File
+} from "lucide-react";
 import { useEffect, useState, useCallback } from 'react';
 import api from '@/helper/axios';
+import { formatDateJakartaUS24 } from '@/helper/format-date';
+import { useLocation } from 'react-router-dom';
 import { useToast } from '@/components/ui/useToast';
 
 type ResultDoc = {
@@ -15,125 +31,310 @@ type ResultDoc = {
   family_card?: string | null;
   id_card?: string | null;
   approved?: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
 type ResultDetail = {
   id: number;
   assessee?: { user?: { full_name?: string; email?: string } } | null;
   assessor?: { user?: { full_name?: string; email?: string } } | null;
-  docs?: ResultDoc[] | Record<string, string | null> | null;
+  docs?: ResultDoc | null;
   created_at?: string;
   approved?: boolean;
 };
 
 type PendingDoc = ResultDoc & { result?: ResultDetail };
 
+// Fungsi untuk menentukan jenis file berdasarkan URL/extension
+const getFileType = (url: string): 'image' | 'pdf' | 'unknown' => {
+  if (!url) return 'unknown';
+
+  const extension = url.split('.').pop()?.toLowerCase();
+  if (['jpg', 'jpeg', 'png'].includes(extension || '')) {
+    return 'image';
+  } else if (extension === 'pdf') {
+    return 'pdf';
+  }
+  return 'unknown';
+};
+
 export default function VerifikasiPage() {
   const [items, setItems] = useState<PendingDoc[]>([]);
   const [filter, setFilter] = useState<'pending' | 'approved'>('pending');
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<ResultDetail | null>(null);
+  const [docDetails, setDocDetails] = useState<ResultDoc | any>(null);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   const toast = useToast();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const queryAssessor = searchParams.get('assessor');
+  const querySchedule = searchParams.get('schedule');
 
   const fetchPending = useCallback(async () => {
     try {
       setLoading(true);
-  const res = await api.get(`/assessments/verification/${filter === 'pending' ? 'pending' : 'approved'}`);
-  if (res.data.success) setItems(res.data.data || []);
+      const res = await api.get(`/assessments/verification/${filter === 'pending' ? 'pending' : 'approved'}` + (querySchedule ? `/${querySchedule}` : ''));
+      if (res.data.success) {
+        let all = res.data.data || [];
+        if (queryAssessor) {
+          const assessorIdNum = Number(queryAssessor);
+          all = all.filter((i: any) => Number(i.result?.assessor?.id) === assessorIdNum);
+        }
+        setItems(all);
+      }
     } catch (err) {
       console.error(err);
+      toast.show({ title: 'Error', description: 'Gagal memuat data verifikasi', type: 'error' });
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, toast]);
 
   useEffect(() => { void fetchPending(); }, [fetchPending]);
 
   const openDetail = async (resultId: number) => {
     try {
-      const res = await api.get(`/assessments/verification/${resultId}`);
-      if (res.data.success) setSelected(res.data.data);
-    } catch (err) { console.error(err); }
+      setImageErrors(new Set());
+      const res = await api.get(`/assessments/apl-01/result/docs/${resultId}`);
+      if (res.data.success) {
+        setDocDetails(res.data.data);
+        const resultData = items.find(item =>
+          (item.result_id === resultId) || (item.result?.id === resultId)
+        )?.result;
+        setSelected(resultData || { id: resultId });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.show({ title: 'Error', description: 'Gagal mengambil detail dokumen', type: 'error' });
+    }
   };
 
   const approve = async (resultId: number) => {
     try {
       const res = await api.post(`/assessments/verification/${resultId}/approve`);
       if (res.data.success) {
-        // refresh
         fetchPending();
         setSelected(null);
-  toast.show({ title: 'Berhasil', description: 'Verifikasi disetujui', type: 'success' });
+        setDocDetails(null);
+        setSelectedImage(null);
+        setSelectedPdf(null);
+        toast.show({ title: 'Berhasil', description: 'Verifikasi disetujui', type: 'success' });
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      toast.show({ title: 'Error', description: 'Gagal menyetujui verifikasi', type: 'error' });
+    }
   };
+
+  const handleImageError = (url: string) => {
+    setImageErrors(prev => new Set(prev).add(url));
+  };
+
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await api.get(import.meta.env.VITE_API_URL + '/' + url, { responseType: 'blob' });
+      const blob = new Blob([response.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast.show({ title: 'Error', description: 'Gagal mengunduh file', type: 'error' });
+    }
+  };
+
+  // Fungsi untuk menangani klik tombol "Lihat"
+  const handleViewFile = (url: string) => {
+    const fileType = getFileType(url);
+
+    if (fileType === 'image') {
+      setSelectedImage(url);
+      setSelectedPdf(null);
+    } else if (fileType === 'pdf') {
+      // Buka PDF di tab baru
+      window.open(import.meta.env.VITE_API_URL + '/' + url, '_blank');
+    }
+  };
+
+  // Fungsi untuk render preview dokumen berdasarkan jenis file
+  const renderDocumentPreview = (url: string, label: string) => {
+    const fileType = getFileType(url);
+
+    if (fileType === 'image') {
+      return (
+        <div className="p-4 h-48 overflow-hidden flex items-center justify-center bg-gray-50">
+          {!imageErrors.has(url) ? (
+            <img
+              src={import.meta.env.VITE_API_URL + '/' + url}
+              alt={label}
+              className="max-h-full max-w-full object-contain"
+              onError={() => handleImageError(url)}
+            />
+          ) : (
+            <div className="text-center p-4">
+              <FileX size={32} className="text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">Gagal memuat gambar</p>
+            </div>
+          )}
+        </div>
+      );
+    } else if (fileType === 'pdf') {
+      return (
+        <div className="p-4 h-48 flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
+          <File size={48} className="text-red-500 mb-3" />
+          <p className="text-sm font-medium text-gray-700 mb-2">File PDF</p>
+          <p className="text-xs text-gray-500 text-center">Klik tombol lihat untuk membuka file PDF</p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="p-4 h-48 flex flex-col items-center justify-center bg-gray-50">
+          <FileX size={32} className="text-gray-400 mx-auto mb-2" />
+          <p className="text-sm text-gray-500">Format file tidak dikenali</p>
+        </div>
+      );
+    }
+  };
+
+  // Daftar field dokumen yang akan ditampilkan
+  const documentFields = [
+    { key: 'student_card', label: 'Kartu Pelajar' },
+    { key: 'family_card', label: 'Kartu Keluarga / KTP' },
+    { key: 'id_card', label: 'Pasfoto 3 x 4' },
+    { key: 'school_report_card', label: 'Rapor Sekolah' },
+    { key: 'field_work_practice_certificate', label: 'Sertifikat Praktik Kerja Lapangan' },
+  ];
 
   return (
     <>
-
-      <div className="flex min-h-screen bg-gray-50">
-
-        <div className="inset-y-0 left-0 lg:w-64 md:w-0 bg-white shadow-md ">
-          <Sidebar />
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 lg:ml-0 md:ml-0">
-          {/* Navbar - Sticky di atas */}
-          <div className="sticky top-0 z-10 bg-white shadow-sm">
-            <Navbar />
-          </div>
-
-          {/* Konten Utama */}
-          <div className="p-6">
+      <div className="min-h-screen bg-[#F7FAFC] flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar title="Verifikasi" icon={<Check size={20} />} />
+          <div className="flex-1 overflow-auto p-4 lg:p-6">
             <main>
               <div className="text-sm text-gray-500 mb-2">Dashboard / Verifikasi Approval</div>
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">Verifikasi Approval</h1>
+              <h1 className="text-xl lg:text-2xl font-bold text-gray-800 mb-2">Verifikasi Approval</h1>
 
-              <div className="flex justify-end">
-                <div className="flex items-center space-x-2 mb-6">
-                  <div className="flex rounded-md overflow-hidden border">
-                    <button onClick={() => setFilter('pending')} className={`px-3 py-1 text-sm ${filter === 'pending' ? 'bg-orange-500 text-white' : 'text-orange-600 bg-white'}`}>Pending</button>
-                    <button onClick={() => setFilter('approved')} className={`px-3 py-1 text-sm ${filter === 'approved' ? 'bg-orange-500 text-white' : 'text-orange-600 bg-white'}`}>Approved</button>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex p-1 rounded-lg bg-gray-100/80 shadow-sm">
+                    <button
+                      onClick={() => setFilter('pending')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${filter === 'pending'
+                        ? 'bg-white text-orange-600 shadow-sm ring-1 ring-orange-100'
+                        : 'text-gray-600 hover:text-orange-600'}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} />
+                        <span>Pending</span>
+                        {filter === 'pending' && items.length > 0 && (
+                          <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-xs">
+                            {items.length}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setFilter('approved')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${filter === 'approved'
+                        ? 'bg-white text-orange-600 shadow-sm ring-1 ring-orange-100'
+                        : 'text-gray-600 hover:text-orange-600'}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <CheckCircle size={16} />
+                        <span>Approved</span>
+                        {filter === 'approved' && items.length > 0 && (
+                          <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-xs">
+                            {items.length}
+                          </span>
+                        )}
+                      </div>
+                    </button>
                   </div>
-                  <button onClick={fetchPending} className="flex items-center px-4 text-sm font-medium text-orange-600 border border-orange-500 rounded hover:bg-orange-100 transition">
+                  <button
+                    onClick={fetchPending}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all shadow-sm"
+                  >
+                    <RefreshCw size={16} className="animate-spin" />
                     Refresh
                   </button>
                 </div>
               </div>
 
-              <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+              <div className="overflow-hidden bg-white shadow-md rounded-xl border border-gray-200">
                 <table className="min-w-full table-auto text-left">
                   <thead>
-                    <tr className="bg-orange-500 text-white text-sm">
-                      <th className="px-6 py-3">Asesi</th>
-                      <th className="px-6 py-3">Bukti Upload</th>
-                      <th className="px-6 py-3">Tanggal</th>
-                      <th className="px-6 py-3 text-center">Aksi</th>
+                    <tr className="bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm">
+                      <th className="px-4 py-4 lg:px-6 font-medium">Asesi</th>
+                      <th className="px-4 py-4 lg:px-6 hidden sm:table-cell font-medium">Bukti Upload</th>
+                      <th className="px-4 py-4 lg:px-6 hidden md:table-cell font-medium">Tanggal</th>
+                      <th className="px-4 py-4 lg:px-6 text-center font-medium">Aksi</th>
                     </tr>
                   </thead>
                   <tbody className="text-sm text-gray-700">
-                      {loading ? (
+                    {loading ? (
                       <tr><td colSpan={4} className="p-6 text-center">Memuat...</td></tr>
                     ) : items.length === 0 ? (
                       <tr><td colSpan={4} className="p-6 text-center">Tidak ada verifikasi</td></tr>
                     ) : (
                       items.map((row) => (
-                        <tr key={row.id} className={` ${row.id % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
-                          <td className="px-6 py-4 whitespace-nowrap">{row.result?.assessee?.user?.full_name || row.result?.assessee?.user?.email}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{row.purpose || 'Bukti APL1'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{new Date(row.result?.created_at || '').toLocaleString()}</td>
-                          <td className="px-6 py-4 text-center space-x-3">
-                            <button onClick={() => { const id = row.result_id || row.result?.id; if (id) openDetail(id); }} className="text-orange-500 hover:text-orange-700" title="Lihat">
-                              <Eye size={18} />
-                            </button>
-                            {filter === 'pending' ? (
-                              <button onClick={() => { const id = row.result_id || row.result?.id; if (id) approve(id); }} className="text-orange-500 hover:text-orange-700" title="Setujui">
-                                <SquareCheck size={18} />
+                        <tr key={row.id} className={`group transition-colors ${row.id % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'} hover:bg-orange-50/50`}>
+                          <td className="px-4 py-4 lg:px-6">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                                {(row.result?.assessee?.user?.full_name || '?')[0].toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">{row.result?.assessee?.user?.full_name || 'Tidak tersedia'}</span>
+                                <span className="text-xs text-gray-500">{row.result?.assessee?.user?.email || 'Email tidak tersedia'}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 lg:px-6 hidden sm:table-cell">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                              {row.purpose || 'Bukti APL1'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 lg:px-6 hidden md:table-cell">
+                            <div className="flex items-center text-gray-500 text-sm">
+                              <Calendar size={14} className="mr-2" />
+                              {formatDateJakartaUS24(row.result?.created_at || '')}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 lg:px-6">
+                            <div className="flex items-center justify-center space-x-2">
+                              <button
+                                onClick={() => { const id = row.result_id || row.result?.id; if (id) openDetail(id); }}
+                                className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-100 rounded-lg transition-colors"
+                                title="Lihat Detail"
+                              >
+                                <Eye size={18} />
                               </button>
-                            ) : (
-                              <span className="text-green-600 font-medium">Terverifikasi</span>
-                            )}
+                              {filter === 'pending' ? (
+                                <button
+                                  onClick={() => { const id = row.result_id || row.result?.id; if (id) approve(id); }}
+                                  className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                  title="Setujui Verifikasi"
+                                >
+                                  <SquareCheck size={18} />
+                                </button>
+                              ) : (
+                                <span className="flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                  <CheckCircle size={14} className="mr-1" />
+                                  Terverifikasi
+                                </span>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -143,55 +344,157 @@ export default function VerifikasiPage() {
               </div>
 
               {/* Detail Modal */}
-              {selected && (
-                <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-white/5 z-50">
-                  <div className="bg-white p-6 rounded-lg max-w-3xl w-full">
-                    <div className="flex justify-between items-start">
-                      <h2 className="text-lg font-semibold">Detail Verifikasi</h2>
-                      <button onClick={() => setSelected(null)} className="text-gray-500">Tutup</button>
+              {(selected && docDetails) && (
+                <div className="fixed inset-0 flex items-center justify-center backdrop-blur bg-black/60 z-50 p-4">
+                  <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                    {/* Modal Header */}
+                    <div className="p-6 border-b bg-gray-50/80">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h2 className="text-xl font-semibold text-gray-900">Detail Verifikasi</h2>
+                          <p className="text-sm text-gray-500 mt-1">Review dokumen dan informasi asesi</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSelected(null);
+                            setDocDetails(null);
+                            setImageErrors(new Set());
+                            setSelectedImage(null);
+                            setSelectedPdf(null);
+                          }}
+                          className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-all"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+
+                      {/* Asesi Info Card */}
+                      <div className="mt-4 flex items-center bg-white p-4 rounded-lg border space-x-4">
+                        <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-semibold text-lg">
+                          {(selected?.assessee?.user?.full_name || '?')[0].toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">{selected?.assessee?.user?.full_name || 'Tidak tersedia'}</h3>
+                          <p className="text-sm text-gray-500">{selected?.assessee?.user?.email || 'Email tidak tersedia'}</p>
+                          <div className="flex items-center mt-2">
+                            <FileText size={14} className="text-orange-500 mr-2" />
+                            <span className="text-sm text-gray-600">{docDetails.purpose || 'Tidak tersedia'}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-4">
-                      <p className="font-medium">Asesi: {selected?.assessee?.user?.full_name}</p>
-                      <p className="text-sm text-gray-600">Email: {selected?.assessee?.user?.email}</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                        {selected?.docs && (
-                          // docs can be array or object
-                          Array.isArray(selected.docs) ? (
-                            (selected.docs as ResultDoc[]).map((d) => (
-                              <div key={d.id}>
-                                <p className="text-sm font-medium">{d.purpose || 'Dokumen'}</p>
-                                {/* try common fields */}
-                                {d.school_report_card && <img src={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${d.school_report_card}`} alt="school_report_card" className="max-h-48 object-contain" />}
-                                {d.field_work_practice_certificate && <img src={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${d.field_work_practice_certificate}`} alt="field_work_practice_certificate" className="max-h-48 object-contain" />}
-                                {d.student_card && <img src={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${d.student_card}`} alt="student_card" className="max-h-48 object-contain" />}
-                                {d.family_card && <img src={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${d.family_card}`} alt="family_card" className="max-h-48 object-contain" />}
-                                {d.id_card && <img src={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${d.id_card}`} alt="id_card" className="max-h-48 object-contain" />}
-                              </div>
-                            ))
-                          ) : (
-                            Object.entries(selected.docs as Record<string, string>).map(([k, v]) => (
-                              k !== 'id' && k !== 'result_id' && k !== 'purpose' && k !== 'approved' && v ? (
-                                <div key={k}>
-                                  <p className="text-sm font-medium">{k}</p>
-                                  <img src={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${v}`} alt={k} className="max-h-48 object-contain" />
+
+                    {/* Modal Body - Scrollable Content */}
+                    <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+                        {documentFields.map((field) => (
+                          docDetails[field.key] ? (
+                            <div key={field.key} className="group bg-white border rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all">
+                              <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+                                <div className="flex items-center space-x-2">
+                                  <FileText size={16} className="text-orange-500" />
+                                  <p className="text-sm font-medium text-gray-700">{field.label}</p>
+                                  {/* Badge jenis file */}
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getFileType(docDetails[field.key]) === 'pdf'
+                                      ? 'bg-red-100 text-red-800'
+                                      : 'bg-blue-100 text-blue-800'
+                                    }`}>
+                                    {getFileType(docDetails[field.key]) === 'pdf' ? 'PDF' : 'Gambar'}
+                                  </span>
                                 </div>
-                              ) : null
-                            ))
+                                <div className="flex items-center space-x-1">
+                                  <button
+                                    onClick={() => handleViewFile(docDetails[field.key])}
+                                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    title={
+                                      getFileType(docDetails[field.key]) === 'pdf'
+                                        ? "Buka PDF"
+                                        : "Lihat gambar"
+                                    }
+                                  >
+                                    <ZoomIn size={16} />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const url = docDetails[field.key];
+                                      if (!url) return;
+                                      const filename = url.split('/').pop() || `${field.key}`;
+                                      handleDownload(url, filename);
+                                    }}
+                                    className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                                    title="Download"
+                                  >
+                                    <Download size={16} />
+                                  </button>
+                                </div>
+                              </div>
+                              {renderDocumentPreview(docDetails[field.key], field.label)}
+                            </div>
+                          ) : (
+                            <div key={field.key} className="bg-gray-50 border rounded-xl p-4 flex items-center justify-center">
+                              <div className="text-center">
+                                <FileX size={24} className="text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm font-medium text-gray-500">{field.label}</p>
+                                <p className="text-xs text-gray-400 mt-1">Dokumen tidak tersedia</p>
+                              </div>
+                            </div>
                           )
-                        )}
-                      </div>
-                      <div className="mt-4 flex justify-end">
-                        <button onClick={() => selected && approve(selected.id)} className="bg-[#E77D35] text-white px-4 py-2 rounded">Approve</button>
+                        ))}
                       </div>
                     </div>
+
+                    {/* Modal Footer */}
+                    {filter === 'pending' && (
+                      <div className="p-6 border-t bg-gray-50/80">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-gray-500">Pastikan semua dokumen telah diperiksa sebelum melakukan verifikasi</p>
+                          <button
+                            onClick={() => selected && approve(selected.id)}
+                            className="flex items-center px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-medium shadow-sm hover:shadow-md transition-all active:scale-95"
+                          >
+                            <CheckCircle size={18} className="mr-2" />
+                            Verifikasi Sekarang
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
+              {/* Modal Gambar Besar (hanya untuk gambar) */}
+              {selectedImage && (
+                <div className="fixed inset-0 flex items-center justify-center backdrop-blur bg-black/80 z-50 p-4">
+                  <div className="relative max-w-[90vw] max-h-full">
+                    <button
+                      onClick={() => setSelectedImage(null)}
+                      className="absolute -top-10 right-0 p-2 text-white hover:text-orange-400 transition-colors"
+                    >
+                      <X size={24} />
+                    </button>
+                    <div className="bg-black rounded-lg overflow-hidden">
+                      <img
+                        src={import.meta.env.VITE_API_URL + '/' + selectedImage}
+                        alt="Preview dokumen"
+                        className="max-w-full max-h-[80vh] object-contain"
+                      />
+                    </div>
+                    <div className="mt-4 flex justify-center">
+                      <a
+                        href={import.meta.env.VITE_API_URL + '/' + selectedImage}
+                        download
+                        className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                      >
+                        <Download size={18} className="mr-2" />
+                        Download Gambar
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
             </main>
           </div>
         </div>
-
       </div>
     </>
   );

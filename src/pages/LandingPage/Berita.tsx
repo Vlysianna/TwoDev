@@ -1,5 +1,6 @@
 import FootLanding from "../../components/FootLanding";
 import NavLanding from "../../components/NavLanding";
+import { getAssetPath } from '@/utils/assetPath';
 
 function Berita() {
   const berita = [
@@ -10,7 +11,7 @@ function Berita() {
     tanggal: "23-08-24",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/bgsklh.png",
+    gambar: getAssetPath('/bgsklh.png'),
   },
   {
     id: 2,
@@ -19,7 +20,7 @@ function Berita() {
     tanggal: "5 Feb",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/bgsklh.png",
+    gambar: getAssetPath('/bgsklh.png'),
   },
   {
     id: 3,
@@ -28,7 +29,7 @@ function Berita() {
     tanggal: "3 Feb",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/berita-kecil.jpg",
+    gambar: getAssetPath('/berita-kecil.jpg'),
   },
   // tambahkan berita lainnya
   {
@@ -38,7 +39,7 @@ function Berita() {
     tanggal: "3 Feb",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/berita-kecil.jpg",
+    gambar: getAssetPath('/berita-kecil.jpg'),
   },
   {
     id: 3,
@@ -47,7 +48,7 @@ function Berita() {
     tanggal: "3 Feb",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/berita-kecil.jpg",
+    gambar: getAssetPath('/berita-kecil.jpg'),
   },
   {
     id: 3,
@@ -56,7 +57,7 @@ function Berita() {
     tanggal: "3 Feb",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/berita-kecil.jpg",
+    gambar: getAssetPath('/berita-kecil.jpg'),
   },
   {
     id: 3,
@@ -65,7 +66,7 @@ function Berita() {
     tanggal: "3 Feb",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/berita-kecil.jpg",
+    gambar: getAssetPath('/berita-kecil.jpg'),
   },
   {
     id: 3,
@@ -74,7 +75,7 @@ function Berita() {
     tanggal: "3 Feb",
     deskripsi:
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry...",
-    gambar: "/berita-kecil.jpg",
+    gambar: getAssetPath('/berita-kecil.jpg'),
   },
   {
     id: 3,

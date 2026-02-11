@@ -14,7 +14,7 @@ export interface CreateAssesseeAPL1Payload {
   address: string;
   postal_code: string;
   educational_qualifications: string;
-  jobs?: Array<{
+  job?: Array<{
     institution_name: string;
     address: string;
     postal_code: string;

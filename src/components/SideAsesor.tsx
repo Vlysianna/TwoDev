@@ -1,13 +1,19 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getAssetPath } from '@/utils/assetPath';
 import {
     LogOut,
     Menu,
     X,
     FileText,
+    LayoutDashboard,
+    AlertCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import paths from "@/routes/paths";
+import { useAuth } from "@/contexts/AuthContext";
+import { useBiodataCheck } from "@/hooks/useBiodataCheck";
+import ConfirmModal from "./ConfirmModal";
 
 interface MenuItem {
     name: string;
@@ -24,18 +30,44 @@ interface MenuItemProps {
 
 const SidebarAsesor: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+    const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
     const location = useLocation();
+    const navigate = useNavigate();
+    const { logout } = useAuth();
+    const { isCheckingBiodata, biodataComplete, refreshBiodataCheck } = useBiodataCheck();
 
-    const menuItems: MenuItem[] = [
-        {
-            name: "Biodata Asesor",
-            icon: FileText,
-            section: "main",
-            path: paths.asesor.biodata,
-        },
+    // Refresh biodata check when navigating to dashboard routes
+    // useEffect(() => {
+    //     if (location.pathname.includes('/asesor/dashboard') && refreshBiodataCheck) {
+    //         refreshBiodataCheck();
+    //     }
+    // }, [location.pathname, refreshBiodataCheck]);
 
+    const getMenuItems = (): MenuItem[] => {
+        const baseItems: MenuItem[] = [];
 
-    ];
+        if (biodataComplete) {
+            // If biodata is complete, show Dashboard and other menus
+            baseItems.push({
+                name: "Dashboard",
+                icon: LayoutDashboard,
+                section: "main",
+                path: paths.asesor.dashboardAsesor,
+            });
+        } else {
+            // If biodata is not complete, only show Biodata menu
+            baseItems.push({
+                name: "Biodata Asesor",
+                icon: FileText,
+                section: "main",
+                path: paths.asesor.biodata,
+            });
+        }
+
+        return baseItems;
+    };
+
+    const menuItems = getMenuItems();
 
     const handleItemClick = (): void => {
         // Close mobile menu when item is clicked
@@ -46,10 +78,12 @@ const SidebarAsesor: React.FC = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
-    const handleLogout = (): void => {
-        // Add logout logic here
-        console.log("Logout clicked");
-        setIsMobileMenuOpen(false);
+
+
+    const confirmLogout = (): void => {
+        setShowLogoutModal(false);
+        logout();
+        navigate(paths.auth.login);
     };
 
     const MenuItem: React.FC<MenuItemProps> = ({ item, isActive, onClick }) => {
@@ -58,7 +92,7 @@ const SidebarAsesor: React.FC = () => {
         return (
             <Link
                 to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 relative
+                className={`flex items-center space-x-3 px-4 py-4 cursor-pointer transition-all duration-200 relative
     ${isActive
                         ? "bg-[#ffffff80] text-white font-medium"
                         : ""}
@@ -83,7 +117,7 @@ const SidebarAsesor: React.FC = () => {
                 <Link to={paths.asesor.root} className="p-6">
                     <div className="h-20 flex items-center justify-center">
                         <img
-                            src="/twodev-putih.svg"
+                            src={getAssetPath('/twodev-putih.svg')}
                             alt="Logo"
                             className="h-full object-contain"
                         />
@@ -94,8 +128,8 @@ const SidebarAsesor: React.FC = () => {
 
             {/* Main Menu Items */}
             <div className="flex-1 flex flex-col ">
-                <div className="py-2">
-                    {menuItems.map((item) => (
+                <div className="py-3">
+                    {isCheckingBiodata || menuItems.map((item) => (
                         <MenuItem
                             key={item.name}
                             item={item}
@@ -104,21 +138,23 @@ const SidebarAsesor: React.FC = () => {
                         />
                     ))}
                 </div>
+
+                {/* Informative message when biodata is incomplete */}
+                {isCheckingBiodata || !biodataComplete && (
+                    <div className="mx-4 mb-4 p-3 bg-[#ffffff20] rounded-lg border border-[#ffffff40]">
+                        <div className="flex items-center space-x-2 mb-2">
+                            <AlertCircle size={16} className="text-yellow-300" />
+                            <span className="text-xs font-medium text-white">Biodata Diperlukan</span>
+                        </div>
+                        <p className="text-xs text-[#ffffffcc] leading-relaxed">
+                            Silakan lengkapi biodata Anda untuk mengakses Dashboard dan semua fitur asesor.
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Separator Line */}
-            <div className="mx-4 border-t border-orange-400"></div>
-
-            {/* Logout */}
-            <div className="p-2">
-                <button
-                    className="w-full flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 text-orange-100 hover:bg-orange-500 hover:text-white"
-                    onClick={handleLogout}
-                >
-                    <LogOut size={18} className="flex-shrink-0" />
-                    <span className="text-sm font-medium">Logout</span>
-                </button>
-            </div>
+            <div className="border-t border-orange-400"></div>
         </>
     );
 
@@ -126,7 +162,7 @@ const SidebarAsesor: React.FC = () => {
         <>
             {/* Mobile Menu Button - Hidden on desktop */}
             <button
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-orange-500 text-white rounded-md shadow-lg"
+                className="lg:hidden fixed top-6 left-4 z-[60] p-2 bg-orange-500 text-white rounded-md shadow-lg"
                 onClick={toggleMobileMenu}
             >
                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -135,23 +171,34 @@ const SidebarAsesor: React.FC = () => {
             {/* Overlay for mobile */}
             {isMobileMenuOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 z-30"
+                    className="lg:hidden fixed inset-0 z-[55]"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
 
             {/* SidebarAsesor - Always visible on desktop, slide on mobile */}
-            <div className={`
-  fixed inset-y-0 left-0 z-40
-  w-64 h-screen bg-[#E77D35] text-white flex flex-col
-  transform transition-transform duration-300 ease-in-out lg:transform-none
-  ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                        <div className={`
+    fixed top-0 left-0 h-full w-64 bg-[#E77D35] text-white shadow-lg z-[58] transform transition-transform duration-300 ease-in-out
+    ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
 `}>
                 <SidebarAsesorContent />
             </div>
 
             {/* Spacer for desktop layout */}
             <div className="hidden lg:block w-64 flex-shrink-0" />
+
+            {/* Logout Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={confirmLogout}
+                title="Yakin ingin keluar?"
+                message="Logout akan mengakhiri sesi Anda saat ini, dan Anda perlu login kembali untuk melanjutkan aktivitas."
+                confirmText="Keluar"
+                cancelText="Batalkan"
+                type="danger"
+                icon={<img src={getAssetPath('/img/gambarprialogout.svg')} alt="Logout" className="w-16 h-16" />}
+            />
         </>
     );
 };

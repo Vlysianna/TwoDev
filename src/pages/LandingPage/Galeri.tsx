@@ -1,13 +1,14 @@
 import FootLanding from "../../components/FootLanding";
 import NavLanding from "../../components/NavLanding";
 import { Image as ImageIcon } from "lucide-react"; // ikon placeholder
+import { getAssetPath } from '@/utils/assetPath';
 
 function Galeri() {
   // Data gambar bisa diganti di sini
   const galeriImages = [
-    { src: '/bgsklh.png', alt: 'Berita 1' },
-    { src: '/bgsklh.png', alt: 'Berita 2' },
-    { src: '/bgsklh.png', alt: 'Berita 3' },
+    { src: getAssetPath('/bgsklh.png'), alt: 'Berita 1' },
+    { src: getAssetPath('/bgsklh.png'), alt: 'Berita 2' },
+    { src: getAssetPath('/bgsklh.png'), alt: 'Berita 3' },
     { src: '/bgsklh.png', alt: 'Berita 4' },
     { src: '/bgsklh.png', alt: 'Berita 1' },
     { src: '/bgsklh.png', alt: 'Berita 2' },
@@ -23,7 +24,7 @@ function Galeri() {
         {/* Section Hero */}
         <section className="relative min-h-screen">
            <img
-            src="/bgsklh.png"
+            src={getAssetPath('/bgsklh.png')}
             alt=""
             className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />
@@ -60,7 +61,7 @@ function Galeri() {
                 </div>
                 <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-white to-transparent flex items-end justify-start opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <img
-                    src="/twodev-teks.svg"
+                    src={getAssetPath('/twodev-teks.svg')}
                     alt="Wodev"
                     className="h-6 w-auto mb-4 ml-4"
                   />

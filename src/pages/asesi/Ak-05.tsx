@@ -1,0 +1,344 @@
+import { useState, useEffect } from "react";
+import { AlertCircle, Clock, House } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import paths from "@/routes/paths";
+import { useAuth } from "@/contexts/AuthContext";
+import api from "@/helper/axios";
+import { QRCodeCanvas } from "qrcode.react";
+import { getAssessorUrl } from "@/lib/hashids";
+import type { AK05ResponseData } from "@/model/ak05-model";
+import NavbarAsesi from "@/components/NavbarAsesi";
+import { useAssessmentParams } from "@/components/AssessmentAsesiProvider";
+import ConfirmModal from "@/components/ConfirmModal";
+import { formatDateInputLocal } from "@/helper/format-date";
+
+export default function CekAk05() {
+	const { id_result, id_asesor } = useAssessmentParams();
+	const { user } = useAuth();
+	const navigate = useNavigate();
+
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [data, setData] = useState<AK05ResponseData | null>(null);
+	const [qrValue, setQrValue] = useState("");
+
+	const [catatan, setCatatan] = useState("");
+	const [negatifPositif, setNegatifPositif] = useState("");
+	const [penolakan, setPenolakan] = useState("");
+	const [saran, setSaran] = useState("");
+	const [deskripsi, setDeskripsi] = useState("");
+
+	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [saving, setSaving] = useState(false);
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+	useEffect(() => {
+		fetchData();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user]);
+
+	const fetchData = async () => {
+		try {
+			setLoading(true);
+			setError(null);
+			const response = await api.get(`/assessments/ak-05/${id_result}`);
+			const rawData = response.data;
+			if (rawData.success) {
+				setData(rawData.data);
+				// console.log(rawData.data);
+
+				// Set form values from API data
+				setNegatifPositif(
+					rawData.data.result.result_ak05.negative_positive_aspects || ""
+				);
+				setPenolakan(rawData.data.result.result_ak05.rejection_notes || "");
+				setSaran(rawData.data.result.result_ak05.improvement_suggestions || "");
+				setCatatan(rawData.data.result.result_ak05.notes || "");
+				setDeskripsi(rawData.data.result.result_ak05.description || "");
+
+				// jika sudah approve, langsung set QR
+				if (rawData.data.result.result_ak05.approved_assessor) {
+					setQrValue(getAssessorUrl(Number(id_asesor)));
+				}
+			} else {
+				setError("Gagal memuat data");
+			}
+		} catch (err) {
+			console.error("Error fetching data:", err);
+			setError("Terjadi kesalahan saat memuat data");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleSaveClick = () => {
+		setShowConfirmModal(true);
+	};
+
+	const handleConfirmSave = async () => {
+		setSaving(true);
+		// Jika perlu, bisa tambahkan API call di sini untuk update status selesai
+		setShowConfirmModal(false);
+		setSaving(false);
+		navigate(paths.asesi.dashboard);
+	};
+
+	if (loading) {
+		return (
+			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E77D35]"></div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+				<div className="text-center">
+					<AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+					<h2 className="text-xl font-semibold text-gray-800 mb-2">Error</h2>
+					<p className="text-gray-600 mb-4">{error}</p>
+					<button
+						onClick={fetchData}
+						className="bg-[#E77D35] text-white px-4 py-2 rounded hover:bg-orange-600"
+					>
+						Coba Lagi
+					</button>
+				</div>
+			</div>
+		);
+	}
+
+	if (!data) {
+		return null;
+	}
+	return (
+		<div className="min-h-screen bg-gray-50">
+			<div className="mx-auto">
+				<div className="bg-white rounded-lg shadow-sm">
+					<NavbarAsesi
+						title="Laporan Asesmen - FR.AK.05"
+						icon={
+							<Link to={paths.asesi.dashboard} onClick={(e) => {
+								e.preventDefault(); // cegah auto navigasi
+								setIsConfirmOpen(true);
+							}}
+								className="text-gray-500 hover:text-gray-600"
+							>
+								<House size={20} />
+							</Link>
+						}
+					/>
+					<ConfirmModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}
+						onConfirm={() => {
+							setIsConfirmOpen(false);
+							navigate(paths.asesi.dashboard); // manual navigate setelah confirm
+						}}
+						title="Konfirmasi"
+						message="Apakah Anda yakin ingin kembali ke Dashboard?"
+						confirmText="Ya, kembali"
+						cancelText="Batal"
+						type="warning"
+					/>
+				</div>
+				<main className='m-4'>
+					<section className="mb-1">
+						<div className="w-full">
+							<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+								{/* Header Skema */}
+								<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+									{/* Kiri */}
+									<div className="flex items-center space-x-3 flex-wrap">
+										<h2 className="text-lg font-bold text-gray-800">
+											Skema Sertifikasi {data.result.assessment.occupation.name}
+										</h2>
+										<div className="flex items-center space-x-2">
+											<Clock className="w-5 h-5 text-gray-400" />
+											<span className="text-sm text-gray-600">
+												{data.result.tuk || "Sewaktu"}
+											</span>
+										</div>
+									</div>
+
+									{/* Kanan */}
+									<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2">
+										<span className="px-3 py-1 w-fit rounded text-sm font-medium text-[#E77D35] bg-[#E77D3533]">
+											{data.result.assessment.code}
+										</span>
+									</div>
+								</div>
+
+								{/* Detail Asesi - Asesor - Waktu */}
+								<div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mt-2 text-sm text-gray-600">
+									{/* Asesi & Asesor */}
+									<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+										<div className="flex flex-wrap">
+											<span className="xs-text mr-1">Asesi:</span>
+											<span>{data.result.assessee.name || "N/A"}</span>
+										</div>
+										<div className="flex flex-wrap">
+											<span className="xs-text mr-1">Asesor:</span>
+											<span>{data.result.assessor.name || "N/A"}</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					{/* --- Tabel Asesi --- */}
+					<section className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+						<div className="overflow-x-auto">
+							<table className="w-full border rounded-xl bg-white text-sm min-w-[600px]">
+								<thead>
+									<tr>
+										<th className="p-3 border text-center">No.</th>
+										<th className="p- border text-center xs-text">Nama Asesi</th>
+										<th className="p-3 border text-center">Rekomendasi</th>
+										<th className="p-3 border text-center">Keterangan</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td className="p-3 border text-center">1</td>
+										<td className="p-3 border text-center">
+											{data.result.assessee.name || "N/A"}
+										</td>
+										<td className="p-3 border text-center">
+											{data.result.result_ak05.is_competent
+												? "K"
+												: "BK"}
+										</td>
+										<td className="p-3 border text-center">{deskripsi || "-"}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</section>
+
+					{/* --- Form & QR --- */}
+					<section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						{/* Kiri: Form Catatan */}
+						<div className="bg-white border rounded-xl p-6 shadow-sm space-y-4">
+							<h2 className="text-sm font-medium">
+								Aspek Negatif dan Positif dalam Asesemen
+							</h2>
+							<textarea
+								className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								rows={2}
+								placeholder="Aspek negatif dan positif"
+								value={negatifPositif}
+								disabled
+								onChange={(e) => setNegatifPositif(e.target.value)}
+							/>
+							<h2 className="text-sm font-medium">
+								Pencatatan Penolakan Hasil Asesmen
+							</h2>
+							<textarea
+								className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								rows={2}
+								placeholder="Pencatatan penolakan"
+								value={penolakan}
+								disabled
+								onChange={(e) => setPenolakan(e.target.value)}
+							/>
+							<h2 className="text-sm font-medium">
+								Saran Perbaikan: (Asesor/Personil Terkait)
+							</h2>
+							<textarea
+								className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								rows={2}
+								placeholder="Saran perbaikan"
+								value={saran}
+								disabled
+								onChange={(e) => setSaran(e.target.value)}
+							/>
+							<h2 className="text-sm font-medium">Catatan</h2>
+							<textarea
+								className="w-full border rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+								rows={3}
+								placeholder="Catatan..."
+								value={catatan}
+								disabled
+								onChange={(e) => setCatatan(e.target.value)}
+							/>
+						</div>
+
+						{/* Kanan: Asesor & QR */}
+						<div className="bg-white border rounded-xl p-6 shadow-sm flex flex-col justify-between">
+							<div>
+								<h2 className="text-sm font-medium mb-3">Asesor</h2>
+								<input
+									type="text"
+									value={data.result.assessor.name || "N/A"}
+									disabled
+									className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+								/>
+							</div>
+							<div>
+								<h2 className="text-sm font-medium mb-3">Nomor Registrasi</h2>
+								<input
+									type="text"
+									value={data.result.assessor.no_reg_met || "N/A"}
+									disabled
+									className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+								/>
+							</div>
+							<div>
+								<h2 className="text-sm font-medium mb-3">Tanggal</h2>
+								<input
+									type="date"
+									value={formatDateInputLocal(data.result.schedule.end_date).slice(0, 10) || "N/A" }
+									disabled
+									className="border rounded-lg p-2 text-sm bg-gray-100 text-gray-500 w-full mb-3"
+								/>
+							</div>
+
+							<div className="flex flex-col items-center justify-center border rounded-lg py-10 bg-gray-50 mb-3">
+								{qrValue ? (
+									<>
+										<QRCodeCanvas value={qrValue} size={100} />
+										<p className="text-xs text-gray-400 mt-2">
+											{data.result.assessor.name || "Nama Asesor"}
+										</p>
+									</>
+								) : (
+									<p className="text-gray-400 text-sm">Belum Generate QR</p>
+								)}
+								{data?.result?.result_ak05?.approved_assessor && (
+									<p className="text-green-600 text-sm font-semibold mt-2 text-center">
+										Sudah disetujui asesor
+									</p>
+								)}
+							</div>
+							
+							<>
+								<button
+									onClick={handleSaveClick}
+									disabled={saving || !qrValue}
+									className={`w-full text-white py-2 rounded-lg mt-2 ${saving || !qrValue
+											? "bg-gray-400 cursor-not-allowed"
+											: "bg-[#E77D35] hover:bg-orange-600 cursor-pointer"
+										}`}
+								>
+									{saving ? "Menyimpan..." : "Selesai"}
+								</button>
+
+								<ConfirmModal
+									isOpen={showConfirmModal}
+									onClose={() => setShowConfirmModal(false)}
+									onConfirm={handleConfirmSave}
+									title="Konfirmasi Selesai"
+									message="Apakah Anda yakin ingin menyelesaikan asesmen ini? Setelah disimpan, Anda tidak dapat mengubah data lagi."
+									confirmText="Oke"
+									cancelText="Batal"
+									type="warning"
+								/>
+							</>
+						</div>
+					</section>
+				</main>
+			</div>
+		</div>
+	);
+}

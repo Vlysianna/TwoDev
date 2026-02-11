@@ -3,6 +3,7 @@ import FootLanding from "../../components/FootLanding";
 import { useState, useEffect } from "react";
 import { Link} from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getAssetPath } from '@/utils/assetPath';
 import paths from "@/routes/paths";
 
 
@@ -110,7 +111,7 @@ useEffect(() => {
         {/* Hero Section */}
         <div className="relative h-[90vh] w-full overflow-hidden">
           <img
-            src="/bgsklh.png"
+            src={getAssetPath('/bgsklh.png')}
             alt=""
             className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />

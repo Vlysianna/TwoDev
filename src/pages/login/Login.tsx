@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Eye, EyeClosed, CheckCircle } from 'lucide-react';
+import { Eye, EyeClosed } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import paths from '@/routes/paths';
 import { useAuth } from '@/contexts/AuthContext';
 import { useForm } from 'react-hook-form';
+import { getAssetPath } from '@/utils/assetPath';
+import api from '@/helper/axios';
+import useToast from '@/components/ui/useToast';
 
 type FormValues = {
   email: string
@@ -20,23 +23,26 @@ export default function LoginForm() {
   } = useForm<FormValues>()
 
   const [showPassword, setShowPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [error, setError] = useState('');
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const toast = useToast();
+
   const from = location.state?.from?.pathname || '/';
 
   // Handle success message and pre-fill email from registration
   useEffect(() => {
     if (location.state?.message) {
-      setSuccessMessage(location.state.message);
+      toast.show({
+        description: location.state.message,
+        type: 'success',
+      });
     }
     if (location.state?.email) {
       setValue('email', location.state.email);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 
   const onSubmit = async (data: FormValues) => {
@@ -44,27 +50,90 @@ export default function LoginForm() {
     const { email, password } = data;
 
     if (!email || !password) {
-      setError('Email dan password harus diisi');
-      setSuccessMessage('');
+      toast.show({
+        description: 'Email dan password harus diisi',
+        type: 'error',
+      })
       return;
     }
 
-    setError('');
-    setSuccessMessage('');
-    
-    await login(email, password).then(() => {
-      setSuccessMessage('Login berhasil');
-      navigate(from, { replace: true });
-    }).catch((err: any) => {
-      // console.log(err);
-      const errorMessage = err.response?.data?.message || 'Terjadi kesalahan';
-      setError(errorMessage);
-    });
-  };
+    try {
+      const loginResponse = await api.post('/auth/login', {
+        email,
+        password,
+      });
 
-  useEffect(() => {
-    console.log(error);
-  }, [error]);
+      if (!loginResponse.data.success) {
+        throw new Error(loginResponse.data.message || 'Login failed');
+      }
+
+      const { user: loginUser, token } = loginResponse.data.data;
+      
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      await login(email, password);
+      
+      toast.show({
+        description: 'Login berhasil',
+        type: 'success',
+      });
+      
+      // Get user info to check role and signature using token
+      try {
+        const response = await api.get('/auth/me');
+        const userData = response.data.data;
+        const userRole = userData.role_id;
+        const signature = userData.signature;
+
+        const needsSignature = (userRole === 1 || userRole === 2) && (!signature || signature.trim() === '');
+
+        if (needsSignature) {
+          if (userRole === 1) {
+            // Admin
+            navigate(paths.admin.profile, { 
+              replace: true,
+              state: { 
+                message: 'Harap upload tanda tangan terlebih dahulu untuk melanjutkan.',
+                from: from 
+              }
+            });
+          } else if (userRole === 2) {
+            // Assessor
+            navigate(paths.asesor.profile, { 
+              replace: true,
+              state: { 
+                message: 'Harap upload tanda tangan terlebih dahulu untuk melanjutkan.',
+                from: from 
+              }
+            });
+          } else {
+            navigate(from, { replace: true });
+          }
+        } else {
+          if (userRole === 2 && from.startsWith('/asesor') && from !== '/asesor') {
+            navigate('/asesor', { replace: true });
+          } else {
+            navigate(from, { replace: true });
+          }
+        }
+      } catch (error) {
+        // If can't get user info, use default redirect
+        // toast.show({
+        //   description: 'Login gagal atau terjadi kesalahan',
+        //   type: 'error',
+        // })
+        navigate(from, { replace: true });
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      // console.log(err);
+      const errorMessage = err.response?.data?.message || err.message || 'Terjadi kesalahan';
+      toast.show({
+        description: errorMessage,
+        type: 'error',
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row w-full">
@@ -74,7 +143,7 @@ export default function LoginForm() {
           {/* Logo and Title */}
           <div className="text-start">
             <div className="w-30 h-30 md:w-40 md:h-40 rounded-lg text-start">
-              <img src="/img/logo-lsp-oren.svg" alt="Logo" className="w-full h-full" />
+              <img src={getAssetPath('/img/logo-lsp-oren.svg')} alt="Logo" className="w-full h-full" />
             </div>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Masuk</h1>
             <p className="mb-5 text-gray-600 text-xs md:text-sm">
@@ -84,7 +153,7 @@ export default function LoginForm() {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
-            
+
             {/* Email Field */}
             <div>
               <div className="block text-sm font-medium text-gray-700 mb-1 md:mb-2">
@@ -94,7 +163,7 @@ export default function LoginForm() {
                 type="email"
                 placeholder="Masukkan email anda"
                 className="w-full px-3 py-2 md:py-2.5 bg-[#DADADA33] rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm"
-                {...register("email", { required: "Email wajib diisi" })}
+                {...register("email", { required: "Email wajib diisi", pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i })}
               />
             </div>
 
@@ -108,7 +177,7 @@ export default function LoginForm() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Masukkan password anda"
                   className="w-full px-3 py-2 md:py-2.5 bg-[#DADADA33] rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm pr-10"
-                  {...register("password", { required: "Password wajib diisi" })}
+                  {...register("password", { required: "Password wajib diisi", minLength: 8 })}
                 />
                 <button
                   onClick={() => setShowPassword(!showPassword)}
@@ -123,29 +192,7 @@ export default function LoginForm() {
                 </button>
               </div>
             </div>
-
-            {/* Success Message */}
-            {successMessage && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                {successMessage}
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Forgot Password */}
-            <div className="text-right">
-              <button type="button" className="text-xs md:text-sm text-black-500 hover:text-gray-700 hover:cursor-pointer font-small">
-                Lupa password?
-              </button>
-            </div>
-
+            
             {/* Sign In Button */}
             <button
               type="submit"
@@ -170,14 +217,14 @@ export default function LoginForm() {
               </Link>
             </div>
           </form>
-        </div>
-        <div className="fixed bottom-0 pb-10 flex items-center justify-center text-xs md:text-sm text-gray-600">
-          <span>Developed by</span>
-          <img
-            src="/img/logo-two-dev.svg"
-            alt=""
-            className="w-20 ml-2"
-          />
+          <div className="mt-10 flex items-center justify-center text-xs md:text-sm text-gray-600">
+            <span>Developed by</span>
+            <img
+              src={getAssetPath('/img/logo-two-dev.svg')}
+              alt=""
+              className="w-20 ml-2"
+            />
+          </div>
         </div>
       </div>
 
@@ -194,7 +241,7 @@ export default function LoginForm() {
           <div className="text-center flex justify-center items-center">
             {/* Certificate Icon */}
             <div className="w-138 object-cover rounded-lg text-center">
-              <img src="/img/hadline login.svg" alt="" />
+              <img src={getAssetPath('/img/hadline login.svg')} alt="" />
             </div>
           </div>
         </div>

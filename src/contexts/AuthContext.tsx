@@ -17,7 +17,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, confirmPassword: string, roleId: number) => Promise<void>;
+  register: (name: string, email: string, password: string, confirmPassword: string, roleId: number) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -123,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (
+    name: string,
     email: string,
     password: string,
     confirmPassword: string,
@@ -132,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       dispatch({ type: 'SET_LOADING', payload: true });
       
       const response = await api.post('/auth/register', {
+        full_name: name,
         email,
         password,
         confirm_password: confirmPassword,
@@ -151,7 +153,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = (): void => {
+    localStorage.clear();
     dispatch({ type: 'LOGOUT' });
+    window.location.href = '';
   };
 
   const checkAuth = async (): Promise<void> => {

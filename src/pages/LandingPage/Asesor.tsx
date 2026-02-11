@@ -1,6 +1,7 @@
 import FootLanding from "../../components/FootLanding";
 import NavLanding from "../../components/NavLanding";
 import { Search } from 'lucide-react';
+import { getAssetPath } from '@/utils/assetPath';
 
 
 function Asesor() {
@@ -27,9 +28,8 @@ function Asesor() {
         <div className="mt-16"></div>
 
         <main className="flex-grow bg-gray-50">
-          {/* Section Hero dengan background */}
- <img
-            src="/bgsklh.png"
+          {/* Section Hero dengan background */}<img
+            src={getAssetPath('/bgsklh.png')}
             alt=""
             className="absolute inset-0 w-full h-full object-cover blur-[3px] brightness-100 z-0"
           />

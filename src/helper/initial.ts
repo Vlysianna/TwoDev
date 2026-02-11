@@ -1,7 +1,8 @@
-export function getInitials(name: string) {
+export const getInitials = (name: string) => {
 	return name
 		.split(" ")
-		.map((word) => word[0])
+		.map((n) => n[0])
 		.join("")
-		.toUpperCase();
-}
+		.toUpperCase()
+		.substring(0, 2);
+};

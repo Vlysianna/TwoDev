@@ -51,17 +51,42 @@ const AssesseeModal: React.FC<AssesseeModalProps> = ({ isOpen, onClose, onSucces
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  const [existingSignature, setExistingSignature] = useState<string | null>(null);
 
   useEffect(() => {
     if (assessee && (mode === 'edit' || mode === 'show')) {
+      // support both shapes:
+      // 1) { id, name, identity_number, ... } (assessee detail)
+      // 2) { id, email, assessee: { full_name, ... } } (user wrapper)
+      const nested = (assessee as any).assessee ? (assessee as any).assessee : assessee;
+      // normalize birth_date to YYYY-MM-DD for date input
+      const rawBirth = nested?.birth_date || '';
+      const birth_date = rawBirth ? new Date(rawBirth).toISOString().split('T')[0] : '';
+      // normalize gender for select display
+      let genderVal = nested?.gender || '';
+      if (typeof genderVal === 'string') {
+        const gv = genderVal.toLowerCase();
+        if (gv === 'male' || gv === 'laki-laki' || gv.includes('laki')) genderVal = 'Laki-laki';
+        else if (gv === 'female' || gv === 'perempuan' || gv.includes('perempuan')) genderVal = 'Perempuan';
+      }
       setForm({
         ...initialForm,
-        ...assessee.assessee,
-        full_name: assessee.full_name || '',
-        email: assessee.email || '',
+        ...nested,
+        birth_date,
+        gender: genderVal,
+        full_name: (assessee as any).name || (assessee as any).full_name || nested.full_name || '',
+        email: (assessee as any).email || nested.email || '',
       });
+      if (nested?.signature) {
+        setExistingSignature(nested.signature);
+      }
     } else {
       setForm(initialForm);
+      setExistingSignature(null);
+      setSignaturePreview(null);
+      setSignatureFile(null);
     }
     setError(null);
   }, [assessee, mode, isOpen]);
@@ -70,15 +95,50 @@ const AssesseeModal: React.FC<AssesseeModalProps> = ({ isOpen, onClose, onSucces
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSignatureFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setSignaturePreview(previewUrl);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
+      // map gender back to API expected value ('male'|'female')
+      const formData = new FormData();
+      Object.keys(form).forEach(key => {
+        const value = form[key as keyof typeof form];
+        if (value) {
+          formData.append(key, value);
+        }
+      });
+      
+      if (form.gender) {
+        const g = String(form.gender).toLowerCase();
+        if (g.includes('laki')) {
+          formData.set('gender', 'male');
+        } else if (g.includes('perempuan')) {
+          formData.set('gender', 'female');
+        }
+      }
+      
+      if (signatureFile) {
+        formData.append('signature', signatureFile);
+      }
+
       if (mode === 'create') {
-        await api.post('/user/assessee', form);
+        await api.post('/assessees', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else if (mode === 'edit' && assessee) {
-        await api.put(`/user/assessee/${assessee.id}`, form);
+        await api.put(`/assessees/${assessee.id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
       onSuccess();
       onClose();
@@ -160,6 +220,31 @@ const AssesseeModal: React.FC<AssesseeModalProps> = ({ isOpen, onClose, onSucces
             <div>
               <label className="block text-sm mb-1 text-gray-700">Pendidikan</label>
               <input name="educational_qualifications" value={form.educational_qualifications} onChange={handleChange} readOnly={isReadOnly} className="input input-bordered w-full" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm mb-1 text-gray-700">Tanda Tangan</label>
+              <input 
+                type="file" 
+                accept="image/png,image/jpeg,image/jpg" 
+                onChange={handleSignatureChange}
+                disabled={isReadOnly}
+                className="input input-bordered w-full"
+              />
+              {(signaturePreview || existingSignature) && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-600 mb-1">Preview:</p>
+                  <div className="w-40 h-40 border-2 border-gray-300 rounded flex items-center justify-center bg-white">
+                    <img
+                      src={signaturePreview || (existingSignature?.startsWith('http') ? existingSignature : `${import.meta.env.VITE_API_URL || 'http://localhost:3000/twodev/api/'}/${existingSignature}`)}
+                      alt="Tanda Tangan"
+                      className="max-w-full max-h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="mt-6 flex justify-end gap-2">

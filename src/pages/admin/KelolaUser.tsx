@@ -1,0 +1,720 @@
+import React, { useState, useEffect } from 'react';
+// import useDebounce from '@/hooks/useDebounce';
+import {
+  Search,
+  Plus,
+  Edit3,
+  Eye,
+  Trash2,
+  Loader2,
+  AlertCircle,
+  // Download,
+  Users
+} from 'lucide-react';
+import Sidebar from '@/components/SideAdmin';
+import Navbar from '@/components/NavAdmin';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import ApprovalConfirmModal from '@/components/ApprovalConfirmModal';
+import UserFormModal from '@/components/UserFormModal';
+import UserDetailModal from '@/components/UserDetailModal';
+// import { useNavigate } from 'react-router-dom';
+import useToast from '@/components/ui/useToast';
+import api from '@/helper/axios';
+import { formatDateJakartaUS24 } from '@/helper/format-date';
+
+interface Role {
+  id: number;
+  name: string;
+}
+
+interface PaginationMeta {
+  current_page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  summary: Summary;
+  meta: PaginationMeta;
+}
+
+interface UserData {
+  id: number;
+  email: string;
+  full_name: string;
+  role: Role;
+  created_at: string;
+  updated_at: string;
+  assessee?: {
+    id: number;
+    full_name: string;
+    phone_no: string;
+    identity_number: string;
+    birth_date: string;
+    birth_location: string;
+    gender: string;
+    nationality: string;
+    house_phone_no?: string;
+    office_phone_no?: string;
+    address: string;
+    postal_code?: string;
+    educational_qualifications: string;
+  };
+  assessor?: {
+    id: number;
+    full_name: string;
+    phone_no: string;
+    scheme_id: number;
+    address: string;
+    birth_date: string;
+  };
+  admin?: {
+    id: number;
+    address: string;
+    phone_no: string;
+    birth_date: string;
+  };
+}
+
+interface FilterState {
+  role: string;
+  search: string;
+}
+
+interface Summary {
+  total_user: number;
+  total_assessee: number;
+  total_assessor: number;
+  total_admin: number;
+}
+
+const KelolaUser: React.FC = () => {
+  const toast = useToast();
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [summary, setSummary] = useState<Summary>({ total_user: 0, total_assessee: 0, total_assessor: 0, total_admin: 0 });
+  const [filteredUsers, setFilteredUsers] = useState<UserData[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState>({
+    role: '',
+    search: ''
+  });
+  const [searchValue, setSearchValue] = useState('');
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Modal states
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [pendingApprovalData, setPendingApprovalData] = useState<{ approver_admin_id: number; backup_admin_id?: number; comment: string } | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // const navigate = useNavigate();
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch users with pagination parameters
+      const response = await api.get<ApiResponse<UserData[]>>('/user', {
+        params: {
+          page: currentPage,
+          limit: itemsPerPage,
+          role_name: filters.role,
+          keyword: filters.search
+        }
+      });
+
+      if (response.data.success) {
+        setUsers(response.data.data);
+        setFilteredUsers(response.data.data);
+        setSummary(response.data.summary);
+
+        // Update pagination state from API response
+        setCurrentPage(response.data.meta.current_page);
+        setTotalPages(response.data.meta.total_pages);
+        setItemsPerPage(response.data.meta.limit);
+
+      } else {
+        setError(response.data.message || 'Gagal memuat data pengguna');
+      }
+    } catch (err) {
+      console.error('Failed to fetch data:', err);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any)?.response?.data?.message || 'Gagal memuat data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Removed client-side filtering since we're using server-side pagination
+  // Menghapus debounce effect yang tidak diperlukan karena kita sudah handle di handleSearchChange
+
+  useEffect(() => {
+    fetchData();
+    fetchRoles();
+  }, [currentPage, itemsPerPage, filters]);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await api.get('/roles');
+
+      if (response.data.success) {
+        setRoles(response.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch roles:', err);
+    }
+  };
+
+  // Debug untuk melihat nilai filters saat berubah
+  useEffect(() => {
+    // console.log('Current filters:', filters);
+  }, [filters]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+  };
+
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setFilters(prev => ({ ...prev, search: searchValue }));
+    setCurrentPage(1);
+  };
+
+  const handleRoleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilters(prev => ({ ...prev, role: e.target.value }));
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newItemsPerPage = parseInt(e.target.value);
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when items per page changes
+  };
+
+  const handleCreateUser = () => {
+    setFormMode('create');
+    setSelectedUser(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleEditUser = (user: UserData) => {
+    setFormMode('edit');
+    setSelectedUser(user);
+    setIsFormModalOpen(true);
+  };
+
+  const handleViewUser = (user: UserData) => {
+    setSelectedUser(user);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleDeleteClick = (user: UserData) => {
+    setUserToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    try {
+      setDeleteLoading(true);
+      if (!pendingApprovalData) {
+        setIsApprovalModalOpen(true);
+        return;
+      }
+      const headers: Record<string, string> = {
+        'x-approver-admin-id': pendingApprovalData.approver_admin_id.toString(),
+        'x-approval-comment': pendingApprovalData.comment,
+      };
+      
+      if (pendingApprovalData.backup_admin_id) {
+        headers['x-backup-admin-id'] = pendingApprovalData.backup_admin_id.toString();
+      }
+      
+      await api.delete(`/user/${userToDelete.id}`, { headers });
+      await fetchData(); // Refresh the list
+      setIsDeleteModalOpen(false);
+      setUserToDelete(null);
+      setPendingApprovalData(null);
+      toast.show({ title: 'Berhasil', description: 'Permintaan penghapusan dikirim untuk persetujuan', type: 'success' });
+    } catch (error: unknown) {
+      console.error('Error deleting user:', error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (error as any)?.response?.data?.message || 'Gagal menghapus pengguna';
+      setError(msg);
+      toast.show({ title: 'Gagal', description: msg, type: 'error' });
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // const handleApprovalCollectedForDelete = async (data: { approver_admin_id: number; comment: string }) => {
+  //   setPendingApprovalData(data);
+  //   setIsApprovalModalOpen(false);
+  //   await handleDeleteConfirm();
+  // };
+
+  const handleFormSuccess = () => {
+    setIsFormModalOpen(false);
+    setSelectedUser(null);
+    fetchData(); // Refresh the list
+  };
+
+  const handleSubmitEditWithApproval = async (payload: any) => {
+    // EDIT no longer requires approval: submit directly
+    if (!selectedUser) return;
+    try {
+      const res = await api.put(`/user/${selectedUser.id}`, payload);
+      if (res?.data?.success) {
+        handleFormSuccess();
+      } else {
+        setError(res?.data?.message || 'Gagal mengupdate pengguna');
+      }
+    } catch (err: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg = (err as any)?.response?.data?.message || 'Gagal mengupdate pengguna';
+      setError(msg);
+    } finally {
+    }
+  };
+
+  // const handleExport = () => {
+  //   // console.log('Export to Excel clicked');
+  // };
+
+  const getRoleDisplayName = (roleName: string) => {
+    const roleMap: { [key: string]: string } = {
+      'Admin': 'Administrator',
+      'Assessor': 'Asesor',
+      'Assessee': 'Asesi'
+    };
+    return roleMap[roleName] || roleName;
+  };
+
+  const getUserDisplayName = (user: UserData) => {
+    // Priority: assessee > assessor > admin > user.full_name
+    if (user.assessee?.full_name) return user.assessee.full_name;
+    if (user.assessor?.full_name) return user.assessor.full_name;
+    return user.full_name;
+  };
+
+  const getVerificationStatus = (_user: UserData) => {
+    // TODO: Implement verification status logic based on business rules
+    return 'Verified'; // Placeholder
+  };
+
+  // Remove initial loading screen since we're showing loading state in the table
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#F7FAFC] flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Navbar title="Kelola Pengguna" icon={<Users size={20} />} />
+          <main className="flex-1 overflow-auto p-6 flex items-center justify-center">
+            <div className="text-center">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Terjadi Kesalahan</h3>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <button
+                onClick={fetchData}
+                className="px-4 py-2 bg-[#E77D35] text-white rounded-md hover:bg-orange-600 transition-colors"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F7FAFC] flex">
+      <Sidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Navbar title="Kelola Pengguna" icon={<Users size={20} />} />
+        <main className="flex-1 overflow-auto p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            {/* Header */}
+            <div className="p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Manajemen Pengguna
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Kelola semua pengguna sistem (Admin, Asesor, Asesi)
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={handleCreateUser}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
+                  >
+                    <Plus size={16} />
+                    Tambah Pengguna
+                  </button>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                {/* Search */}
+                <form className="relative flex-1 flex" onSubmit={handleSearchSubmit}>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <Search className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Cari berdasarkan nama, email..."
+                    value={searchValue}
+                    onChange={handleSearchChange}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E77D35] focus:border-transparent text-sm"
+                  />
+                  <button
+                    type="submit"
+                    className="ml-2 px-4 py-2 bg-[#E77D35] text-white rounded-md text-sm hover:bg-orange-600 transition-colors"
+                  >
+                    Cari
+                  </button>
+                </form>
+
+                {/* Role Filter */}
+                <div className="relative">
+                  <select
+                    value={filters.role}
+                    onChange={handleRoleFilterChange}
+                    className="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E77D35] focus:border-transparent text-sm"
+                  >
+                    <option value="">Semua Role</option>
+                    {roles.map(role => (
+                      <option key={role.id} value={role.name}>
+                        {getRoleDisplayName(role.name)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Items per page selector */}
+                <div className="relative">
+                  <select
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                    className="w-full sm:w-32 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E77D35] focus:border-transparent text-sm"
+                  >
+                    <option value={10}>10 / page</option>
+                    <option value={25}>25 / page</option>
+                    <option value={50}>50 / page</option>
+                    <option value={100}>100 / page</option>
+                  </select>
+                </div>
+
+                {/* Clear Filters */}
+                {(filters.search || filters.role) && (
+                  <button
+                    onClick={() => {
+                      setFilters({ role: '', search: '' });
+                      setSearchValue('');
+                      setCurrentPage(1); // Reset to first page when clearing filters
+                    }}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    Reset Filter
+                  </button>
+                )}
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Total Pengguna</p>
+                  <p className="text-2xl font-semibold text-gray-900">{users.length}</p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <p className="text-sm text-red-600">Admin</p>
+                  <p className="text-2xl font-semibold text-red-700">
+                    {summary.total_admin}
+                  </p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-blue-600">Asesor</p>
+                  <p className="text-2xl font-semibold text-blue-700">
+                    {summary.total_assessor}
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-green-600">Asesi</p>
+                  <p className="text-2xl font-semibold text-green-700">
+                    {summary.total_assessee}
+                  </p>
+                </div>
+              </div>
+
+              {/* Full width border line */}
+              <div className="border-b border-gray-200"></div>
+            </div>
+
+            {/* Table Container */}
+            <div className="px-6 pb-6">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-[#E77D35] text-white">
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Nama Lengkap
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium tracking-wider">
+                        Terdaftar
+                      </th>
+                      <th className="px-6 py-4 text-center text-sm font-medium tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {users.length === 0 && <tr><td colSpan={6} className="px-4 lg:px-6 py-4 text-center text-sm text-gray-500">Tidak ada data pengguna</td></tr>}
+                    {loading ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-8 text-center">
+                          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#E77D35]" />
+                          <p className="text-sm text-gray-500">Memuat data...</p>
+                        </td>
+                      </tr>
+                    ) : filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                          {filters.search ? `Tidak ditemukan pengguna dengan kata kunci "${filters.search}"` :
+                            filters.role ? `Tidak ditemukan pengguna dengan role "${getRoleDisplayName(filters.role)}"` :
+                              'Belum ada data pengguna'}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredUsers.map((user, index) => (
+                        <tr
+                          key={user.id}
+                          className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 bg-[#E77D35] rounded-full flex items-center justify-center text-white text-sm font-medium mr-3">
+                                {getUserDisplayName(user).charAt(0).toUpperCase()}
+                              </div>
+                              {getUserDisplayName(user)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role.name === 'Admin'
+                              ? 'bg-red-100 text-red-800'
+                              : user.role.name === 'Assessor'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-green-100 text-green-800'
+                              }`}>
+                              {getRoleDisplayName(user.role.name)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                              {getVerificationStatus(user)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatDateJakartaUS24(user.created_at)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <div className="flex items-center justify-center space-x-2">
+                              <button
+                                onClick={() => handleViewUser(user)}
+                                className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
+                                title="Lihat Detail"
+                              >
+                                <Eye size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleEditUser(user)}
+                                className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
+                                title="Edit"
+                              >
+                                <Edit3 size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteClick(user)}
+                                className="p-2 text-[#E77D35] hover:bg-orange-50 rounded-md transition-colors"
+                                title="Hapus"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                <div className="flex flex-1 justify-between sm:hidden">
+                  <button
+                    onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                    disabled={currentPage === totalPages}
+                    className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Menampilkan{' '}
+                      <span className="font-medium">
+                        {filteredUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}
+                      </span>{' '}
+                      sampai{' '}
+                      <span className="font-medium">
+                        {(currentPage - 1) * itemsPerPage + filteredUsers.length}
+                      </span>{' '}
+                      dari{' '}
+                      <span className="font-medium">{users.length}</span>{' '}
+                      hasil
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                      <button
+                        onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                        disabled={currentPage === 1}
+                        className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      {[...Array(totalPages)].map((_, index) => {
+                        const pageNumber = index + 1;
+                        return (
+                          <button
+                            key={pageNumber}
+                            onClick={() => setCurrentPage(pageNumber)}
+                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${currentPage === pageNumber
+                              ? 'z-10 bg-[#E77D35] text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E77D35]'
+                              : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                              }`}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      })}
+                      <button
+                        onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                        disabled={currentPage === totalPages}
+                        className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                      >
+                        <span className="sr-only">Next</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* Modals */}
+      {isFormModalOpen && (
+        <UserFormModal
+          isOpen={isFormModalOpen}
+          onClose={() => setIsFormModalOpen(false)}
+          mode={formMode}
+          user={selectedUser}
+          roles={roles}
+          onSuccess={handleFormSuccess}
+          onSubmitEditWithApproval={handleSubmitEditWithApproval}
+        />
+      )}
+
+      {isDetailModalOpen && selectedUser && (
+        <UserDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={() => setIsDetailModalOpen(false)}
+          user={selectedUser}
+        />
+      )}
+
+      {isDeleteModalOpen && userToDelete && (
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={() => {
+            setIsApprovalModalOpen(true);
+          }}
+          loading={deleteLoading}
+          title="Hapus Pengguna"
+          message={`Apakah Anda yakin ingin menghapus pengguna "${getUserDisplayName(userToDelete)}"? Tindakan ini tidak dapat dibatalkan.`}
+        />
+      )}
+
+      {isApprovalModalOpen && (
+        <ApprovalConfirmModal
+          isOpen={isApprovalModalOpen}
+          onClose={() => {
+            setIsApprovalModalOpen(false);
+            setPendingApprovalData(null);
+          }}
+          onConfirm={(data) => { setPendingApprovalData(data); setIsApprovalModalOpen(false); void handleDeleteConfirm(); }}
+          title={'Persetujuan Penghapusan'}
+          subtitle={'Pilih 1 admin untuk menyetujui penghapusan ini.'}
+          loading={deleteLoading}
+        />
+      )}
+    </div>
+  );
+};
+
+export default KelolaUser;

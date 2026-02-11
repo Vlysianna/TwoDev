@@ -1,6 +1,7 @@
 import { ChevronDown, Clipboard, NotepadText } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import NavbarAssesor from "../../components/ui/NavbarAssesor";
+import { getAssetPath } from '@/utils/assetPath';
 
 export default function AssessmentRecord() {
   const [selectedOptions, setSelectedOptions] = useState<
@@ -57,7 +58,7 @@ export default function AssessmentRecord() {
   };
 
   const handleSubmit = () => {
-    console.log("Assessment Record submitted");
+    // console.log("Assessment Record submitted");
   };
 
   return (
@@ -378,7 +379,7 @@ export default function AssessmentRecord() {
             {/* QR Code */}
             <div className="w-32 h-24 sm:w-36 sm:h-28 lg:w-45 lg:h-30 border-2 border-gray-300 rounded flex items-center justify-center bg-white">
               <img 
-                src="/images/qrcode.png" 
+                src={getAssetPath('/images/qrcode.png')} 
                 alt="QR Code" 
                 className="w-20 h-20 sm:w-24 sm:h-24 lg:w-30 lg:h-30 object-contain"
               />

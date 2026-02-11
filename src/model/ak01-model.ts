@@ -1,12 +1,7 @@
-export interface ResultAK01 {
-    id: number;
-    assessment: Assessment;
-    assessee: Assessee;
-    assessor: Assessor;
-    tuk: string;
-    is_competent: boolean;    
-    created_at: string;
-    locations: string[]
+import type { ResultTemplate } from "@/lib/types";
+
+export interface ResultAK01 extends ResultTemplate {
+    location: string;
     ak01_header: AK01Header;
 }
 
@@ -14,37 +9,13 @@ interface AK01Header {
     id: number;
     approved_assessee: boolean;
     approved_assessor: boolean;
+    rows: AK01Row[];
     created_at: string;
     updated_at: string;
 }
 
-interface Assessment {
+interface AK01Row {
     id: number;
-    code: string;
-    occupation: Occupation;
-}
-
-interface Occupation {
-    id: number;
-    name: string;
-    scheme: Scheme;
-}
-
-interface Scheme {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface Assessee {
-    id: number;
-    name: string;
-    email: string;
-}
-
-interface Assessor {
-    id: number;
-    name: string;
-    email: string;
-    no_reg_met: string;
+    header_id: number;
+    evidence: string;
 }

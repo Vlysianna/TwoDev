@@ -3,6 +3,7 @@ import { hashids } from "@/lib/hashids";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronLeft, FileCheck2, User, Phone, MapPin, Calendar, Award, Shield } from "lucide-react";
+import { formatDateJakartaUS24 } from "@/helper/format-date";
 
 interface Scheme {
   id: number;
@@ -57,11 +58,7 @@ const AssessorCertificate: React.FC = () => {
       const data = resp.data.data;
       setAssessorData(data);
       
-      const birthDate = new Date(data.birth_date.split("T")[0]).toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
+      const birthDate = formatDateJakartaUS24(data.birth_date);
       setFormattedDate(birthDate);
       
     } catch (err) {
