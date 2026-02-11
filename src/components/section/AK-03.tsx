@@ -582,7 +582,7 @@ export default function AK03({
 					</div>
 
 					{/* Footer */}
-					<div className="mt-6">
+					{/* <div className="mt-6">
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Catatan/komentar lainnya (apabila ada) :
 						</label>
@@ -603,7 +603,7 @@ export default function AK03({
 								</button>
 							</div>
 						)}
-					</div>
+					</div> */}
 				</form>
 			</div>
 		</div>

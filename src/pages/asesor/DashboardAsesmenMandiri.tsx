@@ -522,8 +522,8 @@ export default function DashboardAsesmenMandiri() {
                   <button
                     key={tab.name}
                     onClick={() => setSelectedTab(tab.name)}
-                    className={`flex-shrink-0 px-3 py-2 rounded-md border-b-2 transition-all duration-200 whitespace-nowrap
-            ${selectedTab.toLowerCase() === tab.name.toLowerCase()
+                    className={`flex-shrink-0 px-3 py-2 cursor-pointer rounded-md border-b-2 transition-all duration-200
+        ${selectedTab.toLowerCase() === tab.name.toLowerCase()
                         ? "border-orange-800 bg-[#E77D35] text-white font-semibold"
                         : tab.status === "Tuntas"
                           ? "border-green-500 text-green-700 font-medium"
@@ -534,7 +534,7 @@ export default function DashboardAsesmenMandiri() {
                               : "border-red-500 text-red-600 font-medium"
                       }`}
                   >
-                    {tab.name}
+                    {tab.name === "IA-05" ? "IA-05-C" : tab.name}
                   </button>
                 ))}
             </div>

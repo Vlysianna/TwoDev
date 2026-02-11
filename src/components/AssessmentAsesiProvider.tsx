@@ -208,8 +208,6 @@ export default function AssessmentAsesiProvider({
 		fetcherTabs
 	);
 
-	// console.log(id_assessment, id_asesor, result?.assessee?.id, navigation);
-
 	// tab items
 	const tabItems: AssessmentRoute[] = useMemo(() => [
 		{
@@ -336,8 +334,8 @@ export default function AssessmentAsesiProvider({
 	}, [navigation, tabItems]);
 
 	useEffect(() => {
-   	function handleClick(e: MouseEvent) {
-    	if (!(e.target instanceof Node)) return;
+		function handleClick(e: MouseEvent) {
+			if (!(e.target instanceof Node)) return;
 
 			const el = navRef.current;
 			if (!el) return;
@@ -347,9 +345,9 @@ export default function AssessmentAsesiProvider({
 			}
 		}
 
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [navRef]);
+		document.addEventListener("mousedown", handleClick);
+		return () => document.removeEventListener("mousedown", handleClick);
+	}, [navRef]);
 
 	const [showStatusModal, setShowStatusModal] = useState(false);
 
@@ -448,7 +446,9 @@ export default function AssessmentAsesiProvider({
 																		)}
 
 																		<span className="font-medium text-sm whitespace-nowrap">
-																			{tab.label}
+																			{tab.label === "IA-05"
+																				? (result?.ia05_options ? "IA-05.C" : "IA-05.A")
+																				: tab.label}
 																		</span>
 																	</div>
 
@@ -521,13 +521,13 @@ export default function AssessmentAsesiProvider({
 														</div>
 													</div>
 												</div>
-												) : (
-													<div className="p-4 text-center text-sm text-slate-600">
-														<p className="font-medium text-red-500">
-															Lengkapi data diri Anda terlebih dahulu.
-														</p>
-													</div>
-												)}
+											) : (
+												<div className="p-4 text-center text-sm text-slate-600">
+													<p className="font-medium text-red-500">
+														Lengkapi data diri Anda terlebih dahulu.
+													</p>
+												</div>
+											)}
 										</div>
 									</motion.div>
 								)}

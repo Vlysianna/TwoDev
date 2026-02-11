@@ -366,7 +366,7 @@ export default function ResultAsesiAssessment() {
 												: "border-gray-300 text-gray-600"
 										}`}
 									>
-										{tab.name}
+										{tab.name === "IA-05" ? "IA-05-C" : tab.name}
 									</button>
 								))}
 						</div>
