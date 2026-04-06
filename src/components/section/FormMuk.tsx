@@ -45,6 +45,7 @@ export default function FormMuk({
   submitting,
   disabled = false,
   setFileIA02,
+  isEdit = false,
 }: {
   schemes: Scheme[];
   occupations: Occupation[];
@@ -52,6 +53,7 @@ export default function FormMuk({
   submitting: boolean;
   disabled?: boolean;
   setFileIA02?: (file: File | null) => void;
+  isEdit?: boolean;
 }) {
   const filteredOccupations = useMemo(
     () =>
@@ -59,7 +61,7 @@ export default function FormMuk({
         return o.scheme?.id === Number(form.getValues("scheme_id"));
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [form.watch("scheme_id"), occupations]
+    [form.watch("scheme_id"), occupations],
   );
 
   const toast = useToast();
@@ -110,16 +112,16 @@ export default function FormMuk({
   });
 
   const [openValueAPL02, setOpenValueAPL02] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [openValueIA01, setOpenValueIA01] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [openValueIA03, setOpenValueIA03] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [openValueIA05, setOpenValueIA05] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const [IA02File, setIA02File] = useState<string | null>(null);
@@ -129,7 +131,7 @@ export default function FormMuk({
     if (!file) return;
     try {
       const html = await extractDocxText(file);
-      const parsedData = parseHTMLToAPL02(html);
+      const parsedData = parseHTMLToAPL02(html, isEdit);
 
       const currentValues = getValues();
 
@@ -154,7 +156,7 @@ export default function FormMuk({
     if (!file) return;
     try {
       const html = await extractDocxText(file);
-      const parsedData = parseHTMLToIA01(html);
+      const parsedData = parseHTMLToIA01(html, isEdit);
 
       const currentValues = getValues();
 
@@ -859,7 +861,7 @@ function extractCode(doc: Document): { code: string } | null {
 
     for (const row of rows) {
       const cells = Array.from(row.querySelectorAll("td")).map(
-        (td) => td.textContent?.trim() ?? ""
+        (td) => td.textContent?.trim() ?? "",
       );
       const joined = cells.join(" ");
 
@@ -888,7 +890,7 @@ function validateSchemaNumber(doc: Document): boolean {
   return currentCode.includes(code);
 }
 
-function parseHTMLToAPL02(html: string): UnitAPL02[] {
+function parseHTMLToAPL02(html: string, isEdit = false): UnitAPL02[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
@@ -900,7 +902,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
 
   // Cari node yang mengandung FR.APL.02.
   const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
-    el.textContent?.includes("FR.APL.02.")
+    el.textContent?.includes("FR.APL.02."),
   );
 
   if (!anchorNode) {
@@ -936,7 +938,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
     for (const row of rows) {
       const text = row.innerText;
       const cells = Array.from(row.querySelectorAll("td")).map((td) =>
-        td.innerText.trim()
+        td.innerText.trim(),
       );
 
       // if (text.includes("Nomor")) {
@@ -976,7 +978,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
         let title = "";
 
         const target = Array.from(row.querySelectorAll("td *")).find((el) =>
-          el.textContent?.trim().toLowerCase().includes("kriteria unjuk kerja")
+          el.textContent?.trim().toLowerCase().includes("kriteria unjuk kerja"),
         );
 
         if (!target) continue;
@@ -999,7 +1001,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
           // ✅ normal case
           Array.from(list.querySelectorAll("li")).forEach((li, i) => {
             items.push({
-              id: `${elemenCounter}.${i + 1}`,
+              id: !isEdit ? `${elemenCounter}.${i + 1}` : null,
               description: li.textContent?.trim() || "",
             });
           });
@@ -1011,7 +1013,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
               const text = next.textContent?.trim() || "";
               if (/^\d+(\.\d+)*\.?\s/.test(text)) {
                 items.push({
-                  id: text.split(" ")[0].replace(/\.$/, ""),
+                  id: !isEdit ? text.split(" ")[0].replace(/\.$/, "") : null,
                   description: text.replace(/^\d+(\.\d+)*\.?\s*/, ""),
                 });
               }
@@ -1021,7 +1023,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
         }
 
         currentElemen = {
-          id,
+          id: !isEdit ? id : null,
           title: title,
           details: items,
         };
@@ -1039,7 +1041,7 @@ function parseHTMLToAPL02(html: string): UnitAPL02[] {
   return filteredUnits;
 }
 
-function parseHTMLToIA01(html: string): IA01Group[] {
+function parseHTMLToIA01(html: string, isEdit = false): IA01Group[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
@@ -1051,7 +1053,7 @@ function parseHTMLToIA01(html: string): IA01Group[] {
 
   // Cari node yang mengandung FR.IA.01.
   const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
-    el.textContent?.includes("FR.IA.01.")
+    el.textContent?.includes("FR.IA.01."),
   );
 
   if (!anchorNode) {
@@ -1095,7 +1097,7 @@ function parseHTMLToIA01(html: string): IA01Group[] {
       // Ambil unit header di baris kedua
       const unitRow = rows[1];
       const unitCells = Array.from(unitRow.querySelectorAll("td")).map((td) =>
-        td.innerText.trim()
+        td.innerText.trim(),
       );
       if (unitCells.length >= 3 && currentGroup) {
         const unit_code = unitCells[1];
@@ -1113,7 +1115,7 @@ function parseHTMLToIA01(html: string): IA01Group[] {
       let title = "";
       for (const row of rows) {
         const cells = Array.from(row.querySelectorAll("td")).map((td) =>
-          td.innerText.trim()
+          td.innerText.trim(),
         );
         if (cells.join(" ").includes("Kode Unit"))
           unit_code = cells[cells.length - 1];
@@ -1130,7 +1132,7 @@ function parseHTMLToIA01(html: string): IA01Group[] {
     if (
       rows.some(
         (r) =>
-          r.innerText.includes("Elemen") && r.innerText.includes("Kriteria")
+          r.innerText.includes("Elemen") && r.innerText.includes("Kriteria"),
       )
     ) {
       if (!currentUnit)
@@ -1141,7 +1143,7 @@ function parseHTMLToIA01(html: string): IA01Group[] {
 
       for (const row of rows.slice(2)) {
         const cells = Array.from(row.querySelectorAll("td")).map((td) =>
-          td.innerText.trim()
+          td.innerText.trim(),
         );
         if (cells.length === 0) continue;
 
@@ -1151,10 +1153,11 @@ function parseHTMLToIA01(html: string): IA01Group[] {
           const description = cells[2];
           benchmark = cells[3] ? cells[3] : benchmark;
 
-          currentElemen = { id, title, details: [] };
+          currentElemen = { id: !isEdit ? id : null, title, details: [] };
           if (description) {
             currentElemen.details.push({
-              id: `${id}.${currentElemen.details.length + 1}`,
+
+              id: !isEdit ?`${id}.${currentElemen.details.length + 1}` : null,
               description,
               benchmark,
             });
@@ -1168,7 +1171,7 @@ function parseHTMLToIA01(html: string): IA01Group[] {
               currentElemen.details.length + 1
             }`;
             currentElemen.details.push({
-              id: nextDetailId,
+              id: !isEdit ? nextDetailId : null,
               description,
               benchmark,
             });
@@ -1193,7 +1196,7 @@ function parseHTMLToIA03(html: string): IA03Group[] {
 
   // Cari FR.IA.03.
   const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
-    el.textContent?.includes("FR.IA.03.")
+    el.textContent?.includes("FR.IA.03."),
   );
   if (!anchorNode) throw new Error("FR.IA.03 tidak ditemukan!");
 
@@ -1224,7 +1227,7 @@ function parseHTMLToIA03(html: string): IA03Group[] {
         if (cells.length >= 3) {
           const no = parseInt(
             cells[0].textContent?.trim().replace(/\./, "") || "0",
-            10
+            10,
           );
           const code = cells[1].textContent?.trim() || "";
           const title = cells[2].textContent?.trim() || "";
@@ -1318,7 +1321,7 @@ function parseHTMLToIA05A(html: string): IA05Question[] {
 
   // Cari node yang mengandung FR.IA.05.
   const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
-    el.textContent?.includes("FR.IA.05")
+    el.textContent?.includes("FR.IA.05"),
   );
 
   if (!anchorNode) {
@@ -1360,7 +1363,7 @@ function parseHTMLToIA05A(html: string): IA05Question[] {
     // kalau bentuk <ol><li> → opsi juga
     if (el.tagName.toLowerCase() === "ol") {
       const items = Array.from(el.querySelectorAll("li")).map(
-        (li) => li.textContent?.trim() ?? ""
+        (li) => li.textContent?.trim() ?? "",
       );
       if (items.length === 0) return;
 
@@ -1405,7 +1408,7 @@ function parseHTMLToIA05B(html: string): Record<number, string> {
 
   // Cari node yang mengandung FR.IA.05.
   const anchorNode = Array.from(doc.querySelectorAll("body *")).find((el) =>
-    el.textContent?.includes("FR.IA.05")
+    el.textContent?.includes("FR.IA.05"),
   );
 
   if (!anchorNode) {
@@ -1588,7 +1591,7 @@ function GroupIA03({
           <div key={question.id} className="flex items-center space-x-2">
             <input
               {...register(
-                `groups_ia03.${groupIndex}.qa_ia03.${questionIndex}.question`
+                `groups_ia03.${groupIndex}.qa_ia03.${questionIndex}.question`,
               )}
               className="flex-1 border border-gray-300 rounded-md p-2"
               placeholder={`Question ${questionIndex + 1}`}
@@ -1692,7 +1695,7 @@ function OptionsFieldArray({
 
                 <input
                   {...control.register?.(
-                    `ia05_questions.${qIndex}.options.${oIndex}.option`
+                    `ia05_questions.${qIndex}.options.${oIndex}.option`,
                   )}
                   className="flex-1 border border-gray-300 rounded-md px-3 py-1"
                   placeholder={`Opsi ${oIndex + 1}`}
