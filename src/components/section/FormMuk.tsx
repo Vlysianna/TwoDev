@@ -35,6 +35,7 @@ import { useEffect, useMemo, useState } from "react";
 import mammoth from "mammoth";
 import type { Occupation, Scheme } from "@/lib/types";
 import useToast from "../ui/useToast";
+import { cn } from "@/lib/utils";
 
 let currentCode: string | null = null;
 
@@ -127,6 +128,7 @@ export default function FormMuk({
   const [IA02File, setIA02File] = useState<string | null>(null);
 
   async function handleUploadAPL02(e: React.ChangeEvent<HTMLInputElement>) {
+    if (fieldsAPL02.length > 0) return;
     const file = e.target.files?.[0];
     if (!file) return;
     try {
@@ -152,6 +154,7 @@ export default function FormMuk({
   }
 
   async function handleUploadIA01(e: React.ChangeEvent<HTMLInputElement>) {
+    if (fieldsGroupIA01.length > 0) return;
     const file = e.target.files?.[0];
     if (!file) return;
     try {
@@ -183,6 +186,7 @@ export default function FormMuk({
   }
 
   async function handleUploadIA03(e: React.ChangeEvent<HTMLInputElement>) {
+    if (fieldsGroupIA03.length > 0) return;
     const file = e.target.files?.[0];
     if (!file) return;
     try {
@@ -208,6 +212,7 @@ export default function FormMuk({
   }
 
   async function handleUploadIA05A(e: React.ChangeEvent<HTMLInputElement>) {
+    if (questionFields.length > 0) return;
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -385,18 +390,27 @@ export default function FormMuk({
               </label>
 
               <div className="flex mb-4 items-stretch">
-                <label className="inline-flex items-center bg-[#E77D35] text-white px-6 py-2 rounded-md cursor-pointer z-10">
+                <label
+                  className={cn(
+                    "inline-flex items-center text-white px-6 py-2 rounded-md cursor-pointer z-10",
+                    fieldsAPL02.length > 0
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-[#E77D35]",
+                  )}
+                >
                   Pilih File
                   <input
                     type="file"
                     accept=".docx"
                     onChange={handleUploadAPL02}
                     className="hidden"
-                    disabled={disabled}
+                    disabled={disabled || fieldsAPL02.length > 0}
                   />
                 </label>
                 <span className="flex-1 bg-gray-100 text-gray-500 text-sm rounded-md px-6 flex items-center -ml-4 pl-8">
-                  Convert file unit dari word
+                  {fieldsAPL02.length > 0
+                    ? "File sudah diupload. Untuk mengganti, kosongkan data atau ubah di form units"
+                    : "Convert file unit dari word"}
                 </span>
               </div>
 
@@ -492,18 +506,27 @@ export default function FormMuk({
               File IA 01
             </label>
             <div className="flex mb-4 items-stretch">
-              <label className="inline-flex items-center bg-[#E77D35] text-white px-6 py-2 rounded-md cursor-pointer z-10">
+              <label
+                className={cn(
+                  "inline-flex items-center text-white px-6 py-2 rounded-md cursor-pointer z-10",
+                  fieldsGroupIA01.length > 0
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#E77D35]",
+                )}
+              >
                 Pilih File
                 <input
                   type="file"
                   accept=".docx"
                   onChange={handleUploadIA01}
                   className="hidden"
-                  disabled={disabled}
+                  disabled={disabled || fieldsGroupIA01.length > 0}
                 />
               </label>
               <span className="flex-1 bg-gray-100 text-gray-500 text-sm rounded-md px-6 flex items-center -ml-4 pl-8">
-                Convert file unit dari word
+                {fieldsGroupIA01.length > 0
+                  ? "File sudah diupload. Untuk mengganti, kosongkan data atau ubah di form units"
+                  : "Convert file unit dari word"}
               </span>
             </div>
             {/* Body */}
@@ -581,18 +604,27 @@ export default function FormMuk({
               File IA 03
             </label>
             <div className="flex mb-4 items-stretch">
-              <label className="inline-flex items-center bg-[#E77D35] text-white px-6 py-2 rounded-md cursor-pointer z-10">
+              <label
+                className={cn(
+                  "inline-flex items-center text-white px-6 py-2 rounded-md cursor-pointer z-10",
+                  fieldsGroupIA03.length > 0
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#E77D35]",
+                )}
+              >
                 Pilih File
                 <input
                   type="file"
                   accept=".docx"
                   onChange={handleUploadIA03}
                   className="hidden"
-                  disabled={disabled}
+                  disabled={disabled || fieldsGroupIA03.length > 0}
                 />
               </label>
               <span className="flex-1 bg-gray-100 text-gray-500 text-sm rounded-md px-6 flex items-center -ml-4 pl-8">
-                Convert file unit dari word
+                {fieldsGroupIA03.length > 0
+                  ? "File sudah diupload. Untuk mengganti, kosongkan data atau ubah di form units"
+                  : "Convert file unit dari word"}
               </span>
             </div>
             {/* Body */}
@@ -675,18 +707,27 @@ export default function FormMuk({
             File IA 05.A
           </label>
           <div className="flex mb-4 items-stretch">
-            <label className="inline-flex items-center bg-[#E77D35] text-white px-6 py-2 rounded-md cursor-pointer z-10">
+            <label
+              className={cn(
+                "inline-flex items-center text-white px-6 py-2 rounded-md cursor-pointer z-10",
+                questionFields.length > 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#E77D35]",
+              )}
+            >
               Pilih File
               <input
                 type="file"
                 accept=".docx,.pdf"
                 onChange={handleUploadIA05A}
                 className="hidden"
-                disabled={disabled}
+                disabled={disabled || questionFields.length > 0}
               />
             </label>
             <span className="flex-1 bg-gray-100 text-gray-500 text-sm rounded-md px-6 flex items-center -ml-4 pl-10">
-              Pilih file soal
+              {fieldsAPL02.length > 0
+                ? "File sudah diupload. Untuk mengganti, kosongkan data atau ubah di form units"
+                : "Pilih file soal"}
             </span>
           </div>
 
@@ -705,7 +746,7 @@ export default function FormMuk({
               />
             </label>
             <span className="flex-1 bg-gray-100 text-gray-500 text-sm rounded-md px-6 flex items-center -ml-4 pl-10">
-              Pilih file soal
+              Pilih file jawaban
             </span>
           </div>
 
@@ -1156,8 +1197,7 @@ function parseHTMLToIA01(html: string, isEdit = false): IA01Group[] {
           currentElemen = { id: !isEdit ? id : null, title, details: [] };
           if (description) {
             currentElemen.details.push({
-
-              id: !isEdit ?`${id}.${currentElemen.details.length + 1}` : null,
+              id: !isEdit ? `${id}.${currentElemen.details.length + 1}` : null,
               description,
               benchmark,
             });
