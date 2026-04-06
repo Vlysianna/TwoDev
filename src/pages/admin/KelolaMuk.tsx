@@ -9,9 +9,11 @@ import axiosInstance from "@/helper/axios";
 import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 import ApprovalConfirmModal from "@/components/ApprovalConfirmModal";
 import type { MukType } from "@/model/muk-model";
+import { useAuth } from "@/contexts/AuthContext";
 
 const KelolaMUK: React.FC = () => {
 	const toast = useToast();
+	const { user } = useAuth();
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -20,6 +22,7 @@ const KelolaMUK: React.FC = () => {
 	const [muks, setMuks] = useState<MukType[]>([]);
 	const [approvalOpen, setApprovalOpen] = useState(false);
 	const [approvalData, setApprovalData] = useState<{ approver_admin_id: number; backup_admin_id?: number; comment: string } | null>(null);
+	const isSuperAdmin = user?.role_id === 1 && user?.id === 1;
 
 	useEffect(() => {
 		fetchMuk();
@@ -128,7 +131,7 @@ const KelolaMUK: React.FC = () => {
 						message="Apakah Anda yakin ingin menghapus skema ini? Tindakan ini tidak dapat dibatalkan."
 					/>
 
-					{approvalOpen && (
+					{/* {approvalOpen && (
 						<ApprovalConfirmModal
 							isOpen={approvalOpen}
 							onClose={() => { setApprovalOpen(false); setApprovalData(null); }}
@@ -137,7 +140,7 @@ const KelolaMUK: React.FC = () => {
 							subtitle="Pilih 1 admin untuk menyetujui penghapusan MUK ini."
 							loading={deleteLoading}
 						/>
-					)}
+					)} */}
 
 					{/* Page Title */}
 					<div className="mb-6">
@@ -230,16 +233,18 @@ const KelolaMUK: React.FC = () => {
 														>
 															<Edit3 size={16} />
 														</Link>
-														<button
-															onClick={() => {
-																setDeletingId(muk.id);
-																setDeleteModalOpen(true);
-															}}
-															className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-															title="Delete"
-														>
-															<Trash2 size={16} />
-														</button>
+														{isSuperAdmin && (
+															<button
+																onClick={() => {
+																	setDeletingId(muk.id);
+																	setDeleteModalOpen(true);
+																}}
+																className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+																title="Delete"
+															>
+																<Trash2 size={16} />
+															</button>
+														)}
 													</div>
 												</td>
 											</tr>

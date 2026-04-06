@@ -50,13 +50,13 @@ export type UnitAPL02 = {
 };
 
 export type ElementAPL02 = {
-	id: string;
+	id: string | null;
 	title: string;
 	details: ItemElementAPL02[];
 };
 
 export type ItemElementAPL02 = {
-	id: string;
+	id: string | null;
 	description: string;
 };
 
@@ -85,13 +85,13 @@ export type UnitIA01 = {
 };
 
 export type ElementIA01 = {
-	id: string;
+	id: string | null;
 	title: string;
 	details: ItemElementIA01[];
 };
 
 export type ItemElementIA01 = {
-	id: string;
+	id: string | null;
 	description: string;
 	benchmark: string;
 };
