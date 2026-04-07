@@ -582,8 +582,8 @@ export default function AK03({
 					</div>
 
 					{/* Footer */}
-					{/* <div className="mt-6">
-						<label className="block text-sm font-medium text-gray-700 mb-2">
+					<div className="mt-6">
+						{/* <label className="block text-sm font-medium text-gray-700 mb-2">
 							Catatan/komentar lainnya (apabila ada) :
 						</label>
 
@@ -593,7 +593,7 @@ export default function AK03({
 									isSubmitted ? "cursor-not-allowed bg-gray-100" : ""}`} placeholder="Catatan"
 								rows={4} {...field} disabled={!isAssessee || isAdmin || isSubmitted} />
 						)}
-						/>
+						/> */}
 
 						{isAssessee && !isAdmin && (
 							<div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 w-full">
@@ -603,7 +603,7 @@ export default function AK03({
 								</button>
 							</div>
 						)}
-					</div> */}
+					</div>
 				</form>
 			</div>
 		</div>
